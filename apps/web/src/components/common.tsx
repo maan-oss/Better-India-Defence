@@ -4,7 +4,7 @@ import { get } from '../api/client';
 import { hms, dateTime } from '../lib/format';
 import { useWorld } from '../state/world';
 import { Dialog } from './ui';
-import { Alert, Skeleton, TextShimmer } from './kit';
+import { Alert, CopyButton, JsonViewer, Skeleton, TextShimmer } from './kit';
 
 export function StateChip({ state, label }: { state: EpistemicState | string; label?: string }) {
   return (
@@ -74,7 +74,10 @@ export function ObservationViewer({ id, onClose }: { id: string; onClose: () => 
         <div className="col" style={{ gap: 10 }}>
           <dl className="kv">
             <dt>Observation</dt>
-            <dd className="mono">{String(data.id)}</dd>
+            <dd className="mono row" style={{ gap: 4 }}>
+              {String(data.id)}
+              <CopyButton value={String(data.id)} label="Copy observation id" iconOnly variant="plain" />
+            </dd>
             <dt>Sensor</dt>
             <dd>
               {String(data.sensor_id)} — {String(data.sensorName ?? '')}
@@ -110,10 +113,12 @@ export function ObservationViewer({ id, onClose }: { id: string; onClose: () => 
               </>
             )}
           </dl>
-          <div className="upper muted">Payload as received</div>
-          <pre className="mono scroll" style={{ maxHeight: 280, background: 'var(--bg-0)', padding: 10, margin: 0, border: '1px solid var(--line)' }}>
-            {JSON.stringify(data.payload, null, 2)}
-          </pre>
+          <div className="row">
+            <span className="upper muted">Payload as received</span>
+            <span className="spacer" />
+            <CopyButton label="Copy JSON" value={JSON.stringify(data.payload, null, 2)} />
+          </div>
+          <JsonViewer data={data.payload} rootName="payload" defaultExpandDepth={2} />
         </div>
       )}
     </Modal>

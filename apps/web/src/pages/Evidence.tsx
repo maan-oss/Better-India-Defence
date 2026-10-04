@@ -9,6 +9,8 @@ import { useWorld } from '../state/world';
 import { useNavigate } from 'react-router-dom';
 import { bytes, dateTime, dur, hms, pct } from '../lib/format';
 import { Segmented, Tabs } from '../components/ui';
+import { DateRangePicker, FilterToolbar, Pagination, SearchField, SortableDataTable, Streamgraph, type DateRange, type FilterChip } from '../components/kit';
+import { Empty } from '../brand/Boot';
 
 /** EVIDENCE — searchable repository of observations and media, plus the safe hand-off demonstration. */
 export function Evidence() {
@@ -40,78 +42,99 @@ export function Evidence() {
   );
 }
 
+type ObsRow = { id: string; sensor_id: string; kind: string; source_kind: string; t: number; received_at: number; state: string; quality: Record<string, unknown>; x: number | null; y: number | null; adapter: string };
+const KINDS = ['track', 'media', 'position', 'rf', 'spatial', 'imagery', 'infrastructure', 'health'];
+
 function ObservationSearch() {
   const [sensorId, setSensor] = useState('');
-  const [kind, setKind] = useState('');
-  const [state, setState] = useState('');
-  const [flagged, setFlagged] = useState(false);
-  const [q, setQ] = useState({ sensorId: '', kind: '', state: '', flagged: false });
+  const [filters, setFilters] = useState<FilterChip[]>([]);
+  const [range, setRange] = useState<DateRange | null>(null);
   const [obs, setObs] = useState<string | null>(null);
-  const { data, error, loading } = useAsync(
-    (s) => get<{ id: string; sensor_id: string; kind: string; source_kind: string; t: number; received_at: number; state: string; quality: Record<string, unknown>; x: number | null; y: number | null; adapter: string }[]>(`/api/evidence/search?${qs({ sensorId: q.sensorId, kind: q.kind, state: q.state, flagged: q.flagged ? '1' : undefined, limit: 300 })}`, s),
-    [q],
-  );
+  const val = (id: string) => filters.find((f) => f.id === id)?.value;
+  const query = { sensorId: sensorId.trim().toUpperCase(), kind: val('kind'), state: val('state'), flagged: val('quality') ? '1' : undefined, from: range ? range.start.getTime() : undefined, to: range ? range.end.getTime() + 86_399_999 : undefined, limit: 500 };
+  const key = JSON.stringify(query);
+  const { data, error, loading } = useAsync((s) => get<ObsRow[]>(`/api/evidence/search?${qs(query)}`, s), [key]);
+  const rows = useMemo(() => data ?? [], [data]);
+  const [page, setPage] = useState(1);
+  const PER = 50;
+  const pages = Math.max(1, Math.ceil(rows.length / PER));
+  const pg = Math.min(page, pages);
+  // Observations over the result's time span, by kind (Arc streamgraph): what the record holds, and when.
+  const stream = useMemo(() => {
+    if (rows.length < 4) return null;
+    const t0 = Math.min(...rows.map((r) => r.t));
+    const t1 = Math.max(...rows.map((r) => r.t));
+    const n = 16;
+    const w = Math.max(1, (t1 - t0) / n);
+    const kinds = [...new Set(rows.map((r) => r.source_kind))].slice(0, 6);
+    const bins = Array.from({ length: n }, (_, i) => ({ key: String(i), label: dateTime(t0 + i * w), axisLabel: t1 - t0 < 3_600_000 ? hms(t0 + i * w) : hms(t0 + i * w).slice(0, 5), values: Object.fromEntries(kinds.map((k) => [k, 0])) as Record<string, number> }));
+    for (const r of rows) {
+      const i = Math.min(n - 1, Math.floor((r.t - t0) / w));
+      if (kinds.includes(r.source_kind)) bins[i]!.values[r.source_kind] = (bins[i]!.values[r.source_kind] ?? 0) + 1;
+    }
+    return { bins, series: kinds.map((k) => ({ key: k, label: k })) };
+  }, [rows]);
   return (
-    <div>
-      <form
-        className="row section"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setQ({ sensorId, kind, state, flagged });
-        }}
-      >
-        <input className="input" placeholder="Sensor (e.g. C12)" value={sensorId} onChange={(e) => setSensor(e.target.value)} />
-        <select className="input" value={kind} onChange={(e) => setKind(e.target.value)}>
-          <option value="">Any kind</option>
-          {['track', 'media', 'position', 'rf', 'spatial', 'imagery', 'infrastructure', 'health'].map((k) => (
-            <option key={k}>{k}</option>
-          ))}
-        </select>
-        <select className="input" value={state} onChange={(e) => setState(e.target.value)}>
-          <option value="">Any state</option>
-          <option>CAPTURED</option>
-          <option>RECONSTRUCTED</option>
-        </select>
-        <label className="check">
-          <input type="checkbox" checked={flagged} onChange={(e) => setFlagged(e.target.checked)} /> quality-flagged only (late, out-of-order, derived…)
-        </label>
-        <button className="btn">Search</button>
-      </form>
+    <div className="ev-obs">
+      <div className="ev-filters">
+        <div style={{ width: 220 }}>
+          <SearchField label="Sensor" placeholder="e.g. C12" value={sensorId} onValueChange={setSensor} />
+        </div>
+        <div style={{ width: 280 }}>
+          <DateRangePicker label="Observed between" value={range} onChange={setRange} maxDate={new Date()} />
+        </div>
+        <div className="ev-chips">
+          <FilterToolbar
+            filters={filters}
+            onRemove={(id) => setFilters((f) => f.filter((x) => x.id !== id))}
+            onClearAll={() => setFilters([])}
+            addFilter={{
+              label: 'Add filter',
+              align: 'start',
+              fields: [
+                { id: 'kind', label: 'Kind', options: KINDS },
+                { id: 'state', label: 'State', options: [{ value: 'CAPTURED', label: 'Captured' }, { value: 'RECONSTRUCTED', label: 'Reconstructed' }, { value: 'INFERRED', label: 'Inferred' }] },
+                { id: 'quality', label: 'Quality', options: [{ value: '1', label: 'Flagged only (late, out of order, derived)' }] },
+              ],
+              onAdd: (chip, field) => setFilters((f) => [...f.filter((x) => x.id !== field.id), { id: field.id, label: field.label, value: chip.value }]),
+            }}
+          />
+        </div>
+      </div>
       {error && <ErrorNote error={error} />}
-      {loading && <Loading />}
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Observed</th>
-            <th>Sensor</th>
-            <th>Kind</th>
-            <th>State</th>
-            <th>Latency</th>
-            <th>Flags</th>
-            <th>Adapter</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(data ?? []).map((o) => (
-            <tr key={o.id} className="click" onClick={() => setObs(o.id)}>
-              <td className="mono">{dateTime(o.t)}</td>
-              <td className="mono">{o.sensor_id}</td>
-              <td>{o.source_kind}</td>
-              <td>
-                <StateChip state={o.state} />
-              </td>
-              <td className="mono muted">{((o.received_at - o.t) / 1000).toFixed(1)} s</td>
-              <td className="mono muted">
-                {Object.entries(o.quality)
-                  .filter(([, v]) => v)
-                  .map(([k]) => k)
-                  .join(' ')}
-              </td>
-              <td className="mono dim">{o.adapter}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {loading && !data && <Loading what="observations" />}
+      {stream && (
+        <div className="ev-stream">
+          <Streamgraph data={stream.bins} series={stream.series} label="Observations by kind" unit="obs" height={150} categoryLabel="Time" offset="silhouette" />
+        </div>
+      )}
+      {data && rows.length === 0 ? (
+        <Empty compact art="search" title="No observations match" description="Widen the time range, or remove a filter." />
+      ) : (
+        <div className="ev-table">
+          <SortableDataTable
+            caption="Observations"
+            rowKey="id"
+            itemName={{ one: 'observation', other: 'observations' }}
+            defaultSort={{ key: 't', direction: 'desc' }}
+            rows={rows.slice((pg - 1) * PER, pg * PER).map((o) => ({ ...o, latency: (o.received_at - o.t) / 1000, flags: Object.entries(o.quality).filter(([, v]) => v).map(([k]) => k).join(' ') }))}
+            columns={[
+              { key: 't', label: 'Observed', sortable: true, render: (v, r) => <button className="obs-link mono" onClick={() => setObs(String(r.id))}>{dateTime(Number(v))}</button> },
+              { key: 'sensor_id', label: 'Sensor', sortable: true, render: (v) => <span className="mono">{String(v)}</span> },
+              { key: 'source_kind', label: 'Kind', sortable: true },
+              { key: 'state', label: 'State', sortable: true, render: (v) => <StateChip state={String(v)} /> },
+              { key: 'latency', label: 'Latency', sortable: true, numeric: true, render: (v) => `${Number(v).toFixed(1)} s` },
+              { key: 'flags', label: 'Flags', render: (v) => <span className="mono muted">{String(v)}</span> },
+              { key: 'adapter', label: 'Adapter', sortable: true, render: (v) => <span className="mono dim">{String(v)}</span> },
+            ]}
+          />
+          {pages > 1 && (
+            <div className="audit-pager">
+              <Pagination page={pg} pageCount={pages} onPageChange={setPage} label="Observation pages" />
+            </div>
+          )}
+        </div>
+      )}
       {obs && <ObservationViewer id={obs} onClose={() => setObs(null)} />}
     </div>
   );
