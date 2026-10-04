@@ -3,8 +3,7 @@ import { get, post } from '../api/client';
 import { useSession } from '../state/session';
 import { ErrorNote, Loading } from '../components/common';
 import { dateTime, hms } from '../lib/format';
-import { FlaskConical } from 'lucide-react';
-import { EmptyState } from '../components/kit';
+import { Empty } from '../brand/Boot';
 import { useWorld } from '../state/world';
 
 interface SimState {
@@ -25,9 +24,8 @@ export function SimulationLab() {
   if (!simulated)
     return (
       <div className="page">
-        <EmptyState
-          className="wall-empty"
-          icon={<FlaskConical size={28} strokeWidth={1.5} />}
+        <Empty
+          art="offline"
           title="No simulator on an operational site"
           description="The simulation lab drives the synthetic demonstration site. This installation runs on real sensors only. To explore scenarios, start a separate demo instance with npm run demo."
         />

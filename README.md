@@ -218,6 +218,7 @@ docs                 OPERATIONS, INTEROP, ARCHITECTURE, SECURITY, REALITY_LIMITS
 - [docs/INTEROP.md](docs/INTEROP.md) — cameras, NMEA, MAVLink, Cursor-on-Target, writing adapters
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — components, algorithms, data model, runtime
 - [docs/DESIGN.md](docs/DESIGN.md) — display design: the colour system and the rules for using it
+- [docs/BRAND.md](docs/BRAND.md) — the STRATA identity: mark, wordmark, colour, type, motif, illustrations
 - [docs/SECURITY.md](docs/SECURITY.md) — implemented controls and what is missing for real use
 
 ## Responsible use

@@ -1,10 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useSession } from '../state/session';
-import { Icon } from '../components/Icons';
-import { TopoHero } from '../components/TopoHero';
+import { StrataField } from '../brand/StrataField';
 import { get } from '../api/client';
 import { Alert } from '../components/kit';
 import { DitherGradient } from '../components/vendor/componentry/dither-gradient';
+import { Lockup } from '../brand/Mark';
 
 interface Banner {
   classification: { level: string; caveat: string };
@@ -63,8 +63,8 @@ export function Login() {
       <div className="cls-banner">{clsText}</div>
       <div className="login-main">
         <section className="login-hero" aria-hidden="true">
-          <DitherGradient className="hero-dither" colorFrom="#141414" colorMid="#262523" colorTo="#3b3934" intensity={0.22} speed={1.2} angle={155} />
-          <TopoHero />
+          <DitherGradient className="hero-dither" colorFrom="#141414" colorMid="#1d1d1c" colorTo="#2c2b28" intensity={0.18} speed={0.8} angle={160} />
+          <StrataField className="hero-strata" width={1400} height={1000} lines={38} seed={7} relief={0.7} animate observations={3} />
           <div className="hero-clock">
             <span>
               <b>{zulu}Z</b> · {new Date().toISOString().slice(0, 10)}
@@ -73,11 +73,10 @@ export function Login() {
           </div>
           <div className="hero-copy">
             <div className="hero-mark">
-              <Icon.Logo size={34} />
-              <b>STRATA</b>
+              <Lockup size={36} />
             </div>
             <h2>
-              One picture of the installation. <em>What is happening, what happened, and the evidence for both.</em>
+              The installation, layer by layer. <em>What is happening now — and the record under every layer.</em>
             </h2>
             <p>Cameras, trackers, UAS, radar and allied feeds fused into a single operational picture with threat evaluation, recognition and response coordination.</p>
             <div className="hero-pillars">

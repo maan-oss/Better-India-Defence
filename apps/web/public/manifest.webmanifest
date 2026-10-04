@@ -1,0 +1,17 @@
+{
+  "name": "Strata",
+  "short_name": "Strata",
+  "description": "One picture of the installation, and the record behind it.",
+  "start_url": "/field",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#171717",
+  "theme_color": "#171717",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

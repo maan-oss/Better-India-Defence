@@ -11,6 +11,7 @@ import { ErrorNote, Loading, Prio, StateChip, useAsync } from '../components/com
 import { dateTime, dur, hms } from '../lib/format';
 import { Segmented } from '../components/ui';
 import { Timeline as SuiTimeline, TimelineContent, TimelineDate, TimelineHeader, TimelineIndicator, TimelineItem, TimelineSeparator, TimelineTitle } from '../components/vendor/spaceui/components/spaceui/timeline';
+import { Empty } from '../brand/Boot';
 
 /** INCIDENTS — investigation library and incident files. */
 export function Incidents() {
@@ -41,10 +42,7 @@ export function Incidents() {
       <div className="page-body split">
         <div className="scroll">
           {incidents.length === 0 && (
-            <div className="empty-state">
-              <h3>No incidents recorded</h3>
-              <p>Critical alerts open an incident automatically. Operators can also open one for any place and time window.</p>
-            </div>
+            <Empty compact art="incidents" title="No incidents recorded" description="Critical alerts open an incident automatically. Operators can also open one for any place and time window." />
           )}
           {incidents.map((i) => (
             <div key={i.id} className={`list-row inc-row ${i.id === id || i.code === id ? 'sel' : ''}`} onClick={() => nav(`/incidents/${i.id}`)}>
@@ -66,7 +64,7 @@ export function Incidents() {
             </div>
           ))}
         </div>
-        <div className="scroll">{creating ? <CreateIncident onDone={(nid) => (setCreating(false), nid && nav(`/incidents/${nid}`))} /> : id ? <IncidentFile id={id} /> : <div className="empty">Select an incident.</div>}</div>
+        <div className="scroll">{creating ? <CreateIncident onDone={(nid) => (setCreating(false), nid && nav(`/incidents/${nid}`))} /> : id ? <IncidentFile id={id} /> : <Empty art="incidents" title="Select an incident" description="Its file holds the window, the evidence gathered from every sensor, the tracks, alerts, chronology and pinned items." />}</div>
       </div>
     </div>
   );

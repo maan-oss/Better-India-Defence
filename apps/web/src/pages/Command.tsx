@@ -16,6 +16,7 @@ import { useTime } from '../state/time';
 import { tracks as trackStore, type RenderTrack } from '../state/tracks';
 import { Segmented, Tabs } from '../components/ui';
 import '../styles/command.css';
+import { Empty } from '../brand/Boot';
 
 /**
  * COMMAND — the duty officer's console: readiness, threat evaluation, response teams and tasking,
@@ -312,7 +313,7 @@ function TasksPanel({ version }: { version: number }) {
           {can('ops.dispatch') ? 'Drag a card to record its progress' : 'Read only'}
         </span>
       </div>
-      {tasks.data && tasks.data.length === 0 ? <div className="empty">No tasks issued. Dispatch a team to a grid reference to create one.</div> : <TaskBoard tasks={tasks.data ?? []} canDispatch={can('ops.dispatch')} />}
+      {tasks.data && tasks.data.length === 0 ? <Empty compact art="tasks" title="No tasks issued" description="Dispatch a team to an alert, a track or a grid reference to create one." /> : <TaskBoard tasks={tasks.data ?? []} canDispatch={can('ops.dispatch')} />}
     </section>
   );
 }
@@ -584,7 +585,7 @@ function Sitreps() {
           </div>
         ))}
       </div>
-      <div className="scroll">{sel ? <SitrepEditor key={sel.id} s={sel} site={facility?.name ?? ''} onChanged={(x) => (setSel(x), list.reload())} /> : <div className="empty">Select or draft a SITREP.</div>}</div>
+      <div className="scroll">{sel ? <SitrepEditor key={sel.id} s={sel} site={facility?.name ?? ''} onChanged={(x) => (setSel(x), list.reload())} /> : <Empty art="audit" title="Select or draft a SITREP" description="Draft from the record fills the DTG, grid references, alerts, incidents, teams and top threats. Edit, then issue; amendments are kept as versions." />}</div>
     </div>
   );
 }

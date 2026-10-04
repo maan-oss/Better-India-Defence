@@ -13,6 +13,8 @@ import { Icon } from '../components/Icons';
 import { Segmented, Tabs } from '../components/ui';
 import '../styles/forensics.css';
 import { FileDropzone } from '../components/kit';
+import { Empty } from '../brand/Boot';
+import { Illustration } from '../brand/Illustration';
 
 /**
  * MEDIA FORENSICS — evidence library and imaging workbench.
@@ -68,7 +70,7 @@ export function Forensics() {
           <div className="scroll">
             {items.loading && !items.data && <Loading />}
             {items.error && <ErrorNote error={items.error} />}
-            {items.data?.length === 0 && <div className="empty">No evidence yet. Add images or video to begin.</div>}
+            {items.data?.length === 0 && <Empty compact art="evidence" title="No evidence yet" description="Add images or video to begin." />}
             {items.data?.map((it) => (
               <ItemRow key={it.id} it={it} sel={it.id === id} live={liveStatus[it.id]} onClick={() => nav(`/forensics/${it.id}`)} />
             ))}
@@ -117,7 +119,8 @@ function ItemRow({ it, sel, live, onClick }: { it: EvidenceItem; sel: boolean; l
 
 function EmptyWorkspace() {
   return (
-    <div className="empty" style={{ paddingTop: 80 }}>
+    <div className="empty" style={{ paddingTop: 40 }}>
+      <Illustration name="evidence" size={180} className="ws-art" />
       <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'left' }} className="col">
         <b>How this works</b>
         <span className="muted">1. Add images or video (phone, body camera, drone card, CCTV export). The file is hashed (SHA-256) and stored unmodified.</span>
@@ -380,7 +383,7 @@ function Products({ item, version }: { item: EvidenceItem; version: number }) {
   if (!prods.data) return <Loading />;
   return (
     <div className="scroll" style={{ padding: 14 }}>
-      {!prods.data.length && <div className="empty">No products yet. Use VIEW (capture / multi-frame) or ENHANCE.</div>}
+      {!prods.data.length && <Empty compact art="reconstructions" title="No products yet" description="Capture a frame, run multi-frame fusion, or enhance a region. Each product keeps its own hash and processing record." />}
       <div className="pgrid">
         {prods.data.map((p) => (
           <div key={p.id} className="pcard" onClick={() => setOpen(p)} role="button" tabIndex={0}>

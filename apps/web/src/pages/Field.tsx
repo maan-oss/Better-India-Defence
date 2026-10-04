@@ -8,11 +8,11 @@ import { useTime } from '../state/time';
 import { tracks as trackStore, type RenderTrack } from '../state/tracks';
 import { symbolFor, symbolTexture } from '../engine/symbols';
 import { ErrorNote, Modal, useAsync } from '../components/common';
-import { Icon } from '../components/Icons';
 import type { Task, Team } from '../components/ops/OpsWidgets';
 import { HoldToConfirm, Switch } from '../components/kit';
 import { alpha, P as C } from '../lib/palette';
 import '../styles/field.css';
+import { Empty } from '../brand/Boot';
 
 const NEXT: Record<string, { status: string; label: string } | undefined> = {
   ISSUED: { status: 'ACKNOWLEDGED', label: 'Acknowledge task' },
@@ -96,11 +96,7 @@ export function Field() {
       )}
       {team && can('ops.log') && <ShareLocation teamId={team.id} onFix={() => teams.reload()} />}
       {!team && (
-        <div className="empty-state">
-          <Icon.Field />
-          <h3>Choose your team</h3>
-          <p>The field view follows one team: its current task, position, nearby alerts and reports. Your choice is remembered on this device.</p>
-        </div>
+        <Empty art="tasks" title="Choose your team" description="The field view follows one team: its current task, position, nearby alerts and reports. Your choice is remembered on this device." />
       )}
 
       {team && (

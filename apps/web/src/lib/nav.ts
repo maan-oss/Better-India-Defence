@@ -41,4 +41,4 @@ export const NAV: { group: string; items: NavItem[] }[] = [
   },
 ];
 
-export const pageTitle = (path: string): string => NAV.flatMap((g) => g.items).find((i) => path.startsWith(i.to))?.label ?? 'Console';
+export const pageTitle = (path: string): string => (path.startsWith('/brand') ? 'Brand' : null) ?? NAV.flatMap((g) => g.items).find((i) => path.startsWith(i.to))?.label ?? 'Console';

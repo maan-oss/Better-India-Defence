@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Cctv, Smartphone } from 'lucide-react';
-import { Button, EmptyState } from '../components/kit';
+import { Button } from '../components/kit';
+import { Empty } from '../brand/Boot';
 import { FACILITY } from '@strata/domain';
 import { api, get, post } from '../api/client';
 import { useVisionLive, type FaceEvent } from '../api/vision';
@@ -171,9 +172,8 @@ export function Cameras() {
           {data.error && <ErrorNote error={data.error} />}
           {!data.data && <Loading />}
           {data.data && !cams.length && (
-            <EmptyState
-              className="wall-empty"
-              icon={<Cctv size={28} strokeWidth={1.5} />}
+            <Empty
+              art="cameras"
               title="No cameras yet"
               description="Add an IP camera by its RTSP or HTTP address, or turn a phone, tablet or laptop into a camera. Every frame is analysed on this server for people and vehicles."
               action={

@@ -82,8 +82,8 @@
   --cls-secret: #c8102e;
   --cls-topsecret: #ff8c00;
 
-  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-sans: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* Spacing — 4 px base. Use these, not ad-hoc values. */
   --sp-1: 4px;

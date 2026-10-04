@@ -9,6 +9,7 @@ import { ErrorNote, Loading, useAsync } from '../components/common';
 import { DECISION_TEXT, DecisionChip, FaceCard, QualityLine } from '../components/identity/FaceCard';
 import { Segmented, Tabs } from '../components/ui';
 import '../styles/forensics.css';
+import { Empty } from '../brand/Boot';
 
 /**
  * IDENTITY — authorised-personnel register, watchlist, recognition review and archive search.
@@ -74,7 +75,7 @@ function Review({ faceId }: { faceId: string | null }) {
           <span className="muted">{list.data?.length ?? '…'}</span>
         </div>
         <div className="scroll">
-          {list.data?.length === 0 && <div className="empty">Nothing to review.</div>}
+          {list.data?.length === 0 && <Empty compact art="identity" title="Nothing to review" description="Recognition candidates appear here for human verification." />}
           {list.data?.map((ev) => (
             <div key={ev.id} className={`list-row ${sel === ev.id ? 'sel' : ''}`} onClick={() => setSel(ev.id)}>
               <img src={`/api/faces/${ev.id}/image?which=aligned`} alt="" style={{ width: 40, height: 40 }} />
@@ -102,7 +103,7 @@ function Review({ faceId }: { faceId: string | null }) {
             }}
           />
         ) : (
-          <div className="empty">Select a sighting.</div>
+          <Empty art="identity" title="Select a sighting" description="Compare the capture with the enrolled photos, check the quality grade, then confirm or reject. Nothing is an identification until a person confirms it." />
         )}
       </div>
     </div>
@@ -244,7 +245,7 @@ function Sightings() {
       </div>
       {list.error && <ErrorNote error={list.error} />}
       {!list.data && <Loading />}
-      {list.data?.length === 0 && <div className="empty">No face sightings recorded.</div>}
+      {list.data?.length === 0 && <Empty compact art="cameras" title="No face sightings recorded" description="Cameras with face recognition enabled add sightings here." />}
       <div className="fgrid">
         {list.data?.map((ev) => (
           <FaceCard key={ev.id} ev={ev} onChanged={list.reload} />
@@ -323,9 +324,7 @@ function Register({ selected, onSelect }: { selected: string | null; onSelect: (
         ) : selected ? (
           <IdentityDetail id={selected} onChanged={ids.reload} />
         ) : (
-          <div className="empty">
-            Select an entry, or create one. Authorised-register entries record who may be where; watchlist entries require a documented basis and analyst rights.
-          </div>
+          <Empty art="identity" title="Select an entry, or create one" description="Authorised-register entries record who may be where; watchlist entries require a documented basis and analyst rights." />
         )}
       </div>
     </div>

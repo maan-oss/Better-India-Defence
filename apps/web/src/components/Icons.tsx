@@ -1,3 +1,5 @@
+import { Mark } from '../brand/Mark';
+
 const p = { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.4, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
 
 export const Icon = {
@@ -129,14 +131,7 @@ export const Icon = {
       <path d="M9 9h6M9 12h4" />
     </svg>
   ),
-  Logo: ({ size = 22 }: { size?: number } = {}) => (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
-      <path d="M16 2.5l11 4.2v8.1c0 7-4.6 12.2-11 14.7C9.6 27 5 21.8 5 14.8V6.7z" />
-      <path d="M10 19.5h12" />
-      <path d="M11.5 15.5h9" opacity="0.75" />
-      <path d="M13 11.5h6" opacity="0.5" />
-    </svg>
-  ),
+  Logo: ({ size = 16 }: { size?: number } = {}) => <Mark size={size} variant="line" />,
   Chevron: () => (
     <svg {...p} width={16} height={16}>
       <path d="M9 6l6 6-6 6" />

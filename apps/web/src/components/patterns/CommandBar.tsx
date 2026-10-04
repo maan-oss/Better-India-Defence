@@ -113,6 +113,7 @@ export function CommandBar({ open, onOpenChange, onShortcuts }: { open: boolean;
       { id: 'night', group: 'Actions', label: theme === 'night' ? 'Standard display' : 'Night display (red light)', icon: theme === 'night' ? <Icon.Sun /> : <Icon.Moon />, run: () => useUi.getState().setTheme(theme === 'night' ? 'dark' : 'night') },
       { id: 'sound', group: 'Actions', label: sound ? 'Mute alarm sound' : 'Enable alarm sound', icon: sound ? <Icon.BellOff /> : <Icon.Bell />, run: () => useOps.getState().setSound(!sound) },
       { id: 'keys', group: 'Actions', label: 'Keyboard shortcuts', icon: <Icon.Command />, keys: '?', run: onShortcuts },
+      { id: 'brand', group: 'Actions', label: 'Brand guidelines', detail: 'The STRATA identity', icon: <Icon.Logo />, run: () => nav('/brand') },
     ];
     const match = (r: Result) => !term || r.label.toLowerCase().includes(term) || (r.detail ?? '').toLowerCase().includes(term);
     return [...out, ...pages.filter(match), ...actions.filter(match)];

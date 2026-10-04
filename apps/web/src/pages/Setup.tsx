@@ -7,6 +7,8 @@ import { Icon } from '../components/Icons';
 import { Alert, Button, Input, PasswordStrength, RadioCards, SegmentedControl, Slider, Stepper, TextShimmer } from '../components/kit';
 import { OtpInput } from '../components/patterns/OtpInput';
 import '../styles/setup.css';
+import { Lockup } from '../brand/Mark';
+import { TopoHero } from '../components/TopoHero';
 
 export interface SetupStatus {
   mode: 'operational' | 'demo';
@@ -200,10 +202,12 @@ export function Setup({ status }: { status: SetupStatus }) {
   return (
     <div className="setup">
       <div className="cls-banner">{level}</div>
+      <div className="setup-art" aria-hidden="true">
+        <TopoHero />
+      </div>
       <main className="setup-main">
         <header className="setup-brand">
-          <Icon.Logo size={28} />
-          <b>STRATA</b>
+          <Lockup size={30} />
           <span className="setup-tag">First-run setup</span>
         </header>
         <div className="setup-card">

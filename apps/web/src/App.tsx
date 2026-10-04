@@ -15,7 +15,8 @@ import { Login } from './pages/Login';
 import { Setup, type SetupStatus } from './pages/Setup';
 import { Shell } from './components/Shell';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { Icon } from './components/Icons';
+import { Mark } from './brand/Mark';
+import { BootMark, BootScreen, Empty, NotFound } from './brand/Boot';
 
 const Operations = lazy(() => import('./pages/Operations').then((m) => ({ default: m.Operations })));
 const Incidents = lazy(() => import('./pages/Incidents').then((m) => ({ default: m.Incidents })));
@@ -26,6 +27,7 @@ const SimulationLab = lazy(() => import('./pages/SimulationLab').then((m) => ({ 
 const SystemHealth = lazy(() => import('./pages/SystemHealth').then((m) => ({ default: m.SystemHealth })));
 const Audit = lazy(() => import('./pages/Audit').then((m) => ({ default: m.Audit })));
 const DeviceCamera = lazy(() => import('./pages/DeviceCamera').then((m) => ({ default: m.DeviceCamera })));
+const Brand = lazy(() => import('./pages/Brand').then((m) => ({ default: m.Brand })));
 const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
 const Forensics = lazy(() => import('./pages/Forensics').then((m) => ({ default: m.Forensics })));
 const Command = lazy(() => import('./pages/Command').then((m) => ({ default: m.Command })));
@@ -89,7 +91,7 @@ function Authenticated() {
     return (
       <div className="boot">
         <div className="boot-card">
-          <Icon.Logo size={36} />
+          <Mark size={36} />
           <div className="err" style={{ margin: 0 }}>
             Failed to load the facility model: {error}
           </div>
@@ -103,7 +105,7 @@ function Authenticated() {
   return (
     <Shell>
       <ErrorBoundary area="Application area">
-        <Suspense fallback={<div className="route-loading"><span className="spinner" /></div>}>
+        <Suspense fallback={<div className="route-loading"><BootMark size={36} /></div>}>
           <Routes>
             <Route path="/" element={<Navigate to="/operations" replace />} />
             <Route path="/operations" element={<Operations />} />
@@ -126,7 +128,8 @@ function Authenticated() {
             <Route path="/system" element={<SystemHealth />} />
             <Route path="/audit" element={<Audit />} />
             <Route path="/admin" element={<Admin />} />
-            <Route path="*" element={<Navigate to="/operations" replace />} />
+            <Route path="/brand" element={<Brand />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </ErrorBoundary>
@@ -134,22 +137,7 @@ function Authenticated() {
   );
 }
 
-function Boot({ label }: { label: string }) {
-  return (
-    <div className="boot">
-      <div className="boot-card">
-        <span className="boot-logo">
-          <Icon.Logo size={44} />
-        </span>
-        <b>STRATA</b>
-        <div className="boot-bar">
-          <i />
-        </div>
-        <span>{label}</span>
-      </div>
-    </div>
-  );
-}
+const Boot = ({ label }: { label: string }) => <BootScreen label={label} />;
 
 export function App() {
   const status = useSession((s) => s.status);
@@ -172,14 +160,16 @@ export function App() {
     if (role === 'administrator') return <Setup status={setup} />;
     return (
       <div className="waiting-setup">
-        <div className="empty-state">
-          <Icon.Logo size={36} />
-          <h3>The site has not been set up yet</h3>
-          <p>An administrator needs to define the installation before the operational picture can start. Sign in as an administrator, or ask yours to finish setup.</p>
-          <button className="btn" onClick={() => void useSession.getState().logout()}>
-            Sign out
-          </button>
-        </div>
+        <Empty
+          art="site"
+          title="The site has not been set up yet"
+          description="An administrator needs to define the installation before the operational picture can start. Sign in as an administrator, or ask yours to finish setup."
+          action={
+            <button className="btn" onClick={() => void useSession.getState().logout()}>
+              Sign out
+            </button>
+          }
+        />
       </div>
     );
   }

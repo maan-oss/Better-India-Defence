@@ -17,6 +17,7 @@ import { Breadcrumb, PopoverContent, ToastStack, ToastStackProvider, UserMenu } 
 import { CommandBar } from './patterns/CommandBar';
 import { StatusIsland } from './patterns/StatusIsland';
 import { MacKeyboard } from './vendor/componentry/mac-keyboard';
+import { Mark } from '../brand/Mark';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 const MOD = isMac ? '⌘' : 'Ctrl';
@@ -95,7 +96,7 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
   return (
     <nav className="rail" aria-label="Application areas">
       <Link to="/operations" className="rail-logo" aria-label="Strata home">
-        <Icon.Logo />
+        <Mark size={28} />
       </Link>
       <div className="rail-items">
         {NAV.map((g, gi) => {
@@ -162,6 +163,9 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
     ...(rest.length ? [{ label: rest.map((x) => decodeURIComponent(x)).join(' · ') }] : []),
   ];
   const role = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '';
+  useEffect(() => {
+    document.title = `${title} · ${siteName} · Strata`;
+  }, [title, siteName]);
 
   return (
     <header className="topbar">

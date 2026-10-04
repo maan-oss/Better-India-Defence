@@ -9,7 +9,7 @@ body {
   font-family: var(--font-sans);
   font-size: 13px;
   line-height: 20px;
-  font-feature-settings: 'cv11' 1, 'ss01' 1, 'tnum' 1;
+  font-feature-settings: 'tnum' 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -489,3 +489,5 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .audit-detail td { background: var(--bg-0); padding: var(--sp-3) var(--sp-5) !important; }
 .audit-form { align-items: flex-end; }
 .wall-empty { margin: auto; padding: 72px 24px; max-width: 520px; }
+.login-hero .hero-strata { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--text-1); opacity: 0.85; mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 92%); }
+.login-hero h2 { font-size: 40px; line-height: 1.08; }

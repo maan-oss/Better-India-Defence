@@ -8,6 +8,7 @@ import { useSession } from '../state/session';
 import { useTime } from '../state/time';
 import { dateTime, dur, hms, pct, titleCase } from '../lib/format';
 import { Segmented } from '../components/ui';
+import { Empty } from '../brand/Boot';
 
 /** RECONSTRUCTIONS — jobs with inputs (evidence), outputs, confidence and failures. */
 export function Reconstructions() {
@@ -69,7 +70,7 @@ export function Reconstructions() {
             </tbody>
           </table>
         </div>
-        <div className="scroll">{id ? <JobDetail id={id} /> : <div className="empty">Select a job.</div>}</div>
+        <div className="scroll">{id ? <JobDetail id={id} /> : <Empty art="reconstructions" title="Select a job" description="Reconstructions rebuild a scene from recorded observations, with every derived surface marked as reconstructed." />}</div>
       </div>
     </div>
   );

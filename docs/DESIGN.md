@@ -26,7 +26,7 @@ component and colour libraries rather than hand-picked values.
 | [Componentry](https://componentry.dev/) (MIT) | Vendored in `components/vendor/componentry/`: split-flap display (status island Zulu clock), dither gradient (sign-in hero), Mac keyboard (shortcuts sheet). |
 | [Bencho](https://bencho.dev/) and [Skecher UI](https://skecher-ui.com/docs) | Interaction patterns only — their code carries no open licence, so nothing is copied. Original implementations after their patterns: the command bar and the dynamic-island status pill (Bencho), the one-time-code input (Bencho), the morphing tool dock grouping (Skecher). Each file says so in its header. |
 | [Tailwind CSS v4](https://tailwindcss.com) | Only the theme and utility layers (no Preflight reset), for the Space UI and Componentry components. Our own CSS is unlayered, so it wins over utilities. |
-| [Inter](https://rsms.me/inter/) and [JetBrains Mono](https://www.jetbrains.com/lp/mono/) | Interface text, and data (grid references, IDs, timestamps). Both are bundled with the build, because installations run air-gapped. |
+| [Geist and Geist Mono](https://vercel.com/font) (OFL) | Interface text, and data (grid references, IDs, timestamps). Both are bundled with the build, because installations run air-gapped. Brand: [BRAND.md](BRAND.md). |
 
 Tokens are in `apps/web/src/styles/tokens.css`. Canvas and WebGL code, which cannot read CSS variables,
 uses the same values from `apps/web/src/lib/palette.ts`. Change the two files together.
