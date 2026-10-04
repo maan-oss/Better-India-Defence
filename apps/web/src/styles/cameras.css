@@ -38,3 +38,23 @@
 .devcam-count { font-size: 12px; }
 .devcam-note { margin: 0; font-size: 12px; }
 @media (max-width: 760px) { .devcam-body { padding: var(--sp-3); } .devcam-view { aspect-ratio: 3 / 4; } }
+
+/* Camera form (Arc fields) */
+.camform { display: flex; flex-direction: column; gap: 22px; }
+.camform section { display: flex; flex-direction: column; gap: 12px; }
+.camform h4 { margin: 0; font-size: 12px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.06em; }
+.camform-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; align-items: start; }
+.camform-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 16px; }
+.camform-url { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
+.camform-url > button { margin-top: 26px; }
+.camform-test { font-family: var(--font-mono); font-size: 12px; padding: 6px 10px; border-radius: var(--radius-md); border: 1px solid var(--line-2); }
+.camform-test.ok { color: var(--st-normal, var(--text-0)); }
+.camform-test.bad { color: var(--st-critical); }
+.camform-files { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12px; }
+.camform-note { margin: 0; font-size: 12px; line-height: 18px; }
+.camform-fps { display: flex; flex-direction: column; gap: 8px; font-size: 11.5px; }
+.camform-label { font-size: 14px; font-weight: 500; color: var(--text-0); }
+.camform-switches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; }
+.camform-foot { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+.wall-tour { display: flex; align-items: center; }
+@media (max-width: 760px) { .camform-two, .camform-grid, .camform-switches { grid-template-columns: 1fr; } }

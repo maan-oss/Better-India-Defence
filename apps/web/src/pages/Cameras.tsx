@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Cctv, Smartphone } from 'lucide-react';
-import { Button } from '../components/kit';
+import { Button, ConfirmMorph, Input, NumberField, Pagination, RadioCards, Select as ArcSelect, SplitButton, Switch, useToastStack } from '../components/kit';
+import { TickSlider } from '../components/vendor/spaceui/components/spaceui/tick-slider';
 import { Empty } from '../brand/Boot';
 import { FACILITY } from '@strata/domain';
 import { api, get, post } from '../api/client';
@@ -158,13 +159,19 @@ export function Cameras() {
           ]}
         />
         <Segmented label="Layout" value={layout} onChange={setL} options={([1, 4, 9, 16] as Layout[]).map((l) => ({ value: l, label: `${Math.sqrt(l)}×${Math.sqrt(l)}` }))} />
-        <button className={`btn small ${tour ? 'on' : ''}`} onClick={() => setTour(!tour)} title="Cycle through pages every 12 s">
-          {tour ? <span className="live-dot" /> : null} Guard tour
-        </button>
+        <div className="wall-tour" title="Cycle through pages every 12 s">
+          <Switch label="Guard tour" checked={tour} disabled={pages < 2} onCheckedChange={setTour} />
+        </div>
         {can('cameras.manage') && (
-          <button className="btn primary small" onClick={() => setEdit('new')}>
-            + Add stream
-          </button>
+          <SplitButton
+            label="Add camera"
+            icon={<Cctv size={16} />}
+            onClick={() => setEdit('new')}
+            actions={[
+              { label: 'Network camera (RTSP, HTTP or recorded file)', icon: <Cctv size={16} />, onSelect: () => setEdit('new') },
+              { label: 'Use this device’s camera', icon: <Smartphone size={16} />, onSelect: () => setEdit('new-device') },
+            ]}
+          />
         )}
       </div>
       <div className="page-body" style={{ gridTemplateColumns: focused ? '1fr 400px' : '1fr' }}>
@@ -198,15 +205,7 @@ export function Cameras() {
           </div>
           {pages > 1 && (
             <div className="wall-pager">
-              <button className="btn small" onClick={() => setPage((pg - 1 + pages) % pages)} aria-label="Previous page">
-                ‹
-              </button>
-              {Array.from({ length: pages }, (_, i) => (
-                <button key={i} className={`dot ${i === pg ? 'on' : ''}`} onClick={() => setPage(i)} aria-label={`Page ${i + 1}`} />
-              ))}
-              <button className="btn small" onClick={() => setPage((pg + 1) % pages)} aria-label="Next page">
-                ›
-              </button>
+              <Pagination page={pg + 1} pageCount={pages} onPageChange={(p) => setPage(p - 1)} label="Camera wall pages" />
             </div>
           )}
         </div>
@@ -270,7 +269,8 @@ function WallTile({ c, t, alert, selected, onSelect }: { c: WallCam; t: number; 
 function FocusPanel({ c, alert, onClose, onEdit, onChanged }: { c: WallCam; alert: AlertRecord | null; onClose: () => void; onEdit: () => void; onChanged: () => void }) {
   const can = useSession((s) => s.can);
   const nav = useNavigate();
-  const [msg, setMsg] = useState<string | null>(null);
+  const { toast } = useToastStack();
+  const [capturing, setCapturing] = useState(false);
   const s = c.source;
   const def = FACILITY.sensors.find((x) => x.id === c.id);
   const showOnMap = () => {
@@ -286,9 +286,9 @@ function FocusPanel({ c, alert, onClose, onEdit, onChanged }: { c: WallCam; aler
           {c.id} · {c.kind === 'live' ? 'live stream' : 'site camera'}
         </h3>
         <span className="spacer" />
-        <button className="btn ghost small icon" onClick={onClose} aria-label="Close">
+        <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close">
           <Icon.Close />
-        </button>
+        </Button>
       </div>
       <div className="section">
         <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 6 }}>{c.name}</div>
@@ -298,39 +298,56 @@ function FocusPanel({ c, alert, onClose, onEdit, onChanged }: { c: WallCam; aler
           </div>
         )}
         <div className="row" style={{ flexWrap: 'wrap', gap: 6 }}>
-          <button className="btn small" onClick={showOnMap}>
+          <Button variant="secondary" size="sm" onClick={showOnMap}>
             Show on map
-          </button>
+          </Button>
           {s && can('evidence.upload') && (
-            <button
-              className="btn small"
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={capturing}
               disabled={s.status.state !== 'live'}
-              onClick={() =>
+              onClick={() => {
+                setCapturing(true);
                 void post<{ item: { id: string } }>(`/api/cameras/${s.id}/capture`, {})
-                  .then((r) => nav(`/forensics/${r.item.id}`))
-                  .catch((e: unknown) => setMsg(e instanceof Error ? e.message : String(e)))
-              }
+                  .then((r) => {
+                    toast({ type: 'success', title: 'Frame preserved as evidence', description: `${s.id} · hashed and added to the evidence store` });
+                    nav(`/forensics/${r.item.id}`);
+                  })
+                  .catch((e: unknown) => toast({ type: 'error', title: 'Capture failed', description: e instanceof Error ? e.message : String(e) }))
+                  .finally(() => setCapturing(false));
+              }}
             >
               Capture to evidence
-            </button>
+            </Button>
           )}
           {s && can('cameras.manage') && (
-            <>
-              <button className="btn small" onClick={() => void post(`/api/cameras/${s.id}/enable`, { enabled: !s.enabled }).then(onChanged)}>
-                {s.enabled ? 'Disable' : 'Enable'}
-              </button>
-              <button className="btn small ghost" onClick={onEdit}>
-                Settings
-              </button>
-            </>
+            <Button variant="ghost" size="sm" onClick={onEdit}>
+              Settings
+            </Button>
           )}
           {s && s.scheme === 'device' && can('ops.log') && (
-            <button className="btn small primary" onClick={() => nav(`/cameras/${encodeURIComponent(s.id)}/stream`)}>
+            <Button size="sm" onClick={() => nav(`/cameras/${encodeURIComponent(s.id)}/stream`)}>
               Stream from this device
-            </button>
+            </Button>
           )}
         </div>
-        {msg && <div className="err-inline">{msg}</div>}
+        {s && can('cameras.manage') && (
+          <div style={{ marginTop: 12 }}>
+            <Switch
+              label={s.enabled ? 'Analysing this stream' : 'Stream disabled'}
+              checked={s.enabled}
+              onCheckedChange={(on) =>
+                void post(`/api/cameras/${s.id}/enable`, { enabled: on })
+                  .then(() => {
+                    toast({ type: 'success', title: on ? `${s.id} enabled` : `${s.id} disabled`, description: 'Recorded in the audit log' });
+                    onChanged();
+                  })
+                  .catch((e: unknown) => toast({ type: 'error', title: 'Not changed', description: e instanceof Error ? e.message : String(e) }))
+              }
+            />
+          </div>
+        )}
       </div>
       {s && (
         <div className="section">
@@ -460,170 +477,166 @@ function CameraForm({ initial, startAs = 'network', siteCameras, onClose, onSave
       setErr(e instanceof Error ? e.message : String(e));
     }
   };
-  const num = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: Number(e.target.value) });
+  const set = <K extends keyof typeof f>(k: K) => (v: (typeof f)[K]) => setF((cur) => ({ ...cur, [k]: v }));
+  const [testing, setTesting] = useState(false);
+  const runTest = () => {
+    setTesting(true);
+    setTest(null);
+    void post<{ ok: boolean; width?: number; height?: number; error?: string }>('/api/cameras/test', { url: f.url })
+      .then((r) => setTest(r.ok ? `Connected: ${r.width ?? '?'}×${r.height ?? '?'}` : `Failed: ${r.error}`))
+      .catch((e: unknown) => setTest(e instanceof Error ? e.message : String(e)))
+      .finally(() => setTesting(false));
+  };
   return (
     <Modal title={initial ? `Camera ${initial.id}` : 'Add camera'} onClose={onClose} wide>
-      <div className="formgrid">
-        <label>Source</label>
-        <Segmented
-          label="Camera source"
-          value={kind}
-          onChange={(k) => setKind(k)}
-          options={[
-            { value: 'network', label: 'Network stream (RTSP / HTTP / file)', disabled: Boolean(initial) },
-            { value: 'device', label: 'This device’s camera', disabled: Boolean(initial) },
-          ]}
-        />
-        <label>Binding</label>
-        <Segmented
-          label="Camera binding"
-          value={f.binding}
-          onChange={(b) => setF({ ...f, binding: b })}
-          options={[
-            { value: 'new', label: 'New camera on site', disabled: Boolean(initial) },
-            { value: 'site', label: 'Drive existing site camera', disabled: Boolean(initial) },
-          ]}
-        />
-        <label>Camera id</label>
-        {f.binding === 'site' ? (
-          <select className="input" value={f.id} disabled={Boolean(initial)} onChange={(e) => setF({ ...f, id: e.target.value, name: f.name || (siteCameras.find((c) => c.id === e.target.value)?.name ?? '') })}>
-            <option value="">— choose —</option>
-            {siteCameras.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.id} · {c.name}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input className="input" value={f.id} disabled={Boolean(initial)} placeholder="e.g. GATE2-CAM1" onChange={(e) => setF({ ...f, id: e.target.value.toUpperCase() })} />
+      <div className="camform">
+        {!initial && (
+          <section>
+            <h4>Source</h4>
+            <RadioCards
+              aria-label="Camera source"
+              layout="grid"
+              minColumnWidth={320}
+              value={kind}
+              onValueChange={(k) => setKind(k as 'network' | 'device')}
+              options={[
+                { value: 'network', label: 'Network stream', icon: <Cctv size={16} />, description: 'An IP camera or NVR by RTSP or HTTP address, or a recorded file from the import folder.' },
+                { value: 'device', label: 'This device’s camera', icon: <Smartphone size={16} />, description: 'A phone, tablet or laptop streams frames from its browser. Needs HTTPS or localhost.' },
+              ]}
+            />
+            <RadioCards
+              aria-label="Camera binding"
+              layout="grid"
+              minColumnWidth={320}
+              value={f.binding}
+              onValueChange={(b) => set('binding')(b as 'site' | 'new')}
+              options={[
+                { value: 'new', label: 'New camera on site', description: 'You give its position and orientation below.' },
+                { value: 'site', label: 'Drive an existing site camera', description: 'Takes the calibrated pose already in the site configuration.', disabled: siteCameras.length === 0, disabledReason: 'The site configuration has no cameras.' },
+              ]}
+            />
+          </section>
         )}
-        <label>Name</label>
-        <input className="input" value={f.name} placeholder="e.g. Gate 2 vehicle lane" onChange={(e) => setF({ ...f, name: e.target.value })} />
-        {device ? (
-          <>
-            <label>Stream</label>
-            <span className="muted" style={{ fontSize: 12.5 }}>
-              After saving, this browser opens the camera and sends frames to the server for analysis. Any signed-in phone, tablet or laptop can stream to this camera from <span className="mono">/cameras/{f.id || 'ID'}/stream</span>. Needs HTTPS or localhost.
-            </span>
-          </>
-        ) : (
-          <>
-        <label>Stream</label>
-        <div className="col">
-          <div className="row">
-            <input className="input grow" value={f.url} placeholder={initial ? `unchanged: ${initial.urlMasked} — re-enter to change` : 'rtsp://user:pass@10.0.4.21:554/Streaming/Channels/101'} onChange={(e) => setF({ ...f, url: e.target.value })} />
-            <button
-              className="btn small"
-              disabled={!f.url}
-              onClick={() => {
-                setTest('testing…');
-                void post<{ ok: boolean; width?: number; height?: number; error?: string }>('/api/cameras/test', { url: f.url })
-                  .then((r) => setTest(r.ok ? `OK — ${r.width ?? '?'}×${r.height ?? '?'}` : `Failed: ${r.error}`))
-                  .catch((e: unknown) => setTest(e instanceof Error ? e.message : String(e)));
-              }}
-            >
-              Test
-            </button>
+        <section>
+          <h4>Identity</h4>
+          <div className="camform-two">
+            {f.binding === 'site' ? (
+              <ArcSelect
+                label="Site camera"
+                placeholder="Choose a camera"
+                value={f.id || undefined}
+                disabled={Boolean(initial)}
+                onValueChange={(v) => setF((cur) => ({ ...cur, id: v, name: cur.name || (siteCameras.find((c) => c.id === v)?.name ?? '') }))}
+                options={siteCameras.map((c) => ({ value: c.id, label: `${c.id} · ${c.name}` }))}
+              />
+            ) : (
+              <Input label="Camera ID" value={f.id} disabled={Boolean(initial)} placeholder="e.g. GATE2-CAM1" onChange={(e) => set('id')(e.target.value.toUpperCase())} />
+            )}
+            <Input label="Name" value={f.name} placeholder="e.g. Gate 2 vehicle lane" onChange={(e) => set('name')(e.target.value)} />
           </div>
-          {test && <span className="mono muted">{test}</span>}
-          {files.data && files.data.files.length > 0 && (
-            <div className="row muted" style={{ flexWrap: 'wrap', fontSize: 11.5 }}>
-              Recorded files in <span className="mono">{files.data.dir}</span>:
-              {files.data.files.map((x) => (
-                <button key={x.name} className="btn small ghost" onClick={() => setF({ ...f, url: x.name, loopFile: true })}>
-                  {x.name} ({bytes(x.bytes)})
-                </button>
-              ))}
-            </div>
+        </section>
+        <section>
+          <h4>Stream</h4>
+          {device ? (
+            <p className="muted camform-note">
+              After saving, this browser opens the camera and sends frames to the server for analysis. Any signed-in phone, tablet or laptop can stream to this camera from <span className="mono">/cameras/{f.id || 'ID'}/stream</span>.
+            </p>
+          ) : (
+            <>
+              <div className="camform-url">
+                <Input
+                  label="Address"
+                  className="mono"
+                  value={f.url}
+                  placeholder={initial ? `unchanged: ${initial.urlMasked}` : 'rtsp://user:pass@10.0.4.21:554/Streaming/Channels/101'}
+                  description="Credentials in the address are stored encrypted when a storage key is configured and are never shown again."
+                  onChange={(e) => set('url')(e.target.value)}
+                />
+                <Button variant="secondary" disabled={!f.url} loading={testing} onClick={runTest}>
+                  Test connection
+                </Button>
+              </div>
+              {test && <div className={`camform-test ${test.startsWith('Connected') ? 'ok' : 'bad'}`}>{test}</div>}
+              {files.data && files.data.files.length > 0 && (
+                <div className="camform-files">
+                  <span className="muted">
+                    Recorded files in <span className="mono">{files.data.dir}</span>
+                  </span>
+                  {files.data.files.map((x) => (
+                    <Button key={x.name} variant="ghost" size="sm" onClick={() => setF({ ...f, url: x.name, loopFile: true })}>
+                      {x.name} · {bytes(x.bytes)}
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </>
           )}
-          <span className="dim" style={{ fontSize: 11 }}>
-            Credentials in the URL are stored encrypted when a storage key is configured and are never shown again. Files must be in the import folder.
-          </span>
-        </div>
-          </>
-        )}
+        </section>
         {f.binding === 'new' && (
-          <>
-            <label>Position (WGS84)</label>
-            <div className="row">
-              <input className="input" type="number" step={0.000001} value={f.lat} onChange={num('lat')} style={{ width: 130 }} title="Latitude" />
-              <input className="input" type="number" step={0.000001} value={f.lon} onChange={num('lon')} style={{ width: 130 }} title="Longitude" />
-              <span className="muted">height above ground</span>
-              <input className="input" type="number" step={0.1} value={f.heightM} onChange={num('heightM')} style={{ width: 70 }} />
-              <span className="muted">m</span>
-              <button className="btn small" type="button" onClick={here}>
+          <section>
+            <h4>Position and pose</h4>
+            <div className="camform-grid">
+              <NumberField label="Latitude" value={f.lat} onValueChange={set('lat')} min={-90} max={90} step={0.00001} formatOptions={{ maximumFractionDigits: 6, useGrouping: false }} />
+              <NumberField label="Longitude" value={f.lon} onValueChange={set('lon')} min={-180} max={180} step={0.00001} formatOptions={{ maximumFractionDigits: 6, useGrouping: false }} />
+              <NumberField label="Height above ground" value={f.heightM} onValueChange={set('heightM')} min={0} max={200} step={0.5} suffix=" m" />
+              <NumberField label="Heading" value={f.headingDeg} onValueChange={set('headingDeg')} min={0} max={359} step={1} largeStep={15} suffix="°" scrub />
+              <NumberField label="Tilt" value={f.pitchDeg} onValueChange={set('pitchDeg')} min={-90} max={30} step={1} suffix="°" scrub />
+              <NumberField label="Horizontal field of view" value={f.hfovDeg} onValueChange={set('hfovDeg')} min={2} max={180} step={1} suffix="°" scrub />
+            </div>
+            <div className="row" style={{ marginTop: 10, gap: 10 }}>
+              <Button variant="secondary" size="sm" onClick={here}>
                 Use this device’s location
-              </button>
+              </Button>
               {locating && <span className="muted" style={{ fontSize: 12 }}>{locating}</span>}
             </div>
-            <label>Orientation</label>
-            <div className="row">
-              <span className="muted">heading</span>
-              <input className="input" type="number" value={f.headingDeg} onChange={num('headingDeg')} style={{ width: 70 }} />
-              <span className="muted">° · tilt</span>
-              <input className="input" type="number" value={f.pitchDeg} onChange={num('pitchDeg')} style={{ width: 70 }} />
-              <span className="muted">° · horizontal FOV</span>
-              <input className="input" type="number" value={f.hfovDeg} onChange={num('hfovDeg')} style={{ width: 70 }} />
-              <span className="muted">°</span>
-            </div>
-            <label />
-            <span className="dim" style={{ fontSize: 11 }}>
-              Survey these values (GNSS + compass/inclinometer, or from known landmarks). Geolocation of detections — and therefore tracks and zone alerts — is only as accurate as this pose.
-            </span>
-          </>
+            <p className="dim camform-note">Survey these values (GNSS and compass or inclinometer, or from known landmarks). Geolocation of detections, and so tracks and zone alerts, is only as accurate as this pose.</p>
+          </section>
         )}
-        <label>Watches zone</label>
-        <select className="input" value={f.zoneId} onChange={(e) => setF({ ...f, zoneId: e.target.value })}>
-          <option value="">— determine from geolocation —</option>
-          {FACILITY.zones.map((z) => (
-            <option key={z.id} value={z.id}>
-              {z.name}
-              {z.restricted ? ' (restricted)' : ''}
-            </option>
-          ))}
-        </select>
-        <label>Analytics</label>
-        <div className="row" style={{ flexWrap: 'wrap' }}>
-          <input className="input" type="number" min={0.2} max={10} step={0.1} value={f.analyticsFps} onChange={num('analyticsFps')} style={{ width: 70 }} />
-          <span className="muted">frames/s</span>
-          <label className="check">
-            <input type="checkbox" checked={f.detectObjects} onChange={(e) => setF({ ...f, detectObjects: e.target.checked })} />
-            people &amp; vehicles
-          </label>
-          <label className="check">
-            <input type="checkbox" checked={f.recogniseFaces} onChange={(e) => setF({ ...f, recogniseFaces: e.target.checked })} />
-            face recognition
-          </label>
-          <label className="check" title="Analyse in native-resolution tiles: finds small/distant people, costs ~6× CPU">
-            <input type="checkbox" checked={f.tiled} onChange={(e) => setF({ ...f, tiled: e.target.checked })} />
-            long-range (tiled)
-          </label>
-          {isFile && (
-            <label className="check">
-              <input type="checkbox" checked={f.loopFile} onChange={(e) => setF({ ...f, loopFile: e.target.checked })} />
-              loop recording (rehearsal)
-            </label>
-          )}
-          <label className="check">
-            <input type="checkbox" checked={f.enabled} onChange={(e) => setF({ ...f, enabled: e.target.checked })} />
-            enabled
-          </label>
-        </div>
+        <section>
+          <h4>Analysis</h4>
+          <div className="camform-two">
+            <ArcSelect
+              label="Watches zone"
+              placeholder="Determine from geolocation"
+              value={f.zoneId || '_auto'}
+              onValueChange={(v) => set('zoneId')(v === '_auto' ? '' : v)}
+              options={[{ value: '_auto', label: 'Determine from geolocation' }, ...FACILITY.zones.map((z) => ({ value: z.id, label: `${z.name}${z.restricted ? ' (restricted)' : ''}` }))]}
+            />
+            <div className="camform-fps">
+              <span className="camform-label">Frames analysed per second</span>
+              <TickSlider label="Frames analysed per second" value={f.analyticsFps} onChange={set('analyticsFps')} min={0.5} max={10} step={0.5} majorEvery={2} unit=" fps" />
+              <span className="dim">CPU cost grows with rate. 2 fps finds people walking; raise it for vehicles.</span>
+            </div>
+          </div>
+          <div className="camform-switches">
+            <Switch label="Detect people and vehicles" checked={f.detectObjects} onCheckedChange={set('detectObjects')} />
+            <Switch label="Recognise faces against the register" checked={f.recogniseFaces} onCheckedChange={set('recogniseFaces')} />
+            <Switch label="Long range: analyse in full-resolution tiles (about 6× CPU)" checked={f.tiled} onCheckedChange={set('tiled')} />
+            {isFile && <Switch label="Loop the recording (rehearsal)" checked={f.loopFile} onCheckedChange={set('loopFile')} />}
+            <Switch label="Enabled" checked={f.enabled} onCheckedChange={set('enabled')} />
+          </div>
+        </section>
       </div>
       {err && <ErrorNote error={err} />}
-      <div className="row" style={{ marginTop: 12 }}>
+      <div className="row camform-foot">
         {initial && (
-          <button className="btn danger" onClick={() => void api(`/api/cameras/${initial.id}`, { method: 'DELETE' }).then(onSaved)}>
-            Remove
-          </button>
+          <ConfirmMorph
+            label="Remove camera"
+            prompt={`Remove ${initial.id}? Recorded evidence is kept.`}
+            confirmLabel="Remove"
+            pendingLabel="Removing"
+            doneLabel="Removed"
+            tone="danger"
+            onConfirm={() => api(`/api/cameras/${initial.id}`, { method: 'DELETE' }).then(() => onSaved())}
+          />
         )}
         <div className="spacer" />
-        <button className="btn" onClick={onClose}>
+        <Button variant="ghost" onClick={onClose}>
           Cancel
-        </button>
-        <button className="btn primary" disabled={!f.id || !f.name || (!device && !f.url && !initial)} onClick={() => void save()}>
+        </Button>
+        <Button disabled={!f.id || !f.name || (!device && !f.url && !initial)} onClick={() => void save()}>
           {device && !initial ? 'Save and start streaming' : 'Save (audited)'}
-        </button>
+        </Button>
       </div>
     </Modal>
   );
