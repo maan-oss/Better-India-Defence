@@ -7,7 +7,7 @@ import { useTime } from '../state/time';
 import { Icon } from './Icons';
 import { ObservationViewer, StateChip } from './common';
 import { hms } from '../lib/format';
-import { TextShimmer } from './kit';
+import { ChatComposer, TextShimmer, type ChatComposerHandle } from './kit';
 import { LoadingOrb } from './vendor/spaceui/components/orb/loading';
 
 interface Turn {
@@ -22,12 +22,11 @@ export function Copilot() {
   const open = useWorld((s) => s.copilotOpen);
   const setOpen = useWorld((s) => s.setCopilot);
   const [turns, setTurns] = useState<Turn[]>([]);
-  const [q, setQ] = useState('');
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ configured: boolean; model: string | null; mode: string } | null>(null);
   const [obs, setObs] = useState<string | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<ChatComposerHandle>(null);
 
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
@@ -77,7 +76,6 @@ export function Copilot() {
   const ask = async (text: string) => {
     if (!text.trim()) return;
     setBusy(true);
-    setQ('');
     const idx = turns.length;
     setTurns((t) => [...t, { q: text, a: null, applied: [] }]);
     const w = useWorld.getState();
@@ -201,18 +199,9 @@ export function Copilot() {
           </div>
         ))}
       </div>
-      <form
-        className="cp-input"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void ask(q);
-        }}
-      >
-        <input ref={inputRef} className="input" placeholder="Ask about changes, tracks, evidence, coverage…" value={q} onChange={(e) => setQ(e.target.value)} disabled={busy} aria-label="Copilot question" />
-        <button className="btn primary" disabled={busy || !q.trim()}>
-          Ask
-        </button>
-      </form>
+      <div className="cp-input">
+        <ChatComposer ref={inputRef} allowAttachments={false} disabled={busy} placeholder="Ask about changes, tracks, evidence, coverage…" labels={{ send: 'Ask' }} onSend={(d) => void ask(d.text)} />
+      </div>
       {obs && <ObservationViewer id={obs} onClose={() => setObs(null)} />}
     </section>
   );

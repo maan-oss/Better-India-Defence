@@ -86,7 +86,7 @@
 .cp-ev button { height: 22px; font-size: 11px; padding: 0 7px; border: 1px solid var(--line-2); background: var(--bg-2); border-radius: var(--radius-sm); color: var(--text-1); cursor: pointer; font-family: var(--font-mono); }
 .cp-ev button:hover { border-color: var(--line-3); color: var(--text-0); }
 .cp-input { display: flex; gap: var(--sp-2); padding: var(--sp-3); border-top: 1px solid var(--line); }
-.cp-input input { flex: 1; height: 32px; }
+.cp-input > * { flex: 1; min-width: 0; }
 .cp-suggest { display: flex; flex-wrap: wrap; gap: 6px; }
 .cp-suggest button { font-size: 12px; padding: 4px 10px; border: 1px solid var(--line-2); border-radius: 999px; background: var(--bg-2); color: var(--text-1); cursor: pointer; text-align: left; }
 .cp-suggest button:hover { color: var(--text-0); border-color: var(--line-3); }
