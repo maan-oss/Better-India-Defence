@@ -151,6 +151,8 @@ export interface CommentThreadProps {
   nowLabel?: string;
   /** Words for localization. Leave out any key to keep its English default. */
   labels?: CommentThreadLabels;
+  /** Strata adaptation: a record that is only ever added to. Hides edit, delete, reactions, replies and resolve. */
+  appendOnly?: boolean;
   className?: string;
 }
 
@@ -377,7 +379,7 @@ type Ui = { editing: string | null; confirming: string | null; picker: string | 
 
 export const CommentThread = forwardRef<HTMLElement, CommentThreadProps>(function CommentThread({
   comments, defaultComments = [], onCommentsChange, currentUser, people, resolved, defaultResolved = false, onResolvedChange,
-  title, reactions = DEFAULT_REACTIONS, placeholder = "Reply, or @mention someone", maxDepth = 2, nowLabel = "Just now", labels, className,
+  title, reactions = DEFAULT_REACTIONS, placeholder = "Reply, or @mention someone", maxDepth = 2, nowLabel = "Just now", labels, appendOnly = false, className,
 }, forwardedRef) {
   const t = withDefaults(DEFAULT_LABELS, labels);
   const reduced = useReducedFlag();
@@ -507,7 +509,7 @@ export const CommentThread = forwardRef<HTMLElement, CommentThreadProps>(functio
                         initial={reduced ? false : { opacity: 0, scale: .6 }} animate={{ opacity: 1, scale: 1 }} transition={reduced ? { duration: 0 } : { ...motionTokens.spring.snappy, delay: index * motionTokens.stagger.item }}>{emoji}</motion.button>)}
                       <button type="button" className={styles.iconAction} aria-label={t.closeReactions} onClick={() => setUi(current => ({ ...current, picker: null }))}><X size={14} strokeWidth={1.75} aria-hidden="true" /></button>
                     </motion.div>
-                    : <motion.div key="actions" className={styles.actions} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : motionTokens.duration.instant, ease: standard }}>
+                    : appendOnly ? null : <motion.div key="actions" className={styles.actions} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : motionTokens.duration.instant, ease: standard }}>
                       <button type="button" className={styles.iconAction} aria-label={t.addReaction} onClick={() => setUi(current => ({ ...current, picker: comment.id, confirming: null }))}>
                         <SmilePlus size={15} strokeWidth={1.75} aria-hidden="true" />
                       </button>
@@ -564,7 +566,7 @@ export const CommentThread = forwardRef<HTMLElement, CommentThreadProps>(functio
                 {title && <h3 className={styles.title}>{title}</h3>}
                 <span className={styles.subtitle}>{t.commentCount(total)}</span>
               </div>
-              <button type="button" className={styles.resolve} data-resolve disabled={!total} onClick={() => setResolved(true)}><Check size={15} strokeWidth={1.75} aria-hidden="true" />{t.resolve}</button>
+              {!appendOnly && <button type="button" className={styles.resolve} data-resolve disabled={!total} onClick={() => setResolved(true)}><Check size={15} strokeWidth={1.75} aria-hidden="true" />{t.resolve}</button>}
             </header>
 
             {list.length > 0
