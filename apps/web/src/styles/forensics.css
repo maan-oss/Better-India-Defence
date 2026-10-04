@@ -171,3 +171,10 @@
 .cmp-arc > * { height: 100%; }
 .cmp-arc img { image-rendering: pixelated; }
 .cmp-wait { width: 100%; height: 100%; background: var(--bg-0); }
+.idform-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+@media (max-width: 900px) { .idform-grid { grid-template-columns: 1fr; } }
+.id-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.id-settings-body { padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 20px; }
+.id-two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.tpl-slide { margin: 0; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.tpl-slide img { width: 160px; height: 160px; object-fit: cover; border-radius: var(--radius); display: block; }

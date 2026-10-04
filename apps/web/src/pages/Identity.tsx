@@ -10,6 +10,7 @@ import { DECISION_TEXT, DecisionChip, FaceCard, QualityLine } from '../component
 import { Segmented, Tabs } from '../components/ui';
 import '../styles/forensics.css';
 import { Empty } from '../brand/Boot';
+import { ActionButton, Avatar, Button, Carousel, CopyButton, DatePicker, Input, MetricCard, MultiSelect, NumberField, RadioCards, SearchField, SegmentedControl, Select as ArcSelect, Slider, Switch, Textarea } from '../components/kit';
 
 /**
  * IDENTITY — authorised-personnel register, watchlist, recognition review and archive search.
@@ -286,13 +287,13 @@ function Register({ selected, onSelect }: { selected: string | null; onSelect: (
           )}
         </div>
         <div style={{ padding: 10, borderBottom: '1px solid var(--line)' }}>
-          <input className="input" style={{ width: '100%' }} placeholder="Name, service number, unit…" value={q} onChange={(e) => setQ(e.target.value)} />
+          <SearchField label="Search the register" placeholder="Name, service number, unit" value={q} onValueChange={setQ} />
         </div>
         <div className="scroll">
-          {ids.data?.length === 0 && <div className="empty">No entries.</div>}
+          {ids.data?.length === 0 && <Empty compact art="identity" title={q ? 'No matches' : 'No entries yet'} description={q ? 'Try a shorter name or a service number.' : list === 'WATCHLIST' ? 'Watchlist entries need a documented basis.' : 'Add the people who may be on site, with their zone access.'} />}
           {ids.data?.map((i) => (
             <div key={i.id} className={`list-row ${selected === i.id ? 'sel' : ''}`} onClick={() => (setCreating(false), onSelect(i.id))}>
-              {i.photoTemplateId ? <img src={`/api/identities/templates/${i.photoTemplateId}/image?which=aligned`} alt="" style={{ width: 36, height: 36 }} /> : <div style={{ width: 36, height: 36, border: '1px dashed var(--line-3)' }} />}
+              <Avatar name={i.name} size="md" src={i.photoTemplateId ? `/api/identities/templates/${i.photoTemplateId}/image?which=aligned` : undefined} />
               <div className="grow" style={{ minWidth: 0 }}>
                 <div className="ellipsis">
                   {i.rank ? `${i.rank} ` : ''}
@@ -369,60 +370,52 @@ function IdentityForm({ list, initial, onSaved }: { list: 'AUTHORISED' | 'WATCHL
   };
   const cats = list === 'WATCHLIST' ? ['Person of interest', 'Banned from site', 'Missing person', 'Absconder'] : ['Personnel', 'Contractor', 'Visitor', 'Family', 'Vendor', 'Other'];
   return (
-    <div className="col" style={{ maxWidth: 720, gap: 12 }}>
+    <div className="col idform" style={{ maxWidth: 720, gap: 16 }}>
       <h3 style={{ margin: 0 }}>{initial ? 'Edit entry' : list === 'WATCHLIST' ? 'New watchlist entry' : 'New authorised person'}</h3>
-      <div className="formgrid">
-        <label>Category</label>
-        <select className="input" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
-          {cats.map((c) => (
-            <option key={c}>{c}</option>
-          ))}
-        </select>
-        <label>Full name</label>
-        <input className="input" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
-        <label>Rank</label>
-        <input className="input" value={f.rank} placeholder="e.g. Maj, Sub, Hav, Nk, Sep" onChange={(e) => setF({ ...f, rank: e.target.value })} />
-        <label>Service / ID number</label>
-        <input className="input" value={f.serviceNo} onChange={(e) => setF({ ...f, serviceNo: e.target.value })} />
-        <label>Unit</label>
-        <input className="input" value={f.unit} onChange={(e) => setF({ ...f, unit: e.target.value })} />
-        <label>Organisation</label>
-        <input className="input" value={f.organisation} onChange={(e) => setF({ ...f, organisation: e.target.value })} />
-        {list === 'AUTHORISED' && (
-          <>
-            <label>Restricted-zone access</label>
-            <div className="row" style={{ flexWrap: 'wrap' }}>
-              {ZONES.filter((z) => z.restricted).map((z) => (
-                <label key={z.id} className="check">
-                  <input type="checkbox" checked={f.accessZones.includes(z.id)} onChange={(e) => setF({ ...f, accessZones: e.target.checked ? [...f.accessZones, z.id] : f.accessZones.filter((x) => x !== z.id) })} />
-                  {z.name}
-                </label>
-              ))}
-            </div>
-            <label>Valid until</label>
-            <input className="input" type="date" value={f.validUntil} onChange={(e) => setF({ ...f, validUntil: e.target.value })} />
-          </>
-        )}
-        {list === 'WATCHLIST' && (
-          <>
-            <label>Threat level</label>
-            <select className="input" value={f.threatLevel} onChange={(e) => setF({ ...f, threatLevel: e.target.value as 'LOW' | 'MEDIUM' | 'HIGH' })}>
-              {['LOW', 'MEDIUM', 'HIGH'].map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-            <label>Basis (required)</label>
-            <textarea className="input" rows={3} value={f.basis} placeholder="Authority and source: order / intelligence report reference, who requested the listing, review date." onChange={(e) => setF({ ...f, basis: e.target.value })} />
-          </>
-        )}
-        <label>Notes</label>
-        <textarea className="input" rows={2} value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} />
+      <div className="idform-grid">
+        <ArcSelect label="Category" value={f.category} onValueChange={(v) => setF({ ...f, category: v })} options={cats.map((c) => ({ value: c, label: c }))} />
+        <Input label="Full name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+        <Input label="Rank" value={f.rank} placeholder="e.g. Maj, Sub, Hav, Nk, Sep" onChange={(e) => setF({ ...f, rank: e.target.value })} />
+        <Input label="Service / ID number" value={f.serviceNo} onChange={(e) => setF({ ...f, serviceNo: e.target.value })} />
+        <Input label="Unit" value={f.unit} onChange={(e) => setF({ ...f, unit: e.target.value })} />
+        <Input label="Organisation" value={f.organisation} onChange={(e) => setF({ ...f, organisation: e.target.value })} />
       </div>
+      {list === 'AUTHORISED' && (
+        <div className="idform-grid">
+          <MultiSelect
+            label="Restricted-zone access"
+            description="Entry to any other restricted zone raises an alert."
+            placeholder="No restricted zones"
+            value={f.accessZones}
+            onValueChange={(v) => setF({ ...f, accessZones: v })}
+            options={ZONES.filter((z) => z.restricted).map((z) => ({ value: z.id, label: z.name }))}
+          />
+          <DatePicker label="Valid until" description="Leave empty for no expiry." value={f.validUntil ? new Date(`${f.validUntil}T00:00:00`) : undefined} onChange={(d) => setF({ ...f, validUntil: d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '' })} minDate={new Date()} showToday />
+        </div>
+      )}
+      {list === 'WATCHLIST' && (
+        <>
+          <RadioCards
+            aria-label="Threat level"
+            layout="grid"
+            minColumnWidth={160}
+            value={f.threatLevel}
+            onValueChange={(v) => setF({ ...f, threatLevel: v as 'LOW' | 'MEDIUM' | 'HIGH' })}
+            options={[
+              { value: 'LOW', label: 'Low', description: 'Note and report a sighting' },
+              { value: 'MEDIUM', label: 'Medium', description: 'Verify, then inform the guard commander' },
+              { value: 'HIGH', label: 'High', description: 'Critical alert and immediate response' },
+            ]}
+          />
+          <Textarea label="Basis (required)" rows={3} value={f.basis} description="Authority and source: order or intelligence report reference, who requested the listing, review date." onChange={(e) => setF({ ...f, basis: e.target.value })} />
+        </>
+      )}
+      <Textarea label="Notes" rows={2} value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} />
       {err && <ErrorNote error={err} />}
       <div className="row">
-        <button className="btn primary" disabled={f.name.trim().length < 2} onClick={() => void save()}>
+        <Button variant="primary" disabled={f.name.trim().length < 2 || (list === 'WATCHLIST' && f.basis.trim().length < 10)} onClick={() => void save()}>
           Save (audited)
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -511,9 +504,10 @@ function IdentityDetail({ id, onChanged }: { id: string; onChanged: () => void }
       </dl>
       <div>
         <h4 className="upper muted">Enrolled photos ({i.templates.length})</h4>
-        <div className="tpl-grid">
+        {i.templates.length > 0 && (
+        <Carousel label={`Enrolled photos of ${i.name}`} slideSize="160px">
           {i.templates.map((t) => (
-            <figure key={t.id}>
+            <figure key={t.id} className="tpl-slide">
               <img src={`/api/identities/templates/${t.id}/image?which=aligned`} alt="Enrolled face" />
               <span className={`qline ${t.quality.grade}`}>{t.quality.grade}</span>
               <span className="dim">{t.source.split(':')[0]}</span>
@@ -524,8 +518,9 @@ function IdentityDetail({ id, onChanged }: { id: string; onChanged: () => void }
               )}
             </figure>
           ))}
-          {!i.templates.length && <span className="muted">No photos — this entry cannot be recognised until a photo is enrolled.</span>}
-        </div>
+        </Carousel>
+        )}
+        {!i.templates.length && <span className="muted">No photos — this entry cannot be recognised until a photo is enrolled.</span>}
       </div>
       {mayEdit && (
         <EnrolPhoto
@@ -748,59 +743,52 @@ function Settings() {
   return (
     <div className="scroll" style={{ padding: 16 }}>
       <div className="col" style={{ maxWidth: 900, gap: 16 }}>
-        <div className="cards" style={{ border: '1px solid var(--line)' }}>
-          <div className="stat">
-            <div className="v">{st.data.gallery.authorised}</div>
-            <div className="l">authorised entries</div>
-          </div>
-          <div className="stat">
-            <div className="v">{st.data.gallery.watchlist}</div>
-            <div className="l">watchlist entries</div>
-          </div>
-          <div className="stat">
-            <div className="v">{st.data.gallery.templates}</div>
-            <div className="l">enrolled photos</div>
-          </div>
+        <div className="id-metrics">
+          <MetricCard label="Authorised entries" value={st.data.gallery.authorised} context="people who may be on site" />
+          <MetricCard label="Watchlist entries" value={st.data.gallery.watchlist} context="each with a documented basis" />
+          <MetricCard label="Enrolled photos" value={st.data.gallery.templates} context="face templates matched against" />
         </div>
-        <div className="panel" style={{ padding: 14 }}>
-          <h4 className="upper muted" style={{ margin: '0 0 10px' }}>
-            Decision thresholds (cosine similarity)
-          </h4>
-          <div className="formgrid">
-            <label>Strong match ≥</label>
-            <input className="input" type="number" step={0.01} value={f.strong} disabled={!can('admin.config')} onChange={(e) => setF({ ...f, strong: Number(e.target.value) })} />
-            <label>Possible match ≥</label>
-            <input className="input" type="number" step={0.01} value={f.possible} disabled={!can('admin.config')} onChange={(e) => setF({ ...f, possible: Number(e.target.value) })} />
-            <label>Minimum face quality</label>
-            <select className="input" value={f.minGrade} disabled={!can('admin.config')} onChange={(e) => setF({ ...f, minGrade: e.target.value as FaceSettings['minGrade'] })}>
-              {['GOOD', 'FAIR', 'POOR'].map((g) => (
-                <option key={g}>{g}</option>
-              ))}
-            </select>
-            <label>Keep unmatched sightings</label>
-            <div className="row">
-              <input className="input" type="number" min={1} max={3650} value={f.retentionDays} disabled={!can('admin.config')} onChange={(e) => setF({ ...f, retentionDays: Number(e.target.value) })} style={{ width: 90 }} />
-              <span className="muted">days, then deleted (images included)</span>
-            </div>
-            <label>Unknown faces</label>
-            <label className="check">
-              <input type="checkbox" checked={f.alertUnknownInRestricted} disabled={!can('admin.config')} onChange={(e) => setF({ ...f, alertUnknownInRestricted: e.target.checked })} />
-              Alert when a camera covering a restricted zone sees a face not in the authorised register
-            </label>
+        <div className="panel id-settings">
+          <div className="panel-h">
+            <h3>Decision thresholds</h3>
+            <span className="muted" style={{ fontSize: 12 }}>
+              cosine similarity
+            </span>
           </div>
-          {can('admin.config') && (
-            <div className="row" style={{ marginTop: 10 }}>
-              <button className="btn primary small" onClick={() => void save()}>
-                Save
-              </button>
-              {msg && <span className="muted">{msg}</span>}
+          <div className="id-settings-body">
+            <Slider
+              label="Possible match · strong match"
+              min={0.2}
+              max={0.7}
+              step={0.01}
+              value={[f.possible, f.strong]}
+              minStepsBetweenThumbs={2}
+              thumbLabels={['Possible match threshold', 'Strong match threshold']}
+              format={(v: number) => v.toFixed(2)}
+              marks={[{ value: 0.32, label: 'measured 0.32' }]}
+              disabled={!can('admin.config')}
+              onValueChange={(v: [number, number]) => setF({ ...f, possible: v[0], strong: v[1] })}
+            />
+            <div className="id-two">
+              <div className="col" style={{ gap: 6 }}>
+                <span className="setup-label">Minimum face quality</span>
+                <SegmentedControl label="Minimum face quality" value={f.minGrade} onValueChange={(v) => can('admin.config') && setF({ ...f, minGrade: v as FaceSettings['minGrade'] })} options={['GOOD', 'FAIR', 'POOR'].map((g) => ({ value: g, label: g.charAt(0) + g.slice(1).toLowerCase() }))} />
+              </div>
+              <NumberField label="Keep unmatched sightings" suffix=" days" min={1} max={3650} value={f.retentionDays} disabled={!can('admin.config')} onValueChange={(v) => setF({ ...f, retentionDays: v })} description="Then deleted, images included." />
             </div>
-          )}
-          <div className="note" style={{ marginTop: 12 }}>
+            <Switch label="Alert when a camera covering a restricted zone sees a face not in the authorised register" checked={f.alertUnknownInRestricted} disabled={!can('admin.config')} onCheckedChange={(v) => setF({ ...f, alertUnknownInRestricted: v })} />
+            {can('admin.config') && (
+              <div className="row">
+                <ActionButton label="Save settings" pendingLabel="Saving" successLabel="Saved (audited)" onAction={() => save().then(() => undefined)} />
+                {msg && msg !== 'Saved (audited).' && <span className="err-inline">{msg}</span>}
+              </div>
+            )}
+          <div className="note">
             Defaults come from a measured benchmark (LFW verification pairs, this exact pipeline): best accuracy 98.2% at 0.32; no false accepts among 274 impostor pairs at ≥ 0.32 and 3.7%
             false rejects; at 0.42 false rejects rise to 4.4%. Accuracy on CCTV at distance, at night or through haze is lower and must be measured on your own cameras with{' '}
             <span className="mono">npm run vision:eval</span>. In 1:N search against a register of N people, the chance of some false candidate grows roughly N-fold — which is why every
             watchlist candidate needs human verification.
+          </div>
           </div>
         </div>
         <div className="panel">
@@ -821,8 +809,9 @@ function Settings() {
                 <tr key={m.key}>
                   <td>
                     {m.name}
-                    <div className="mono dim" style={{ fontSize: 10 }}>
+                    <div className="row mono dim" style={{ fontSize: 10, gap: 4 }}>
                       {m.sha256.slice(0, 16)}…
+                      <CopyButton value={m.sha256} label="Copy SHA-256" iconOnly variant="plain" />
                     </div>
                   </td>
                   <td style={{ fontSize: 12 }}>{m.purpose}</td>
