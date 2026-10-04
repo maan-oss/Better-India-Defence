@@ -3,6 +3,7 @@ import { Mark, Wordmark, Lockup } from '../brand/Mark';
 import { StrataField } from '../brand/StrataField';
 import { Illustration, type ArtName } from '../brand/Illustration';
 import '../brand/brand.css';
+import { InViewTitle, TextReveal } from '../components/kit';
 
 const ART: ArtName[] = ['empty', 'site', 'cameras', 'incidents', 'evidence', 'identity', 'tasks', 'sensors', 'search', 'offline', 'audit', 'reconstructions'];
 const SWATCHES = [
@@ -21,7 +22,7 @@ export function Brand() {
         <StrataField className="bb-hero-art" width={1600} height={620} lines={30} seed={11} animate observations={2} />
         <div className="bb-hero-copy">
           <Lockup size={44} />
-          <h1>The installation, layer by layer — and the record under every layer.</h1>
+          <TextReveal as="h1" text={"The installation, layer by layer —\nand the record under every layer."} delay={0.15} />
           <p>
             Strata is named for the layers of ground a geologist reads in a cut. The console reads an installation the same way: what is happening now on top, and beneath it the
             recorded evidence for everything that happened. The identity draws only that.
@@ -30,7 +31,7 @@ export function Brand() {
       </header>
 
       <section className="bb-sec">
-        <h2>The Core mark</h2>
+        <InViewTitle as="h2" variant="blur" text="The Core mark" />
         <p className="bb-lead">A core sample cut through stratified ground. The top stratum is the terrain profile with one observation on its ridge; the strata below relax with depth.</p>
         <div className="bb-marks">
           <figure>
@@ -71,7 +72,7 @@ export function Brand() {
       </section>
 
       <section className="bb-sec">
-        <h2>Wordmark and type</h2>
+        <InViewTitle as="h2" variant="blur" text="Wordmark and type" />
         <div className="bb-type">
           <div className="bb-wm">
             <Wordmark size={56} />
@@ -93,7 +94,7 @@ export function Brand() {
       </section>
 
       <section className="bb-sec">
-        <h2>Colour</h2>
+        <InViewTitle as="h2" variant="blur" text="Colour" />
         <p className="bb-lead">Graphite and cream only. Colour beyond that belongs to meaning — status, affiliation, provenance — never to the brand.</p>
         <div className="bb-swatches">
           {SWATCHES.map(([n, hex, use]) => (
@@ -108,7 +109,7 @@ export function Brand() {
       </section>
 
       <section className="bb-sec">
-        <h2>The section</h2>
+        <InViewTitle as="h2" variant="blur" text="The section" />
         <p className="bb-lead">The motif: hairline strata over a terrain profile, a time ruler on the right, observations on the ridge. Generated from a seed, so every console draws the same art.</p>
         <div className="bb-motif">
           <StrataField width={1400} height={520} lines={40} seed={7} relief={0.75} observations={3} />
@@ -116,7 +117,7 @@ export function Brand() {
       </section>
 
       <section className="bb-sec">
-        <h2>Illustrations</h2>
+        <InViewTitle as="h2" variant="blur" text="Illustrations" />
         <p className="bb-lead">One block of ground, cut to show its strata, with one object on it. Used for empty states only.</p>
         <div className="bb-art">
           {ART.map((a) => (

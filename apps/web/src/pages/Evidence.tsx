@@ -9,7 +9,7 @@ import { useWorld } from '../state/world';
 import { useNavigate } from 'react-router-dom';
 import { bytes, dateTime, dur, hms, pct } from '../lib/format';
 import { Segmented, Tabs } from '../components/ui';
-import { DateRangePicker, FilterToolbar, Pagination, SearchField, SortableDataTable, Streamgraph, type DateRange, type FilterChip } from '../components/kit';
+import { DateRangePicker, FilterToolbar, Pagination, SearchField, Ridgeline, SortableDataTable, Streamgraph, type DateRange, type FilterChip } from '../components/kit';
 import { Empty } from '../brand/Boot';
 
 /** EVIDENCE — searchable repository of observations and media, plus the safe hand-off demonstration. */
@@ -74,6 +74,22 @@ function ObservationSearch() {
     }
     return { bins, series: kinds.map((k) => ({ key: k, label: k })) };
   }, [rows]);
+  // Delivery latency (received − observed) by source kind (Arc ridgeline): a slow or bursty link shows as a long tail.
+  const latency = useMemo(() => {
+    const by = new Map<string, number[]>();
+    for (const r of rows) {
+      const v = (r.received_at - r.t) / 1000;
+      if (!Number.isFinite(v) || v < 0) continue;
+      const list = by.get(r.source_kind) ?? [];
+      list.push(v);
+      by.set(r.source_kind, list);
+    }
+    const series = [...by.entries()].filter(([, v]) => v.length >= 5).map(([k, v]) => ({ id: k, label: k, values: v }));
+    if (series.length < 1) return null;
+    const all = series.flatMap((x) => x.values).sort((a, b) => a - b);
+    const p99 = all[Math.floor(all.length * 0.99)] ?? all[all.length - 1] ?? 1;
+    return { series, domain: [0, Math.max(0.5, p99)] as [number, number] };
+  }, [rows]);
   return (
     <div className="ev-obs">
       <div className="ev-filters">
@@ -106,6 +122,7 @@ function ObservationSearch() {
       {stream && (
         <div className="ev-stream">
           <Streamgraph data={stream.bins} series={stream.series} label="Observations by kind" unit="obs" height={150} categoryLabel="Time" offset="silhouette" />
+          {latency && <Ridgeline series={latency.series} domain={latency.domain} label="Delivery latency by kind" unit="s" formatValue={(v) => `${latency.domain[1] < 2 ? v.toFixed(2) : v.toFixed(1)} s`} rowHeight={26} />}
         </div>
       )}
       {data && rows.length === 0 ? (

@@ -501,7 +501,8 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .ev-obs { display: flex; flex-direction: column; }
 .ev-filters { display: flex; align-items: flex-end; gap: 16px; padding: 16px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .ev-chips { flex: 1; min-width: 260px; padding-bottom: 2px; }
-.ev-stream { padding: 12px 20px 0; border-bottom: 1px solid var(--line); }
+.ev-stream { padding: 12px 20px 8px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 1100px) { .ev-stream { grid-template-columns: 1fr; } }
 .ev-table { padding: 0 8px; }
 button.obs-link { all: unset; cursor: pointer; font-family: var(--font-mono); font-size: 12px; color: var(--text-0); text-decoration: underline dotted var(--line-3); text-underline-offset: 3px; }
 button.obs-link:hover { text-decoration-color: var(--text-1); }

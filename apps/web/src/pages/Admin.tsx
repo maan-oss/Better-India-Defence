@@ -6,7 +6,8 @@ import { ErrorNote, Loading, Modal, useAsync } from '../components/common';
 import { useOnWatch } from '../components/ops/OnWatch';
 import { Check, Copy, KeyRound, Settings2, UserCheck, UserCog } from 'lucide-react';
 import { useSession } from '../state/session';
-import { Alert, Avatar, AvatarGroup, Badge, Button, ConfirmMorph, DropdownMenu, Input, JsonViewer, PasswordStrength, RadioCards, SortableDataTable, useToastStack } from '../components/kit';
+import { FACILITY } from '@strata/domain';
+import { CodeBlock, Alert, Avatar, AvatarGroup, Badge, Button, ConfirmMorph, DropdownMenu, Input, JsonViewer, PasswordStrength, RadioCards, SortableDataTable, useToastStack } from '../components/kit';
 
 interface ConfigResponse {
   stored: { key: string; value: unknown; updated_by: string; updated_at: number }[];
@@ -205,6 +206,13 @@ export function Admin() {
             />
           </div>
           <div className="section">
+            <h4>Connect equipment</h4>
+            <p className="muted" style={{ fontSize: 12.5, margin: '0 0 10px' }}>
+              Anything that can send HTTPS can be a sensor: register it in Site configuration, then post <span className="mono">strata.ingest/v1</span> envelopes with the service token. Re-sent message ids are de-duplicated, so retries are safe. Formats and adapters: docs/INTEROP.md.
+            </p>
+            <CodeBlock filename="health-report.sh" language="bash" code={ingestExample(window.location.origin, FACILITY.sensors[0]?.id ?? 'C01')} />
+          </div>
+          <div className="section">
             <h4>Accreditation status</h4>
             <div className="note warn">This build is a development prototype. It holds no government or defence certification or accreditation. See docs/SECURITY.md for what would be required.</div>
           </div>
@@ -213,6 +221,26 @@ export function Admin() {
       {resetFor && <ResetPassword user={resetFor} onClose={() => setResetFor(null)} onSave={(pw) => update(resetFor, { password: pw }, `Password reset for ${resetFor.displayName}`).then(() => setResetFor(null))} />}
     </div>
   );
+}
+
+function ingestExample(origin: string, sensorId: string) {
+  return `# A health report from ${sensorId}. The token is STRATA_SERVICE_TOKEN from the server environment.
+now=$(date +%s%3N)
+curl -sS -X POST ${origin}/api/ingest/batch \\
+  -H "Authorization: Bearer $STRATA_SERVICE_TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{ "messages": [ {
+    "schema": "strata.ingest/v1",
+    "messageId": "${sensorId.toLowerCase()}-health-'"$now"'",
+    "sensorId": "${sensorId}",
+    "adapter": "site.health.v1",
+    "seq": 1,
+    "observedAt": '"$now"',
+    "sentAt": '"$now"',
+    "kind": "sensor.health",
+    "payload": { "status": "ok", "uptimeS": 86400, "message": "self-test passed" }
+  } ] }'
+# 202 accepted · 207 some rejected (reasons listed) · 401 wrong token`;
 }
 
 function ResetPassword({ user, onClose, onSave }: { user: UserRecord; onClose: () => void; onSave: (pw: string) => Promise<void> }) {
