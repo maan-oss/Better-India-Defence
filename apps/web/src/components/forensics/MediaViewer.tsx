@@ -10,7 +10,7 @@ export interface Overlay {
 }
 
 /** Categorical (not status) colours for detection classes on imagery. */
-const CAT_COLOR: Record<string, string> = { person: '#0bd8b6', vehicle: '#baa7ff', face: '#edeef0', aircraft: '#70b8ff', boat: '#70b8ff', animal: 'var(--text-2)', object: 'var(--text-2)' };
+const CAT_COLOR: Record<string, string> = { person: '#0bd8b6', vehicle: '#baa7ff', face: '#f3f1ea', aircraft: '#70b8ff', boat: '#70b8ff', animal: 'var(--text-2)', object: 'var(--text-2)' };
 
 /**
  * Frame-accurate viewer for an evidence item. Frames are decoded server-side from the immutable original
@@ -194,11 +194,11 @@ function ActivityStrip({ item, t, onT }: { item: EvidenceItem; t: number; onT: (
       g.fillStyle = 'rgba(186,167,255,0.7)';
       g.fillRect(x, h - 8 - hp - hv, bw, hv);
       if (s.faces) {
-        g.fillStyle = '#edeef0';
+        g.fillStyle = '#f3f1ea';
         g.fillRect(x, h - 5, bw, 4);
       }
     }
-    g.fillStyle = '#edeef0';
+    g.fillStyle = '#f3f1ea';
     g.fillRect((t / dur) * w - 1, 0, 2 * devicePixelRatio, h);
   }, [tl, t, dur]);
   return (

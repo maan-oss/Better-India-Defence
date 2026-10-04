@@ -3,26 +3,26 @@
  * change both together. Night mode is applied to canvases by a CSS filter, so these stay as defined.
  */
 export const P = {
-  // Surfaces (Radix Slate dark)
-  bg0: '#0c0d0e',
-  bg1: '#111113',
-  bg2: '#18191b',
-  bg3: '#212225',
-  // Text
-  text0: '#edeef0',
-  text1: '#b0b4ba',
-  text2: '#8b8f98',
-  text3: '#62666e',
-  // Interaction (neutral: selection is the brightest neutral)
-  accent: '#edeef0',
-  accent2: '#ffffff',
+  // Surfaces (ChatGPT-style neutral greys)
+  bg0: '#171717',
+  bg1: '#212121',
+  bg2: '#2a2a2a',
+  bg3: '#2f2f2f',
+  // Text (Claude cream)
+  text0: '#f3f1ea',
+  text1: '#c9c6bd',
+  text2: '#9b988f',
+  text3: '#6e6c66',
+  // Interaction (cream: selection is the brightest neutral)
+  accent: '#f0eee6',
+  accent2: '#faf9f5',
   // Status (Radix red / orange / amber / grass / cyan 9)
   critical: '#e5484d',
   serious: '#f76b15',
   caution: '#ffc53d',
   normal: '#46a758',
   standby: '#00a2c7',
-  off: '#696e77',
+  off: '#6e6c66',
   // Affiliation (APP-6; Radix step 11)
   friend: '#70b8ff',
   hostile: '#ff6369',
@@ -30,19 +30,19 @@ export const P = {
   neutral: '#71d083',
   unknownAff: '#f5e147',
   // Epistemic
-  captured: '#edeef0',
+  captured: '#f3f1ea',
   reconstructed: '#0bd8b6',
   inferred: '#baa7ff',
-  prior: '#8b8f98',
+  prior: '#9b988f',
   // Static map context (neutral by design)
-  terrain: '#161719',
-  road: '#26282b',
-  roadMark: '#777b84',
-  building: '#363a3f',
-  buildingEdge: '#b0b4ba',
-  zone: '#b0b4ba',
-  fence: '#8b8f98',
-  grid: '#9ba1aa',
+  terrain: '#1e1e1e',
+  road: '#2b2b2b',
+  roadMark: '#8a877f',
+  building: '#3a3a3a',
+  buildingEdge: '#c9c6bd',
+  zone: '#c9c6bd',
+  fence: '#9b988f',
+  grid: '#a8a59d',
 } as const;
 
 /** `rgba()` from a palette hex. */

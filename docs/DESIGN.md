@@ -19,7 +19,7 @@ component and colour libraries rather than hand-picked values.
 
 | Library | Used for |
 |---|---|
-| [Radix Colors](https://www.radix-ui.com/colors) | Every colour. 12-step dark scales: steps 1–2 backgrounds, 3–5 component states, 6–8 borders, 9–10 solid fills, 11–12 text. Slate for the chrome; red / orange / amber / grass / cyan for status; blue / teal / violet for affiliation and provenance. |
+| [Radix Colors](https://www.radix-ui.com/colors) | Status, affiliation and provenance colours. 12-step dark scales: steps 3 tint, 6 border, 9 solid fill, 11 text. Red / orange / amber / grass / cyan for status; blue / teal / violet for affiliation and provenance. |
 | [Radix Primitives](https://www.radix-ui.com/primitives) | Dialog, dropdown menu, tabs, toggle group (segmented controls) and tooltip, in `apps/web/src/components/ui.tsx`. Focus trapping, keyboard navigation, collision-aware placement and ARIA roles come from the library. |
 | [Inter](https://rsms.me/inter/) and [JetBrains Mono](https://www.jetbrains.com/lp/mono/) | Interface text, and data (grid references, IDs, timestamps). Both are bundled with the build, because installations run air-gapped. |
 
@@ -32,9 +32,9 @@ Each colour family has one job.
 
 | Role | Values | Used for | Never used for |
 |---|---|---|---|
-| Chrome | Slate `#0c0d0e` → `#272a2d`, hairlines at 6–18 % white | Surfaces, borders, depth | Meaning |
-| Text | `#edeef0` / `#b0b4ba` / `#8b8f98` / `#62666e` (contrast 16.4 / 9.6 / 5.6 / 3.6) | Primary, secondary, labels, disabled | — |
-| Interaction | The brightest neutral: white primary button, lighter surface plus a white bar for selection, white focus ring | Buttons, selection, focus, active tab and nav | Status |
+| Chrome | ChatGPT-style true greys: `#171717` rail, top bar and side panels; `#212121` pages; `#2a2a2a` / `#2f2f2f` / `#383838` raised, hover and selected; hairlines at 6–18 % white | Surfaces, borders, depth | Meaning |
+| Text | Claude-style warm cream: `#f3f1ea` / `#c9c6bd` / `#9b988f` / `#6e6c66` (contrast on `#212121`: 14.9 / 9.3 / 5.4 / 3.1) | Primary, secondary, labels, disabled | — |
+| Interaction | Cream (`#f0eee6`, hover `#faf9f5`): cream primary button with dark ink, a lighter grey surface plus a cream bar for selection, cream focus ring | Buttons, selection, focus, active tab and nav | Status |
 | Status | Critical red `#e5484d`, serious orange `#f76b15`, caution amber `#ffc53d`, normal green `#46a758`, standby cyan `#00a2c7` (with tint, border and text steps) | Alerts, priorities, readiness, sensor and team states | Decoration |
 | Affiliation | Friend `#70b8ff`, hostile `#ff6369`, suspect `#ffa057`, neutral `#71d083`, unknown `#f5e147` | Track symbols (APP-6 frames carry the meaning) | Interface |
 | Provenance | Captured white, reconstructed teal `#0bd8b6`, inferred violet `#baa7ff` (dashed) | How a piece of the picture is known | Status |
@@ -42,7 +42,7 @@ Each colour family has one job.
 | Static context | Grey `#b0b4ba` / `#8b8f98` | Zones, fence, buildings, vital-asset rings, grid | Anything that changes |
 | Classification | Marking colours (RESTRICTED purple, as for CUI) | Top and bottom banners | Anything else |
 
-Keeping the interface free of hue is what lets blue mean *friendly*, red mean *act now* and violet mean
+Keeping the interface to grey and cream is what lets blue mean *friendly*, red mean *act now* and violet mean
 *inferred* without ambiguity.
 
 ## Rules
@@ -63,8 +63,8 @@ Keeping the interface free of hue is what lets blue mean *friendly*, red mean *a
 7. **Sentence case.** Headings, tabs, labels and buttons are in sentence case. Uppercase is kept for
    short status chips and classification markings.
 8. **Spacing comes from the scale.** 4, 8, 12, 16, 20, 24, 32, 40 px (`--sp-*`). Page gutters are 20 px,
-   panel padding 16 px, and control heights 24 / 28 / 36 px. Radii are 4 for chips, 6 for controls,
-   8 for containers and 10 for dialogs.
+   panel padding 16 px, and control heights 24 / 28 / 36 px. Radii are 6 for chips, 8 for controls,
+   12 for containers and 16 for dialogs.
 9. **Summaries lead with the worst state.** The top-bar alert summary shows critical first, then high.
    The operations rail badge appears only while critical alerts are open, and is red. Other badges are
    work counts and stay neutral.

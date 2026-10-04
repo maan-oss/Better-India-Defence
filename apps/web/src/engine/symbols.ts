@@ -146,7 +146,7 @@ function draw(g: CanvasRenderingContext2D, s: SymbolSpec): void {
   }
   // Dark under-stroke so the symbol reads on any background.
   frame(g, s.aff, s.dim);
-  g.strokeStyle = 'rgba(4, 9, 15, 0.8)';
+  g.strokeStyle = 'rgba(12, 12, 12, 0.8)';
   g.lineWidth = 9;
   g.setLineDash([]);
   g.stroke();
@@ -159,8 +159,8 @@ function draw(g: CanvasRenderingContext2D, s: SymbolSpec): void {
   g.stroke();
   g.setLineDash([]);
   // Function icon.
-  g.strokeStyle = '#f4f6f8';
-  g.fillStyle = '#f4f6f8';
+  g.strokeStyle = '#faf9f5';
+  g.fillStyle = '#faf9f5';
   g.lineWidth = 4;
   const { x, y, w, h } = box;
   const cx = x + w / 2;

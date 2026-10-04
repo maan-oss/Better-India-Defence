@@ -5,37 +5,39 @@
  * backgrounds, 3–5 component states, 6–8 borders, 9–10 solid fills and 11–12 text. Using a calibrated
  * system rather than hand-picked hex values keeps contrast and tint consistent everywhere.
  *
- * The chrome is monochrome (Radix Slate), as on operational consoles such as Anduril Lattice and
+ * The chrome is monochrome: ChatGPT-style neutral greys with Claude's warm cream for text and the primary
+ * action. As on operational consoles such as Anduril Lattice and
  * Palantir Gotham: colour on screen is reserved for meaning — status, affiliation, provenance — so it is
  * never spent on buttons or decoration (ISA-101). Primary actions and selection use the brightest neutral.
  */
 :root {
   color-scheme: dark;
 
-  /* Neutral ladder — Radix Slate (dark). */
-  --bg-0: #0c0d0e;   /* map frame, wells, deepest */
-  --bg-1: #111113;   /* app surface: pages, panels, chrome (slate-1) */
-  --bg-2: #18191b;   /* raised: cards, inputs, headers (slate-2) */
-  --bg-3: #212225;   /* hover / pressed (slate-3) */
-  --bg-4: #272a2d;   /* selected, menus (slate-4) */
-  --bg-hover: #1c1d20;
-  --line: rgba(216, 244, 246, 0.06);    /* hairline (slate-a2/a3) */
-  --line-2: rgba(221, 234, 248, 0.09);  /* default border */
-  --line-3: rgba(217, 237, 255, 0.18);  /* strong border, hover (slate-a6/a7) */
+  /* Neutral ladder — ChatGPT-style true greys (no blue tint). */
+  --bg-chrome: #171717; /* rail, top bar, side panels (ChatGPT sidebar) */
+  --bg-0: #171717;   /* map frame, wells, inputs' surround */
+  --bg-1: #212121;   /* app surface: pages, panels (ChatGPT main) */
+  --bg-2: #2a2a2a;   /* raised: cards, inputs, headers */
+  --bg-3: #2f2f2f;   /* hover / pressed (ChatGPT composer) */
+  --bg-4: #383838;   /* selected, menus */
+  --bg-hover: #262626;
+  --line: rgba(255, 255, 255, 0.06);    /* hairline */
+  --line-2: rgba(255, 255, 255, 0.1);   /* default border */
+  --line-3: rgba(255, 255, 255, 0.18);  /* strong border, hover */
 
-  /* Text — Radix Slate 12 / 11 and two interpolated steps. Contrast on --bg-1: 16.4, 9.6, 5.6, 3.6. */
-  --text-0: #edeef0;
-  --text-1: #b0b4ba;
-  --text-2: #8b8f98;
-  --text-3: #62666e;
+  /* Text — Claude's warm cream instead of cold white. Contrast on --bg-1: 14.9, 9.3, 5.4, 3.1. */
+  --text-0: #f3f1ea;
+  --text-1: #c9c6bd;
+  --text-2: #9b988f;
+  --text-3: #6e6c66;
 
-  /* Interaction — neutral. Bright fill for the one primary action; selection is a lighter surface. */
-  --accent: #edeef0;
-  --accent-2: #ffffff;
-  --accent-ink: #111113;
-  --accent-dim: rgba(221, 234, 248, 0.08);
-  --accent-line: rgba(241, 247, 254, 0.42);
-  --focus: rgba(237, 238, 240, 0.7);
+  /* Interaction — cream. The one primary action is a cream fill (Claude ivory); selection is a lighter grey. */
+  --accent: #f0eee6;
+  --accent-2: #faf9f5;
+  --accent-ink: #1f1e1d;
+  --accent-dim: rgba(240, 238, 230, 0.08);
+  --accent-line: rgba(240, 238, 230, 0.42);
+  --focus: rgba(240, 238, 230, 0.7);
 
   /* Status — Radix scales: solid (9), text (11), tint (3), border (6). */
   --st-critical: #e5484d;  --st-critical-text: #ff9592; --st-critical-tint: #3b1219; --st-critical-line: #72232d;
@@ -43,7 +45,7 @@
   --st-caution: #ffc53d;   --st-caution-text: #ffca16;  --st-caution-tint: #302008;  --st-caution-line: #5c3d05;
   --st-normal: #46a758;    --st-normal-text: #71d083;   --st-normal-tint: #1b2a1e;   --st-normal-line: #2d5736;
   --st-standby: #00a2c7;   --st-standby-text: #4ccce6;  --st-standby-tint: #082c36;  --st-standby-line: #045468;
-  --st-off: #696e77;
+  --st-off: #7a7770;
   /* Legacy names mapped onto the scale. */
   --red: var(--st-critical);
   --red-dim: var(--st-critical-tint);
@@ -57,7 +59,7 @@
   --info-dim: var(--st-standby-tint);
 
   /* Data (charts, sparklines): neutral so measures never read as status. */
-  --data: #9ba1aa;
+  --data: #a8a59d;
 
   /* Affiliation (APP-6 / MIL-STD-2525) — map symbology only. Radix blue/red/orange/grass/yellow 11. */
   --friend: #70b8ff;
@@ -67,11 +69,11 @@
   --unknown-aff: #f5e147;
 
   /* Epistemic state — paired with pattern everywhere (solid / half / dashed). Radix teal 11, violet 11. */
-  --captured: #edeef0;
+  --captured: #f3f1ea;
   --reconstructed: #0bd8b6;
   --inferred: #baa7ff;
-  --prior: #8b8f98;
-  --unknown: #43484e;
+  --prior: #9b988f;
+  --unknown: #4a4a4a;
 
   /* Classification markings. */
   --cls-unclassified: #007a33;
@@ -94,10 +96,10 @@
   --sp-10: 40px;
 
   /* Radius — controls 6, containers 8, overlays 10. */
-  --radius-sm: 4px;
-  --radius: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 10px;
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -107,7 +109,7 @@
 
   /* Dark UI separates with hairlines; shadow only for things that float. */
   --shadow-1: none;
-  --shadow-2: 0 0 0 1px rgba(221, 234, 248, 0.08), 0 12px 32px -8px rgba(0, 0, 0, 0.6), 0 4px 10px -4px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 16px 40px -8px rgba(0, 0, 0, 0.55), 0 4px 12px -4px rgba(0, 0, 0, 0.35);
   --glow-accent: 0 0 0 1px var(--bg-1), 0 0 0 3px var(--focus);
 
   --rail-w: 52px;
@@ -123,6 +125,7 @@
  * State is still carried by shape, text and position, as everywhere else.
  */
 :root[data-theme='night'] {
+  --bg-chrome: #030000;
   --bg-0: #000000;
   --bg-1: #060101;
   --bg-2: #0c0202;

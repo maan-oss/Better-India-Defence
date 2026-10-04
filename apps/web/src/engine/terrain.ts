@@ -49,11 +49,11 @@ const frag = /* glsl */ `
     float shade = 0.62 + 0.38 * max(dot(n, normalize(uSun)), 0.0);
     // Very slight albedo variation keeps large flat areas from looking synthetic.
     float grain = fract(sin(dot(floor(vWorld.xy / 7.0), vec2(12.9898, 78.233))) * 43758.5453);
-    vec3 base = mix(vec3(0.072, 0.075, 0.082), vec3(0.082, 0.086, 0.093), grain * 0.6);
+    vec3 base = mix(vec3(0.088, 0.088, 0.088), vec3(0.098, 0.098, 0.097), grain * 0.6);
     vec3 col = base * shade * 1.35;
     float c1 = contour(vWorld.z, 2.0, 1.0) * 0.07;
     float c2 = contour(vWorld.z, 10.0, 1.2) * 0.12;
-    col = mix(col, vec3(0.86, 0.88, 0.91), c1 + c2);
+    col = mix(col, vec3(0.95, 0.94, 0.91), c1 + c2);
 
     if (uOrthoOn > 0.5) {
       vec2 ouv = (vWorld.xy - uOrthoRect.xy) / (uOrthoRect.zw - uOrthoRect.xy);
@@ -74,8 +74,8 @@ const frag = /* glsl */ `
       float minor = 1.0 - clamp(min(m1.x, m1.y) / 1.0, 0.0, 1.0);
       float major = 1.0 - clamp(min(m2.x, m2.y) / 1.4, 0.0, 1.0);
       float fadeMinor = clamp(1.0 - length(vWorld - cameraPosition) / 3500.0, 0.0, 1.0);
-      col = mix(col, vec3(0.70, 0.72, 0.75), minor * 0.07 * fadeMinor);
-      col = mix(col, vec3(0.80, 0.82, 0.85), major * 0.2);
+      col = mix(col, vec3(0.79, 0.78, 0.74), minor * 0.07 * fadeMinor);
+      col = mix(col, vec3(0.94, 0.93, 0.90), major * 0.2);
     }
 
     if (uCoverageOn > 0.5) {
@@ -91,7 +91,7 @@ const frag = /* glsl */ `
       if (observed < 0.5) {
         // Never observed: diagonal hatching, not colour fill. Unknown is not "zero".
         float hatch = step(0.82, fract((vWorld.x + vWorld.y) / 14.0));
-        col = mix(col, vec3(0.40, 0.42, 0.45), hatch * 0.55);
+        col = mix(col, vec3(0.44, 0.43, 0.41), hatch * 0.55);
       } else {
         col = mix(col, tint, 0.38);
       }

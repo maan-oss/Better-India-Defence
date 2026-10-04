@@ -4,11 +4,11 @@ import type { DsmGeometry, StructureState, WorldObjectState } from '../api/types
 import { P } from '../lib/palette';
 
 const SURFACE_COLORS: Record<RoadDef['surface'], string> = {
-  runway: '#2a2c30',
-  taxiway: '#26282c',
-  apron: '#2e3135',
-  asphalt: '#232528',
-  gravel: '#27282a',
+  runway: '#2e2e2e',
+  taxiway: '#2a2a2a',
+  apron: '#333333',
+  asphalt: '#272727',
+  gravel: '#2b2a28',
 };
 
 /** Roads and airfield surfaces as draped ribbons (single merged mesh, vertex colours). */
@@ -102,7 +102,7 @@ export function buildFence(f: FacilityDef): { group: THREE.Group; segments: Map<
   return { group: g, segments };
 }
 
-const bodyMat = new THREE.MeshStandardMaterial({ color: '#43484e', roughness: 0.88, metalness: 0.04 });
+const bodyMat = new THREE.MeshStandardMaterial({ color: '#4a4a4a', roughness: 0.88, metalness: 0.04 });
 const reconMat = new THREE.MeshStandardMaterial({ color: '#1c4a44', roughness: 0.9, metalness: 0.02 });
 const edgeMat = new THREE.LineBasicMaterial({ color: P.buildingEdge, transparent: true, opacity: 0.32 });
 const reconEdgeMat = new THREE.LineBasicMaterial({ color: P.reconstructed, transparent: true, opacity: 0.5 });
@@ -173,7 +173,7 @@ export function buildBuildings(f: FacilityDef, structures: StructureState[] | nu
   return g;
 }
 
-const OBJ_COLORS: Record<string, string> = { expected: '#363a3f', confirmed: '#4a4f56', detected: P.caution, missing: P.serious };
+const OBJ_COLORS: Record<string, string> = { expected: '#3a3a3a', confirmed: '#505050', detected: P.caution, missing: P.serious };
 
 export function buildObjects(objects: WorldObjectState[]): THREE.Group {
   const g = new THREE.Group();
@@ -191,7 +191,7 @@ export function buildObjects(objects: WorldObjectState[]): THREE.Group {
       g.add(edges);
       continue;
     }
-    const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: OBJ_COLORS[o.state] ?? '#363a3f', roughness: 0.9 }));
+    const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: OBJ_COLORS[o.state] ?? '#3a3a3a', roughness: 0.9 }));
     mesh.position.set(o.position.x, o.position.y, z);
     mesh.rotation.z = (o.yawDeg * Math.PI) / 180;
     mesh.userData = { pick: 'object', id: o.id };
