@@ -21,8 +21,8 @@ component and colour libraries rather than hand-picked values.
 |---|---|
 | [Radix Colors](https://www.radix-ui.com/colors) | Status, affiliation and provenance colours. 12-step dark scales: steps 3 tint, 6 border, 9 solid fill, 11 text. Red / orange / amber / grass / cyan for status; blue / teal / violet for affiliation and provenance. |
 | [Radix Primitives](https://www.radix-ui.com/primitives) | Dialogs, tabs, tooltips and the toggle-group fallback for segmented controls with rich labels, in `apps/web/src/components/ui.tsx`; Arc builds on Radix too. Focus trapping, keyboard navigation, collision-aware placement and ARIA roles come from the library. |
-| [Arc](https://uiarc.dev/components) (MIT, free tier) | The main component kit, vendored in `apps/web/src/components/arc/` (105 components, CSS modules + Motion) and re-exported from `components/kit.ts`. Used for segmented controls everywhere, breadcrumb, popovers, user menu, toast stack, resizable panels, floating button group (map dock), switches, accordion, bottom sheet (phone inspector), stepper, inputs, password strength, radio cards, sliders, alerts, badges, empty states, skeleton and text shimmer, hold-to-confirm (assistance request), file dropzone, image compare, JSON viewer, pagination, search field, gauges, line and donut charts, sparklines, animated counters. Arc's tokens are mapped onto ours in `styles/arc-theme.css`. |
-| [Space UI](https://www.spaceui.one/components) (MIT) | Vendored in `components/vendor/spaceui/`: Kanban (Command tasks board), timeline (incident chronology), notification list (status island alerts), status badge, loading orb (copilot). Tailwind utilities, mapped to our tokens in `styles/tw.css`. |
+| [Arc](https://uiarc.dev/components) (MIT, free tier) | The main component kit, vendored in `apps/web/src/components/arc/` (CSS modules + Motion), re-exported from `components/kit.ts`, tokens mapped in `styles/arc-theme.css`. Where each is used: see *Component inventory* below. |
+| [Space UI](https://www.spaceui.one/components) (MIT) | Vendored in `components/vendor/spaceui/`: kanban (Command tasks), timeline (incident chronology), notification list (status island), status badge, loading orb (copilot), member selector (handover), user presence avatars (on watch), tick slider (camera analysis rate), slide to confirm (field task status), interactive checklist (arrival drills), pin list (camera wall order). Tailwind utilities, mapped to our tokens in `styles/tw.css`. |
 | [Componentry](https://componentry.dev/) (MIT) | Vendored in `components/vendor/componentry/`: split-flap display (status island Zulu clock), dither gradient (sign-in hero), Mac keyboard (shortcuts sheet). |
 | [Bencho](https://bencho.dev/) and [Skecher UI](https://skecher-ui.com/docs) | Interaction patterns only — their code carries no open licence, so nothing is copied. Original implementations after their patterns: the command bar and the dynamic-island status pill (Bencho), the one-time-code input (Bencho), the morphing tool dock grouping (Skecher). Each file says so in its header. |
 | [Tailwind CSS v4](https://tailwindcss.com) | Only the theme and utility layers (no Preflight reset), for the Space UI and Componentry components. Our own CSS is unlayered, so it wins over utilities. |
@@ -30,6 +30,38 @@ component and colour libraries rather than hand-picked values.
 
 Tokens are in `apps/web/src/styles/tokens.css`. Canvas and WebGL code, which cannot read CSS variables,
 uses the same values from `apps/web/src/lib/palette.ts`. Change the two files together.
+
+## Component inventory
+
+Arc, by screen. Vendored components we changed say so in a `Strata adaptation` comment (the MIT licence
+allows it): the comment thread's append-only mode, the context menu's still-right-click trigger, the
+checklist's optional reset, the dither gradient's zero-size guard.
+
+| Screen | Arc components |
+|---|---|
+| Shell | breadcrumb, user menu, toast stack, popover, theme switch (night display), announcement bar (demo mode), shortcut list and keys, password field and input (sign-in), rolling slot text (island alert counts) |
+| Operational picture | context menu (map), tree view (site), segmented control, floating button group, resizable panels, bottom sheet, chat composer (copilot) |
+| Command | text morph, timeline, hold to confirm, alert, textarea, activity heatmap, bar chart, slope chart, hover card, select, mention input (duty log), chip group, signature pad, confirm morph, copy button, action button, sortable data table |
+| Incidents | search field, chip group, inline edit, segmented control, tabs, sortable data table, comment thread, date picker, time picker, number field, input |
+| Sensors | search field, metric card, waffle chart, sortable data table, brush chart, timeline, JSON viewer, button group |
+| Camera wall | split button, switch, pagination, expanding search, drawer, radio cards, input, select, number field, confirm morph |
+| Field | select, textarea, stepper, swipe actions, hold to confirm, input |
+| Evidence | search field, date range picker, filter toolbar, streamgraph, ridgeline, sortable data table, pagination, JSON viewer, copy button |
+| Identity | select, input, multi-select, date picker, radio cards, textarea, carousel, metric card, slider, segmented control, number field, switch, action button, copy button, avatar |
+| Reconstructions | select, expandable card, radio cards, number field, sortable data table, badge, progress, card (quick look), JSON viewer |
+| Audit | search field, date range picker, filter toolbar and menu, sortable data table, pagination, drawer, copy button, JSON viewer |
+| System health | gauge, line chart, sparkline, animated counter, usage meter (data volume), treemap (records), donut chart (jobs) |
+| Administration | avatar, avatar group, badge, dropdown menu, confirm morph, password strength, radio cards, JSON viewer, sortable data table, code block |
+| Brand book | text reveal, in-view title |
+
+Not used, on purpose: billing toggle and price, money input, phone input and colour picker (nothing in a
+security console takes those inputs); card stack (swipe-to-decide encourages quick, careless decisions,
+which is wrong for recognition review); rich-text editor (SITREPs and log entries are plain text by
+design); chat thread (copilot answers carry facts, evidence links and applied actions, which its
+text-only messages cannot hold — the copilot uses Arc's chat composer instead); calendar, radio group,
+tag input, expanding button group and shortcut recorder (no screen needs them). Componentry's magnetic dock
+is not used: its effect depends on hover, which phones do not have, and the desktop tool dock already
+fits the map.
 
 ## Layout
 

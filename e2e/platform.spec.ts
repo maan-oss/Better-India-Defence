@@ -63,7 +63,7 @@ test('incidents: the recorded drone incursion produced an incident with gathered
 test('copilot answers from the record and cites evidence or states insufficiency', async ({ page }) => {
   await signIn(page, 'analyst');
   await page.getByRole('button', { name: /Ask the record/ }).click();
-  await page.getByLabel('Copilot question').fill('Which sensors are currently not reporting?');
+  await page.getByRole('textbox', { name: /Ask about changes/ }).fill('Which sensors are currently not reporting?');
   await page.keyboard.press('Enter');
   const answer = page.locator('.cp-a').last();
   await expect(answer).not.toHaveText(/Querying the record/);
@@ -168,7 +168,8 @@ test('site setup: an administrator can start a site from the demo layout and see
 test('field view: a team leader selects their team and sends a SALUTE contact report', async ({ page }) => {
   const errors = await signIn(page, 'operator');
   await page.goto('/field');
-  await page.getByLabel('My team').selectOption({ label: 'QRT-1 · QRT' });
+  await page.getByRole('combobox', { name: 'My team' }).click();
+  await page.getByRole('option', { name: 'QRT-1 · QRT' }).click();
   await expect(page.locator('.ftask')).toBeVisible();
   await expect(page.locator('.flocal')).toBeVisible();
   await page.getByRole('button', { name: 'Contact report (SALUTE)' }).click();
@@ -237,5 +238,31 @@ test('operational picture: layers sheet toggles a layer and the inspector collap
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Hide inspector' }).click();
   await expect(page.getByRole('button', { name: 'Show inspector' })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('incidents: a note is recorded in the append-only duty log under the incident', async ({ page }) => {
+  const errors = await signIn(page, 'operator');
+  await page.getByRole('link', { name: 'Incidents' }).click();
+  await page.getByRole('tab', { name: /Notes/ }).click();
+  await page.getByPlaceholder('Add a note to the record').fill('E2E: patrol confirms the fence line is intact.');
+  await page.getByRole('button', { name: 'Record' }).click();
+  await expect(page.getByText('E2E: patrol confirms the fence line is intact.')).toBeVisible();
+  const log = await page.evaluate(async () => (await fetch('/api/ops/log?limit=20')).json());
+  expect(log.some((l: { text: string; ref: string | null }) => l.text.includes('fence line is intact') && l.ref?.startsWith('inc-'))).toBe(true);
+  expect(errors).toEqual([]);
+});
+
+test('operational picture: a still right-click opens map actions for the point under the pointer', async ({ page }) => {
+  const errors = await signIn(page, 'operator');
+  await page.waitForTimeout(3000);
+  const canvas = page.locator('.world-canvas canvas').first();
+  const box = (await canvas.boundingBox())!;
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.6, { button: 'right' });
+  const menu = page.getByRole('menu', { name: 'Map actions' });
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole('menuitem', { name: /Copy grid/ })).toBeVisible();
+  await expect(menu.getByRole('menuitem', { name: 'Dispatch a team here' })).toBeVisible();
+  await page.keyboard.press('Escape');
   expect(errors).toEqual([]);
 });
