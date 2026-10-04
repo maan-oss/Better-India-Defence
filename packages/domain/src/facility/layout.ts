@@ -1,5 +1,7 @@
 import type {
+  BmsDef,
   BuildingDef,
+  GpsGatewayDef,
   CameraDef,
   DroneDef,
   FacilityDef,
@@ -60,7 +62,7 @@ const buildings: BuildingDef[] = [
     depth: 70,
     height: 22,
     yawDeg: 0,
-    markings: [{ id: 'mk-C-north', face: 'north', text: 'KX-4471', widthM: 12, heightM: 3, offsetM: 18, elevationM: 15 }],
+    markings: [{ id: 'mk-C-north', face: 'north', text: 'KX-4471', widthM: 4.3, heightM: 0.9, offsetM: 12, elevationM: 9 }],
     rooms: [{ id: 'bld-C-bay', name: 'Main bay', floor: 1 }],
   },
   { id: 'bld-D', label: 'D', name: 'Hangar 2', kind: 'hangar', center: { x: 0, y: -420 }, width: 90, depth: 70, height: 22, yawDeg: 0, rooms: [{ id: 'bld-D-bay', name: 'Main bay', floor: 1 }] },
@@ -223,7 +225,7 @@ const cameras: CameraDef[] = [
   camera('C06', 'Apron & runway', 300, -480, 12, 200, -6, 70, 900, 'airside'),
   camera('C07', 'Hangar row', -200, -335, 10, 100, -8, 60, 380, 'airside'),
   camera('C08', 'East Fence — looking south', 2420, 1300, 10, 180, -5, 40, 650, 'east'),
-  camera('C09', 'Warehouse G — north-east', -460, 320, 9, 235, -12, 60, 260, 'west'),
+  camera('C09', 'Warehouse G — north-east', -460, 320, 9, 215, -12, 60, 260, 'west'),
   camera('C10', 'Warehouse G — south-west', -680, 160, 9, 60, -10, 60, 260, 'west'),
   camera('C11', 'Fuel depot', -1000, -180, 8, 235, -14, 60, 220, 'west'),
   camera('C12', 'Hangar 1 — north wall', -110, -330, 6, 180, -6, 50, 160, 'airside'),
@@ -298,13 +300,13 @@ const drones: DroneDef[] = [
 
 const satellite: SatelliteDef = {
   id: 'EO1',
-  name: 'Synthetic EO satellite EO1',
+  name: 'Synthetic EO constellation EO1',
   kind: 'satellite',
   segment: 'space',
-  revisitS: 1800,
+  revisitS: 900,
   phaseS: 420,
   groundSampleDistanceM: 4,
-  deliveryLatencyS: 720,
+  deliveryLatencyS: 300,
 };
 
 const fenceSensors: FenceSensorDef[] = ['N', 'E', 'S', 'W'].map((side) => ({
@@ -315,7 +317,23 @@ const fenceSensors: FenceSensorDef[] = ['N', 'E', 'S', 'W'].map((side) => ({
   fenceSegmentIds: fence.filter((f) => f.id.startsWith(`F-${side}`)).map((f) => f.id),
 }));
 
-const sensors: SensorDef[] = [...cameras, ...radars, ...rf, ...lidars, ...drones, satellite, ...fenceSensors];
+const bms: BmsDef = {
+  id: 'BMS1',
+  name: 'Infrastructure gateway BMS1',
+  kind: 'bms',
+  segment: 'core',
+  assets: [
+    { id: 'gate-N', kind: 'gate', name: 'North Gate', position: { x: 0, y: P } },
+    { id: 'gate-E', kind: 'gate', name: 'East Gate', position: { x: P, y: 0 } },
+    { id: 'PWR-MAIN', kind: 'power', name: 'Main incomer (Substation I)', position: { x: 900, y: 450 } },
+    { id: 'PWR-G', kind: 'power', name: 'Warehouse G feeder', position: { x: -560, y: 250 } },
+    { id: 'NET-EAST', kind: 'network', name: 'East distribution switch', position: { x: 2000, y: 600 } },
+  ],
+};
+
+const gpsGateway: GpsGatewayDef = { id: 'GPS1', name: 'Cooperative position gateway GPS1', kind: 'gps', segment: 'core' };
+
+const sensors: SensorDef[] = [...cameras, ...radars, ...rf, ...lidars, ...drones, satellite, ...fenceSensors, bms, gpsGateway];
 
 export const FACILITY: FacilityDef = {
   id: 'site-kestrel',
@@ -338,6 +356,7 @@ export const getRfSensors = (f: FacilityDef = FACILITY): RfDef[] => f.sensors.fi
 export const getLidars = (f: FacilityDef = FACILITY): LidarDef[] => f.sensors.filter((s): s is LidarDef => s.kind === 'lidar');
 export const getDrones = (f: FacilityDef = FACILITY): DroneDef[] => f.sensors.filter((s): s is DroneDef => s.kind === 'drone');
 export const getSatellite = (f: FacilityDef = FACILITY): SatelliteDef | undefined => f.sensors.find((s): s is SatelliteDef => s.kind === 'satellite');
+export const getBms = (f: FacilityDef = FACILITY): BmsDef | undefined => f.sensors.find((s): s is BmsDef => s.kind === 'bms');
 export const getFenceSensors = (f: FacilityDef = FACILITY): FenceSensorDef[] => f.sensors.filter((s): s is FenceSensorDef => s.kind === 'fence');
 export const findSensor = (id: string, f: FacilityDef = FACILITY): SensorDef | undefined => f.sensors.find((s) => s.id === id);
 export const findBuilding = (id: string, f: FacilityDef = FACILITY): BuildingDef | undefined =>

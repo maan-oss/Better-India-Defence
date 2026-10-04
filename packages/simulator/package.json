@@ -1,0 +1,27 @@
+{
+  "name": "@strata/simulator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "bin": {
+    "strata-sim": "./src/cli.ts"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.ts live",
+    "seed": "tsx src/cli.ts seed",
+    "build": "esbuild src/cli.ts --bundle --platform=node --format=esm --target=node22 --outfile=dist/cli.js --banner:js=\"import{createRequire}from'module';const require=createRequire(import.meta.url);\"",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@strata/domain": "0.1.0",
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/pngjs": "^6.0.5"
+  }
+}

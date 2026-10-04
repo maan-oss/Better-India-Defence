@@ -93,7 +93,7 @@ export interface GateDef {
 
 export interface StaticObjectDef {
   id: string;
-  kind: 'container' | 'barrier' | 'light_mast' | 'parked_vehicle';
+  kind: 'container' | 'barrier' | 'light_mast' | 'parked_vehicle' | 'debris';
   center: Vec2;
   width: number;
   depth: number;
@@ -101,7 +101,7 @@ export interface StaticObjectDef {
   yawDeg: number;
 }
 
-export type SensorKind = 'camera' | 'radar' | 'rf' | 'lidar' | 'drone' | 'satellite' | 'gps' | 'fence';
+export type SensorKind = 'camera' | 'radar' | 'rf' | 'lidar' | 'drone' | 'satellite' | 'gps' | 'fence' | 'bms';
 
 interface SensorBase {
   id: string;
@@ -178,7 +178,18 @@ export interface FenceSensorDef extends SensorBase {
   fenceSegmentIds: string[];
 }
 
-export type SensorDef = CameraDef | RadarDef | RfDef | LidarDef | DroneDef | SatelliteDef | FenceSensorDef;
+/** Building-management / infrastructure gateway (gates, power, network status). */
+export interface BmsDef extends SensorBase {
+  kind: 'bms';
+  assets: { id: string; kind: 'gate' | 'power' | 'network' | 'lighting'; name: string; position: Vec2 }[];
+}
+
+/** Aggregated cooperative-position gateway (GPS tags on personnel, AVL on vehicles). */
+export interface GpsGatewayDef extends SensorBase {
+  kind: 'gps';
+}
+
+export type SensorDef = CameraDef | RadarDef | RfDef | LidarDef | DroneDef | SatelliteDef | FenceSensorDef | BmsDef | GpsGatewayDef;
 
 export interface FacilityDef {
   id: string;

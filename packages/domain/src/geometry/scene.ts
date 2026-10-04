@@ -15,6 +15,8 @@ export interface BuildingPartState {
   fx0: number;
   fx1: number;
   height: number;
+  /** Collapsed / damaged part: rendered as rubble by imaging sensor models. */
+  damaged?: boolean;
 }
 
 export function buildingBoxes(def: BuildingDef, parts?: BuildingPartState[]): SolidBox[] {
@@ -35,7 +37,7 @@ export function buildingBoxes(def: BuildingDef, parts?: BuildingPartState[]): So
       depth: def.depth,
       height: p.height,
       yawDeg: def.yawDeg,
-      material,
+      material: p.damaged ? 'debris' : material,
     };
   });
 }
@@ -50,7 +52,7 @@ export function staticObjectBox(o: StaticObjectDef): SolidBox {
     depth: o.depth,
     height: o.height,
     yawDeg: o.yawDeg,
-    material: o.kind === 'container' ? 'container' : o.kind === 'parked_vehicle' ? 'vehicle' : 'metal',
+    material: o.kind === 'container' ? 'container' : o.kind === 'parked_vehicle' ? 'vehicle' : o.kind === 'debris' ? 'debris' : 'metal',
   };
 }
 

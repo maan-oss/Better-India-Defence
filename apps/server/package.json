@@ -1,0 +1,35 @@
+{
+  "name": "@strata/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/main.ts",
+    "start": "node dist/main.js",
+    "build": "node build.mjs",
+    "migrate": "tsx src/db/migrate-cli.ts",
+    "seed": "tsx src/seed.ts",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "@electric-sql/pglite": "^0.5.8",
+    "@fastify/rate-limit": "^11.2.0",
+    "@fastify/static": "^10.1.5",
+    "@fastify/websocket": "^11.3.3",
+    "@strata/domain": "0.1.0",
+    "@strata/simulator": "0.1.0",
+    "fastify": "^5.12.5",
+    "jpeg-js": "^0.4.4",
+    "pg": "^8.23.1",
+    "pino": "^10.4.0",
+    "pino-pretty": "^13.1.3",
+    "pngjs": "^7.0.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1",
+    "@types/pngjs": "^6.0.5",
+    "@types/ws": "^8.5.12"
+  }
+}
