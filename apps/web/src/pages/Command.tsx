@@ -16,7 +16,7 @@ import { useVisionLive } from '../api/vision';
 import { useTime } from '../state/time';
 import { tracks as trackStore, type RenderTrack } from '../state/tracks';
 import { Tabs } from '../components/ui';
-import { ActionButton, ActivityHeatmap, Alert, ConfirmMorph, CopyButton, BarChart, Button, ChipGroup, HoldToConfirm, HoverCard, HoverCardProfile, Select as ArcSelect, SignaturePad, SortableDataTable, Textarea, TextMorph, Timeline as ArcTimeline, signatureToPng, useToastStack, type InkStroke } from '../components/kit';
+import { MentionInput, type MentionValue, SlopeChart, ActionButton, ActivityHeatmap, Alert, ConfirmMorph, CopyButton, BarChart, Button, ChipGroup, HoldToConfirm, HoverCard, HoverCardProfile, Select as ArcSelect, SignaturePad, SortableDataTable, Textarea, TextMorph, Timeline as ArcTimeline, signatureToPng, useToastStack, type InkStroke } from '../components/kit';
 import { OnWatch, useOnWatch } from '../components/ops/OnWatch';
 import { MemberSelector } from '../components/vendor/spaceui/components/spaceui/member-selector';
 import type { AlertRecord } from '@strata/domain';
@@ -232,6 +232,23 @@ function WatchActivity() {
         return { key: k, label: k.charAt(0) + k.slice(1).toLowerCase().replace(/_/g, ' '), axisLabel: tail.charAt(0).toUpperCase() + tail.slice(1, 10), value: v };
       });
   }, [hist.data, day]);
+  // Last 24 h against the 24 h before, per rule: which kinds of alert are rising.
+  const slope = useMemo(() => {
+    const now = Date.now();
+    const m = new Map<string, { start: number; end: number }>();
+    for (const a of hist.data ?? []) {
+      const age = now - a.t;
+      if (age > 48 * 3600_000) continue;
+      const e = m.get(a.rule) ?? { start: 0, end: 0 };
+      if (age <= 24 * 3600_000) e.end++;
+      else e.start++;
+      m.set(a.rule, e);
+    }
+    return [...m.entries()]
+      .sort((x, y) => y[1].start + y[1].end - (x[1].start + x[1].end))
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k.charAt(0) + k.slice(1).toLowerCase().replace(/_/g, ' '), start: v.start, end: v.end }));
+  }, [hist.data]);
   if (!hist.data) return <section className="panel cmd-activity"><Loading what="alert history" /></section>;
   return (
     <section className="panel cmd-activity">
@@ -247,6 +264,11 @@ function WatchActivity() {
         <div className="cmd-activity-body">
           <ActivityHeatmap days={days} label="Alerts per day" period="Last 26 weeks" unit={{ one: 'alert', other: 'alerts' }} thresholds={[1, 4, 10]} weekStartsOn={1} selectedDate={day} onSelectDate={(d) => setDay(d === day ? null : d)} />
           <BarChart data={rules} label="Alerts by rule" period={day ? `On ${day}` : 'Last 26 weeks'} unit="alerts" valueLabel="Alerts" categoryLabel="Rule" averageLabel="Average per rule" height={150} />
+          {slope.length > 0 && (
+            <div className="cmd-slope">
+              <SlopeChart data={slope} label="Alerts by rule, last 24 h against the 24 h before" startLabel="Previous 24 h" endLabel="Last 24 h" formatValue={(v) => String(v)} formatChange={(c) => (c > 0 ? `+${c}` : String(c))} height={220} />
+            </div>
+          )}
         </div>
       )}
     </section>
@@ -415,17 +437,23 @@ function DutyLog() {
   const version = useOps((s) => s.version);
   const [kinds, setKinds] = useState<string[]>([]);
   const log = useAsync((s) => get<{ id: number; t: number; kind: string; text: string; author: string; ref: string | null }[]>(`/api/ops/log?limit=500${kinds.length === 1 ? `&kind=${kinds[0]}` : ''}`, s), [version, kinds.join()]);
-  const [text, setText] = useState('');
+  const [entry, setEntry] = useState<MentionValue>({ text: '', mentions: [] });
+  const text = entry.text;
   const [k, setK] = useState('manual');
   const toast = useToastStack().toast;
-  const add = () =>
-    post('/api/ops/log', { text, kind: k })
+  const teams = useAsync((s) => get<Team[]>('/api/ops/teams', s), [version]);
+  const incidents = useData((s) => s.incidents);
+  const add = () => {
+    // An entry that mentions an incident (#) is filed under it, so it also shows in that incident's notes.
+    const inc = entry.mentions.find((m) => m.kind === 'channel');
+    return post('/api/ops/log', { text: text.trim(), kind: k, ref: inc?.id ?? null })
       .then(() => {
-        setText('');
+        setEntry({ text: '', mentions: [] });
         log.reload();
-        toast({ type: 'success', title: 'Entry recorded', description: `${k} · ${dtg(Date.now())}` });
+        toast({ type: 'success', title: 'Entry recorded', description: `${k} · ${dtg(Date.now())}${inc ? ` · filed under ${inc.label}` : ''}` });
       })
       .catch((e: unknown) => toast({ type: 'error', title: 'Not recorded', description: e instanceof Error ? e.message : String(e) }));
+  };
   const rows = (log.data ?? []).filter((l) => !kinds.length || kinds.includes(l.kind));
   return (
     <div className="scroll" style={{ padding: 20 }}>
@@ -436,16 +464,24 @@ function DutyLog() {
               <div style={{ width: 170 }}>
                 <ArcSelect label="Type" value={k} onValueChange={setK} options={LOG_KINDS.map((x) => ({ value: x, label: x.charAt(0).toUpperCase() + x.slice(1) }))} />
               </div>
-              <div className="grow">
-                <Textarea
-                  label="New entry"
-                  description="Timestamped and append-only. Ctrl Enter to record."
-                  rows={2}
-                  value={text}
-                  placeholder="What happened, who, where (grid reference), what was done"
-                  onChange={(e) => setText(e.target.value)}
-                  onKeyDown={(e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter' && text.trim().length > 1 && void add()}
+              <div className="grow duty-entry">
+                <label htmlFor="duty-entry">New entry</label>
+                <MentionInput
+                  id="duty-entry"
+                  aria-describedby="duty-entry-help"
+                  value={entry}
+                  onChange={setEntry}
+                  minRows={2}
+                  maxRows={6}
+                  placeholder="What happened, who, where (grid reference), what was done. @ for a team, # for an incident"
+                  people={(teams.data ?? []).map((t) => ({ id: t.id, name: t.callsign, role: `${t.kind.toLowerCase()} · ${t.status.toLowerCase()}` }))}
+                  channels={incidents.map((i) => ({ id: i.id, name: i.code, description: i.title }))}
+                  submitOnEnter={false}
+                  onSubmit={() => text.trim().length > 1 && void add()}
                 />
+                <span id="duty-entry-help" className="dim" style={{ fontSize: 12 }}>
+                  Timestamped and append-only. Mentioning an incident files the entry in its notes.
+                </span>
               </div>
             </div>
             <div className="row">
