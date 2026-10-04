@@ -14,6 +14,7 @@ import { FACILITY, setTerrainMode, type SurfacePatch } from '@strata/domain';
 import { Login } from './pages/Login';
 import { Shell } from './components/Shell';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { Icon } from './components/Icons';
 
 const Operations = lazy(() => import('./pages/Operations').then((m) => ({ default: m.Operations })));
 const Incidents = lazy(() => import('./pages/Incidents').then((m) => ({ default: m.Incidents })));
@@ -81,12 +82,25 @@ function useBootstrap(enabled: boolean): { ready: boolean; error: string | null 
 
 function Authenticated() {
   const { ready, error } = useBootstrap(true);
-  if (error) return <div className="err">Failed to load the facility model: {error}</div>;
-  if (!ready) return <div className="boot">Loading world memory…</div>;
+  if (error)
+    return (
+      <div className="boot">
+        <div className="boot-card">
+          <Icon.Logo size={36} />
+          <div className="err" style={{ margin: 0 }}>
+            Failed to load the facility model: {error}
+          </div>
+          <button className="btn" onClick={() => location.reload()}>
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  if (!ready) return <Boot label="Loading site model and recorded state" />;
   return (
     <Shell>
       <ErrorBoundary area="Application area">
-        <Suspense fallback={<div className="boot">Loading…</div>}>
+        <Suspense fallback={<div className="route-loading"><span className="spinner" /></div>}>
           <Routes>
             <Route path="/" element={<Navigate to="/operations" replace />} />
             <Route path="/operations" element={<Operations />} />
@@ -115,6 +129,23 @@ function Authenticated() {
   );
 }
 
+function Boot({ label }: { label: string }) {
+  return (
+    <div className="boot">
+      <div className="boot-card">
+        <span className="boot-logo">
+          <Icon.Logo size={44} />
+        </span>
+        <b>STRATA</b>
+        <div className="boot-bar">
+          <i />
+        </div>
+        <span>{label}</span>
+      </div>
+    </div>
+  );
+}
+
 export function App() {
   const status = useSession((s) => s.status);
   const refresh = useSession((s) => s.refresh);
@@ -122,7 +153,7 @@ export function App() {
     void refresh();
     setUnauthorizedHandler(() => void refresh());
   }, [refresh]);
-  if (status === 'unknown') return <div className="boot">Strata</div>;
+  if (status === 'unknown') return <Boot label="Connecting" />;
   return (
     <BrowserRouter>
       <ErrorBoundary area="Strata">{status === 'authenticated' ? <Authenticated /> : <Login />}</ErrorBoundary>

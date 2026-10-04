@@ -1,46 +1,119 @@
 :root {
-  /* Surfaces: very dark neutral, slightly warm. */
-  --bg-0: #0a0b0c;
-  --bg-1: #101113;
-  --bg-2: #15171a;
-  --bg-3: #1c1f23;
-  --bg-hover: #20242a;
-  --line: rgba(236, 230, 220, 0.07);
-  --line-2: rgba(236, 230, 220, 0.13);
-  --line-3: rgba(236, 230, 220, 0.22);
+  /* Surfaces: deep, slightly cool neutrals with clear elevation steps. */
+  --bg-0: #07090b;
+  --bg-1: #0c0f12;
+  --bg-2: #11151a;
+  --bg-3: #171c22;
+  --bg-4: #1e242c;
+  --bg-hover: #1b2128;
+  --line: rgba(196, 212, 228, 0.07);
+  --line-2: rgba(196, 212, 228, 0.12);
+  --line-3: rgba(196, 212, 228, 0.22);
 
-  /* Text: restrained warm white. */
-  --text-0: #ece6dc;
-  --text-1: #b9b3a8;
-  --text-2: #807b72;
-  --text-3: #5c5850;
+  /* Text */
+  --text-0: #e9edf0;
+  --text-1: #aeb7bf;
+  --text-2: #77818b;
+  --text-3: #525a63;
 
-  /* Operational states only. */
-  --amber: #d9a441;
-  --amber-dim: rgba(217, 164, 65, 0.16);
-  --red: #d4553f;
-  --red-dim: rgba(212, 85, 63, 0.16);
-  --ok: #8ea88a;
-  --info: #8fa3ad;
+  /* Accent: brass — interaction, selection, focus. */
+  --accent: #d4b062;
+  --accent-2: #e8c97f;
+  --accent-dim: rgba(212, 176, 98, 0.14);
+  --accent-line: rgba(212, 176, 98, 0.45);
+
+  /* Operational states */
+  --amber: #e2a73c;
+  --amber-dim: rgba(226, 167, 60, 0.15);
+  --red: #e5533d;
+  --red-dim: rgba(229, 83, 61, 0.15);
+  --ok: #67b97f;
+  --ok-dim: rgba(103, 185, 127, 0.14);
+  --info: #5fa8d3;
+  --info-dim: rgba(95, 168, 211, 0.14);
+
+  /* Affiliation (APP-6 / MIL-STD-2525 convention) */
+  --friend: #5aa9e6;
+  --hostile: #ff4d3d;
+  --suspect: #f08a24;
+  --neutral: #5cc26f;
+  --unknown-aff: #f2d14b;
 
   /* Epistemic states (paired with shape/pattern everywhere — never colour alone). */
-  --captured: #ece6dc;
-  --reconstructed: #7fb3aa;
-  --inferred: #a99bc9;
-  --prior: #807b72;
-  --unknown: #4d4a45;
+  --captured: #e9edf0;
+  --reconstructed: #6fc0b2;
+  --inferred: #ad9ee0;
+  --prior: #77818b;
+  --unknown: #4a5058;
 
   --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --radius: 3px;
+  --radius: 4px;
+  --radius-lg: 8px;
   --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --t-fast: 140ms;
   --t-med: 260ms;
+  --t-slow: 480ms;
 
-  --rail-w: 52px;
+  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 6px 18px rgba(0, 0, 0, 0.28);
+  --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 48px rgba(0, 0, 0, 0.5);
+  --glow-accent: 0 0 0 3px var(--accent-dim);
+
+  --rail-w: 56px;
+  --rail-w-open: 212px;
   --left-w: 268px;
-  --right-w: 372px;
-  --top-h: 44px;
+  --right-w: 380px;
+  --top-h: 48px;
   --timeline-h: 128px;
+}
+
+/*
+ * Night (red-light) theme for darkened operations rooms: preserves dark adaptation. Monochrome red; state is
+ * still carried by shape, text and position, as everywhere else.
+ */
+:root[data-theme='night'] {
+  --bg-0: #000000;
+  --bg-1: #070101;
+  --bg-2: #0d0202;
+  --bg-3: #140303;
+  --bg-4: #1c0505;
+  --bg-hover: #190404;
+  --line: rgba(255, 60, 40, 0.1);
+  --line-2: rgba(255, 60, 40, 0.18);
+  --line-3: rgba(255, 60, 40, 0.3);
+  --text-0: #ff5a46;
+  --text-1: #d94533;
+  --text-2: #a33224;
+  --text-3: #6e2116;
+  --accent: #ff6a52;
+  --accent-2: #ff8a76;
+  --accent-dim: rgba(255, 90, 70, 0.14);
+  --accent-line: rgba(255, 90, 70, 0.45);
+  --amber: #ff7a3c;
+  --amber-dim: rgba(255, 122, 60, 0.15);
+  --red: #ff3020;
+  --red-dim: rgba(255, 48, 32, 0.2);
+  --ok: #c8402e;
+  --ok-dim: rgba(200, 64, 46, 0.14);
+  --info: #d94533;
+  --info-dim: rgba(217, 69, 51, 0.14);
+  --friend: #e0503c;
+  --hostile: #ff2a1a;
+  --suspect: #ff6a30;
+  --neutral: #b83a2a;
+  --unknown-aff: #ff8a5a;
+  --captured: #ff5a46;
+  --reconstructed: #d94533;
+  --inferred: #b8402f;
+  --prior: #a33224;
+  --unknown: #5a1a12;
+  --shadow-1: none;
+  --shadow-2: 0 18px 48px rgba(0, 0, 0, 0.8);
+}
+:root[data-theme='night'] canvas,
+:root[data-theme='night'] img,
+:root[data-theme='night'] video {
+  filter: grayscale(1) sepia(1) saturate(5) hue-rotate(-38deg) brightness(0.62);
 }

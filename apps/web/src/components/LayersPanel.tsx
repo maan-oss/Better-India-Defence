@@ -4,7 +4,7 @@ import { useData } from '../state/data';
 import { useTime } from '../state/time';
 
 const GROUPS: { title: string; keys: LayerKey[] }[] = [
-  { title: 'World', keys: ['terrain', 'buildings', 'roads', 'zones', 'objects'] },
+  { title: 'World', keys: ['terrain', 'grid', 'buildings', 'roads', 'zones', 'objects'] },
   { title: 'Sensors', keys: ['sensors', 'frustums', 'coverage', 'cameraFeeds'] },
   { title: 'Tracks', keys: ['radarTracks', 'drones', 'personnel', 'vehicles', 'trails', 'rf'] },
   { title: 'Analysis', keys: ['uncertainty', 'reconstruction', 'changes', 'alerts', 'incidents'] },

@@ -22,6 +22,7 @@ export const LAYERS = {
   sensors: 'Sensor installations',
   objects: 'Static objects',
   trails: 'Track trails',
+  grid: 'MGRS grid (100 m / 1 km)',
 } as const;
 export type LayerKey = keyof typeof LAYERS;
 
@@ -116,6 +117,7 @@ export const useWorld = create<WorldState>((set, get) => ({
     sensors: true,
     objects: true,
     trails: true,
+    grid: true,
   },
   mode: 'NOW',
   selection: null,

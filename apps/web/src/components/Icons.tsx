@@ -129,12 +129,83 @@ export const Icon = {
       <path d="M9 9h6M9 12h4" />
     </svg>
   ),
-  Logo: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ece6dc" strokeWidth="1.5">
-      <path d="M3 18h18" />
-      <path d="M5 13.5h14" opacity="0.75" />
-      <path d="M7 9h10" opacity="0.5" />
-      <path d="M9 4.5h6" opacity="0.3" />
+  Logo: ({ size = 22 }: { size?: number } = {}) => (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+      <path d="M16 2.5l11 4.2v8.1c0 7-4.6 12.2-11 14.7C9.6 27 5 21.8 5 14.8V6.7z" />
+      <path d="M10 19.5h12" />
+      <path d="M11.5 15.5h9" opacity="0.75" />
+      <path d="M13 11.5h6" opacity="0.5" />
+    </svg>
+  ),
+  Chevron: () => (
+    <svg {...p} width={16} height={16}>
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  ),
+  Bell: () => (
+    <svg {...p} width={16} height={16}>
+      <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" />
+      <path d="M10 20.5a2 2 0 0 0 4 0" />
+    </svg>
+  ),
+  BellOff: () => (
+    <svg {...p} width={16} height={16}>
+      <path d="M6 16V11a6 6 0 0 1 9.5-4.9M18 11v5l1.5 2H8" />
+      <path d="M10 20.5a2 2 0 0 0 4 0M4 4l16 16" />
+    </svg>
+  ),
+  Moon: () => (
+    <svg {...p} width={16} height={16}>
+      <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+    </svg>
+  ),
+  Sun: () => (
+    <svg {...p} width={16} height={16}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
+    </svg>
+  ),
+  SignOut: () => (
+    <svg {...p} width={16} height={16}>
+      <path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h11" />
+    </svg>
+  ),
+  Field: () => (
+    <svg {...p}>
+      <rect x="7" y="2.5" width="10" height="19" rx="2" />
+      <path d="M10.5 18.5h3" />
+      <path d="M12 7.5l2.5 4h-5z" />
+    </svg>
+  ),
+  Grid: () => (
+    <svg {...p} width={16} height={16}>
+      <rect x="4" y="4" width="7" height="7" />
+      <rect x="13" y="4" width="7" height="7" />
+      <rect x="4" y="13" width="7" height="7" />
+      <rect x="13" y="13" width="7" height="7" />
+    </svg>
+  ),
+  Expand: () => (
+    <svg {...p} width={16} height={16}>
+      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+    </svg>
+  ),
+  Check: () => (
+    <svg {...p} width={16} height={16}>
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </svg>
+  ),
+  Alert: () => (
+    <svg {...p} width={16} height={16}>
+      <path d="M12 3.5l9.5 16.5h-19z" />
+      <path d="M12 10v4.5M12 17.2v.3" />
+    </svg>
+  ),
+  Target: () => (
+    <svg {...p}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 2v5M12 17v5M2 12h5M17 12h5" />
+      <circle cx="12" cy="12" r="1.2" />
     </svg>
   ),
 };

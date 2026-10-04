@@ -7,6 +7,8 @@ export interface LabelSpec {
   sub?: string;
   tone?: 'default' | 'amber' | 'red' | 'inferred' | 'muted' | 'building';
   priority: number;
+  /** Horizontal offset in px from the anchor (e.g. to clear a tactical symbol). */
+  dx?: number;
 }
 
 /** DOM labels projected from world space. Only a bounded, prioritised set is shown to avoid clutter. */
@@ -23,7 +25,7 @@ export class LabelLayer {
     for (const s of sorted) {
       this.v.copy(s.position).project(camera);
       if (this.v.z > 1 || this.v.z < -1 || Math.abs(this.v.x) > 1.05 || Math.abs(this.v.y) > 1.05) continue;
-      const x = (this.v.x * 0.5 + 0.5) * w;
+      const x = (this.v.x * 0.5 + 0.5) * w + (s.dx ?? 0);
       const y = (-this.v.y * 0.5 + 0.5) * h;
       // Declutter with estimated label boxes: drop the detail line first, then the label. Selected/critical
       // labels (priority ≥ 90) are always shown.

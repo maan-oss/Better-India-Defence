@@ -1,0 +1,27 @@
+.wall-wrap { position: relative; display: flex; flex-direction: column; min-height: 0; padding: 10px; gap: 8px; background: #050607; }
+.wall { flex: 1; min-height: 0; display: grid; gap: 6px; }
+.wtile { position: relative; background: #000; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; cursor: pointer; min-height: 0; min-width: 0; transition: border-color var(--t-fast), box-shadow var(--t-fast); animation: reveal 360ms var(--ease) both; }
+.wtile:hover { border-color: var(--line-3); }
+.wtile.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 24px rgba(212, 176, 98, 0.18); }
+.wtile.alerting { border-color: var(--red); animation: alertFlash 1.4s ease-in-out infinite; }
+.wtile.alerting.p-high, .wtile.alerting.p-medium { border-color: var(--amber); animation: none; box-shadow: 0 0 0 1px var(--amber); }
+@keyframes alertFlash { 0%, 100% { box-shadow: 0 0 0 1px var(--red), 0 0 22px rgba(229, 83, 61, 0.45); } 50% { box-shadow: 0 0 0 1px rgba(229, 83, 61, 0.3), 0 0 0 rgba(229, 83, 61, 0); } }
+.wtile-v { position: absolute; inset: 0; display: grid; }
+.wtile-v img, .wtile-v .feed { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto; border: 0; }
+.wtile-v .feed img { object-fit: cover; }
+.feed.compact .feed-empty { font-size: 11px; }
+.wtile-top { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: linear-gradient(rgba(0, 0, 0, 0.78), transparent); font-size: 11.5px; color: #e9edf0; pointer-events: none; }
+.wtile-top b { font-size: 11px; color: #fff; }
+.wt-state { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em; padding: 1px 6px; border-radius: 3px; background: rgba(0, 0, 0, 0.55); color: var(--text-1); border: 1px solid rgba(255, 255, 255, 0.12); flex: none; }
+.wt-state.live { color: var(--ok); }
+.wt-state.error { color: var(--red); }
+.wtile-bot { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 10px; align-items: center; padding: 5px 8px; font-size: 10.5px; color: #cfd6dc; background: linear-gradient(transparent, rgba(0, 0, 0, 0.75)); pointer-events: none; }
+.wt-zone { color: var(--amber); border: 1px solid rgba(226, 167, 60, 0.5); padding: 0 5px; border-radius: 3px; font-size: 9.5px; }
+.wtile-alert { position: absolute; left: 8px; right: 8px; bottom: 26px; display: flex; align-items: center; gap: 6px; padding: 4px 8px; background: rgba(229, 83, 61, 0.88); color: #fff; font-size: 11.5px; font-weight: 500; border-radius: 3px; pointer-events: none; animation: popIn 300ms var(--ease-out) both; }
+.wtile.alerting.p-high .wtile-alert, .wtile.alerting.p-medium .wtile-alert { background: rgba(226, 167, 60, 0.92); color: #17120a; }
+.wtile .camtile-off { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; color: var(--text-2); font-size: 12px; padding: 12px; text-align: center; background: repeating-linear-gradient(45deg, #08090b 0 8px, #0c0e11 8px 16px); }
+.wtile .camtile-off.error { color: #ffb3a6; }
+.wall-pager { display: flex; justify-content: center; align-items: center; gap: 6px; }
+.wall-pager .dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--line-3); background: transparent; padding: 0; cursor: pointer; transition: background var(--t-fast), transform var(--t-fast); }
+.wall-pager .dot.on { background: var(--accent); border-color: var(--accent); transform: scale(1.25); }
+.focus-panel { border-left: 1px solid var(--line); background: var(--bg-1); min-height: 0; }

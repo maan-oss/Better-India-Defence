@@ -31,6 +31,9 @@ const frag = /* glsl */ `
   uniform sampler2D uOrtho;
   uniform float uOrthoOn;
   uniform vec4 uOrthoRect;
+  uniform float uGridOn;
+  uniform vec4 uGridM;
+  uniform vec2 uGridO;
   varying vec3 vWorld;
   varying vec3 vNormal;
 
@@ -45,7 +48,7 @@ const frag = /* glsl */ `
     float shade = 0.62 + 0.38 * max(dot(n, normalize(uSun)), 0.0);
     // Very slight albedo variation keeps large flat areas from looking synthetic.
     float grain = fract(sin(dot(floor(vWorld.xy / 7.0), vec2(12.9898, 78.233))) * 43758.5453);
-    vec3 base = mix(vec3(0.074, 0.078, 0.082), vec3(0.086, 0.088, 0.09), grain * 0.6);
+    vec3 base = mix(vec3(0.070, 0.078, 0.086), vec3(0.082, 0.089, 0.097), grain * 0.6);
     vec3 col = base * shade * 1.35;
     float c1 = contour(vWorld.z, 2.0, 1.0) * 0.07;
     float c2 = contour(vWorld.z, 10.0, 1.2) * 0.12;
@@ -59,6 +62,19 @@ const frag = /* glsl */ `
         float l = dot(ortho, vec3(0.299, 0.587, 0.114));
         col = mix(vec3(l), ortho, 0.65) * 0.62 * shade + col * 0.15;
       }
+    }
+
+    if (uGridOn > 0.5) {
+      // Military grid: site ENU mapped linearly onto UTM easting/northing (exact at the anchor, convergence
+      // and scale included), lines every 100 m and index lines every 1 km.
+      vec2 g = vec2(uGridM.x * vWorld.x + uGridM.y * vWorld.y, uGridM.z * vWorld.x + uGridM.w * vWorld.y) + uGridO;
+      vec2 m1 = abs(fract(g / 100.0 - 0.5) - 0.5) / fwidth(g / 100.0);
+      vec2 m2 = abs(fract(g / 1000.0 - 0.5) - 0.5) / fwidth(g / 1000.0);
+      float minor = 1.0 - clamp(min(m1.x, m1.y) / 1.0, 0.0, 1.0);
+      float major = 1.0 - clamp(min(m2.x, m2.y) / 1.4, 0.0, 1.0);
+      float fadeMinor = clamp(1.0 - length(vWorld - cameraPosition) / 3500.0, 0.0, 1.0);
+      col = mix(col, vec3(0.55, 0.68, 0.8), minor * 0.07 * fadeMinor);
+      col = mix(col, vec3(0.83, 0.69, 0.38), major * 0.26);
     }
 
     if (uCoverageOn > 0.5) {
@@ -125,6 +141,9 @@ export function createTerrain(halfExtent: number, segments = 256): { mesh: THREE
       uOrtho: { value: null },
       uOrthoOn: { value: 0 },
       uOrthoRect: { value: new THREE.Vector4(0, 0, 1, 1) },
+      uGridOn: { value: 1 },
+      uGridM: { value: new THREE.Vector4(1, 0, 0, 1) },
+      uGridO: { value: new THREE.Vector2(0, 0) },
     },
   });
   const mesh = new THREE.Mesh(geom, material);

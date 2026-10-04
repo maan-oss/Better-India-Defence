@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FACILITY } from '@strata/domain';
 import { api, get, post } from '../api/client';
@@ -7,7 +7,15 @@ import { useSession } from '../state/session';
 import { ago, bytes } from '../lib/format';
 import { ErrorNote, Loading, Modal, useAsync } from '../components/common';
 import { FaceCard } from '../components/identity/FaceCard';
+import { CameraFeed } from '../components/CameraFeed';
+import { Icon } from '../components/Icons';
+import { useData } from '../state/data';
+import { useTime } from '../state/time';
+import { useWorld } from '../state/world';
+import { grid } from '../state/ops';
+import type { AlertRecord } from '@strata/domain';
 import '../styles/forensics.css';
+import '../styles/cameras.css';
 
 interface SourceStatus {
   state: 'stopped' | 'connecting' | 'live' | 'error';
@@ -40,50 +48,143 @@ interface Source {
   status: SourceStatus;
 }
 
+type Layout = 1 | 4 | 9 | 16;
+type Filter = 'all' | 'live' | 'site' | 'alerting';
+
+interface WallCam {
+  id: string;
+  name: string;
+  kind: 'live' | 'site';
+  source: Source | null;
+  zoneName: string | null;
+  restricted: boolean;
+}
+
 /**
- * LIVE CAMERAS — real video sources (RTSP/HTTP or recorded files played as live) analysed on site.
- * Detections feed the same fusion and alerting as every other sensor; faces go to recognition.
+ * CAMERA WALL — every camera on the site in one console: live streams analysed on site (RTSP/HTTP/recorded
+ * files) and the site's camera estate. Tiles with an active alert flash; a guard tour cycles pages.
  */
 export function Cameras() {
   const can = useSession((s) => s.can);
+  const alerts = useData((s) => s.alerts);
   const [n, setN] = useState(0);
   const data = useAsync((s) => get<{ sources: Source[]; siteCameras: { id: string; name: string }[]; ffmpeg: boolean }>('/api/cameras', s), [n]);
   const [edit, setEdit] = useState<Source | 'new' | null>(null);
   const [focus, setFocus] = useState<string | null>(null);
+  const [layout, setLayout] = useState<Layout>(() => (Number(localStorage.getItem('strata.wall.layout')) as Layout) || 9);
+  const [filter, setFilter] = useState<Filter>('all');
+  const [page, setPage] = useState(0);
+  const [tour, setTour] = useState(false);
+  const [now, setNow] = useState(() => useTime.getState().currentLiveEdge());
   useEffect(() => {
     const id = setInterval(() => setN((x) => x + 1), 4000);
-    return () => clearInterval(id);
+    const tk = setInterval(() => setNow(useTime.getState().currentLiveEdge()), 2000);
+    return () => (clearInterval(id), clearInterval(tk));
   }, []);
-  const sources = data.data?.sources ?? [];
+  const sources = useMemo(() => data.data?.sources ?? [], [data.data]);
+  const alerting = useMemo(() => {
+    const m = new Map<string, AlertRecord>();
+    for (const a of alerts) {
+      if (a.status !== 'open') continue;
+      const ids = new Set([...a.source.split(/,\s*/), ...a.evidence.map((e) => e.sensorId ?? '')]);
+      for (const id of ids) if (id && !m.has(id)) m.set(id, a);
+    }
+    return m;
+  }, [alerts]);
+  const cams = useMemo<WallCam[]>(() => {
+    const live = new Map(sources.map((s) => [s.id, s]));
+    const zoneOf = (id: string | null) => FACILITY.zones.find((z) => z.id === id) ?? null;
+    const out: WallCam[] = sources.map((s) => {
+      const z = zoneOf(s.zoneId);
+      return { id: s.id, name: s.name, kind: 'live', source: s, zoneName: z?.name ?? null, restricted: Boolean(z?.restricted) };
+    });
+    for (const c of FACILITY.sensors) {
+      if (c.kind !== 'camera' || live.has(c.id)) continue;
+      out.push({ id: c.id, name: c.name, kind: 'site', source: null, zoneName: null, restricted: false });
+    }
+    return out;
+  }, [sources]);
+  const alertingCount = cams.filter((c) => alerting.has(c.id)).length;
+  const shown = cams.filter((c) => filter === 'all' || (filter === 'live' ? c.kind === 'live' : filter === 'site' ? c.kind === 'site' : alerting.has(c.id)));
+  // Alerting cameras first, so nothing that matters sits on a later page.
+  shown.sort((a, b) => Number(alerting.has(b.id)) - Number(alerting.has(a.id)));
+  const pages = Math.max(1, Math.ceil(shown.length / layout));
+  const pg = Math.min(page, pages - 1);
+  useEffect(() => {
+    if (!tour) return;
+    const id = setInterval(() => setPage((p) => (p + 1) % pages), 12_000);
+    return () => clearInterval(id);
+  }, [tour, pages]);
+  const setL = (l: Layout) => {
+    setLayout(l);
+    setPage(0);
+    try {
+      localStorage.setItem('strata.wall.layout', String(l));
+    } catch {
+      /* ignore */
+    }
+  };
+  const tiles = shown.slice(pg * layout, pg * layout + layout);
+  const cols = Math.sqrt(layout);
+  const focused = cams.find((c) => c.id === focus) ?? null;
   return (
     <div className="page">
       <div className="page-h">
-        <h1>Live Cameras</h1>
-        <span className="sub">Real streams analysed on site: people, vehicles and faces. Frames are dropped, never queued, so what you see is current.</span>
+        <h1>Camera wall</h1>
+        <span className="sub">
+          {cams.length} cameras · {sources.filter((s) => s.status.state === 'live').length} live analysed streams ·{' '}
+          {alertingCount ? <b style={{ color: 'var(--red)' }}>{alertingCount} alerting</b> : 'none alerting'}
+        </span>
         <div className="spacer" />
-        {data.data && !data.data.ffmpeg && <span className="err-inline">ffmpeg not installed — live cameras unavailable</span>}
+        {data.data && !data.data.ffmpeg && <span className="err-inline">ffmpeg not installed — live streams unavailable</span>}
+        <div className="seg" aria-label="Filter">
+          {(['all', 'alerting', 'live', 'site'] as Filter[]).map((f) => (
+            <button key={f} className={filter === f ? 'on' : ''} onClick={() => (setFilter(f), setPage(0))}>
+              {f === 'live' ? 'LIVE STREAMS' : f === 'site' ? 'SITE CAMERAS' : f.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        <div className="seg" aria-label="Layout">
+          {([1, 4, 9, 16] as Layout[]).map((l) => (
+            <button key={l} className={layout === l ? 'on' : ''} onClick={() => setL(l)} title={`${Math.sqrt(l)}×${Math.sqrt(l)}`}>
+              {Math.sqrt(l)}×{Math.sqrt(l)}
+            </button>
+          ))}
+        </div>
+        <button className={`btn small ${tour ? 'on' : ''}`} onClick={() => setTour(!tour)} title="Cycle through pages every 12 s">
+          {tour ? <span className="live-dot" /> : null} Guard tour
+        </button>
         {can('cameras.manage') && (
-          <button className="btn primary" onClick={() => setEdit('new')}>
-            + Add camera
+          <button className="btn primary small" onClick={() => setEdit('new')}>
+            + Add stream
           </button>
         )}
       </div>
-      <div className="page-body" style={{ gridTemplateColumns: focus ? '1fr 420px' : '1fr' }}>
-        <div className="scroll" style={{ padding: 14 }}>
+      <div className="page-body" style={{ gridTemplateColumns: focused ? '1fr 400px' : '1fr' }}>
+        <div className="wall-wrap">
           {data.error && <ErrorNote error={data.error} />}
           {!data.data && <Loading />}
-          {data.data && !sources.length && (
-            <div className="empty">
-              No live sources yet. {can('cameras.manage') ? 'Add an RTSP/HTTP camera, or a recorded file from the import folder to rehearse analytics.' : 'An administrator can add cameras.'}
-            </div>
-          )}
-          <div className="camwall">
-            {sources.map((s) => (
-              <CameraTile key={s.id} s={s} focused={focus === s.id} onFocus={() => setFocus(focus === s.id ? null : s.id)} onEdit={() => setEdit(s)} onChanged={() => setN((x) => x + 1)} />
+          {data.data && !shown.length && <div className="empty">{filter === 'alerting' ? 'No camera has an active alert.' : 'No cameras match this filter.'}</div>}
+          <div className="wall" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gridTemplateRows: `repeat(${cols}, 1fr)` }}>
+            {tiles.map((c) => (
+              <WallTile key={c.id} c={c} t={now} alert={alerting.get(c.id) ?? null} selected={focus === c.id} onSelect={() => setFocus(focus === c.id ? null : c.id)} />
             ))}
           </div>
+          {pages > 1 && (
+            <div className="wall-pager">
+              <button className="btn small" onClick={() => setPage((pg - 1 + pages) % pages)} aria-label="Previous page">
+                ‹
+              </button>
+              {Array.from({ length: pages }, (_, i) => (
+                <button key={i} className={`dot ${i === pg ? 'on' : ''}`} onClick={() => setPage(i)} aria-label={`Page ${i + 1}`} />
+              ))}
+              <button className="btn small" onClick={() => setPage((pg + 1) % pages)} aria-label="Next page">
+                ›
+              </button>
+            </div>
+          )}
         </div>
-        {focus && <CameraFaces id={focus} />}
+        {focused && <FocusPanel c={focused} alert={alerting.get(focused.id) ?? null} onClose={() => setFocus(null)} onEdit={() => focused.source && setEdit(focused.source)} onChanged={() => setN((x) => x + 1)} />}
       </div>
       {edit && data.data && (
         <CameraForm
@@ -100,37 +201,83 @@ export function Cameras() {
   );
 }
 
-function CameraTile({ s, focused, onFocus, onEdit, onChanged }: { s: Source; focused: boolean; onFocus: () => void; onEdit: () => void; onChanged: () => void }) {
-  const can = useSession((st) => st.can);
+function WallTile({ c, t, alert, selected, onSelect }: { c: WallCam; t: number; alert: AlertRecord | null; selected: boolean; onSelect: () => void }) {
+  const st = c.source?.status;
+  const live = c.kind === 'site' || st?.state === 'live';
+  return (
+    <div className={`wtile ${alert ? `alerting p-${alert.priority}` : ''} ${selected ? 'sel' : ''}`} onClick={onSelect} role="button" tabIndex={0} aria-label={`${c.id} ${c.name}`} onKeyDown={(e) => e.key === 'Enter' && onSelect()}>
+      <div className="wtile-v">
+        {c.kind === 'site' ? (
+          <CameraFeed sensorId={c.id} t={t} live compact />
+        ) : st?.state === 'live' ? (
+          <img src={`/api/cameras/${c.id}/mjpeg`} alt={`Live: ${c.name}`} />
+        ) : (
+          <div className={`camtile-off ${st?.state ?? ''}`}>
+            <span className={st?.state === 'error' ? '' : 'spinner'} />
+            {st?.state === 'error' ? (st.lastError ?? 'stream error') : c.source?.enabled ? 'connecting…' : 'disabled'}
+          </div>
+        )}
+      </div>
+      <div className="wtile-top">
+        <span className={`wt-state ${live ? 'live' : (st?.state ?? '')}`}>
+          {live && <span className="live-dot" style={{ width: 6, height: 6 }} />}
+          {c.kind === 'live' ? (st?.state === 'live' ? 'LIVE · ANALYSED' : (st?.state ?? 'off').toUpperCase()) : 'SITE'}
+        </span>
+        <b className="mono">{c.id}</b>
+        <span className="ellipsis">{c.name}</span>
+      </div>
+      {alert && (
+        <div className="wtile-alert">
+          <Icon.Alert /> <span className="ellipsis">{alert.title}</span>
+        </div>
+      )}
+      <div className="wtile-bot mono">
+        <span>{new Date(t).toISOString().slice(11, 19)}Z</span>
+        {c.restricted && <span className="wt-zone">{c.zoneName}</span>}
+        {st?.state === 'live' && <span className="dim">{st.analysisMs ? `${st.analysisMs} ms` : ''}</span>}
+      </div>
+    </div>
+  );
+}
+
+function FocusPanel({ c, alert, onClose, onEdit, onChanged }: { c: WallCam; alert: AlertRecord | null; onClose: () => void; onEdit: () => void; onChanged: () => void }) {
+  const can = useSession((s) => s.can);
   const nav = useNavigate();
   const [msg, setMsg] = useState<string | null>(null);
-  const zone = FACILITY.zones.find((z) => z.id === s.zoneId);
-  const live = s.status.state === 'live';
+  const s = c.source;
+  const def = FACILITY.sensors.find((x) => x.id === c.id);
+  const showOnMap = () => {
+    nav('/operations');
+    const w = useWorld.getState();
+    w.select({ kind: 'sensor', id: c.id });
+    if (def && 'position' in def) w.flyTo(def.position, 220);
+  };
   return (
-    <div className={`camtile ${focused ? 'sel' : ''}`}>
-      <div className="camtile-v" onClick={onFocus} role="button" tabIndex={0}>
-        {live ? <img src={`/api/cameras/${s.id}/mjpeg`} alt={`Live: ${s.name}`} /> : <div className={`camtile-off ${s.status.state}`}>{s.status.state === 'error' ? s.status.lastError ?? 'error' : s.enabled ? 'connecting…' : 'disabled'}</div>}
-        <span className={`camtile-state ${s.status.state}`}>{s.status.state.toUpperCase()}</span>
-        {zone?.restricted && <span className="camtile-zone">{zone.name}</span>}
+    <aside className="focus-panel scroll reveal">
+      <div className="panel-h">
+        <h3>
+          {c.id} · {c.kind === 'live' ? 'live stream' : 'site camera'}
+        </h3>
+        <span className="spacer" />
+        <button className="btn ghost small icon" onClick={onClose} aria-label="Close">
+          <Icon.Close />
+        </button>
       </div>
-      <div className="camtile-b">
-        <div className="row">
-          <b className="mono">{s.id}</b>
-          <span className="ellipsis grow">{s.name}</span>
-        </div>
-        <div className="mono dim ellipsis" style={{ fontSize: 10.5 }} title={s.urlMasked}>
-          {s.urlMasked}
-        </div>
-        <div className="mono dim" style={{ fontSize: 10.5 }}>
-          {s.status.width ? `${s.status.width}×${s.status.height} · ` : ''}
-          {s.status.framesAnalysed} analysed · {s.status.framesDropped} dropped · {s.status.analysisMs ? `${s.status.analysisMs} ms/frame` : '—'} · last {ago(s.status.lastFrameAt, Date.now())}
-          {s.status.restarts ? ` · ${s.status.restarts} reconnects` : ''}
-        </div>
-        <div className="row" style={{ gap: 4, flexWrap: 'wrap' }}>
-          {can('evidence.upload') && (
+      <div className="section">
+        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 6 }}>{c.name}</div>
+        {alert && (
+          <div className="note warn" style={{ marginBottom: 8 }}>
+            <b>{alert.priority.toUpperCase()}</b> · {alert.title}
+          </div>
+        )}
+        <div className="row" style={{ flexWrap: 'wrap', gap: 6 }}>
+          <button className="btn small" onClick={showOnMap}>
+            Show on map
+          </button>
+          {s && can('evidence.upload') && (
             <button
               className="btn small"
-              disabled={!live}
+              disabled={s.status.state !== 'live'}
               onClick={() =>
                 void post<{ item: { id: string } }>(`/api/cameras/${s.id}/capture`, {})
                   .then((r) => nav(`/forensics/${r.item.id}`))
@@ -140,7 +287,7 @@ function CameraTile({ s, focused, onFocus, onEdit, onChanged }: { s: Source; foc
               Capture to evidence
             </button>
           )}
-          {can('cameras.manage') && (
+          {s && can('cameras.manage') && (
             <>
               <button className="btn small" onClick={() => void post(`/api/cameras/${s.id}/enable`, { enabled: !s.enabled }).then(onChanged)}>
                 {s.enabled ? 'Disable' : 'Enable'}
@@ -151,9 +298,52 @@ function CameraTile({ s, focused, onFocus, onEdit, onChanged }: { s: Source; foc
             </>
           )}
         </div>
-        {msg && <span className="err-inline">{msg}</span>}
+        {msg && <div className="err-inline">{msg}</div>}
       </div>
-    </div>
+      {s && (
+        <div className="section">
+          <h4>Stream</h4>
+          <dl className="kv">
+            <dt>Source</dt>
+            <dd className="mono ellipsis" title={s.urlMasked}>
+              {s.urlMasked}
+            </dd>
+            <dt>Resolution</dt>
+            <dd className="mono">{s.status.width ? `${s.status.width}×${s.status.height}` : '—'}</dd>
+            <dt>Analysis</dt>
+            <dd className="mono">
+              {s.analyticsFps} fps · {s.status.analysisMs ? `${s.status.analysisMs} ms/frame` : '—'}
+            </dd>
+            <dt>Frames</dt>
+            <dd className="mono">
+              {s.status.framesAnalysed} analysed · {s.status.framesDropped} dropped
+            </dd>
+            <dt>Last frame</dt>
+            <dd className="mono">{ago(s.status.lastFrameAt, Date.now())}</dd>
+            <dt>Reconnects</dt>
+            <dd className="mono">{s.status.restarts}</dd>
+          </dl>
+        </div>
+      )}
+      {def && def.kind === 'camera' && (
+        <div className="section">
+          <h4>Calibrated pose</h4>
+          <dl className="kv">
+            <dt>Grid</dt>
+            <dd className="mono">{grid(def.position)}</dd>
+            <dt>Heading / tilt</dt>
+            <dd className="mono">
+              {Math.round(def.headingDeg)}° / {Math.round(def.pitchDeg)}°
+            </dd>
+            <dt>Field of view</dt>
+            <dd className="mono">{Math.round(def.hfovDeg)}°</dd>
+            <dt>Mast</dt>
+            <dd className="mono">{def.mastHeightM} m</dd>
+          </dl>
+        </div>
+      )}
+      {s ? <CameraFaces id={c.id} /> : <div className="section muted" style={{ fontSize: 12 }}>Face recognition runs on analysed live streams. Site cameras in the demo report analytics only.</div>}
+    </aside>
   );
 }
 
@@ -162,10 +352,8 @@ function CameraFaces({ id }: { id: string }) {
   const can = useSession((s) => s.can);
   const faces = useAsync((s) => (can('identity.view') ? get<FaceEvent[]>(`/api/faces?source=${id}&limit=60`, s) : Promise.resolve([])), [id, fv]);
   return (
-    <div className="scroll" style={{ borderLeft: '1px solid var(--line)', padding: 12 }}>
-      <div className="panel-h" style={{ padding: 0, marginBottom: 8 }}>
-        <h3>Faces seen by {id}</h3>
-      </div>
+    <div className="section">
+      <h4>Faces seen by {id}</h4>
       {!can('identity.view') && <div className="muted">Your role cannot view recognition results.</div>}
       {faces.data?.length === 0 && <div className="muted">None yet.</div>}
       <div className="col" style={{ gap: 8 }}>

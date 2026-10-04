@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { directionFromHeadingPitch, terrainHeight, type AlertRecord, type CameraDef, type FacilityDef, type IncidentRecord, type SurfacePatch, type Vec3 } from '@strata/domain';
+import { directionFromHeadingPitch, EnuFrame, terrainHeight, toUtm, type AlertRecord, type CameraDef, type FacilityDef, type IncidentRecord, type SurfacePatch, type Vec3 } from '@strata/domain';
 import { CameraController, type NavMode } from './controls';
 import { createTerrain } from './terrain';
 import { buildBuildings, buildFence, buildObjects, buildRoads, buildZones } from './staticWorld';
@@ -138,6 +138,39 @@ export class WorldEngine {
     this.overlays.incidents.visible = l.incidents;
     this.overlays.rf.visible = l.rf;
     (this.terrain.material.uniforms.uCoverageOn as { value: number }).value = l.uncertainty ? 1 : 0;
+    (this.terrain.material.uniforms.uGridOn as { value: number }).value = l.grid ? 1 : 0;
+  }
+
+  /** Align the terrain grid with the site's UTM grid (linear map from site ENU, fitted over ±1 km). */
+  setGridFrame(origin: { lat: number; lon: number; alt: number }): void {
+    const fr = new EnuFrame(origin);
+    const u0 = toUtm(origin.lat, origin.lon);
+    const at = (x: number, y: number) => {
+      const g = fr.toGeodetic({ x, y, z: 0 });
+      return toUtm(g.lat, g.lon, u0.zone);
+    };
+    const ex = at(1000, 0);
+    const ny = at(0, 1000);
+    const m = this.terrain.material.uniforms;
+    (m.uGridM!.value as THREE.Vector4).set((ex.easting - u0.easting) / 1000, (ny.easting - u0.easting) / 1000, (ex.northing - u0.northing) / 1000, (ny.northing - u0.northing) / 1000);
+    (m.uGridO!.value as THREE.Vector2).set(u0.easting % 100000, u0.northing % 100000);
+  }
+
+  /** View state for the HUD: compass heading (deg) and ground metres per CSS pixel at the view centre. */
+  viewInfo(): { headingDeg: number; mPerPx: number; pitchDeg: number } {
+    const h = this.host.clientHeight || 1;
+    const dist = this.camera.position.distanceTo(this.controls.target);
+    const mPerPx = (2 * dist * Math.tan((this.camera.fov * Math.PI) / 360)) / h;
+    const dir = new THREE.Vector3();
+    this.camera.getWorldDirection(dir);
+    const headingDeg = ((Math.atan2(dir.x, dir.y) * 180) / Math.PI + 360) % 360;
+    const pitchDeg = (Math.asin(Math.max(-1, Math.min(1, dir.z))) * 180) / Math.PI;
+    return { headingDeg, mPerPx, pitchDeg };
+  }
+
+  /** Rotate the view to north-up, keeping the target. */
+  northUp(): void {
+    this.controls.flyTo(this.controls.target, this.controls.distance, 0, undefined, 700);
   }
 
   setPatchMode(mode: 'off' | 'support' | 'state', coverage: Coverage | null): void {
@@ -304,7 +337,8 @@ export class WorldEngine {
         if (tr.category === 'vehicle') return l.vehicles;
         return l.radarTracks;
       },
-      this.camera.position,
+      this.camera,
+      h,
       selectedTrack,
       l?.trails ?? true,
       now,
@@ -343,6 +377,7 @@ export class WorldEngine {
         sub: lost ? `LAST OBSERVED ${hms(tr.lastConfirmedAt)}Z · possible region ${Math.round(tr.sigmaH)} m` : tr.cooperative ? undefined : `${tr.reported && tr.reported.affiliation !== 'unknown' ? `${tr.reported.affiliation.toUpperCase()} (${tr.reported.system}) · ` : ''}${tr.classification === 'unknown' ? tr.category : tr.classification} · ${tr.contributors.join(' ')}`,
         tone: lost ? 'inferred' : tr.cooperative ? 'muted' : (tr.category === 'aerial' && tr.classification !== 'bird') || tr.reported?.affiliation === 'hostile' ? 'red' : 'amber',
         priority: tr.id === selected ? 100 : important && !lost ? 60 : 10,
+        dx: 12,
       });
     }
     return out;

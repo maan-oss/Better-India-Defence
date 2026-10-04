@@ -13,7 +13,7 @@ interface FrameDetections {
  * detections reported for that same frame overlaid. Frames are CAPTURED evidence; boxes are the sensor's
  * own analytics output (not platform inference).
  */
-export function CameraFeed({ sensorId, t, width = 1920, height = 1080, live }: { sensorId: string; t: number; width?: number; height?: number; live: boolean }) {
+export function CameraFeed({ sensorId, t, width = 1920, height = 1080, live, compact = false }: { sensorId: string; t: number; width?: number; height?: number; live: boolean; compact?: boolean }) {
   const tq = Math.floor(t / 2000) * 2000;
   const [frame, setFrame] = useState<{ url: string; t: number; dets: FrameDetections['detections'] } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +51,7 @@ export function CameraFeed({ sensorId, t, width = 1920, height = 1080, live }: {
     };
   }, [sensorId, tq, live]);
   return (
-    <div className="feed">
+    <div className={`feed ${compact ? 'compact' : ''}`}>
       {frame && <img src={frame.url} alt={`${sensorId} frame at ${hms(frame.t)}`} />}
       {frame &&
         frame.dets.map((d) => (
@@ -76,7 +76,7 @@ export function CameraFeed({ sensorId, t, width = 1920, height = 1080, live }: {
           )}
         </div>
       )}
-      {frame && (
+      {frame && !compact && (
         <div className="feed-meta mono">
           <StateChip state="CAPTURED" />
           <span>{sensorId}</span>

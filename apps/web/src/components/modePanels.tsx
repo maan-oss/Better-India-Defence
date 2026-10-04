@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { get, post, qs } from '../api/client';
 import type { Coverage, DiffResponse, IncidentPackage } from '../api/types';
 import { useWorld } from '../state/world';
+import { symbolDataUrl, symbolFor } from '../engine/symbols';
 import { useTime } from '../state/time';
 import { useData } from '../state/data';
 import { useSession } from '../state/session';
@@ -380,6 +381,13 @@ export function EvidenceModePanel() {
 }
 
 /** Default context: alerts, active tracks, recent changes. */
+function ago(t: number): string {
+  const s = Math.max(0, (useTime.getState().currentLiveEdge() - t) / 1000);
+  if (s < 60) return `${Math.round(s)} s ago`;
+  if (s < 3600) return `${Math.round(s / 60)} min ago`;
+  return `${(s / 3600).toFixed(1)} h ago`;
+}
+
 export function Overview() {
   const [tab, setTab] = useState<'alerts' | 'tracks' | 'changes'>('alerts');
   const alerts = useData((s) => s.alerts);
@@ -395,7 +403,10 @@ export function Overview() {
     }, 1000);
     return () => clearInterval(id);
   }, []);
+  const [scope, setScope] = useState<'active' | 'all'>('active');
   const openAlerts = alerts.filter((a) => a.status === 'open' || a.status === 'acknowledged');
+  const PR = { critical: 0, high: 1, medium: 2, low: 3 } as const;
+  const shownAlerts = scope === 'active' ? [...openAlerts].sort((a, b) => Number(a.status !== 'open') - Number(b.status !== 'open') || PR[a.priority] - PR[b.priority] || b.t - a.t) : alerts;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div className="ctx-tabs" role="tablist">
@@ -411,17 +422,34 @@ export function Overview() {
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         {tab === 'alerts' && (
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <div className="row" style={{ padding: '8px 12px', borderBottom: '1px solid var(--line)' }}>
+            <div className="seg">
+              <button className={scope === 'active' ? 'on' : ''} onClick={() => setScope('active')}>
+                ACTIVE {openAlerts.length}
+              </button>
+              <button className={scope === 'all' ? 'on' : ''} onClick={() => setScope('all')}>
+                ALL {alerts.length}
+              </button>
+            </div>
+            <span className="spacer" />
+            <span className="muted" style={{ fontSize: 11 }}>
+              {openAlerts.filter((a) => a.status === 'open').length} awaiting acknowledgement
+            </span>
+          </div>
+          <div style={{ flex: 1, minHeight: 0 }}>
           <VirtualList
-            items={alerts}
-            rowHeight={52}
-            empty="No alerts."
+            items={shownAlerts}
+            rowHeight={56}
+            empty={scope === 'active' ? 'No active alerts. All clear.' : 'No alerts.'}
             render={(a) => (
-              <div className="list-row" style={{ height: 52, opacity: a.status === 'resolved' || a.status === 'dismissed' ? 0.5 : 1 }} onClick={() => (select({ kind: 'alert', id: a.id }), a.position && flyTo(a.position, 260), useTime.getState().seek(a.t))}>
+              <div className={`list-row alert-row p-${a.priority} s-${a.status}`} style={{ height: 56 }} onClick={() => (select({ kind: 'alert', id: a.id }), a.position && flyTo(a.position, 260), useTime.getState().seek(a.t))}>
                 <Prio p={a.priority} />
                 <div className="grow" style={{ minWidth: 0 }}>
                   <div className="ellipsis">{a.title}</div>
-                  <div className="muted mono" style={{ fontSize: 11 }}>
-                    {hms(a.t)}Z · {a.rule} · {a.status}
+                  <div className="muted mono" style={{ fontSize: 10.5 }}>
+                    {hms(a.t)}Z · {ago(a.t)} · {a.rule.replace(/_/g, ' ').toLowerCase()}
+                    {a.status !== 'open' && <span className={`al-status ${a.status}`}>{a.status}</span>}
                   </div>
                 </div>
                 {can('alerts.acknowledge') && a.status === 'open' && (
@@ -438,6 +466,8 @@ export function Overview() {
               </div>
             )}
           />
+          </div>
+          </div>
         )}
         {tab === 'tracks' && (
           <VirtualList
@@ -446,6 +476,7 @@ export function Overview() {
             empty="No active tracks at this time."
             render={(t) => (
               <div className="list-row" style={{ height: 44 }} onClick={() => (select({ kind: 'track', id: t.id }), flyTo(t.position, 180))}>
+                <img src={symbolDataUrl(symbolFor(t, false))} alt="" width={24} height={24} style={{ flex: 'none' }} />
                 <span className="mono" style={{ width: 52 }}>
                   {t.id}
                 </span>

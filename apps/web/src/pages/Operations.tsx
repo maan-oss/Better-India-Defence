@@ -13,6 +13,7 @@ import { get, qs } from '../api/client';
 import { LayersPanel } from '../components/LayersPanel';
 import { ContextPanel } from '../components/ContextPanel';
 import { Timeline } from '../components/Timeline';
+import { MapHud } from '../components/MapHud';
 import { Copilot } from '../components/Copilot';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { StateChip } from '../components/common';
@@ -62,6 +63,7 @@ export function Operations() {
       const ne = fr.toEnu({ lat: ortho.bounds.north, lon: ortho.bounds.east, alt: 0 });
       engine.setOrthophoto(ortho.url, { x0: sw.x, y0: sw.y, x1: ne.x, y1: ne.y });
     }
+    engine.setGridFrame(facility.origin);
     const host = hostRef.current;
     const afterIntro = () => {
       try {
@@ -289,6 +291,7 @@ export function Operations() {
             <div ref={hostRef} className="world-canvas" />
             <div ref={labelRef} className="world-labels" />
             <div className="intro-fade" style={{ opacity: introFade }} />
+            {facility && <MapHud engineRef={engineRef} hostRef={hostRef} facility={facility} />}
           </>
         )}
         {banner && <div className="mode-banner glass">{banner}</div>}

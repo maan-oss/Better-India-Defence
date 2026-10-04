@@ -1,20 +1,15 @@
 import * as THREE from 'three';
 import { terrainHeight } from '@strata/domain';
 import type { RenderTrack } from '../state/tracks';
+import { AFF_COLOR, pixelScale, symbolFor, symbolTexture } from './symbols';
 
-const COLORS = {
-  coop: '#cfc9bd',
-  person: '#d9a441',
-  vehicle: '#d9a441',
-  aerial: '#d4553f',
-  bird: '#8d877d',
-  unknown: '#b9b3a8',
-  hostile: '#ff3b2f',
-  suspect: '#f08a24',
-};
+/** Symbol height on screen (CSS px). */
+export const SYMBOL_PX = 24;
 
 interface TrackObj {
   group: THREE.Group;
+  sym: THREE.Sprite;
+  symKey: string;
   body: THREE.Mesh;
   pick: THREE.Mesh;
   ring: THREE.LineLoop;
@@ -44,8 +39,10 @@ export class TracksLayer {
   private objs = new Map<string, TrackObj>();
   visibleIds: string[] = [];
 
-  update(tracks: RenderTrack[], filter: (t: RenderTrack) => boolean, cameraPos: THREE.Vector3, selected: string | null, showTrails: boolean, now: number, t: number = now): void {
+  update(tracks: RenderTrack[], filter: (t: RenderTrack) => boolean, camera: THREE.PerspectiveCamera, viewportH: number, selected: string | null, showTrails: boolean, now: number, t: number = now): void {
+    const cameraPos = camera.position;
     const seen = new Set<string>();
+    const base = pixelScale(camera, viewportH, SYMBOL_PX);
     for (const tr of tracks) {
       if (!filter(tr)) continue;
       seen.add(tr.id);
@@ -54,21 +51,34 @@ export class TracksLayer {
         if (o) this.remove(tr.id);
         o = this.create(tr);
       }
-      const rep = tr.reported?.affiliation;
-      const color = tr.cooperative ? COLORS.coop : rep === 'hostile' ? COLORS.hostile : rep === 'suspect' ? COLORS.suspect : tr.classification === 'bird' ? COLORS.bird : (COLORS[tr.category as keyof typeof COLORS] ?? COLORS.unknown);
+      const spec = symbolFor(tr, tr.id === selected);
+      const color = AFF_COLOR[spec.aff];
+      const key = `${spec.aff}|${spec.dim}|${spec.fn}|${spec.dashed}|${spec.selected}`;
+      if (o.symKey !== key) {
+        (o.sym.material as THREE.SpriteMaterial).map = symbolTexture(spec);
+        (o.sym.material as THREE.SpriteMaterial).needsUpdate = true;
+        o.symKey = key;
+      }
       const mat = o.body.material as THREE.MeshBasicMaterial;
       mat.color.set(color);
       mat.wireframe = tr.inferred;
-      mat.opacity = tr.inferred ? 0.6 : 1;
+      mat.opacity = tr.inferred ? 0.5 : 0.9;
       const ground = terrainHeight(tr.position.x, tr.position.y);
       const z = tr.category === 'aerial' ? tr.position.z : ground;
       o.group.position.set(tr.position.x, tr.position.y, 0);
       o.body.position.set(0, 0, z);
       const d = cameraPos.distanceTo(new THREE.Vector3(tr.position.x, tr.position.y, z));
       const s = Math.max(1, d / (tr.category === 'aerial' ? 160 : 220)) * (tr.id === selected ? 1.5 : 1);
-      o.body.scale.setScalar(s);
+      o.body.scale.setScalar(s * 0.6);
+      // Symbol floats just above the object; long-lost tracks fade so they stop dominating the picture.
+      const sel = tr.id === selected ? 1.3 : 1;
+      o.sym.scale.setScalar(base * sel);
+      o.sym.position.set(0, 0, z + 0.5);
+      const lostFade = tr.inferred ? Math.max(0.35, 1 - Math.max(0, (t - tr.lastConfirmedAt) / 1000) / 900) : 1;
+      (o.sym.material as THREE.SpriteMaterial).opacity = lostFade;
       o.pick.position.set(0, 0, z);
-      o.pick.scale.setScalar(Math.max(4, s * 3));
+      // Pick volume matches the symbol's on-screen size.
+      o.pick.scale.setScalar(Math.max(4, base * d * 0.55));
       // Uncertainty / possible region.
       const r = tr.inferred ? tr.sigmaH : Math.min(tr.sigmaH * 2, 60);
       o.ring.visible = r > 1.5;
@@ -96,6 +106,7 @@ export class TracksLayer {
         o.trail.geometry.dispose();
         o.trail.geometry = new THREE.BufferGeometry().setFromPoints(pts);
         (o.trail.material as THREE.LineBasicMaterial).color.set(color);
+        (o.trail.material as THREE.LineBasicMaterial).opacity = tr.id === selected ? 0.85 : 0.45;
       }
     }
     for (const id of [...this.objs.keys()]) if (!seen.has(id)) this.remove(id);
@@ -104,16 +115,19 @@ export class TracksLayer {
 
   private create(tr: RenderTrack): TrackObj {
     const group = new THREE.Group();
-    const body = new THREE.Mesh(bodyGeometry(tr.category), new THREE.MeshBasicMaterial({ color: COLORS.unknown, transparent: true }));
+    const body = new THREE.Mesh(bodyGeometry(tr.category), new THREE.MeshBasicMaterial({ color: AFF_COLOR.unknown, transparent: true }));
     const pick = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 6), new THREE.MeshBasicMaterial({ visible: false }));
     pick.userData = { pick: 'track', id: tr.id };
     body.userData = { pick: 'track', id: tr.id };
     const ring = new THREE.LineLoop(ringGeo, new THREE.LineDashedMaterial({ color: '#a99bc9', dashSize: 4, gapSize: 3, transparent: true, opacity: 0.7 }));
     const drop = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: '#8d877d', transparent: true, opacity: 0.5 }));
     const trail = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: '#cfc9bd', transparent: true, opacity: 0.45 }));
-    group.add(body, pick, ring, drop, trail);
+    const sym = new THREE.Sprite(new THREE.SpriteMaterial({ sizeAttenuation: false, depthTest: false, depthWrite: false, transparent: true }));
+    sym.renderOrder = 10;
+    sym.userData = { pick: 'track', id: tr.id };
+    group.add(body, pick, ring, drop, trail, sym);
     this.group.add(group);
-    const o = { group, body, pick, ring, drop, trail, kind: tr.category };
+    const o = { group, sym, symKey: '', body, pick, ring, drop, trail, kind: tr.category };
     this.objs.set(tr.id, o);
     return o;
   }
@@ -124,6 +138,7 @@ export class TracksLayer {
     this.group.remove(o.group);
     o.body.geometry.dispose();
     o.trail.geometry.dispose();
+    (o.sym.material as THREE.SpriteMaterial).dispose();
     this.objs.delete(id);
   }
 

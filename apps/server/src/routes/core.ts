@@ -37,6 +37,15 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     return { user: req.user, permissions: permissionsFor(req.user.role) };
   });
 
+  // Pre-sign-in banner: what a terminal shows before authentication (classification, site, use notice).
+  app.get('/api/auth/banner', async () => ({
+    classification: p.classification,
+    site: FACILITY.name,
+    simulated: p.site === null,
+    notice:
+      'This is a government information system for authorised use only. Activity on this system is monitored and recorded, and may be used as evidence. Unauthorised access or use may result in disciplinary and criminal proceedings.',
+  }));
+
   app.get('/api/auth/demo', async () => (cfg.STRATA_DEMO_USERS === 'true' && cfg.NODE_ENV !== 'production' ? { users: ['viewer', 'operator', 'analyst', 'admin'], password: cfg.STRATA_DEMO_PASSWORD } : { users: [], password: null }));
 
   // ------------------------------------------------------------------ ingestion (service-to-service)
