@@ -1,0 +1,44 @@
+# On-premises deployment: PostgreSQL 16 + PostGIS and the Strata application. No external services.
+#   cp .env.example .env   # then set the production secrets below
+#   docker compose up --build
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: strata
+      POSTGRES_USER: strata
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U strata -d strata']
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+  strata:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://strata:${POSTGRES_PASSWORD}@db:5432/strata
+      STRATA_SERVICE_TOKEN: ${STRATA_SERVICE_TOKEN:?set STRATA_SERVICE_TOKEN}
+      STRATA_ADMIN_PASSWORD: ${STRATA_ADMIN_PASSWORD:?set STRATA_ADMIN_PASSWORD}
+      STRATA_DEMO_USERS: 'false'
+      STORAGE_ENCRYPTION_KEY: ${STORAGE_ENCRYPTION_KEY:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      STRATA_SIMULATOR: ${STRATA_SIMULATOR:-true}
+      SEED_MINUTES: ${SEED_MINUTES:-120}
+    ports:
+      # Bound to loopback; publish through a TLS-terminating reverse proxy for network access.
+      - '127.0.0.1:4000:4000'
+    volumes:
+      - strata-data:/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  strata-data:

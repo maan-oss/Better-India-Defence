@@ -1,5 +1,5 @@
 import {
-  EnuFrame,
+  type EnuFrame,
   cameraBasis,
   pixelRay,
   rayTerrain,

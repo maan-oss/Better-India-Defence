@@ -29,6 +29,7 @@
     "concurrently": "^10.0.5",
     "esbuild": "^0.25.0",
     "eslint": "^9.39.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "tsx": "^4.23.15",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.71.0",

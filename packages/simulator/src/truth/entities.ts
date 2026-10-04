@@ -197,7 +197,7 @@ export function basePopulation(): TruthEntity[] {
 export interface FriendlyDrone {
   sensorId: string;
   entity: TruthEntity;
-  baseMotion: (t: number) => import('./itinerary.ts').MotionState | null;
+  baseMotion: (t: number) => MotionState | null;
 }
 
 function droneEntity(sensorId: string, label: string, role: string, steps: Step[]): FriendlyDrone {
