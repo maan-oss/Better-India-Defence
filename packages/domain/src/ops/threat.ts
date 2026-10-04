@@ -82,6 +82,8 @@ export function defaultVitalAssets(f: FacilityDef): VitalAsset[] {
     });
 }
 
+const LOST_DISCOUNT = 0.4;
+
 const CATEGORY_WEIGHT: Record<TrackSnapshot['category'], number> = { aerial: 1, vehicle: 0.8, person: 0.65, unknown: 0.7 };
 
 export function assess(track: TrackSnapshot, va: VitalAsset): ThreatAssessment {
@@ -127,8 +129,12 @@ export function assess(track: TrackSnapshot, va: VitalAsset): ThreatAssessment {
   const approach = closing > 0.5 ? Math.min(1, closing / (track.category === 'aerial' ? 20 : 4)) : 0;
   const confidence = Math.max(0.3, Math.min(1, track.confidence));
   const raw = wCat * wPrio * confidence * (0.45 * proximity + 0.35 * imminence + 0.2 * approach);
-  // Already inside the protection boundary is decisive for any non-cooperative track.
-  const score = Math.max(Math.round(Math.min(1, raw) * 100), inside && wCat > 0 ? Math.round(75 * wPrio) : 0);
+  // Already inside the protection boundary is decisive for any non-cooperative track that is still held.
+  // A lost track's position is only its last confirmed one: it is kept on the board but discounted, so live
+  // contacts rank above stale ones (zone-entry alerts already covered the intrusion when it was seen).
+  const lost = track.status === 'lost';
+  const held = Math.max(Math.round(Math.min(1, raw) * 100), inside && wCat > 0 ? Math.round(75 * wPrio) : 0);
+  const score = lost ? Math.round(held * LOST_DISCOUNT) : held;
   const level: ThreatLevel = score >= 70 ? 'CRITICAL' : score >= 45 ? 'HIGH' : score >= 20 ? 'MEDIUM' : 'LOW';
   return {
     trackId: track.id,
@@ -149,6 +155,7 @@ export function assess(track: TrackSnapshot, va: VitalAsset): ThreatAssessment {
     level,
     factors: [
       { name: 'category', value: round2(wCat) },
+      ...(lost ? [{ name: 'lost (last known position)', value: LOST_DISCOUNT }] : []),
       ...(rep && rep !== 'friend' ? [{ name: `reported ${rep} (${track.reported!.system})`, value: round2(wRep) }] : []),
       { name: 'asset priority', value: round2(wPrio) },
       { name: 'track confidence', value: round2(confidence) },

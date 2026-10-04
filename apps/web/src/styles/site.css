@@ -17,12 +17,18 @@
 .plan-label { fill: #ece6dc; font-family: var(--font-mono); pointer-events: none; }
 .plan-draft { fill: rgba(236, 230, 220, 0.06); stroke: #ece6dc; stroke-dasharray: 4 3; }
 
+.site-panel .formgrid { grid-template-columns: 110px 1fr; }
 .feed-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 76px 1fr 92px 28px;
   gap: 4px;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
 }
-.feed-row select {
-  width: 120px;
-}
+.feed-row .input { width: 100%; min-width: 0; }
+.feed-row .f-kind { grid-column: 2 / 4; }
+.feed-row .f-name { grid-column: 1 / 3; }
+.feed-row .f-name.wide { grid-column: 1 / 4; }
+.feed-row .f-x { grid-column: 4; grid-row: 1; }

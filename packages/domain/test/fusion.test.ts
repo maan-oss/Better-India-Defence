@@ -111,3 +111,48 @@ function normalize(v: { x: number; y: number; z: number }) {
   const l = Math.hypot(v.x, v.y, v.z);
   return { x: v.x / l, y: v.y / l, z: v.z / l };
 }
+
+describe('TrackEngine with sparse reports', () => {
+  const report = (k: number, t: number, validUntil?: number): TrackMeasurement => ({
+    observationId: `ext-${k}`,
+    sensorId: 'EXT1',
+    sensorKind: 'external',
+    localId: 'BRAVO2',
+    t,
+    position: { x: 8 * (t / 1000), y: 0, z: 0 },
+    sigma: { x: 6, y: 6, z: 2 },
+    cls: 'cooperative',
+    entityId: 'TAK:BRAVO2',
+    label: 'BRAVO-2',
+    confidence: 0.95,
+    positional: true,
+    category: 'person',
+    ...(validUntil ? { validUntil } : {}),
+  });
+
+  it('keeps the velocity estimate honest when the clock ticks between reports', () => {
+    const e = new TrackEngine();
+    for (let k = 0; k < 12; k++) {
+      const t = k * 10_000;
+      e.ingest([report(k, t)]);
+      // Wall-clock ticks between the 10 s reports must not distort the next update's time step.
+      for (let s = 1; s < 10; s++) e.tick(t + s * 1000);
+    }
+    const s = e.snapshots(110_000)[0]!;
+    expect(Math.hypot(s.velocity.x, s.velocity.y)).toBeGreaterThan(6.5);
+    expect(Math.hypot(s.velocity.x, s.velocity.y)).toBeLessThan(9.5);
+  });
+
+  it('honours the source-declared validity (CoT stale) before coasting, up to a cap', () => {
+    const e = new TrackEngine();
+    for (let k = 0; k < 4; k++) e.ingest([report(k, k * 10_000, k * 10_000 + 30_000)]);
+    e.tick(38_000); // 8 s after the last report: a person track would coast after 4 s without a validity
+    expect(e.snapshots(38_000)[0]!.status).toBe('confirmed');
+    e.tick(65_000); // past the stale time
+    expect(e.snapshots(65_000)[0]!.status).toBe('coasting');
+    const f = new TrackEngine();
+    for (let k = 0; k < 4; k++) f.ingest([report(k, k * 10_000, k * 10_000 + 3_600_000)]);
+    f.tick(30_000 + 61_000); // an hour's claimed validity is capped at 60 s
+    expect(f.snapshots(91_000)[0]!.status).toBe('coasting');
+  });
+});

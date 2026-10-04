@@ -48,6 +48,9 @@ export const CATEGORY_PARAMS: Record<TrackCategory, CategoryParams> = {
   unknown: { q: 3, coastAfterS: 5, lostAfterS: 15, closeAfterS: 900, maxSpeedMps: 25 },
 };
 
+/** Longest source-declared report validity honoured for track lifecycle (s). */
+const MAX_VALIDITY_S = 60;
+
 const PREFIX: Record<TrackCategory, string> = { aerial: 'A', person: 'P', vehicle: 'V', unknown: 'U' };
 
 export interface ContributorStat {
@@ -81,6 +84,7 @@ interface TrackInternal {
   /** Observation ids applied in the most recent update (for provenance persistence). */
   pendingObservationIds: string[];
   reported: ReportedIdentity | null;
+  validUntil: number | null;
 }
 
 export type TrackEvent =
@@ -199,11 +203,12 @@ export class TrackEngine {
     for (const tr of this.tracks.values()) {
       const p = this.params[tr.category];
       const age = (now - tr.lastPositionalUpdate) / 1000;
+      const { coastAfterS, lostAfterS } = this.timing(tr);
       let next: TrackStatus = tr.status;
       if (tr.status === 'closed') continue;
       if (age > p.closeAfterS) next = 'closed';
-      else if (age > p.lostAfterS) next = 'lost';
-      else if (age > p.coastAfterS) next = tr.hits >= 3 ? 'coasting' : 'lost';
+      else if (age > lostAfterS) next = 'lost';
+      else if (age > coastAfterS) next = tr.hits >= 3 ? 'coasting' : 'lost';
       else if (tr.hits >= 3) next = 'confirmed';
       else next = 'tentative';
       if (next !== tr.status) {
@@ -212,7 +217,8 @@ export class TrackEngine {
         events.push({ type: 'status', trackId: tr.id, t: now, from: tr.status, to: next });
         tr.status = next;
       }
-      if (tr.status !== 'lost' && tr.status !== 'closed') tr.t = Math.max(tr.t, now);
+      // tr.t stays the time of the last state update: advancing it here without predicting the state would
+      // make the next measurement look closer in time than it is and inflate the velocity estimate.
     }
     events.push(...this.mergeDuplicates(now));
     // Drop closed tracks from the working set (history remains persisted).
@@ -288,6 +294,7 @@ export class TrackEngine {
         lostAt: s.status === 'lost' ? s.t : null,
         pendingObservationIds: [],
         reported: s.reported ?? null,
+        validUntil: null,
       };
       this.tracks.set(tr.id, tr);
       if (tr.entityId) this.entityIndex.set(tr.entityId, tr.id);
@@ -300,6 +307,18 @@ export class TrackEngine {
   }
 
   // ---------------------------------------------------------------------------------------------
+
+  /**
+   * Coast/loss timing. A source that reports at a known interval and declares how long each report is valid
+   * (CoT stale time) keeps its track confirmed for that period — capped, because a report that claims
+   * validity for many minutes says nothing about where a moving object is now.
+   */
+  private timing(tr: TrackInternal): { coastAfterS: number; lostAfterS: number } {
+    const p = this.params[tr.category];
+    const grace = tr.validUntil ? Math.min(MAX_VALIDITY_S, Math.max(0, (tr.validUntil - tr.lastPositionalUpdate) / 1000)) : 0;
+    const coastAfterS = Math.max(p.coastAfterS, grace);
+    return { coastAfterS, lostAfterS: p.lostAfterS + (coastAfterS - p.coastAfterS) };
+  }
 
   private markUpdated(map: Map<string, Set<string>>, trackId: string, sensorId: string): void {
     const s = map.get(trackId);
@@ -362,6 +381,7 @@ export class TrackEngine {
     tr.lastConfirmedPos = { x: x.p, y: y.p, z: z.p };
     tr.hits += 1;
     tr.lostAt = null;
+    tr.validUntil = m.validUntil ?? null;
     if (tr.status === 'lost' || tr.status === 'coasting') tr.status = tr.hits >= 3 ? 'confirmed' : 'tentative';
     if (m.entityId && !tr.entityId) {
       tr.entityId = m.entityId;
@@ -411,6 +431,7 @@ export class TrackEngine {
       lostAt: null,
       pendingObservationIds: [m.observationId],
       reported: m.reported ?? null,
+      validUntil: m.validUntil ?? null,
     };
     this.tracks.set(id, tr);
     if (m.entityId) this.entityIndex.set(m.entityId, id);
@@ -575,7 +596,7 @@ export class TrackEngine {
     const kinds = new Set([...tr.contributors.values()].map((c) => c.sensorKind));
     const ageS = Math.max(0, (now - tr.lastPositionalUpdate) / 1000);
     const confidence =
-      (1 - Math.exp(-tr.hits / 4)) * (0.65 + 0.35 * Math.min(1, (kinds.size - 1) / 2)) * Math.exp(-ageS / (p.coastAfterS * 3));
+      (1 - Math.exp(-tr.hits / 4)) * (0.65 + 0.35 * Math.min(1, (kinds.size - 1) / 2)) * Math.exp(-ageS / (this.timing(tr).coastAfterS * 3));
     const state = tr.status === 'confirmed' || tr.status === 'tentative' ? 'RECONSTRUCTED' : 'INFERRED';
     return {
       id: tr.id,

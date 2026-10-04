@@ -152,8 +152,8 @@ function SitePanel({ cfg, set, sel, setSel }: { cfg: SiteConfig; set: (p: Partia
           <input className="input" value={cfg.name} onChange={(e) => set({ name: e.target.value })} placeholder="e.g. Air Force Station — North" />
           <label>Anchor (WGS84)</label>
           <div className="row">
-            <input className="input" type="number" step={0.000001} value={cfg.origin.lat} onChange={(e) => set({ origin: { ...cfg.origin, lat: Number(e.target.value) } })} style={{ width: 110 }} />
-            <input className="input" type="number" step={0.000001} value={cfg.origin.lon} onChange={(e) => set({ origin: { ...cfg.origin, lon: Number(e.target.value) } })} style={{ width: 110 }} />
+            <input className="input" type="number" step={0.000001} value={cfg.origin.lat} onChange={(e) => set({ origin: { ...cfg.origin, lat: Number(e.target.value) } })} style={{ flex: 1, minWidth: 0 }} />
+            <input className="input" type="number" step={0.000001} value={cfg.origin.lon} onChange={(e) => set({ origin: { ...cfg.origin, lon: Number(e.target.value) } })} style={{ flex: 1, minWidth: 0 }} />
           </div>
           <label>Anchor (MGRS)</label>
           <span className="mono">{anchorMgrs}</span>
@@ -310,19 +310,19 @@ function FeedsSection({ cfg, set }: { cfg: SiteConfig; set: (p: Partial<SiteConf
       </div>
       {feeds.map((f, i) => (
         <div key={i} className="feed-row">
-          <input className="input mono" value={f.id} style={{ width: 80 }} onChange={(e) => upd(i, { id: e.target.value.toUpperCase() })} />
-          <select className="input" value={f.kind} onChange={(e) => upd(i, { kind: e.target.value as keyof typeof FEED_KINDS })}>
+          <input className="input mono" value={f.id} aria-label="Feed sensor id" onChange={(e) => upd(i, { id: e.target.value.toUpperCase() })} />
+          <select className="input f-kind" value={f.kind} aria-label="Feed type" onChange={(e) => upd(i, { kind: e.target.value as keyof typeof FEED_KINDS })}>
             {Object.entries(FEED_KINDS).map(([k, v]) => (
               <option key={k} value={k}>
                 {v}
               </option>
             ))}
           </select>
-          <input className="input grow" value={f.name} placeholder="name" onChange={(e) => upd(i, { name: e.target.value })} />
-          {f.kind !== 'gps' && <input className="input" value={f.system ?? ''} style={{ width: 90 }} placeholder={f.kind === 'drone' ? 'callsign' : 'system'} onChange={(e) => upd(i, { system: e.target.value })} />}
-          <button className="btn small ghost" title="Remove feed" onClick={() => set({ feeds: feeds.filter((_, j) => j !== i) })}>
+          <button className="btn small ghost f-x" title="Remove feed" onClick={() => set({ feeds: feeds.filter((_, j) => j !== i) })}>
             ✕
           </button>
+          <input className={`input f-name ${f.kind === 'gps' ? 'wide' : ''}`} value={f.name} placeholder="name" aria-label="Feed name" onChange={(e) => upd(i, { name: e.target.value })} />
+          {f.kind !== 'gps' && <input className="input" value={f.system ?? ''} placeholder={f.kind === 'drone' ? 'callsign' : 'system'} aria-label={f.kind === 'drone' ? 'Callsign' : 'Source system'} onChange={(e) => upd(i, { system: e.target.value })} />}
         </div>
       ))}
       <button className="btn small" onClick={() => set({ feeds: [...feeds, { id: `EXT${feeds.filter((f) => f.kind === 'external').length + 1}`, kind: 'external', name: 'CoT feed', system: 'CoT' }] })}>

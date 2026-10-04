@@ -68,6 +68,8 @@ export interface TrackMeasurement {
   category?: TrackCategory;
   /** Identity/affiliation as reported by another system (external interop). */
   reported?: ReportedIdentity;
+  /** Source-declared validity end (e.g. CoT stale time): a sparse feed's track does not coast before it. */
+  validUntil?: number;
 }
 
 /** What another system reported about a track. An assertion by that system, not this platform's judgement. */

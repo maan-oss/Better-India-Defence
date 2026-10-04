@@ -192,9 +192,9 @@ baseline. It is **not** JPDA, MHT, IMM or a learned tracker, and it is listed as
 ### Verified numbers (this repository, synthetic data, one developer machine)
 
 - Seeding 120 min of recorded history through the public ingestion API: ≈107 000 messages in ≈53 s.
-- Automated tests: 84 unit and integration tests in 14 files (domain, server, adapters — including
+- Automated tests: 87 unit and integration tests in 14 files (domain, server, adapters — including
   real-model vision tests, a recorded feed played as a live camera, C2 workflows, a configured real site
-  with CoT interop) and browser end-to-end tests against the production build.
+  with CoT interop) and 12 browser end-to-end tests against the production build.
 
 ---
 

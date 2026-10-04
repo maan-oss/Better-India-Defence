@@ -111,8 +111,9 @@ backoff and report state (connecting / live / error) and frame counters.
 track and each vital asset, `assess()` (`packages/domain/src/ops/threat.ts`) computes range to the
 protection boundary, time to boundary (ray–circle intersection on the current velocity), CPA/TCPA,
 closing speed, and a score = category × asset priority × confidence × (0.45 proximity + 0.35
-imminence + 0.2 approach), with a floor for any non-cooperative track inside a boundary and a separate
-factor for another system's reported affiliation. Readiness changes, teams, tasks (ETA from distance ×
+imminence + 0.2 approach), with a floor for any non-cooperative track inside a boundary, a separate
+factor for another system's reported affiliation, and a discount (×0.4) for lost tracks, whose position
+is only their last confirmed one. Readiness changes, teams, tasks (ETA from distance ×
 1.35 path factor at foot/vehicle speed; automatic ON SCENE within 35 m of the task from the team's
 tracker), alert checklists, handovers and SITREPs are tables in migration `005_ops.sql`; the duty log
 is append-only by trigger.
@@ -129,7 +130,8 @@ fused picture as CoT and accepts pushed CoT. External reports fuse as cooperativ
 or as positional measurements with `sensorKind: 'external'` carrying a `reported` identity that the
 engine keeps on the track and never lets merge into a known friendly entity. In live operation the
 fusion watermark also advances on the wall clock, so a sparse feed's last report is not held in the
-reorder buffer until its next one.
+reorder buffer until its next one. A report's declared validity (CoT `stale`, capped at 60 s) delays
+coasting, so a feed that reports every 10 s does not flicker between confirmed and coasting.
 
 ## Fusion
 

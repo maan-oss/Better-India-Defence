@@ -284,6 +284,7 @@ export function normalizeEnvelope(env: IngestEnvelope, frame: EnuFrame, received
         positional: true,
         category,
         reported: { system: p.system, sensorId: env.sensorId, uid: p.uid, affiliation: p.affiliation, ...(p.type ? { type: p.type } : {}), t },
+        ...(p.staleAt !== undefined ? { validUntil: p.staleAt } : {}),
         attributes: { system: p.system, affiliation: p.affiliation, ...(p.type ? { type: p.type } : {}) },
       });
       break;

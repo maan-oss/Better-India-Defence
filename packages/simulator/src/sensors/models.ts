@@ -371,8 +371,8 @@ export function externalStep(_world: TruthWorld, t: number, entities: EntityStat
   if (!due(t, 10, 7)) return [];
   const out: IngestEnvelope[] = [];
   const P = FACILITY.perimeterHalfM;
-  // Friendly patrol on a slow loop 150 m outside the perimeter.
-  const a = ((sec(t) % 1800) / 1800) * 2 * Math.PI;
+  // Friendly foot patrol walking a 4-hour loop 150 m outside the perimeter (≈ 1.1 m/s).
+  const a = ((sec(t) % 14400) / 14400) * 2 * Math.PI;
   const r = P + 150;
   const pos = { x: r * Math.cos(a), y: r * Math.sin(a), z: 0 };
   out.push(
@@ -385,7 +385,7 @@ export function externalStep(_world: TruthWorld, t: number, entities: EntityStat
       position: toGeo(pos),
       ceM: 6,
       courseDeg: round(((90 - ((a + Math.PI / 2) * 180) / Math.PI) % 360 + 360) % 360, 1),
-      speedMps: round((2 * Math.PI * r) / 1800, 2),
+      speedMps: round((2 * Math.PI * r) / 14400, 2),
       type: 'a-f-G-U-C-I',
       staleAt: t + 30_000,
     }, 0),

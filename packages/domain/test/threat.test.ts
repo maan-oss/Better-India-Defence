@@ -45,3 +45,16 @@ describe('threat evaluation', () => {
     expect(a.level).toBe('CRITICAL');
   });
 });
+
+describe('lost tracks', () => {
+  it('are discounted below live contacts, even inside a boundary', () => {
+    const va: VitalAsset = { id: 'va-x', name: 'Armoury', kind: 'ammunition', priority: 1, centre: { x: 0, y: 0 }, radiusM: 50, zoneId: null };
+    const base = { id: 'P-1', category: 'person' as const, label: 'P-1', t: 0, position: { x: 10, y: 0, z: 0 }, velocity: { x: 0, y: 0, z: 0 }, sigmaH: 2, sigmaV: 1, confidence: 0.9, contributors: ['C1'], lastConfirmedAt: 0, lastConfirmedPosition: { x: 10, y: 0, z: 0 }, entityId: null, cooperative: false, classification: 'person' as const, state: 'RECONSTRUCTED' as const, hits: 10 };
+    const live = assess({ ...base, status: 'confirmed' }, va);
+    const lost = assess({ ...base, status: 'lost', state: 'INFERRED' }, va);
+    expect(live.level).toBe('CRITICAL');
+    expect(lost.score).toBeLessThan(live.score / 2);
+    expect(lost.level).not.toBe('CRITICAL');
+    expect(lost.factors.map((f) => f.name)).toContain('lost (last known position)');
+  });
+});
