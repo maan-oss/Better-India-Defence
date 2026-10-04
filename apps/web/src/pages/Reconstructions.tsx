@@ -7,68 +7,79 @@ import { ErrorNote, Loading, StateChip, useAsync } from '../components/common';
 import { useSession } from '../state/session';
 import { useTime } from '../state/time';
 import { dateTime, dur, hms, pct, titleCase } from '../lib/format';
-import { Segmented } from '../components/ui';
+import { Badge, Button, Card, ExpandableCard, JsonViewer, NumberField, Progress, RadioCards, Select as ArcSelect, SortableDataTable, useToastStack } from '../components/kit';
 import { Empty } from '../brand/Boot';
+
+const KINDS = [
+  { value: 'all', label: 'All kinds' },
+  { value: 'multi_frame', label: 'Multi-observation reconstruction' },
+  { value: 'lidar_dsm', label: 'LiDAR surface reconstruction' },
+  { value: 'lidar_change_detection', label: 'LiDAR change detection' },
+  { value: 'imagery_change_detection', label: 'Imagery change detection' },
+];
 
 /** RECONSTRUCTIONS — jobs with inputs (evidence), outputs, confidence and failures. */
 export function Reconstructions() {
   const { id } = useParams();
   const nav = useNavigate();
   const can = useSession((s) => s.can);
-  const [kind, setKind] = useState('');
+  const [kind, setKind] = useState('all');
   const { data, error, reload } = useAsync((s) => get<ReconstructionRow[]>('/api/reconstructions', s), []);
-  const rows = (data ?? []).filter((r) => !kind || r.kind === kind);
+  const rows = (data ?? []).filter((r) => kind === 'all' || r.kind === kind);
+  const busy = (data ?? []).some((r) => r.status === 'queued' || r.status === 'running');
+  useEffect(() => {
+    if (!busy) return;
+    const h = setTimeout(reload, 2000);
+    return () => clearTimeout(h);
+  }, [busy, data, reload]);
   return (
     <div className="page">
       <div className="page-h">
         <h1>Reconstructions</h1>
         <span className="sub">Every derived product records its source observations. Nothing here is generated from a learned prior.</span>
         <div className="spacer" />
-        <select className="input" value={kind} onChange={(e) => setKind(e.target.value)} aria-label="Filter by kind">
-          <option value="">All kinds</option>
-          <option value="multi_frame">Multi-observation reconstruction</option>
-          <option value="lidar_dsm">LiDAR surface reconstruction</option>
-          <option value="lidar_change_detection">LiDAR change detection</option>
-          <option value="imagery_change_detection">Imagery change detection</option>
-        </select>
-        <button className="btn" onClick={reload}>
+        <div className="rc-kind">
+          <ArcSelect label="Kind" value={kind} onValueChange={setKind} options={KINDS} />
+        </div>
+        <Button variant="secondary" onClick={reload}>
           Refresh
-        </button>
+        </Button>
       </div>
       <div className="page-body split">
         <div className="scroll">
           {can('reconstruction.run') && <NewJob onCreated={(nid) => (reload(), nav(`/reconstructions/${nid}`))} />}
           {error && <ErrorNote error={error} />}
           {!data && !error && <Loading />}
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Job</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Conf.</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} className="click" style={r.id === id ? { background: 'var(--bg-3)' } : undefined} onClick={() => nav(`/reconstructions/${r.id}`)}>
-                  <td>
-                    <div className="ellipsis" style={{ maxWidth: 380 }}>
-                      {r.title}
-                    </div>
-                    <div className="muted mono" style={{ fontSize: 11 }}>
-                      {r.id} · {titleCase(r.kind)} · by {r.requested_by}
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`chip ${r.status === 'failed' ? 'UNKNOWN' : ''}`}>{r.status}</span>
-                  </td>
-                  <td className="mono muted">{hms(r.created_at)}</td>
-                  <td className="mono">{r.confidence !== null ? pct(r.confidence) : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {data && rows.length === 0 && <Empty compact art="reconstructions" title={data.length ? 'No job of this kind' : 'No reconstructions yet'} description="Jobs appear here as soon as they are queued, with their inputs, outputs and confidence." />}
+          {rows.length > 0 && (
+            <div className="rc-table">
+              <SortableDataTable
+                caption="Reconstruction jobs"
+                rowKey="id"
+                itemName={{ one: 'job', other: 'jobs' }}
+                defaultSort={{ key: 'created', direction: 'desc' }}
+                rows={rows.map((r) => ({ id: r.id, title: r.title, kind: r.kind, by: r.requested_by, status: r.status, created: r.created_at, conf: r.confidence ?? -1 }))}
+                columns={[
+                  {
+                    key: 'title',
+                    label: 'Job',
+                    sortable: true,
+                    render: (v, r) => (
+                      <button className="rc-job" aria-current={r.id === id ? 'true' : undefined} onClick={() => nav(`/reconstructions/${String(r.id)}`)}>
+                        <span className="ellipsis">{String(v)}</span>
+                        <span className="muted mono">
+                          {titleCase(String(r.kind))} · by {String(r.by)}
+                        </span>
+                      </button>
+                    ),
+                  },
+                  { key: 'status', label: 'Status', sortable: true, width: 110, render: (v) => <Badge size="sm" tone={v === 'failed' ? 'danger' : v === 'completed' ? 'success' : 'info'}>{String(v)}</Badge> },
+                  { key: 'created', label: 'Created', sortable: true, width: 96, render: (v) => <span className="mono muted">{hms(Number(v))}Z</span> },
+                  { key: 'conf', label: 'Conf.', sortable: true, numeric: true, width: 76, render: (v) => (Number(v) >= 0 ? pct(Number(v)) : '—') },
+                ]}
+              />
+            </div>
+          )}
         </div>
         <div className="scroll">{id ? <JobDetail id={id} /> : <Empty art="reconstructions" title="Select a job" description="Reconstructions rebuild a scene from recorded observations, with every derived surface marked as reconstructed." />}</div>
       </div>
@@ -81,61 +92,59 @@ function NewJob({ onCreated }: { onCreated: (id: string) => void }) {
   const [camera, setCamera] = useState('C12');
   const [building, setBuilding] = useState('bld-G');
   const [frames, setFrames] = useState(16);
+  const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const { toast } = useToastStack();
   const marking = FACILITY.buildings.flatMap((b) => b.markings ?? [])[0];
   const run = async () => {
     setErr(null);
+    setBusy(true);
     const t = useTime.getState();
     const at = Math.round((t.mode === 'live' ? t.currentLiveEdge() : t.t) - 4000);
     try {
       const r = await post<{ id: string }>('/api/reconstructions', kind === 'multi_frame' ? { kind, cameraId: camera, markingId: marking?.id, t: at, frames } : { kind, buildingId: building, t: at - 30 * 60_000 });
+      toast({ type: 'success', title: 'Reconstruction queued', description: `${r.id} · inputs are recorded with the job` });
       onCreated(r.id);
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'failed');
+    } finally {
+      setBusy(false);
     }
   };
   return (
     <div className="section">
-      <h4>New reconstruction</h4>
-      <div className="row" style={{ flexWrap: 'wrap' }}>
-        <Segmented
-          label="Reconstruction kind"
-          value={kind}
-          onChange={setKind}
-          options={[
-            { value: 'multi_frame', label: 'Multi-frame' },
-            { value: 'lidar_dsm', label: 'LiDAR surface' },
-          ]}
-        />
-        {kind === 'multi_frame' ? (
-          <>
-            <select className="input" value={camera} onChange={(e) => setCamera(e.target.value)}>
-              {getCameras().map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.id}
-                </option>
-              ))}
-            </select>
-            <span className="muted">frames</span>
-            <input className="input mono" style={{ width: 56 }} type="number" min={4} max={32} value={frames} onChange={(e) => setFrames(Number(e.target.value))} />
-          </>
-        ) : (
-          <select className="input" value={building} onChange={(e) => setBuilding(e.target.value)}>
-            {FACILITY.buildings.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.label} — {b.name}
-              </option>
-            ))}
-          </select>
-        )}
-        <button className="btn primary" onClick={() => void run()}>
-          Run
-        </button>
-      </div>
-      <div className="muted" style={{ fontSize: 11.5, marginTop: 6 }}>
-        {kind === 'multi_frame' ? `Fuses ${frames} recorded frames (2 s apart, ending at the current time) of the registered marking "${marking?.text}" on ${FACILITY.buildings.find((b) => b.markings?.length)?.name}. Best results from C12.` : 'Builds a 2 m digital surface model from LiDAR scans of the structure in the last 30 min. Cells with no returns stay unknown.'}
-      </div>
-      {err && <div className="note warn" style={{ marginTop: 6 }}>{err}</div>}
+      <ExpandableCard title="New reconstruction" description="Rebuild a marking from recorded frames, or a structure surface from LiDAR returns.">
+        <div className="rc-new">
+          <RadioCards
+            aria-label="Reconstruction kind"
+            layout="grid"
+            minColumnWidth={200}
+            value={kind}
+            onValueChange={(v) => setKind(v as 'multi_frame' | 'lidar_dsm')}
+            options={[
+              { value: 'multi_frame', label: 'Multi-frame', description: 'Fuses recorded frames of a registered marking into one sharper image.' },
+              { value: 'lidar_dsm', label: 'LiDAR surface', description: 'A 2 m surface model of a structure from the last 30 min of returns.' },
+            ]}
+          />
+          {kind === 'multi_frame' ? (
+            <div className="rc-two">
+              <ArcSelect label="Camera" value={camera} onValueChange={setCamera} options={getCameras().map((c) => ({ value: c.id, label: `${c.id} · ${c.name}` }))} />
+              <NumberField label="Frames" value={frames} onValueChange={setFrames} min={4} max={32} step={1} description="2 s apart, ending now" />
+            </div>
+          ) : (
+            <ArcSelect label="Structure" value={building} onValueChange={setBuilding} options={FACILITY.buildings.map((b) => ({ value: b.id, label: `${b.label} · ${b.name}` }))} />
+          )}
+          <div className="muted" style={{ fontSize: 12 }}>
+            {kind === 'multi_frame' ? `Uses the registered marking "${marking?.text}" on ${FACILITY.buildings.find((b) => b.markings?.length)?.name}. Best results from C12.` : 'Cells with no returns stay unknown; nothing is filled in.'}
+          </div>
+          {err && <div className="note warn">{err}</div>}
+          <div className="row">
+            <Button loading={busy} onClick={() => void run()}>
+              Run reconstruction
+            </Button>
+          </div>
+        </div>
+      </ExpandableCard>
     </div>
   );
 }
@@ -163,6 +172,11 @@ function JobDetail({ id }: { id: string }) {
           {data.finished_at && data.started_at ? ` · ran ${dur(data.finished_at - data.started_at)}` : ''}
         </div>
         {data.error && <div className="note warn" style={{ marginTop: 8 }}>Failed: {data.error}</div>}
+        {pending && (
+          <div style={{ marginTop: 12 }}>
+            <Progress label={data.status === 'queued' ? 'Waiting for a worker' : 'Reconstructing'} />
+          </div>
+        )}
       </div>
       {data.kind === 'multi_frame' && data.status === 'completed' && <MultiFrame result={r} />}
       {data.status === 'completed' && data.kind !== 'multi_frame' && (
@@ -192,9 +206,7 @@ function JobDetail({ id }: { id: string }) {
       </div>
       <div className="section">
         <h4>Parameters</h4>
-        <pre className="mono" style={{ background: 'var(--bg-0)', padding: 10, border: '1px solid var(--line)', margin: 0 }}>
-          {JSON.stringify(data.params, null, 2)}
-        </pre>
+        <JsonViewer data={data.params} rootName="params" defaultExpandDepth={2} maxHeight={280} label="Job parameters" />
       </div>
     </div>
   );
@@ -208,33 +220,18 @@ function MultiFrame({ result }: { result: Record<string, unknown> }) {
     <>
       <div className="section">
         <h4>Outputs — four distinct products</h4>
-        <div className="sr-grid">
-          {outputs.map((o) =>
-            o.mediaId ? (
-              <div key={o.key} className="sr-cell">
-                <img src={`/api/media/${encodeURIComponent(o.mediaId)}`} alt={o.label} />
-                <div className="cap">
-                  <b>{o.label}</b>
-                  <StateChip state={o.state} />
-                  {metrics?.[o.key] && (
-                    <span className="mono muted">
-                      PSNR {metrics[o.key]!.psnr} dB · SSIM {metrics[o.key]!.ssim}
-                    </span>
-                  )}
-                </div>
-                <div className="muted" style={{ padding: '0 8px 8px', fontSize: 11.5, background: 'var(--bg-2)' }}>
-                  {o.description}
-                </div>
-              </div>
-            ) : (
-              <div key={o.key} className="sr-cell empty">
-                <div style={{ textAlign: 'center' }}>
-                  <b>{o.label}</b> <StateChip state={o.state} />
-                  <div>{o.description}</div>
-                </div>
-              </div>
-            ),
-          )}
+        <div className="rc-outputs">
+          {outputs.map((o) => (
+            <Card
+              key={o.key}
+              title={o.label}
+              description={o.description}
+              media={o.mediaId ? <img className="rc-media" src={`/api/media/${encodeURIComponent(o.mediaId)}`} alt={o.label} /> : <div className="rc-media empty">No output: {o.state.toLowerCase()}</div>}
+              meta={<StateChip state={o.state} />}
+              status={metrics?.[o.key] ? `PSNR ${metrics[o.key]!.psnr} dB · SSIM ${metrics[o.key]!.ssim}` : undefined}
+              details={o.mediaId ? <img className="rc-media-full" src={`/api/media/${encodeURIComponent(o.mediaId)}`} alt={o.label} /> : undefined}
+            />
+          ))}
         </div>
         <div className="muted" style={{ fontSize: 11.5, marginTop: 8 }}>
           {String(result.metricsNote ?? '')} Frames used: {String(result.usedFrames)} · rejected: {String(result.rejectedFrames)}.
@@ -242,26 +239,19 @@ function MultiFrame({ result }: { result: Record<string, unknown> }) {
       </div>
       <div className="section">
         <h4>Registration (sub-pixel alignment per frame)</h4>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Frame time</th>
-              <th>dx (px)</th>
-              <th>dy (px)</th>
-              <th>Residual</th>
-            </tr>
-          </thead>
-          <tbody>
-            {regs.map((g) => (
-              <tr key={g.t}>
-                <td className="mono">{hms(g.t)}Z</td>
-                <td className="mono">{g.dx.toFixed(3)}</td>
-                <td className="mono">{g.dy.toFixed(3)}</td>
-                <td className="mono">{g.residual.toFixed(4)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <SortableDataTable
+          caption="Frame registration"
+          rowKey="t"
+          itemName={{ one: 'frame', other: 'frames' }}
+          defaultSort={{ key: 't', direction: 'asc' }}
+          rows={regs.map((g) => ({ ...g }))}
+          columns={[
+            { key: 't', label: 'Frame time', sortable: true, render: (v) => <span className="mono">{hms(Number(v))}Z</span> },
+            { key: 'dx', label: 'dx (px)', sortable: true, numeric: true, render: (v) => Number(v).toFixed(3) },
+            { key: 'dy', label: 'dy (px)', sortable: true, numeric: true, render: (v) => Number(v).toFixed(3) },
+            { key: 'residual', label: 'Residual', sortable: true, numeric: true, render: (v) => Number(v).toFixed(4) },
+          ]}
+        />
       </div>
     </>
   );

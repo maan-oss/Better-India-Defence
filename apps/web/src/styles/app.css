@@ -553,3 +553,19 @@ button.list-row:focus-visible { box-shadow: inset var(--glow-accent); }
 @media (max-width: 520px) { .login-side { padding: 24px 16px; } }
 .login-mobile-mark { display: none; margin-bottom: 36px; }
 @media (max-width: 960px) { .login-mobile-mark { display: block; } }
+
+/* Reconstructions */
+.rc-kind { width: 260px; }
+.rc-kind label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.rc-table { padding: 0 8px; }
+button.rc-job { all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 2px; max-width: 360px; min-width: 0; }
+button.rc-job > span:first-child { font-size: 13px; }
+button.rc-job > span:last-child { font-size: 11px; }
+button.rc-job[aria-current] > span:first-child { text-decoration: underline; text-underline-offset: 3px; }
+button.rc-job:focus-visible { box-shadow: var(--glow-accent); border-radius: 3px; }
+.rc-new { display: flex; flex-direction: column; gap: 14px; padding-top: 4px; }
+.rc-two { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: start; }
+.rc-outputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.rc-media { display: block; width: 100%; aspect-ratio: 2 / 1; object-fit: contain; background: var(--bg-0); image-rendering: pixelated; }
+.rc-media.empty { display: grid; place-items: center; color: var(--text-2); font-size: 12px; }
+.rc-media-full { display: block; width: 100%; max-height: 70vh; object-fit: contain; image-rendering: pixelated; background: var(--bg-0); }
