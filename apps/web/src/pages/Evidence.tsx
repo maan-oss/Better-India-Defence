@@ -6,7 +6,7 @@ import { ErrorNote, Loading, ObservationViewer, StateChip, useAsync } from '../c
 import { useSession } from '../state/session';
 import { useTime } from '../state/time';
 import { useWorld } from '../state/world';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { bytes, dateTime, dur, hms, pct } from '../lib/format';
 import { Segmented, Tabs } from '../components/ui';
 import { DateRangePicker, FilterToolbar, Pagination, SearchField, Ridgeline, SortableDataTable, Streamgraph, type DateRange, type FilterChip } from '../components/kit';
@@ -46,7 +46,8 @@ type ObsRow = { id: string; sensor_id: string; kind: string; source_kind: string
 const KINDS = ['track', 'media', 'position', 'rf', 'spatial', 'imagery', 'infrastructure', 'health'];
 
 function ObservationSearch() {
-  const [sensorId, setSensor] = useState('');
+  const [params] = useSearchParams();
+  const [sensorId, setSensor] = useState(() => params.get('sensor') ?? '');
   const [filters, setFilters] = useState<FilterChip[]>([]);
   const [range, setRange] = useState<DateRange | null>(null);
   const [obs, setObs] = useState<string | null>(null);

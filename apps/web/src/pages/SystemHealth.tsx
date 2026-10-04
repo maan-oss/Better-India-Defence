@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { get } from '../api/client';
 import { ErrorNote, Loading } from '../components/common';
 import { bytes, hms } from '../lib/format';
-import { AnimatedCounter, Gauge, LineChart, Sparkline, Treemap, UsageMeter } from '../components/kit';
+import { AnimatedCounter, DonutChart, Gauge, LineChart, Sparkline, Treemap, UsageMeter } from '../components/kit';
 
 interface Health {
   services: { name: string; status: string; detail: string }[];
@@ -173,11 +173,20 @@ export function SystemHealth() {
           </div>
           <div className="section">
             <h4>Reconstruction jobs</h4>
-            {h.jobs.map((j) => (
-              <div key={j.status} className="row">
-                <span style={{ width: 120 }}>{j.status}</span> <span className="mono">{j.n}</span>
+            {h.jobs.length === 0 ? (
+              <div className="muted">No jobs yet.</div>
+            ) : (
+              <div className="health-donut">
+                <DonutChart
+                  label="Reconstruction jobs by state"
+                  unit="jobs"
+                  totalLabel="Jobs"
+                  size={160}
+                  thickness={16}
+                  data={h.jobs.map((j) => ({ key: j.status, label: j.status, value: j.n, color: j.status === 'failed' ? 'var(--st-critical)' : j.status === 'completed' ? 'var(--text-2)' : j.status === 'running' ? 'var(--st-standby)' : 'var(--line-3)' }))}
+                />
               </div>
-            ))}
+            )}
           </div>
           <div className="section">
             <h4>Clocks</h4>

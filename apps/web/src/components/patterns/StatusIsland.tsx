@@ -14,6 +14,7 @@ import { useWorld } from '../../state/world';
 import { SplitFlapDisplay } from '../vendor/componentry/split-flap-display';
 import { NotificationList, type NotificationItem } from '../vendor/spaceui/components/spaceui/notification-list';
 import { StatusBadge } from '../vendor/spaceui/components/spaceui/status-badge';
+import { SlotText } from '../kit';
 import './patterns.css';
 
 const zulu = (t: number) => new Date(t).toISOString().slice(11, 19);
@@ -49,7 +50,8 @@ export function StatusIsland() {
   const open_ = useMemo(() => alerts.filter((a) => a.status === 'open'), [alerts]);
   const crit = open_.filter((a) => a.priority === 'critical').length;
   const high = open_.filter((a) => a.priority === 'high').length;
-  const configured = Object.keys(sensors).length || (facility?.sensors.length ?? 0);
+  // Registered sensors, not just the ones that have sent a status since this page loaded.
+  const configured = facility?.sensors.length || Object.keys(sensors).length;
   // Health the server reports for each sensor; sensors with no health record yet are not counted either way.
   const states = Object.values(sensors);
   const down = states.filter((s) => s.status === 'silent' || s.status === 'offline' || s.status === 'fault').length;
@@ -110,13 +112,13 @@ export function StatusIsland() {
             {crit > 0 && (
               <span className="isl-n crit">
                 <span className="prio critical" />
-                {crit}
+                <SlotText value={crit} duration={0.5} spins={0} announce />
               </span>
             )}
             {high > 0 && (
               <span className="isl-n">
                 <span className="prio high" />
-                {high}
+                <SlotText value={high} duration={0.5} spins={0} announce />
               </span>
             )}
           </>

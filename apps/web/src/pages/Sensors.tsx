@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Cctv, Database, MapPin } from 'lucide-react';
 import { useWorld } from '../state/world';
 import { get } from '../api/client';
 import type { SensorListItem } from '../api/types';
@@ -9,7 +10,7 @@ import { useTime } from '../state/time';
 import { useSession } from '../state/session';
 import { ago, hms } from '../lib/format';
 import { Empty } from '../brand/Boot';
-import { BrushChart, Button, JsonViewer, MetricCard, SearchField, SortableDataTable, Timeline as ArcTimeline, WaffleChart } from '../components/kit';
+import { ButtonGroup, BrushChart, Button, JsonViewer, MetricCard, SearchField, SortableDataTable, Timeline as ArcTimeline, WaffleChart } from '../components/kit';
 
 interface SensorDetail {
   definition: SensorListItem['definition'];
@@ -137,6 +138,7 @@ export function Sensors() {
 const hhmm = (d: Date) => `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}Z`;
 
 function SensorDetailView({ id }: { id: string }) {
+  const nav = useNavigate();
   const { data, error } = useAsync((s) => get<SensorDetail>(`/api/sensors/${id}`, s), [id]);
   const [obs, setObs] = useState<string | null>(null);
   const can = useSession((s) => s.can);
@@ -162,6 +164,17 @@ function SensorDetailView({ id }: { id: string }) {
         <div className="row">
           <span className={`status-dot ${data.status?.status ?? 'silent'}`} /> {data.status?.status ?? 'never reported'} · last traffic {ago(data.status?.lastSeen, Date.now())}
           {data.status?.message && <span className="muted"> · {data.status.message}</span>}
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <ButtonGroup
+            label={`${d.id} actions`}
+            size="sm"
+            items={[
+              ...('position' in d && d.position ? [{ id: 'map', label: 'Show on map', icon: <MapPin size={14} />, onSelect: () => (nav('/operations'), useWorld.getState().select({ kind: 'sensor', id: d.id }), useWorld.getState().flyTo((d as { position: { x: number; y: number; z?: number } }).position as { x: number; y: number; z: number }, 300)) }] : []),
+              { id: 'evidence', label: 'Its observations', icon: <Database size={14} />, onSelect: () => nav(`/evidence?sensor=${encodeURIComponent(d.id)}`) },
+              ...(d.kind === 'camera' ? [{ id: 'wall', label: 'Camera wall', icon: <Cctv size={14} />, onSelect: () => nav('/cameras') }] : []),
+            ]}
+          />
         </div>
       </div>
       {(d.kind === 'camera' || d.kind === 'drone') && <CameraFeed sensorId={d.id} t={t} live={useTime.getState().mode === 'live'} />}
