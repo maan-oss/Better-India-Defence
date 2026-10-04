@@ -112,7 +112,7 @@
   --shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 16px 40px -8px rgba(0, 0, 0, 0.55), 0 4px 12px -4px rgba(0, 0, 0, 0.35);
   --glow-accent: 0 0 0 1px var(--bg-1), 0 0 0 3px var(--focus);
 
-  --rail-w: 52px;
+  --rail-w: 56px;
   --rail-w-open: 216px;
   --left-w: 272px;
   --right-w: 384px;

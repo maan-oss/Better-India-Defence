@@ -12,3 +12,97 @@
 .otp-caret { width: 2px; height: 24px; border-radius: 1px; background: var(--accent); animation: otpBlink 1.1s steps(2, start) infinite; }
 @keyframes otpBlink { to { visibility: hidden; } }
 @media (max-width: 420px) { .otp-cell { width: 32px; height: 44px; font-size: 18px; } }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Command bar (pattern after Bencho's command bar). */
+.cmd-overlay { position: fixed; inset: 0; z-index: 140; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); }
+.cmd {
+  position: fixed; z-index: 141; top: 14vh; left: 50%; width: min(640px, calc(100vw - 32px)); margin-left: calc(min(640px, calc(100vw - 32px)) / -2);
+  display: flex; flex-direction: column; max-height: min(560px, 72vh);
+  background: var(--bg-2); border-radius: var(--radius-xl); box-shadow: var(--shadow-2); overflow: hidden; outline: none;
+}
+.cmd-input { display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-4); height: 52px; border-bottom: 1px solid var(--line); color: var(--text-2); flex: none; }
+.cmd-input input { flex: 1; min-width: 0; height: 100%; background: transparent; border: 0; outline: none; font-size: 15px; color: var(--text-0); }
+.cmd-input input::placeholder { color: var(--text-3); }
+.cmd-input input:focus-visible { box-shadow: none; }
+.cmd-list { flex: 1; min-height: 0; padding: var(--sp-2); }
+.cmd-group { padding: var(--sp-3) 10px 6px; font-size: 11.5px; font-weight: 500; color: var(--text-3); }
+.cmd-group:first-child { padding-top: var(--sp-1); }
+.cmd-item { position: relative; display: flex; align-items: center; gap: var(--sp-3); height: 40px; padding: 0 10px; border-radius: var(--radius); cursor: pointer; color: var(--text-1); isolation: isolate; }
+.cmd-item.on { color: var(--text-0); }
+.cmd-hl { position: absolute; inset: 0; z-index: -1; border-radius: var(--radius); background: var(--bg-4); }
+.cmd-icon { width: 18px; height: 18px; display: grid; place-items: center; color: var(--text-2); flex: none; }
+.cmd-icon svg { width: 16px; height: 16px; }
+.cmd-item.on .cmd-icon { color: var(--text-0); }
+.cmd-label { flex: none; max-width: 60%; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmd-detail { flex: 1; min-width: 0; color: var(--text-3); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmd-keys { margin-left: auto; display: flex; gap: 3px; flex: none; }
+.cmd-keys .kbd { min-width: 20px; text-align: center; }
+.cmd-empty { padding: var(--sp-8) var(--sp-4); text-align: center; color: var(--text-2); }
+.cmd-foot { display: flex; align-items: center; gap: var(--sp-4); height: 40px; padding: 0 var(--sp-4); border-top: 1px solid var(--line); color: var(--text-3); font-size: 12px; flex: none; }
+.cmd-foot > span { display: inline-flex; align-items: center; gap: 4px; }
+.cmd-foot .kbd { min-width: 18px; text-align: center; }
+@media (max-width: 640px) { .cmd-foot > span:last-child { display: none; } }
+
+/* Status island (pattern after Bencho's dynamic island). */
+.island-wrap { position: relative; flex: none; min-width: 0; }
+.island {
+  height: 32px; display: flex; align-items: center; padding: 0 4px; border: 1px solid var(--line-2); background: var(--bg-1);
+  color: var(--text-1); cursor: pointer; font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden;
+}
+.island:hover { border-color: var(--line-3); background: var(--bg-2); }
+.island.has-crit { border-color: var(--st-critical-line); box-shadow: 0 0 0 3px var(--st-critical-tint); }
+.island-ghost { visibility: hidden; pointer-events: none; border-radius: 999px; }
+.island:not(.island-ghost) { position: absolute; top: 0; right: 0; }
+.island-row { display: flex; align-items: center; height: 100%; }
+.isl-seg { display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; height: 100%; position: relative; }
+.isl-seg + .isl-seg::before { content: ''; position: absolute; left: 0; top: 9px; bottom: 9px; width: 1px; background: var(--line-2); }
+.isl-time .mono { color: var(--text-0); font-size: 12px; }
+.isl-time.replay { color: var(--st-caution-text); }
+.isl-time.replay .mono { color: var(--st-caution-text); }
+.isl-mode { color: var(--text-2); }
+.isl-ready { font-size: 11px; letter-spacing: 0.05em; font-weight: 600; color: var(--text-1); }
+.isl-ready i { width: 6px; height: 6px; border-radius: 50%; background: var(--st-normal); }
+.isl-ready.r-ALERT { color: var(--st-caution-text); }
+.isl-ready.r-ALERT i { background: var(--st-caution); }
+.isl-ready.r-HIGH-ALERT { color: var(--st-serious-text); }
+.isl-ready.r-HIGH-ALERT i { background: var(--st-serious); }
+.isl-ready.r-LOCKDOWN { color: var(--st-critical-text); }
+.isl-ready.r-LOCKDOWN i { background: var(--st-critical); animation: pulse 1.2s ease-in-out infinite; }
+.isl-n { display: inline-flex; align-items: center; gap: 5px; font-variant-numeric: tabular-nums; color: var(--text-0); }
+.isl-n.crit { color: var(--st-critical-text); }
+.isl-alerts { gap: 10px; }
+.isl-unit { font-weight: 400; }
+.isl-link { color: var(--st-caution-text); }
+
+.island-panel {
+  position: absolute; top: -4px; right: -4px; z-index: 60; width: 400px; max-width: calc(100vw - 24px);
+  background: var(--bg-2); border: 1px solid var(--line-2); box-shadow: var(--shadow-2); overflow: hidden; cursor: default;
+}
+.isp-body { display: flex; flex-direction: column; }
+.isp-clock { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-4); border-bottom: 1px solid var(--line); }
+.isp-flap { padding: 8px !important; border-radius: 12px !important; flex: none; }
+.isp-clock-meta { display: flex; flex-direction: column; gap: 2px; font-size: 12px; min-width: 0; }
+.isp-clock-meta .btn { margin-top: 4px; align-self: flex-start; }
+.isp-k { font-size: 11.5px; font-weight: 500; color: var(--text-2); }
+.isp-sec { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--sp-2); }
+.isp-sec:last-child { border-bottom: 0; }
+.isp-sec > header { display: flex; align-items: center; justify-content: space-between; }
+.isp-link { display: inline-flex; align-items: center; gap: 2px; border: 0; background: none; color: var(--text-2); font-size: 12px; cursor: pointer; padding: 0; }
+.isp-link:hover { color: var(--text-0); }
+.isp-ready { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; font-size: 12.5px; }
+.isp-small { font-size: 11.5px; }
+.isp-empty { font-size: 12.5px; color: var(--text-3); padding: 2px 0 4px; }
+.isp-alerts { padding: 0 !important; background: transparent !important; }
+.isp-row { flex-direction: row; gap: var(--sp-2); }
+.isp-tile { flex: 1; min-width: 0; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; border-radius: 12px; }
+.isp-tile > div { width: 100%; height: auto !important; padding: 10px 12px !important; background: var(--bg-1) !important; border-color: var(--line-2) !important; color: var(--text-0); }
+.isp-tile:hover > div { background: var(--bg-3) !important; }
+
+/* Space UI notification cards: a status bar on the leading edge. */
+.nl-card { overflow: hidden; border: 1px solid var(--line-2); }
+.nl-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--text-3); }
+.nl-card.nl-critical::before { background: var(--st-critical); }
+.nl-card.nl-high::before { background: var(--st-serious); }
+.nl-card.nl-medium::before { background: var(--st-caution); }

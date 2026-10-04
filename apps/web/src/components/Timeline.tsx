@@ -30,6 +30,13 @@ interface Hit {
  * recorded period; scrubbing seeks the whole world, and the live edge is always explicit.
  */
 export function Timeline() {
+  const [open, setOpen] = useState(() => {
+    try {
+      return localStorage.getItem('strata.timeline') !== 'closed';
+    } catch {
+      return true;
+    }
+  });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const hits = useRef<{ x: number; y: number; hit: Hit }[]>([]);
@@ -313,8 +320,18 @@ export function Timeline() {
     setView({ from: to - ms, to });
   };
 
+  const toggleOpen = () => {
+    const next = !open;
+    setOpen(next);
+    try {
+      localStorage.setItem('strata.timeline', next ? 'open' : 'closed');
+    } catch {
+      /* session only */
+    }
+  };
+
   return (
-    <div className="timeline">
+    <div className={`timeline ${open ? '' : 'compact'}`}>
       <div className="tl-controls">
         <button className="btn icon small ghost" title="Step back (frame)" aria-label="Step back" onClick={(e) => time.step(e.shiftKey ? -10 : -1)}>
           <Icon.StepB />
@@ -347,11 +364,14 @@ export function Timeline() {
               ['All', null],
             ] as const
           ).map(([l, ms]) => (
-            <button key={l} onClick={() => preset(ms)}>
+            <button key={l} onClick={() => (preset(ms), open || toggleOpen())}>
               {l}
             </button>
           ))}
         </div>
+        <button className="btn icon small ghost tl-toggle" onClick={toggleOpen} aria-expanded={open} aria-label={open ? 'Hide timeline' : 'Show timeline'} title={open ? 'Hide timeline' : 'Show timeline'}>
+          <Icon.Chevron />
+        </button>
       </div>
       <div ref={wrapRef} className="tl-canvas" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={() => setTip(null)} onWheel={onWheel} role="slider" aria-label="Timeline" aria-valuenow={Math.round(time.t)} tabIndex={0}>
         <canvas ref={canvasRef} />

@@ -10,7 +10,6 @@ import { EnuFrame } from '@strata/domain';
 import { tracks } from '../state/tracks';
 import { live } from '../api/live';
 import { get, qs } from '../api/client';
-import { LayersPanel } from '../components/LayersPanel';
 import { ContextPanel } from '../components/ContextPanel';
 import { Timeline } from '../components/Timeline';
 import { MapHud } from '../components/MapHud';
@@ -19,6 +18,9 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { StateChip } from '../components/common';
 import { hms } from '../lib/format';
 import { buildBasemap } from '../lib/basemap';
+import { ResizablePanel, ResizablePanels } from '../components/kit';
+import { ModeControl, ToolDock } from '../components/ops/MapControls';
+import { GetStarted } from '../components/ops/GetStarted';
 
 const now = () => {
   const s = useTime.getState();
@@ -39,6 +41,15 @@ export function Operations() {
   const [introFade, setIntroFade] = useState(1);
   const [stats, setStats] = useState('');
   const [webglError, setWebglError] = useState<string | null>(null);
+  const splitRef = useRef<HTMLDivElement>(null);
+  const [panelOpen, setPanelOpen] = useState(() => {
+    try {
+      return localStorage.getItem('strata.ops.panel') !== 'closed';
+    } catch {
+      return true;
+    }
+  });
+  const showStats = typeof location !== 'undefined' && location.search.includes('debug');
 
   // Engine lifecycle.
   useEffect(() => {
@@ -284,40 +295,65 @@ export function Operations() {
       </span>
     ) : null;
 
+  // The divider owns collapsing (Enter on the separator hides or restores the inspector), so the dock drives it.
+  const togglePanel = () => splitRef.current?.querySelector(':scope > * > [role="separator"][aria-valuenow]')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  const onLayout = (sizes: number[]) => {
+    const open = (sizes[1] ?? 0) > 0.5;
+    setPanelOpen(open);
+    try {
+      localStorage.setItem('strata.ops.panel', open ? 'open' : 'closed');
+    } catch {
+      /* session only */
+    }
+  };
+  const fit = () => {
+    if (facility) useWorld.getState().flyTo({ x: 0, y: 0, z: 0 }, facility.halfExtentM * 2.1);
+  };
+
   return (
-    <div className="ops">
-      <LayersPanel />
-      <section className="ops-world" aria-label="4D world">
-        {webglError ? (
-          <div className="err">3D world unavailable: {webglError}. All other areas remain usable.</div>
-        ) : (
-          <>
-            <div ref={hostRef} className="world-canvas" />
-            <div ref={labelRef} className="world-labels" />
-            <div className="intro-fade" style={{ opacity: introFade }} />
-            {facility && <MapHud engineRef={engineRef} hostRef={hostRef} facility={facility} />}
-          </>
-        )}
-        {banner && <div className="mode-banner glass">{banner}</div>}
-        {viewThrough && (
-          <div className="world-hud glass" style={{ padding: '6px 10px' }}>
-            Viewing reconstructed world from <b className="mono">{viewThrough}</b> calibrated pose
-            <button className="btn small" onClick={() => useWorld.getState().setViewThrough(null)}>
-              Exit (Esc)
-            </button>
-          </div>
-        )}
-        <div className="perf" aria-hidden>
-          {stats}
-        </div>
-        <ErrorBoundary area="Copilot">
-          <Copilot />
-        </ErrorBoundary>
-      </section>
-      <ContextPanel />
-      <section className="ops-bottom" aria-label="Timeline">
-        <Timeline />
-      </section>
+    <div className="ops" ref={splitRef}>
+      <ResizablePanels label="Operational picture" className="ops-split" onLayoutChange={onLayout}>
+        <ResizablePanel id="ops-world" label="Map" defaultSize={74} minSize={420}>
+          <section className="ops-world" aria-label="4D world">
+            {webglError ? (
+              <div className="err">3D world unavailable: {webglError}. All other areas remain usable.</div>
+            ) : (
+              <>
+                <div ref={hostRef} className="world-canvas" />
+                <div ref={labelRef} className="world-labels" />
+                <div className="intro-fade" style={{ opacity: introFade }} />
+                {facility && <MapHud engineRef={engineRef} hostRef={hostRef} facility={facility} />}
+              </>
+            )}
+            <ModeControl />
+            <ToolDock panelOpen={panelOpen} onTogglePanel={togglePanel} onFit={fit} />
+            {banner && <div className="mode-banner glass">{banner}</div>}
+            {viewThrough && (
+              <div className="world-hud glass" style={{ padding: '6px 10px' }}>
+                Viewing reconstructed world from <b className="mono">{viewThrough}</b> calibrated pose
+                <button className="btn small" onClick={() => useWorld.getState().setViewThrough(null)}>
+                  Exit (Esc)
+                </button>
+              </div>
+            )}
+            {showStats && (
+              <div className="perf" aria-hidden>
+                {stats}
+              </div>
+            )}
+            <GetStarted />
+            <ErrorBoundary area="Copilot">
+              <Copilot />
+            </ErrorBoundary>
+          </section>
+          <section className="ops-bottom" aria-label="Timeline">
+            <Timeline />
+          </section>
+        </ResizablePanel>
+        <ResizablePanel id="ops-context" label="Inspector" defaultSize={26} minSize={320} maxSize={560} collapsible defaultCollapsed={!panelOpen}>
+          <ContextPanel />
+        </ResizablePanel>
+      </ResizablePanels>
     </div>
   );
 }

@@ -101,19 +101,22 @@ export class WorldEngine {
     }
     this.bindPointer();
     this.resize();
-    window.addEventListener('resize', this.resize);
+    // The view follows its container (panels resize and collapse), not only the window.
+    this.resizeObs = new ResizeObserver(() => this.resize());
+    this.resizeObs.observe(this.host);
     this.raf = requestAnimationFrame(this.loop);
   }
 
   dispose(): void {
     cancelAnimationFrame(this.raf);
-    window.removeEventListener('resize', this.resize);
+    this.resizeObs?.disconnect();
     this.controls.dispose();
     this.labels.clear();
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }
 
+  private resizeObs: ResizeObserver | null = null;
   private resize = () => {
     const w = this.host.clientWidth || 1;
     const h = this.host.clientHeight || 1;

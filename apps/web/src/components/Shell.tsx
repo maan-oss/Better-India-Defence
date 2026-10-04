@@ -1,124 +1,322 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Popover as P } from 'radix-ui';
+import { Keyboard, Moon, Sun, Bell, BellOff, Search, Settings2 } from 'lucide-react';
+import { toMgrs, type AlertRecord } from '@strata/domain';
 import { useSession } from '../state/session';
-import { MODES, useWorld, type GlobalMode } from '../state/world';
-import { useTime } from '../state/time';
+import { useWorld } from '../state/world';
 import { useData } from '../state/data';
 import { useVisionLive } from '../api/vision';
-import { get } from '../api/client';
-import { Icon } from './Icons';
-import { Menu, MenuItem, MenuLabel, MenuSeparator, Tabs, Tip } from './ui';
-import { dateTime } from '../lib/format';
-import { EnuFrame, fromMgrs, terrainHeight } from '@strata/domain';
+import { post } from '../api/client';
 import { useOps } from '../state/ops';
 import { useUi } from '../state/ui';
-import { post } from '../api/client';
-import type { AlertRecord } from '@strata/domain';
+import { NAV, pageTitle } from '../lib/nav';
+import { Icon } from './Icons';
+import { Dialog, Tip } from './ui';
+import { Breadcrumb, PopoverContent, ToastStack, ToastStackProvider, UserMenu } from './kit';
+import { CommandBar } from './patterns/CommandBar';
+import { StatusIsland } from './patterns/StatusIsland';
+import { MacKeyboard } from './vendor/componentry/mac-keyboard';
 
-type NavItem = { to: string; label: string; icon: keyof typeof Icon; perm?: string };
-const NAV: { group: string; items: NavItem[] }[] = [
-  {
-    group: 'Operate',
-    items: [
-      { to: '/operations', label: 'Operational picture', icon: 'Ops' },
-      { to: '/command', label: 'Command', icon: 'Command' },
-      { to: '/cameras', label: 'Camera wall', icon: 'Camera', perm: 'media.view' },
-      { to: '/incidents', label: 'Incidents', icon: 'Incidents' },
-      { to: '/field', label: 'Field view', icon: 'Field' },
-    ],
-  },
-  {
-    group: 'Intelligence',
-    items: [
-      { to: '/identity', label: 'Identity', icon: 'Identity', perm: 'identity.view' },
-      { to: '/forensics', label: 'Media forensics', icon: 'Forensics' },
-      { to: '/evidence', label: 'Evidence', icon: 'Evidence' },
-      { to: '/reconstructions', label: 'Reconstructions', icon: 'Recon' },
-    ],
-  },
-  {
-    group: 'Systems',
-    items: [
-      { to: '/sensors', label: 'Sensors', icon: 'Sensors' },
-      { to: '/system', label: 'System health', icon: 'Health', perm: 'system.view' },
-      { to: '/simulation', label: 'Simulation lab', icon: 'Sim', perm: 'simulation.control' },
-      { to: '/audit', label: 'Audit', icon: 'Audit', perm: 'audit.view' },
-    ],
-  },
-  {
-    group: 'Administer',
-    items: [
-      { to: '/admin', label: 'Users & settings', icon: 'Admin', perm: 'admin.users' },
-      { to: '/site', label: 'Site setup', icon: 'Target', perm: 'admin.config' },
-    ],
-  },
-];
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
+const MOD = isMac ? '⌘' : 'Ctrl';
 
+/**
+ * Console frame. The rail (56 px, icons with names on hover) runs the full height beside a 48 px top bar that
+ * carries where you are (site › page), the command bar, and the status island. Content gets everything else.
+ */
 export function Shell({ children }: { children: ReactNode }) {
   const cls = useOps((s) => s.classification);
-  const railOpen = useUi((s) => s.railOpen);
   const loc = useLocation();
+  const [cmd, setCmd] = useState(false);
+  const [keys, setKeys] = useState(false);
   const banner = `${cls.level}${cls.caveat ? ` // ${cls.caveat}` : ''}`;
   const area = loc.pathname.split('/')[1] ?? '';
+  useGlobalKeys(() => setCmd(true), () => setKeys(true));
   return (
-    <div className={`shell cls-${cls.level} ${railOpen ? 'rail-open' : ''}`}>
-      <div className="cls-banner top" role="note" aria-label={`Classification ${banner}`}>
-        {banner}
-      </div>
-      <TopBar />
-      <Rail />
-      <main className="main">
-        <div className="route" key={area}>
-          {children}
+    <ToastStackProvider>
+      <div className={`shell cls-${cls.level.replace(' ', '-')}`}>
+        <div className="cls-banner top" role="note" aria-label={`Classification ${banner}`}>
+          {banner}
         </div>
-      </main>
-      <div className="cls-banner bottom">{banner}</div>
-      <Toasts />
-      <ConnectionWatch />
+        <Rail onShortcuts={() => setKeys(true)} />
+        <TopBar onCommand={() => setCmd(true)} onShortcuts={() => setKeys(true)} />
+        <main className="main">
+          <div className="route" key={area}>
+            {children}
+          </div>
+        </main>
+        <div className="cls-banner bottom">{banner}</div>
+        <AlertToasts />
+        <ToastStack position="bottom-right" label="Console notifications" />
+        <ConnectionWatch />
+        <CommandBar open={cmd} onOpenChange={setCmd} onShortcuts={() => setKeys(true)} />
+        <ShortcutsDialog open={keys} onOpenChange={setKeys} />
+      </div>
+    </ToastStackProvider>
+  );
+}
+
+/** ⌘K / Ctrl K for the command bar, ? for shortcuts, and "G then letter" to go to an area. */
+function useGlobalKeys(openCommand: () => void, openShortcuts: () => void) {
+  const nav = useNavigate();
+  const pendingG = useRef(0);
+  useEffect(() => {
+    const goto: Record<string, string> = {};
+    for (const i of NAV.flatMap((g) => g.items)) if (i.keys?.startsWith('G ')) goto[i.keys.slice(2).toLowerCase()] = i.to;
+    const k = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openCommand();
+        return;
+      }
+      const t = e.target as HTMLElement;
+      if (e.metaKey || e.ctrlKey || e.altKey || t.closest('input, textarea, select, [contenteditable="true"], [role="dialog"], [role="menu"]')) return;
+      if (e.key === '?') {
+        e.preventDefault();
+        openShortcuts();
+      } else if (e.key.toLowerCase() === 'g') pendingG.current = Date.now();
+      else if (Date.now() - pendingG.current < 1200 && goto[e.key.toLowerCase()]) {
+        pendingG.current = 0;
+        nav(goto[e.key.toLowerCase()]!);
+      }
+    };
+    window.addEventListener('keydown', k);
+    return () => window.removeEventListener('keydown', k);
+  }, [nav, openCommand, openShortcuts]);
+}
+
+function Rail({ onShortcuts }: { onShortcuts: () => void }) {
+  const can = useSession((s) => s.can);
+  const pending = useVisionLive((s) => s.pendingReview);
+  const alerts = useData((s) => s.alerts);
+  const critical = useMemo(() => alerts.filter((a) => a.status === 'open' && a.priority === 'critical').length, [alerts]);
+  return (
+    <nav className="rail" aria-label="Application areas">
+      <Link to="/operations" className="rail-logo" aria-label="Strata — operational picture">
+        <Icon.Logo />
+      </Link>
+      <div className="rail-items">
+        {NAV.map((g, gi) => {
+          const items = g.items.filter((n) => !n.perm || can(n.perm));
+          if (!items.length) return null;
+          return (
+            <div key={g.group} className="rail-group" role="group" aria-label={g.group}>
+              {gi > 0 && <span className="rail-sep" aria-hidden="true" />}
+              {items.map((n) => {
+                const I = Icon[n.icon] as () => ReactNode;
+                const badge = n.to === '/identity' && pending > 0 ? pending : n.to === '/operations' && critical > 0 ? critical : 0;
+                return (
+                  <Tip
+                    key={n.to}
+                    side="right"
+                    content={
+                      <span className="tip-nav">
+                        {n.label}
+                        {n.keys && <span className="tip-keys">{n.keys.split(' ').map((k) => <kbd key={k}>{k}</kbd>)}</span>}
+                      </span>
+                    }
+                  >
+                    <NavLink to={n.to} className={({ isActive }) => `rail-item ${isActive ? 'active' : ''}`} aria-label={n.label}>
+                      <I />
+                      {badge > 0 && <span className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`}>{badge > 99 ? '99+' : badge}</span>}
+                    </NavLink>
+                  </Tip>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+      <Tip content={<span className="tip-nav">Keyboard shortcuts<span className="tip-keys"><kbd>?</kbd></span></span>} side="right">
+        <button className="rail-item rail-foot" onClick={onShortcuts} aria-label="Keyboard shortcuts">
+          <Keyboard size={18} strokeWidth={1.75} />
+        </button>
+      </Tip>
+    </nav>
+  );
+}
+
+function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts: () => void }) {
+  const loc = useLocation();
+  const nav = useNavigate();
+  const user = useSession((s) => s.user);
+  const can = useSession((s) => s.can);
+  const logout = useSession((s) => s.logout);
+  const sound = useOps((s) => s.sound);
+  const setSound = useOps((s) => s.setSound);
+  const theme = useUi((s) => s.theme);
+  const setTheme = useUi((s) => s.setTheme);
+  const facility = useWorld((s) => s.facility);
+  const runMode = useWorld((s) => s.runMode);
+  const [siteOpen, setSiteOpen] = useState(false);
+
+  const siteName = facility?.name.split(' — ')[0] ?? 'Site';
+  const title = pageTitle(loc.pathname);
+  const area = NAV.flatMap((g) => g.items).find((i) => loc.pathname.startsWith(i.to));
+  const rest = area ? loc.pathname.slice(area.to.length).split('/').filter(Boolean) : [];
+  const crumbs = [
+    { label: siteName, onClick: () => setSiteOpen((o) => !o) },
+    rest.length && area ? { label: title, href: area.to } : { label: title },
+    ...(rest.length ? [{ label: decodeURIComponent(rest[rest.length - 1]!) }] : []),
+  ];
+  const role = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '';
+
+  return (
+    <header className="topbar">
+      <div className="tb-left">
+        <P.Root open={siteOpen} onOpenChange={setSiteOpen}>
+          <P.Anchor asChild>
+            <div className="tb-crumbs">
+              <Breadcrumb items={crumbs} ariaLabel="Location" />
+            </div>
+          </P.Anchor>
+          <PopoverContent className="site-pop" align="start">
+            <SiteCard onClose={() => setSiteOpen(false)} canEdit={can('admin.config')} />
+          </PopoverContent>
+        </P.Root>
+        {runMode === 'demo' && <span className="tb-demo">Demo</span>}
+      </div>
+      <button className="cmd-trigger" onClick={onCommand} aria-label="Open command bar">
+        <Search size={15} strokeWidth={2} />
+        <span className="cmd-trigger-text">Search or run a command</span>
+        <span className="cmd-trigger-keys">
+          <kbd className="kbd">{MOD}</kbd>
+          <kbd className="kbd">K</kbd>
+        </span>
+      </button>
+      <div className="tb-right">
+        <StatusIsland />
+        {user && (
+          <UserMenu
+            className="user-btn"
+            user={{ name: user.displayName, email: `${user.username} · ${role}` }}
+            showTheme={false}
+            items={[
+              { label: theme === 'night' ? 'Standard display' : 'Night display (red light)', icon: theme === 'night' ? <Sun size={16} strokeWidth={1.75} /> : <Moon size={16} strokeWidth={1.75} />, onSelect: () => setTheme(theme === 'night' ? 'dark' : 'night') },
+              { label: sound ? 'Mute alarm sound' : 'Enable alarm sound', icon: sound ? <BellOff size={16} strokeWidth={1.75} /> : <Bell size={16} strokeWidth={1.75} />, onSelect: () => setSound(!sound) },
+              { label: 'Keyboard shortcuts', icon: <Keyboard size={16} strokeWidth={1.75} />, keys: ['?'], onSelect: onShortcuts },
+              ...(can('admin.users') ? [{ label: 'Users & settings', icon: <Settings2 size={16} strokeWidth={1.75} />, onSelect: () => nav('/admin') }] : []),
+            ]}
+            onSignOut={() => logout()}
+          />
+        )}
+      </div>
+    </header>
+  );
+}
+
+function SiteCard({ onClose, canEdit }: { onClose: () => void; canEdit: boolean }) {
+  const facility = useWorld((s) => s.facility);
+  const runMode = useWorld((s) => s.runMode);
+  const basemap = useWorld((s) => s.basemap);
+  const ortho = useWorld((s) => s.orthophoto);
+  const nav = useNavigate();
+  if (!facility) return null;
+  const [name, sub] = facility.name.split(' — ');
+  const o = facility.origin;
+  let grid = '';
+  try {
+    grid = toMgrs(o.lat, o.lon, 5, true);
+  } catch {
+    /* outside MGRS coverage */
+  }
+  return (
+    <div className="site-card">
+      <div className="site-card-h">
+        <b>{name}</b>
+        {sub && <span className="muted">{sub}</span>}
+      </div>
+      <dl className="kv">
+        <dt>Mode</dt>
+        <dd>{runMode === 'demo' ? 'Demonstration (simulated data)' : 'Operational'}</dd>
+        <dt>Site origin</dt>
+        <dd className="mono">{grid || '—'}</dd>
+        <dt>Latitude, longitude</dt>
+        <dd className="mono">
+          {o.lat.toFixed(5)}, {o.lon.toFixed(5)}
+        </dd>
+        <dt>Area</dt>
+        <dd>
+          {((facility.halfExtentM * 2) / 1000).toFixed(1)} × {((facility.halfExtentM * 2) / 1000).toFixed(1)} km
+        </dd>
+        <dt>Ground imagery</dt>
+        <dd>{ortho ? 'Orthophoto' : basemap ? 'Map tiles' : 'None'}</dd>
+        <dt>Zones / buildings</dt>
+        <dd>
+          {facility.zones.length} / {facility.buildings.length}
+        </dd>
+      </dl>
+      {canEdit && (
+        <div className="site-card-f">
+          <button
+            className="btn small"
+            onClick={() => {
+              onClose();
+              nav('/site');
+            }}
+          >
+            Edit site
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-function Rail() {
-  const can = useSession((s) => s.can);
-  const pending = useVisionLive((s) => s.pendingReview);
-  const open = useUi((s) => s.railOpen);
-  const toggle = useUi((s) => s.toggleRail);
-  const alerts = useData((s) => s.alerts);
-  const critical = useMemo(() => alerts.filter((a) => a.status === 'open' && a.priority === 'critical').length, [alerts]);
+const SHORTCUTS: { group: string; items: [string, string][] }[] = [
+  {
+    group: 'Anywhere',
+    items: [
+      [`${MOD} K`, 'Command bar: search, grid reference, go to, actions'],
+      ['?', 'Keyboard shortcuts'],
+      ['G O', 'Operational picture'],
+      ['G C', 'Command'],
+      ['G W', 'Camera wall'],
+      ['G I', 'Incidents'],
+      ['G F', 'Field view'],
+      ['G S', 'Sensors'],
+    ],
+  },
+  {
+    group: 'Operational picture',
+    items: [
+      ['Space', 'Play or pause'],
+      ['← →', 'Step 1 s (Shift: 10 s)'],
+      ['L', 'Return to live'],
+      ['Esc', 'Clear selection'],
+      ['/', 'Ask the copilot'],
+    ],
+  },
+];
+
+function ShortcutsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  if (!open) return null;
   return (
-    <nav className={`rail ${open ? 'open' : ''}`} aria-label="Application areas">
-      {NAV.map((g) => {
-        const items = g.items.filter((n) => !n.perm || can(n.perm));
-        if (!items.length) return null;
-        return (
-          <div key={g.group} style={{ display: 'contents' }}>
-            <div className="rail-group">
-              <span>{g.group}</span>
-            </div>
-            {items.map((n) => {
-              const I = Icon[n.icon] as () => ReactNode;
-              const badge = n.to === '/identity' && pending > 0 ? pending : n.to === '/operations' && critical > 0 ? critical : 0;
-              return (
-                <Tip key={n.to} content={n.label} side="right" disabled={open}>
-                  <NavLink to={n.to} className={({ isActive }) => (isActive ? 'active' : '')} aria-label={n.label}>
-                    <I />
-                    <span className="lbl">{n.label}</span>
-                    {badge > 0 && <span className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`}>{badge > 99 ? '99+' : badge}</span>}
-                  </NavLink>
-                </Tip>
-              );
-            })}
-          </div>
-        );
-      })}
-      <Tip content="Expand navigation" side="right" disabled={open}>
-        <button className="rail-toggle" onClick={toggle} aria-label={open ? 'Collapse navigation' : 'Expand navigation'}>
-          <Icon.Chevron />
-          {open && <span className="lbl">Collapse</span>}
-        </button>
-      </Tip>
-    </nav>
+    <Dialog onClose={() => onOpenChange(false)} title="Keyboard shortcuts" description="Press any key to see it on the keyboard." wide>
+      <div className="keys-grid">
+        {SHORTCUTS.map((g) => (
+          <section key={g.group}>
+            <h4>{g.group}</h4>
+            {g.items.map(([k, d]) => (
+              <div key={k} className="keys-row">
+                <span className="keys-k">
+                  {k.split(' ').map((x) => (
+                    <kbd key={x} className="kbd">
+                      {x}
+                    </kbd>
+                  ))}
+                </span>
+                <span className="muted">{d}</span>
+              </div>
+            ))}
+          </section>
+        ))}
+      </div>
+      <div className="keys-board">
+        <MacKeyboard soundSrc="" />
+      </div>
+    </Dialog>
   );
 }
 
@@ -126,7 +324,7 @@ const TOAST_MS = { high: 9000, critical: 0 } as const;
 const ruleLabel = (r: string) => r.charAt(0) + r.slice(1).toLowerCase().replace(/_/g, ' ');
 
 /** New critical/high alerts as toasts: critical ones stay until dismissed or acknowledged. */
-function Toasts() {
+function AlertToasts() {
   const alerts = useData((s) => s.alerts);
   const can = useSession((s) => s.can);
   const nav = useNavigate();
@@ -218,287 +416,3 @@ function ConnectionWatch() {
   );
 }
 
-const LOCAL_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
-const localFmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', hour12: false, timeZoneName: 'short' });
-const localTime = (t: number) => localFmt.format(new Date(t));
-
-function Clock() {
-  const [, force] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => force((x) => x + 1), 250);
-    return () => clearInterval(id);
-  }, []);
-  const { mode, t, rate, direction, playing } = useTime.getState();
-  const edge = useTime.getState().currentLiveEdge();
-  const lag = Math.max(0, Date.now() - edge);
-  return (
-    <div className="clock" data-mode={mode}>
-      <span className={`clock-mode ${mode}`}>
-        {mode === 'live' && <span className="live-dot" />}
-        {mode === 'live' ? 'LIVE' : playing ? `${direction < 0 ? '◀ ' : ''}×${rate}` : 'PAUSED'}
-      </span>
-      <span className="mono clock-t">
-        <span className="clock-date">{dateTime(mode === 'live' ? edge : t).split(' ')[0]} </span>
-        {dateTime(mode === 'live' ? edge : t).split(' ').slice(1).join(' ')}
-      </span>
-      <span className="mono clock-local" title={`Local time (${LOCAL_TZ})`}>
-        {localTime(mode === 'live' ? edge : t)}
-      </span>
-      {mode === 'live' ? (
-        <span className="dim mono" title="Age of the newest processed observation">
-          +{(lag / 1000).toFixed(1)}s
-        </span>
-      ) : (
-        <span className="dim mono">−{Math.round((edge - t) / 60000)} min</span>
-      )}
-    </div>
-  );
-}
-
-function SearchBox() {
-  const [q, setQ] = useState('');
-  const [res, setRes] = useState<{ kind: string; id: string; label: string; detail: string }[]>([]);
-  const [open, setOpen] = useState(false);
-  const facility = useWorld((s) => s.facility);
-  const nav = useNavigate();
-  const ref = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    const k = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        ref.current?.focus();
-      }
-    };
-    window.addEventListener('keydown', k);
-    return () => window.removeEventListener('keydown', k);
-  }, []);
-  useEffect(() => {
-    if (q.trim().length < 1) {
-      setRes([]);
-      return;
-    }
-    const ctl = new AbortController();
-    const id = setTimeout(() => {
-      const grid = /^\s*\d{1,2}\s*[C-HJ-NP-X]\s*[A-HJ-NP-Z]{2}\s*\d{2,10}\s*\d*\s*$/i.test(q) ? [{ kind: 'mgrs', id: q.trim(), label: `Grid ${q.trim().toUpperCase()}`, detail: 'MGRS — fly to' }] : [];
-      get<typeof res>(`/api/search?q=${encodeURIComponent(q.trim())}`, ctl.signal)
-        .then((r) => setRes([...grid, ...r]))
-        .catch(() => setRes(grid));
-    }, 150);
-    return () => {
-      clearTimeout(id);
-      ctl.abort();
-    };
-  }, [q]);
-  const choose = (r: (typeof res)[number]) => {
-    const w = useWorld.getState();
-    setOpen(false);
-    setQ('');
-    if (r.kind === 'incident') {
-      nav(`/incidents/${r.id}`);
-      return;
-    }
-    nav('/operations');
-    if (r.kind === 'mgrs' && facility) {
-      try {
-        const g = fromMgrs(r.id);
-        const p = new EnuFrame(facility.origin).toEnu({ lat: g.lat, lon: g.lon, alt: 0 });
-        const z = terrainHeight(p.x, p.y);
-        w.flyTo({ x: p.x, y: p.y, z }, Math.max(200, g.precisionM * 2));
-        w.select({ kind: 'point', position: { x: p.x, y: p.y, z } });
-      } catch {
-        /* invalid reference */
-      }
-      return;
-    }
-    if (r.kind === 'coordinates' && facility) {
-      const [a, b] = r.id.split(',').map(Number) as [number, number];
-      const isGeo = r.label.includes('.') && Math.abs(a) <= 90 && Math.abs(b) <= 180 && Math.abs(a) < 1 && Math.abs(b) < 1;
-      const p = isGeo ? new EnuFrame(facility.origin).toEnu({ lat: a, lon: b, alt: 0 }) : { x: a, y: b, z: 0 };
-      w.flyTo({ x: p.x, y: p.y, z: terrainHeight(p.x, p.y) }, 300);
-      w.select({ kind: 'point', position: { x: p.x, y: p.y, z: terrainHeight(p.x, p.y) } });
-      return;
-    }
-    if (r.kind === 'building' && facility) {
-      const b = facility.buildings.find((x) => x.id === r.id);
-      if (b) w.flyTo({ x: b.center.x, y: b.center.y, z: 0 }, Math.max(180, b.width * 3));
-      w.select({ kind: 'building', id: r.id });
-    } else if (r.kind === 'sensor' && facility) {
-      const s = facility.sensors.find((x) => x.id === r.id);
-      if (s && 'position' in s) w.flyTo(s.position, 220);
-      w.select({ kind: 'sensor', id: r.id });
-    } else if (r.kind === 'zone' && facility) {
-      const z = facility.zones.find((x) => x.id === r.id);
-      if (z) w.flyTo({ x: z.polygon.reduce((s, p) => s + p.x, 0) / z.polygon.length, y: z.polygon.reduce((s, p) => s + p.y, 0) / z.polygon.length, z: 0 }, 700);
-    } else if (r.kind === 'track') w.select({ kind: 'track', id: r.id });
-  };
-  return (
-    <div className="search">
-      <Icon.Search />
-      <input
-        ref={ref}
-        className="search-input"
-        placeholder="Search or jump to grid…"
-        value={q}
-        onChange={(e) => {
-          setQ(e.target.value);
-          setOpen(true);
-        }}
-        onFocus={() => setOpen(true)}
-        onBlur={() => setTimeout(() => setOpen(false), 150)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && res[0]) choose(res[0]);
-          if (e.key === 'Escape') (e.target as HTMLInputElement).blur();
-        }}
-        aria-label="Search"
-      />
-      <span className="kbd">{/Mac/.test(navigator.platform) ? '⌘K' : 'Ctrl K'}</span>
-      {open && res.length > 0 && (
-        <div className="search-results reveal" role="listbox">
-          {res.map((r) => (
-            <div key={`${r.kind}:${r.id}`} className="list-row" role="option" aria-selected={false} onMouseDown={() => choose(r)}>
-              <span className="dim" style={{ width: 80, textTransform: 'capitalize' }}>
-                {r.kind}
-              </span>
-              <span className="grow ellipsis">{r.label}</span>
-              <span className="dim">{r.detail}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function StatusSummary() {
-  const alerts = useData((s) => s.alerts);
-  const sensors = useData((s) => s.sensors);
-  const ws = useData((s) => s.wsStatus);
-  const nav = useNavigate();
-  const open = useMemo(() => alerts.filter((a) => a.status === 'open'), [alerts]);
-  const crit = open.filter((a) => a.priority === 'critical').length;
-  const high = open.filter((a) => a.priority === 'high').length;
-  const down = Object.values(sensors).filter((s) => s.status === 'silent' || s.status === 'offline' || s.status === 'fault').length;
-  return (
-    <div className="row status-sum">
-      <Tip content={`${crit} critical and ${high} high-priority alerts open (${open.length} open in total)`} side="bottom">
-        <button className="btn ghost small sum-alerts" onClick={() => nav('/operations')} aria-label="Open alerts">
-          <span className={`sum-n ${crit ? 'crit' : ''}`}>
-            <span className="prio critical" /> {crit}
-          </span>
-          <span className={`sum-n ${high ? 'high' : ''}`}>
-            <span className="prio high" /> {high}
-          </span>
-        </button>
-      </Tip>
-      <Tip content="Sensors not reporting" side="bottom">
-        <button className="btn ghost small" onClick={() => nav('/sensors')}>
-          <span className={`status-dot ${down ? 'silent' : 'ok'}`} /> {down ? `${down} sensor${down > 1 ? 's' : ''} down` : 'Sensors nominal'}
-        </button>
-      </Tip>
-      {ws !== 'open' && (
-        <span className="row" style={{ fontSize: 12, color: 'var(--st-caution-text)' }}>
-          <span className={`status-dot ${ws === 'connecting' ? 'degraded' : 'silent'}`} />
-          {ws === 'connecting' ? 'Connecting' : 'Offline'}
-        </span>
-      )}
-    </div>
-  );
-}
-
-function TopBar() {
-  const facility = useWorld((s) => s.facility);
-  const readiness = useOps((s) => s.readiness);
-  const mode = useWorld((s) => s.mode);
-  const setMode = useWorld((s) => s.setMode);
-  const loc = useLocation();
-  const nav = useNavigate();
-  const onWorld = loc.pathname.startsWith('/operations');
-  const pick = (m: GlobalMode) => {
-    setMode(m);
-    const time = useTime.getState();
-    if (m === 'NOW') time.goLive();
-    if (m === 'HISTORY' && time.mode === 'live') time.seek(time.currentLiveEdge() - 15 * 60_000);
-    if (!onWorld) nav('/operations');
-  };
-  return (
-    <header className="topbar">
-      <NavLink to="/operations" className="brand" aria-label="Strata — operational picture">
-        <Icon.Logo />
-        <span className="wordmark">STRATA</span>
-      </NavLink>
-      <Tip content={facility?.name.split(' — ')[1] ?? ''} side="bottom">
-        <div className="site" tabIndex={0}>
-          <b>{facility?.name.split(' — ')[0] ?? 'Site'}</b>
-        </div>
-      </Tip>
-      {readiness && (
-        <Tip content={`Readiness set ${new Date(readiness.t || Date.now()).toISOString().slice(0, 16)}Z by ${readiness.by}: ${readiness.reason}`} side="bottom">
-          <button className={`readiness r-${readiness.level.replace(' ', '-')}`} onClick={() => nav('/command')}>
-            {readiness.level}
-          </button>
-        </Tip>
-      )}
-      <span className="tb-sep" />
-      {onWorld && <Tabs className="modes" label="Global mode" value={mode} onChange={pick} options={MODES.map((m) => ({ value: m, label: m.charAt(0) + m.slice(1).toLowerCase() }))} />}
-      {onWorld && <span className="tb-sep" />}
-      <Clock />
-      <SearchBox />
-      <div className="spacer" />
-      <StatusSummary />
-      <UserMenu />
-    </header>
-  );
-}
-
-function UserMenu() {
-  const user = useSession((s) => s.user);
-  const logout = useSession((s) => s.logout);
-  const sound = useOps((s) => s.sound);
-  const setSound = useOps((s) => s.setSound);
-  const theme = useUi((s) => s.theme);
-  const setTheme = useUi((s) => s.setTheme);
-  const initials = (user?.displayName ?? '?')
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-  return (
-    <div className="row" style={{ gap: 4, flex: 'none' }}>
-      <Tip content={sound ? 'Alarm sound on for critical and high alerts' : 'Alarm sound muted'} side="bottom">
-        <button className={`btn ghost icon ${sound ? '' : 'muted'}`} onClick={() => setSound(!sound)} aria-label={sound ? 'Mute alarm sound' : 'Enable alarm sound'} aria-pressed={sound}>
-          {sound ? <Icon.Bell /> : <Icon.BellOff />}
-        </button>
-      </Tip>
-      <Menu
-        label="Account"
-        trigger={
-          <button className="btn ghost user-btn" aria-label="Account menu">
-            <span className="avatar">{initials}</span>
-            <span className="user-meta">
-              <span>{user?.displayName}</span>
-              <span className="dim">{user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ''}</span>
-            </span>
-          </button>
-        }
-      >
-        <MenuLabel>
-          <div style={{ fontWeight: 600, color: 'var(--text-0)' }}>{user?.displayName}</div>
-          <div className="muted" style={{ fontSize: 12 }}>
-            {user?.username} · {user?.role}
-          </div>
-        </MenuLabel>
-        <MenuItem icon={theme === 'night' ? <Icon.Sun /> : <Icon.Moon />} onSelect={() => setTheme(theme === 'night' ? 'dark' : 'night')}>
-          {theme === 'night' ? 'Standard display' : 'Night display (red light)'}
-        </MenuItem>
-        <MenuItem icon={sound ? <Icon.BellOff /> : <Icon.Bell />} onSelect={() => setSound(!sound)}>
-          {sound ? 'Mute alarm sound' : 'Enable alarm sound'}
-        </MenuItem>
-        <MenuSeparator />
-        <MenuItem icon={<Icon.SignOut />} onSelect={() => void logout()}>
-          Sign out
-        </MenuItem>
-      </Menu>
-    </div>
-  );
-}
