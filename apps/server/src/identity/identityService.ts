@@ -192,7 +192,11 @@ const toFaceEvent = (r: FaceEventRow): FaceEventRecord => ({
 
 export class IdentityError extends Error {}
 
+/** Same identity at the same camera within this window is treated as one sighting. */
+const RESIGHT_MS = 10 * 60_000;
+
 export class IdentityService {
+  private readonly recentSightings = new Map<string, { t: number; rank: number }>();
   private gallery: { templateId: string; identityId: string; emb: Float32Array }[] = [];
   private identities = new Map<string, Identity>();
   settings: FaceSettings = DEFAULT_FACE_SETTINGS;
@@ -373,6 +377,19 @@ export class IdentityService {
       const top = candidates[0];
       const ident = top ? this.identities.get(top.identityId) : undefined;
       const matched = decision === 'STRONG' || decision === 'POSSIBLE';
+      // Re-sighting window: the same recognised person at the same camera within 10 minutes is one sighting
+      // (a person waiting at a door must not fill the review queue). A stronger decision is still recorded.
+      if (matched && ident && ctx.sourceKind === 'camera') {
+        const key = `${ident.id}:${ctx.sourceId}`;
+        const prev = this.recentSightings.get(key);
+        const rank = decision === 'STRONG' ? 2 : 1;
+        if (prev && ctx.t - prev.t < RESIGHT_MS && rank <= prev.rank) {
+          prev.t = ctx.t;
+          continue;
+        }
+        this.recentSightings.set(key, { t: ctx.t, rank });
+        if (this.recentSightings.size > 5000) this.recentSightings.clear();
+      }
       const zone = ctx.zoneId ? FACILITY.zones.find((z) => z.id === ctx.zoneId) : undefined;
       let reviewStatus: FaceEventRecord['reviewStatus'] = 'NOT_REQUIRED';
       if (matched && ident?.list === 'WATCHLIST') reviewStatus = 'PENDING';
