@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { get } from '../api/client';
 import { ErrorNote, Loading } from '../components/common';
 import { bytes, hms } from '../lib/format';
-import { AnimatedCounter, DonutChart, Gauge, LineChart, Sparkline } from '../components/kit';
+import { AnimatedCounter, Gauge, LineChart, Sparkline, Treemap, UsageMeter } from '../components/kit';
 
 interface Health {
   services: { name: string; status: string; detail: string }[];
@@ -18,7 +18,7 @@ interface Health {
     memoryMb: number;
     counters: Record<string, number>;
   };
-  storage: { engine: string; counts: Record<string, number>; mediaBytes: number; encryptedAtRest: boolean };
+  storage: { engine: string; counts: Record<string, number>; mediaBytes: number; encryptedAtRest: boolean; disk?: { totalBytes: number; freeBytes: number } | null };
   jobs: { status: string; n: number }[];
   clock: { dataClock: number; liveEdge: number; serverTime: number };
   sensors: { sensorId: string; status: string; lastSeen: number | null }[];
@@ -129,9 +129,33 @@ export function SystemHealth() {
         <div className="scroll">
           <div className="section">
             <h4>Storage · {h.storage.engine === 'pglite' ? 'embedded PostgreSQL (PGlite)' : 'PostgreSQL'}</h4>
+            {h.storage.disk && h.storage.disk.totalBytes > 0 && (
+              <div className="health-disk">
+                <UsageMeter
+                  label="Data volume"
+                  unit="GB"
+                  decimals={1}
+                  limit={h.storage.disk.totalBytes / 1e9}
+                  warnAt={0.85}
+                  freeLabel="free"
+                  segments={[
+                    { id: 'media', label: 'Evidence media', value: h.storage.mediaBytes / 1e9 },
+                    { id: 'other', label: 'Everything else on the volume', value: Math.max(0, h.storage.disk.totalBytes - h.storage.disk.freeBytes - h.storage.mediaBytes) / 1e9 },
+                  ]}
+                />
+                <div className="dim" style={{ fontSize: 11.5, marginTop: 6 }}>
+                  {h.storage.disk.freeBytes / h.storage.disk.totalBytes < 0.15 ? 'Under 15 % free: recording continues, but plan retention or add storage now.' : 'Measured on the volume that holds the data directory.'}
+                </div>
+              </div>
+            )}
             {Object.values(h.storage.counts).some((v) => v > 0) && (
-              <div className="health-donut">
-                <DonutChart label="Stored records" unit="records" totalLabel="Records" size={168} thickness={18} maxSegments={6} data={Object.entries(h.storage.counts).map(([k, v]) => ({ key: k, label: k, value: v }))} />
+              <div className="health-tree">
+                <Treemap
+                  label="Stored records by kind"
+                  height={220}
+                  formatValue={(v) => `${v.toLocaleString()} records`}
+                  data={{ id: 'all', label: 'All records', children: Object.entries(h.storage.counts).filter(([, v]) => v > 0).map(([k, v]) => ({ id: k, label: k.replace(/_/g, ' '), value: v })) }}
+                />
               </div>
             )}
             <dl className="kv">

@@ -541,3 +541,5 @@ button.list-row:focus-visible { box-shadow: inset var(--glow-accent); }
 .admin-user:last-child { border-bottom: 0; }
 .admin-user.off { opacity: 0.6; }
 .perm-cell { text-align: center; color: var(--text-0); }
+.health-disk { margin: 4px 0 18px; }
+.health-tree { margin: 0 0 16px; }
