@@ -54,7 +54,10 @@ async function seed(): Promise<void> {
   log(`seeding ${minutes} min of recorded history ${hms(start)} → ${hms(end)} UTC via ${SERVER}`);
   const t0 = Date.now();
   let lastLog = 0;
-  for (let t = start; t <= end; t += 1000) {
+  // Catch up to real time: the recording ends when the fast-forward reaches the present, so live operation
+  // continues without a gap.
+  let t = start;
+  for (; t <= Math.floor(Date.now() / 1000) * 1000 - 1000; t += 1000) {
     const out = engine.step(t);
     if (out.media.length) {
       await client.flush(2500);
@@ -68,6 +71,8 @@ async function seed(): Promise<void> {
     }
   }
   while (client.queued) await client.flush(2500);
+  state.recordingEnd = t - 1000;
+  saveState(STATE, state);
   await enrollTestSubject();
   log(`seed complete: ${client.sent} messages, ${engine.stats.media} media assets in ${((Date.now() - t0) / 1000).toFixed(1)} s`);
 }
@@ -94,14 +99,15 @@ async function live(): Promise<void> {
   const engine = new SimulatorEngine(state.schedule);
   const client = new IngestClient(SERVER, TOKEN, 250_000, log);
   const failures = new FailureInjector();
-  let liveEdge = Math.floor(Date.now() / 1000) * 1000 - 1000;
+  let liveEdge = Math.max(state.recordingEnd ?? 0, Math.floor(Date.now() / 1000) * 1000 - 300_000);
   startService(PORT, { engine, failures, client, state, token: TOKEN, persist: () => saveState(STATE, state), liveEdge: () => liveEdge, log });
   await waitForServer().catch((e: unknown) => log(String(e)));
   log(`live simulation started; ${state.schedule.length} scheduled scenario(s) loaded`);
   const tick = async () => {
     const now = Math.floor(Date.now() / 1000) * 1000;
-    // Never run ahead of wall-clock; if the process stalled, do not fabricate backfill beyond 10 s.
-    let t = Math.max(liveEdge + 1000, now - 10_000);
+    // Never run ahead of wall-clock. After a pause, buffered data is delivered late (store-and-forward),
+    // bounded to 5 minutes; anything older is a genuine gap.
+    let t = Math.max(liveEdge + 1000, now - 300_000);
     for (; t <= now; t += 1000) {
       const out = engine.step(t);
       for (const m of out.media) await client.uploadMedia(m).catch((e: unknown) => log(String(e)));

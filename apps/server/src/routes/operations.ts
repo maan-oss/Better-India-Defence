@@ -112,7 +112,7 @@ export function registerOperations(app: FastifyInstance, p: Platform): void {
     if (!def) return reply.code(404).send({ error: 'unknown sensor' });
     const events = (await p.db.query('SELECT t, status, previous, message FROM sensor_status_events WHERE sensor_id = $1 ORDER BY t DESC LIMIT 100', [id])).rows;
     const recent = (await p.db.query('SELECT id, t, kind, source_kind, state, quality FROM observations WHERE sensor_id = $1 ORDER BY t DESC LIMIT 50', [id])).rows;
-    const hist = (await p.db.query<{ b: number; n: number }>(`SELECT floor((t - $2) / 60000)::int AS b, count(*)::int AS n FROM observations WHERE sensor_id = $1 AND t > $2 GROUP BY b ORDER BY b`, [id, p.liveEdge() - 3600_000])).rows;
+    const hist = (await p.db.query<{ b: number; n: number }>(`SELECT floor((t - $2::bigint) / 60000)::int AS b, count(*)::int AS n FROM observations WHERE sensor_id = $1 AND t > $2::bigint GROUP BY b ORDER BY b`, [id, p.liveEdge() - 3600_000])).rows;
     return { definition: def, status: p.sensors.get(id) ?? null, events, recent, perMinute: hist, coveragePatches: def.kind === 'camera' ? (p.coverage.visibility[id]?.length ?? 0) : null };
   });
 
@@ -128,6 +128,36 @@ export function registerOperations(app: FastifyInstance, p: Platform): void {
     if (!c) return reply.code(404).send({ error: 'unknown change' });
     void audit(p, req, 'evidence_viewed', id, { kind: 'change' });
     return c;
+  });
+
+  app.get('/api/evidence/search', { preHandler: requirePerm('evidence.view') }, async (req, reply) => {
+    const q = parse(
+      z.object({ sensorId: z.string().max(24).optional(), kind: z.enum(['track', 'media', 'spatial', 'rf', 'position', 'health', 'infrastructure', 'imagery']).optional(), state: z.enum(['CAPTURED', 'RECONSTRUCTED', 'INFERRED']).optional(), from: time.optional(), to: time.optional(), flagged: z.enum(['0', '1']).optional(), limit: z.coerce.number().int().min(1).max(500).default(200) }),
+      req.query,
+      reply,
+    );
+    if (!q) return;
+    const where: string[] = [];
+    const params: unknown[] = [];
+    const add = (sql: string, v: unknown) => {
+      params.push(v);
+      where.push(sql.replace('?', `$${params.length}`));
+    };
+    if (q.sensorId) add('sensor_id = ?', q.sensorId.toUpperCase());
+    if (q.kind) add('kind = ?', q.kind);
+    if (q.state) add('state = ?', q.state);
+    if (q.from !== undefined) add('t >= ?::bigint', q.from);
+    if (q.to !== undefined) add('t <= ?::bigint', q.to);
+    if (q.flagged === '1') where.push(`quality <> '{}'::jsonb`);
+    params.push(q.limit);
+    const rows = (await p.db.query(`SELECT id, sensor_id, kind, source_kind, t, received_at, state, quality, x, y, adapter FROM observations ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY t DESC LIMIT $${params.length}`, params)).rows;
+    return rows;
+  });
+
+  app.get('/api/media', { preHandler: requirePerm('media.view') }, async (req, reply) => {
+    const q = parse(z.object({ kind: z.enum(['pointcloud', 'imagery', 'frame', 'reconstruction']).optional(), limit: z.coerce.number().int().min(1).max(500).default(200) }), req.query, reply);
+    if (!q) return;
+    return (await p.db.query(`SELECT id, sensor_id, kind, captured_at, content_type, bytes, sha256, encrypted, meta, created_at FROM media_assets ${q.kind ? 'WHERE kind = $2' : ''} ORDER BY captured_at DESC LIMIT $1`, q.kind ? [q.limit, q.kind] : [q.limit])).rows;
   });
 
   app.get('/api/imagery', { preHandler: requirePerm('evidence.view') }, async () => (await p.db.query('SELECT * FROM imagery_captures ORDER BY acquired_at DESC LIMIT 200')).rows);
@@ -288,6 +318,32 @@ export function registerOperations(app: FastifyInstance, p: Platform): void {
     } catch (e) {
       return reply.code(e instanceof MediaUnavailable ? e.status : 500).send({ error: e instanceof Error ? e.message : 'media error' });
     }
+  });
+
+  /** Detections reported with the recorded frame nearest (at or before) t, for overlaying on the frame. */
+  app.get('/api/media/detections', { preHandler: requirePerm('media.view') }, async (req, reply) => {
+    const q = parse(z.object({ sensorId: z.string().regex(/^[A-Z0-9-]{2,24}$/), t: time }), req.query, reply);
+    if (!q) return;
+    const frame = (await p.db.query<{ id: string; message_id: string; t: number; payload: Record<string, unknown> }>(
+      `SELECT id, message_id, t, payload FROM observations WHERE sensor_id = $1 AND kind = 'media' AND t <= $2 AND t > $2 - 4000 ORDER BY t DESC LIMIT 1`,
+      [q.sensorId, q.t],
+    )).rows[0];
+    if (!frame) return { frame: null, detections: [] };
+    const dets = (await p.db.query<{ id: string; state: string; payload: { cls: string; bbox: number[]; score: number; localTrackId: string; isStatic?: boolean } }>(
+      `SELECT id, state, payload FROM observations WHERE message_id = $1 AND kind = 'track'`,
+      [frame.message_id],
+    )).rows;
+    return { frame: { observationId: frame.id, t: frame.t, frameId: frame.payload.frameId }, detections: dets.map((d) => ({ observationId: d.id, state: d.state, cls: d.payload.cls, bbox: d.payload.bbox, score: d.payload.score, localTrackId: d.payload.localTrackId, isStatic: d.payload.isStatic ?? false })) };
+  });
+
+  app.get('/api/replay/observations', { preHandler: requirePerm('timeline.view') }, async (req, reply) => {
+    const q = parse(z.object({ kind: z.enum(['rf']), from: time, to: time }), req.query, reply);
+    if (!q) return;
+    if (q.to - q.from > 600_000) return reply.code(400).send({ error: 'window ≤ 10 minutes' });
+    return (await p.db.query<{ id: string; sensor_id: string; t: number; x: number; y: number; r: number }>(
+      `SELECT id, sensor_id, t, x, y, sx * 2 AS r FROM observations WHERE kind = $1 AND t BETWEEN $2 AND $3 ORDER BY t LIMIT 2000`,
+      [q.kind, q.from, q.to],
+    )).rows;
   });
 
   app.get('/api/media/:id', { preHandler: requirePerm('media.view') }, async (req, reply) => {

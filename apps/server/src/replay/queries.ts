@@ -83,7 +83,7 @@ export class ReplayQueries {
   }> {
     const bucketMs = Math.max(1000, Math.ceil((to - from) / buckets));
     const rows = (await this.db.query<{ kind: string; b: number; n: number }>(
-      `SELECT kind, floor((t - $1) / $3)::int AS b, count(*)::int AS n FROM observations WHERE t >= $1 AND t < $2 AND kind <> 'health' GROUP BY kind, b`,
+      `SELECT kind, floor((t - $1::bigint) / $3::bigint)::int AS b, count(*)::int AS n FROM observations WHERE t >= $1::bigint AND t < $2::bigint AND kind <> 'health' GROUP BY kind, b`,
       [from, to, bucketMs],
     )).rows;
     const n = Math.ceil((to - from) / bucketMs);
@@ -95,7 +95,7 @@ export class ReplayQueries {
     const alerts = (await this.db.query<{ id: string; t: number; priority: string; title: string; status: string }>('SELECT id, t, priority, title, status FROM alerts WHERE t BETWEEN $1 AND $2 ORDER BY t', [from, to])).rows;
     const incidents = (await this.db.query<{ id: string; code: string; t_start: number; t_end: number; title: string }>('SELECT id, code, t_start, t_end, title FROM incidents WHERE t_end >= $1 AND t_start <= $2 ORDER BY t_start', [from, to])).rows.map((r) => ({ id: r.id, code: r.code, tStart: r.t_start, tEnd: r.t_end, title: r.title }));
     const changes = (await this.db.query<{ id: string; t: number; kind: string; title: string }>(`SELECT id, t, kind, title FROM world_changes WHERE t BETWEEN $1 AND $2 ORDER BY t`, [from, to])).rows;
-    const ev = (await this.db.query<{ sensor_id: string; t: number; status: string }>('SELECT sensor_id, t, status FROM sensor_status_events WHERE t <= $2 AND t >= $1 - 21600000 ORDER BY sensor_id, t', [from, to])).rows;
+    const ev = (await this.db.query<{ sensor_id: string; t: number; status: string }>('SELECT sensor_id, t, status FROM sensor_status_events WHERE t <= $2::bigint AND t >= $1::bigint - 21600000 ORDER BY sensor_id, t', [from, to])).rows;
     const outages: { sensorId: string; from: number; to: number | null; status: string }[] = [];
     const open = new Map<string, { from: number; status: string }>();
     for (const e of ev) {

@@ -1,0 +1,46 @@
+:root {
+  /* Surfaces: very dark neutral, slightly warm. */
+  --bg-0: #0a0b0c;
+  --bg-1: #101113;
+  --bg-2: #15171a;
+  --bg-3: #1c1f23;
+  --bg-hover: #20242a;
+  --line: rgba(236, 230, 220, 0.07);
+  --line-2: rgba(236, 230, 220, 0.13);
+  --line-3: rgba(236, 230, 220, 0.22);
+
+  /* Text: restrained warm white. */
+  --text-0: #ece6dc;
+  --text-1: #b9b3a8;
+  --text-2: #807b72;
+  --text-3: #5c5850;
+
+  /* Operational states only. */
+  --amber: #d9a441;
+  --amber-dim: rgba(217, 164, 65, 0.16);
+  --red: #d4553f;
+  --red-dim: rgba(212, 85, 63, 0.16);
+  --ok: #8ea88a;
+  --info: #8fa3ad;
+
+  /* Epistemic states (paired with shape/pattern everywhere — never colour alone). */
+  --captured: #ece6dc;
+  --reconstructed: #7fb3aa;
+  --inferred: #a99bc9;
+  --prior: #807b72;
+  --unknown: #4d4a45;
+
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --radius: 3px;
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --t-fast: 140ms;
+  --t-med: 260ms;
+
+  --rail-w: 52px;
+  --left-w: 268px;
+  --right-w: 372px;
+  --top-h: 44px;
+  --timeline-h: 128px;
+}
