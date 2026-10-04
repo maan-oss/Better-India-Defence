@@ -13,7 +13,7 @@ import { useUi } from '../state/ui';
 import { NAV, pageTitle } from '../lib/nav';
 import { Icon } from './Icons';
 import { Dialog, Tip } from './ui';
-import { Breadcrumb, PopoverContent, ToastStack, ToastStackProvider, UserMenu } from './kit';
+import { AnnouncementBar, Breadcrumb, PopoverContent, ToastStack, ToastStackProvider, UserMenu } from './kit';
 import { CommandBar } from './patterns/CommandBar';
 import { StatusIsland } from './patterns/StatusIsland';
 import { MacKeyboard } from './vendor/componentry/mac-keyboard';
@@ -43,6 +43,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <Rail onShortcuts={() => setKeys(true)} />
         <TopBar onCommand={() => setCmd(true)} onShortcuts={() => setKeys(true)} />
         <main className="main">
+          <DemoNotice />
           <div className="route" key={area}>
             {children}
           </div>
@@ -55,6 +56,35 @@ export function Shell({ children }: { children: ReactNode }) {
         <ShortcutsDialog open={keys} onOpenChange={setKeys} />
       </div>
     </ToastStackProvider>
+  );
+}
+
+/**
+ * Demonstration mode is said plainly on every screen until the operator dismisses it for this browser
+ * (Arc announcement bar); the "Demo" chip in the top bar stays regardless.
+ */
+function DemoNotice() {
+  const runMode = useWorld((s) => s.runMode);
+  if (runMode !== 'demo') return null;
+  return (
+    <div className="demo-notice">
+      <AnnouncementBar
+        id="strata-demo-notice-v1"
+        label="Demonstration mode"
+        tone="neutral"
+        autoPlay={false}
+        messages={[
+          {
+            id: 'demo',
+            message: (
+              <>
+                Demonstration site: sensors, tracks, people and faces are simulated, and nothing here is a real observation. Operational use starts the server with <code>STRATA_MODE=operational</code>.
+              </>
+            ),
+          },
+        ]}
+      />
+    </div>
   );
 }
 

@@ -136,7 +136,10 @@ h1, h2, h3, h4, h5 { text-wrap: balance; }
 .keys-board { margin-top: var(--sp-6); display: grid; place-items: center; overflow: hidden; border-radius: var(--radius-lg); background: var(--bg-0); padding: var(--sp-4); }
 .keys-board > * { zoom: 0.72; }
 
-.main { grid-column: 2; grid-row: 3; position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--bg-1); }
+.main { grid-column: 2; grid-row: 3; position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--bg-1); display: flex; flex-direction: column; }
+.main > .route { position: relative; inset: auto; flex: 1; min-height: 0; }
+.demo-notice { flex: none; border-bottom: 1px solid var(--line); }
+.demo-notice code { font-family: var(--font-mono); font-size: 0.92em; }
 .route { position: absolute; inset: 0; animation: routeIn 240ms var(--ease-out) both; }
 @keyframes routeIn { from { opacity: 0; } to { opacity: 1; } }
 
