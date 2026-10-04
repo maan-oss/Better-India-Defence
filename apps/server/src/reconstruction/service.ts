@@ -275,15 +275,17 @@ export class ReconstructionService {
         const lx = dirSign * (mk.offsetM + du);
         corners.push({ x: b.center.x + lx * Math.cos(yaw) - faceY * Math.sin(yaw), y: b.center.y + lx * Math.sin(yaw) + faceY * Math.cos(yaw), z: z0 + mk.elevationM + dv });
       }
-    const basis = cameraBasis(cam);
-    const px = corners.map((c) => projectPoint(cam, c, basis)).filter((p): p is NonNullable<typeof p> => p !== null);
+    // ROI in recorded-stream pixels (the VMS serves the lower-resolution recording stream).
+    const streamPose = { ...cam, widthPx: cam.streamWidthPx, heightPx: cam.streamHeightPx };
+    const basis = cameraBasis(streamPose);
+    const px = corners.map((c) => projectPoint(streamPose, c, basis)).filter((p): p is NonNullable<typeof p> => p !== null);
     if (px.length < 4) throw new Error('marking not visible from this camera');
     const pad = 4;
     const x0 = Math.floor(Math.min(...px.map((p) => p.u))) - pad;
     const y0 = Math.floor(Math.min(...px.map((p) => p.v))) - pad;
     const x1 = Math.ceil(Math.max(...px.map((p) => p.u))) + pad;
     const y1 = Math.ceil(Math.max(...px.map((p) => p.v))) + pad;
-    const roi = { x: Math.max(0, x0), y: Math.max(0, y0), w: Math.min(cam.widthPx, x1) - Math.max(0, x0), h: Math.min(cam.heightPx, y1) - Math.max(0, y0) };
+    const roi = { x: Math.max(0, x0), y: Math.max(0, y0), w: Math.min(cam.streamWidthPx, x1) - Math.max(0, x0), h: Math.min(cam.streamHeightPx, y1) - Math.max(0, y0) };
     const times = Array.from({ length: params.frames }, (_, i) => params.t - (params.frames - 1 - i) * 2000);
     const id = await this.create('multi_frame', `Multi-observation reconstruction — ${b.name} marking via ${cam.id}`, by, { ...params, roi, scale: 4 }, times.map((t) => ({ kind: 'media', id: `${cam.id}@${t}`, sensorId: cam.id, t, state: 'CAPTURED', note: 'VMS frame' })));
     void (async () => {

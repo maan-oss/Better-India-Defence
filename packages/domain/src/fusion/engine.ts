@@ -42,7 +42,7 @@ export interface CategoryParams {
 }
 
 export const CATEGORY_PARAMS: Record<TrackCategory, CategoryParams> = {
-  aerial: { q: 6, coastAfterS: 5, lostAfterS: 20, closeAfterS: 900, maxSpeedMps: 30 },
+  aerial: { q: 6, coastAfterS: 8, lostAfterS: 45, closeAfterS: 900, maxSpeedMps: 30 },
   person: { q: 0.6, coastAfterS: 4, lostAfterS: 12, closeAfterS: 1800, maxSpeedMps: 3 },
   vehicle: { q: 3, coastAfterS: 5, lostAfterS: 20, closeAfterS: 1800, maxSpeedMps: 25 },
   unknown: { q: 3, coastAfterS: 5, lostAfterS: 15, closeAfterS: 900, maxSpeedMps: 25 },
@@ -317,6 +317,9 @@ export class TrackEngine {
     const id = this.localIndex.get(`${m.sensorId}:${m.localId}`);
     const tr = id ? this.tracks.get(id) : undefined;
     if (!tr || tr.status === 'closed') return null;
+    // A lost track can be re-acquired through the same sensor-local track id (strong evidence of identity)
+    // for a limited time; otherwise reacquisition requires a new track and explicit review.
+    if (tr.status === 'lost' && m.t - tr.lastPositionalUpdate > 180_000) return null;
     const pred = this.predicted(tr, m.t);
     const d2 = mahalanobis2(pred, m.position, m.sigma, tr.category === 'aerial');
     // Local track continuity is strong evidence; allow a looser (×3) gate.

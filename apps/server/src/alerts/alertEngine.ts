@@ -237,8 +237,8 @@ export class AlertEngine {
       const s = snaps.get(e.trackId);
       // Only tracks that were ever confirmed matter; short-lived tentative tracks (clutter) are not "lost contact".
       if (!s || s.cooperative || s.hits < 3) continue;
-      const nearZone = FACILITY.zones.find((z) => ZONE_RULES[z.id] && z.polygon.some((p) => Math.hypot(p.x - s.position.x, p.y - s.position.y) < 300));
-      const open = [...this.open.keys()].some((k) => k.endsWith(`:${s.id}`));
+      const nearZone = s.category !== 'aerial' ? FACILITY.zones.find((z) => ZONE_RULES[z.id] && z.id !== 'zn-airside' && z.polygon.some((p) => Math.hypot(p.x - s.position.x, p.y - s.position.y) < 300)) : undefined;
+      const open = [...this.open.keys()].some((k) => k.endsWith(`:${s.id}`) && !k.startsWith('lost:'));
       if (nearZone || open)
         await this.raise({
           rule: 'TRACK_LOST',

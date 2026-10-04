@@ -210,8 +210,10 @@ const camera = (
   headingDeg,
   pitchDeg,
   hfovDeg,
-  widthPx: 480,
-  heightPx: 270,
+  widthPx: 1920,
+  heightPx: 1080,
+  streamWidthPx: 480,
+  streamHeightPx: 270,
   rangeM,
   mastHeightM: mast,
 });

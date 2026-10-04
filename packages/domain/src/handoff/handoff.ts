@@ -95,13 +95,19 @@ export function spaceTimePrism(a: Vec2, b: Vec2, maxPathM: number, samples = 48)
   return out;
 }
 
-export function buildHandoff(reference: number[], observations: HandoffObservation[], minAppearance = 0.55): HandoffResult {
+export const MIN_SHARPNESS = 0.15;
+
+export function buildHandoff(reference: number[], observations: HandoffObservation[], minAppearance = 0.62): HandoffResult {
   const rationale: string[] = [];
-  const candidates = observations
+  // Appearance descriptors from tiny, blurred detections are close to noise: exclude them rather than
+  // letting them masquerade as weak matches.
+  const usable = observations.filter((o) => o.sharpness >= MIN_SHARPNESS);
+  const candidates = usable
     .map((o) => ({ o, s: appearanceScore(reference, o.appearance) }))
     .filter((c) => c.s >= minAppearance)
     .sort((a, b) => a.o.t - b.o.t);
-  rationale.push(`${candidates.length} of ${observations.length} observations exceed the appearance threshold (${minAppearance}).`);
+  rationale.push(`${observations.length - usable.length} observations too small/blurred for appearance comparison were excluded.`);
+  rationale.push(`${candidates.length} of ${usable.length} usable observations exceed the appearance threshold (${minAppearance}).`);
   const links: HandoffLink[] = [];
   for (const c of candidates) {
     const prev = links[links.length - 1];
@@ -129,7 +135,7 @@ export function buildHandoff(reference: number[], observations: HandoffObservati
   const segments: HandoffSegment[] = [];
   for (const l of links) {
     const last = segments[segments.length - 1];
-    if (last && last.cameraId === l.observation.cameraId && l.observation.t - last.toT < 15000) {
+    if (last && last.cameraId === l.observation.cameraId && l.observation.t - last.toT < 90_000) {
       last.toT = l.observation.t;
       last.meanAppearance = (last.meanAppearance * last.observations + l.appearanceScore) / (last.observations + 1);
       last.observations++;
@@ -141,7 +147,7 @@ export function buildHandoff(reference: number[], observations: HandoffObservati
   for (let i = 1; i < links.length; i++) {
     const a = links[i - 1]!.observation;
     const b = links[i]!.observation;
-    if (b.t - a.t < 8000 && a.cameraId === b.cameraId) continue;
+    if (a.cameraId === b.cameraId && b.t - a.t < 90_000) continue;
     const dt = (b.t - a.t) / 1000;
     const maxPath = RUN_MPS * dt;
     blindIntervals.push({

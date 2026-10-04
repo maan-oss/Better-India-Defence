@@ -23,12 +23,10 @@ export function IncidentPanel({ id }: { id: string }) {
     const t = useTime.getState();
     const from = data.window.from;
     const to = Math.min(data.window.to, t.currentLiveEdge());
-    if (t.mode === 'live' || t.t < from || t.t > to) {
-      t.seek(from);
-      t.setRate(4);
-      t.setDirection(1);
-      t.setPlaying(true);
-    }
+    if (t.mode === 'live' || t.t < from || t.t > to) t.seek(from);
+    t.setRate(4);
+    t.setDirection(1);
+    t.setPlaying(true);
     const id2 = setInterval(() => {
       const s = useTime.getState();
       if (s.t > to || s.mode === 'live') {
@@ -186,7 +184,7 @@ export function DiffPanel() {
           <div className="ledger">
             <h5>Detected change events ({data.detectedChanges.length})</h5>
             {data.detectedChanges.length === 0 && <div className="muted">No change events detected between A and B.</div>}
-            {data.detectedChanges.map((c) => (
+            {[...data.detectedChanges].sort((x, y) => rank(x.kind) - rank(y.kind) || x.t - y.t).map((c) => (
               <div key={c.id} className="ev-row" style={{ cursor: 'pointer' }} onClick={() => (select({ kind: 'change', id: c.id }), flyTo(c.position, Math.max(140, c.extentM * 6)))}>
                 <span>{c.title}</span>
                 <StateChip state={c.state} />
@@ -225,6 +223,12 @@ export function DiffPanel() {
     </div>
   );
 }
+
+const KIND_RANK = ['structure_changed', 'road_obstruction', 'object_appeared', 'object_disappeared', 'significant_movement', 'surface_changed', 'infrastructure_changed', 'sensor_offline', 'sensor_restored'];
+const rank = (k: string) => {
+  const i = KIND_RANK.indexOf(k);
+  return i < 0 ? 99 : i;
+};
 
 function ImageryCompare({ before, after }: { before: { id: string; t: number; mediaId: string }; after: { id: string; t: number; mediaId: string } }) {
   const [k, setK] = useState(50);

@@ -117,8 +117,12 @@ export interface CameraDef extends SensorBase {
   headingDeg: number;
   pitchDeg: number;
   hfovDeg: number;
+  /** Analytics (main stream) resolution: detections and calibration are expressed in these pixels. */
   widthPx: number;
   heightPx: number;
+  /** Recording/preview stream served by the VMS (lower resolution, as on real systems). */
+  streamWidthPx: number;
+  streamHeightPx: number;
   rangeM: number;
   mastHeightM: number;
 }

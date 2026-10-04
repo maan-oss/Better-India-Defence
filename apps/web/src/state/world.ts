@@ -79,11 +79,11 @@ interface WorldState {
 
 const MODE_LAYERS: Partial<Record<GlobalMode, Partial<Record<LayerKey, boolean>>>> = {
   COVERAGE: { uncertainty: true, frustums: true, coverage: true },
-  EVIDENCE: { reconstruction: true, uncertainty: false },
-  DIFF: { changes: true },
+  EVIDENCE: { reconstruction: true, uncertainty: false, coverage: false },
+  DIFF: { changes: true, uncertainty: false, coverage: false },
   NOW: { uncertainty: false, coverage: false },
   HISTORY: { uncertainty: false, coverage: false },
-  INCIDENT: { incidents: true, frustums: true },
+  INCIDENT: { incidents: true, frustums: true, uncertainty: false, coverage: false },
 };
 
 let flyId = 0;

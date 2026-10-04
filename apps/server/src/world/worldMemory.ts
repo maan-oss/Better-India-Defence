@@ -170,6 +170,9 @@ export class WorldMemory {
     }
     for (const o of this.objectsAt(t)) {
       if (o.state === 'missing' || o.state === 'removed') continue;
+      // Camera-detected objects have approximate extents; predicting exact returns from them would create
+      // false "disappeared" detections. Only surveyed objects are used to predict range returns.
+      if (o.source !== 'design data') continue;
       const def = FACILITY.staticObjects.find((s) => s.id === o.id);
       const w = def?.width ?? o.extentM * 2;
       const d = def?.depth ?? o.extentM * 2;

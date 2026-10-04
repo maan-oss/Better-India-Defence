@@ -320,7 +320,7 @@ export function SensorInspector({ id }: { id: string }) {
               </dd>
               <dt>Resolution / range</dt>
               <dd className="mono">
-                {def.widthPx}×{def.heightPx} px · {def.rangeM} m
+                analytics {def.widthPx}×{def.heightPx} · recording {def.streamWidthPx}×{def.streamHeightPx} · {def.rangeM} m
               </dd>
             </>
           )}

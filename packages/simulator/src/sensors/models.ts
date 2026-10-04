@@ -187,8 +187,8 @@ export function dronePose(d: DroneDef, state: { position: Vec3; headingRad: numb
     headingDeg: (90 - (state.headingRad * 180) / Math.PI + 360) % 360,
     pitchDeg: d.gimbalPitchDeg,
     hfovDeg: d.cameraHfovDeg,
-    widthPx: 480,
-    heightPx: 270,
+    widthPx: 1920,
+    heightPx: 1080,
   };
 }
 
@@ -246,19 +246,19 @@ function detectFrom(
     const bb = bboxOf(pose, box);
     if (!bb) return;
     const size = Math.max(bb[2], bb[3]);
-    const minPx = kindForSize === 'small' ? 3 : 5;
+    const minPx = kindForSize === 'small' ? 4 : 8;
     if (size < minPx) return;
     const eh = hashString(id) % 100_000;
     const pd = Math.min(0.97, (size - minPx + 1) / 10);
     if (hash01(sh, sec(t), eh, 21) > pd) return;
     let finalCls = cls;
-    if ((cls === 'drone' || cls === 'bird') && size < 9) finalCls = 'unknown';
+    if ((cls === 'drone' || cls === 'bird') && size < 14) finalCls = 'unknown';
     dets.push({
       localTrackId: isStatic ? `S${eh % 10000}` : String(eh % 10000),
       cls: finalCls,
       bbox: bb,
       score: round(Math.min(0.98, 0.35 + size / 80), 2),
-      sharpness: round(Math.max(0.05, Math.min(1, bb[3] / 140)), 3),
+      sharpness: round(Math.max(0.05, Math.min(1, bb[3] / 240)), 3),
       isStatic,
       ...extra,
     });
@@ -273,13 +273,13 @@ function detectFrom(
     if (e.entity.signature) {
       const bb = bboxOf(pose, box);
       const hpx = bb ? bb[3] : 0;
-      const sharp = Math.max(0.05, Math.min(1, hpx / 140));
+      const sharp = Math.max(0.05, Math.min(1, hpx / 240));
       const eh = hashString(e.entity.id) % 100_000;
       const noise = 0.06 + 0.55 * (1 - sharp);
       extra.appearance = normalizeVec(e.entity.signature.map((v, i) => v + noise * g(sh, sec(t), eh, 30 + i))).map((v) => round(v, 4));
       const toCam = Math.atan2(pose.position.y - e.state.position.y, pose.position.x - e.state.position.x);
       const facing = Math.max(0, Math.cos(toCam - e.state.headingRad));
-      extra.faceQuality = round(Math.max(0, Math.min(1, (hpx - 60) / 220)) * facing, 3);
+      extra.faceQuality = round(Math.max(0, Math.min(1, (hpx - 120) / 420)) * facing, 3);
     }
     consider(e.entity.id, box, cls, e.entity.kind === 'drone' || e.entity.kind === 'bird' ? 'small' : 'normal', extra, false);
   }

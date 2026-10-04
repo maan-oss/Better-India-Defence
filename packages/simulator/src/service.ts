@@ -100,12 +100,12 @@ async function handle(req: IncomingMessage, res: ServerResponse, d: ServiceDeps)
     if (!jpg) {
       if (sensor.kind === 'camera') {
         const cam = getCameras().find((c) => c.id === id) as CameraDef;
-        jpg = encodeJpeg(renderFrame(d.engine.world, cameraPoseAt(cam, t), t, { label: cam.id, rangeM: cam.rangeM }), cam.widthPx, cam.heightPx);
+        jpg = encodeJpeg(renderFrame(d.engine.world, { ...cameraPoseAt(cam, t), widthPx: cam.streamWidthPx, heightPx: cam.streamHeightPx }, t, { label: cam.id, rangeM: cam.rangeM }), cam.streamWidthPx, cam.streamHeightPx);
       } else {
         const drone = getDrones().find((c) => c.id === id) as DroneDef;
         const s = d.engine.world.droneState(id, t);
         if (!s || s.mode === 'docked') return json(res, 410, { error: `no recording: ${id} not airborne at requested time` });
-        const pose = dronePose(drone, s);
+        const pose = { ...dronePose(drone, s), widthPx: 480, heightPx: 270 };
         jpg = encodeJpeg(renderFrame(d.engine.world, pose, t, { label: drone.id, rangeM: 700, excludeEntityId: `uas-${id}` }), pose.widthPx, pose.heightPx);
       }
       frameCache.set(key, jpg);

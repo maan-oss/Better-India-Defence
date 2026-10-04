@@ -23,8 +23,20 @@ export interface AuditRecord extends Required<Omit<AuditInput, 'detail'>> {
   hash: string;
 }
 
+/** Key-order-independent JSON: JSONB storage reorders object keys, so hashes must not depend on order. */
+function stableJson(v: unknown): string {
+  if (Array.isArray(v)) return `[${v.map(stableJson).join(',')}]`;
+  if (v !== null && typeof v === 'object') {
+    const entries = Object.entries(v as Record<string, unknown>)
+      .filter(([, x]) => x !== undefined)
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+    return `{${entries.map(([k, x]) => `${JSON.stringify(k)}:${stableJson(x)}`).join(',')}}`;
+  }
+  return JSON.stringify(v) ?? 'null';
+}
+
 const canonical = (r: { t: number; actor: string; role: string; action: string; target: string | null; detail: unknown; ip: string | null }) =>
-  JSON.stringify([r.t, r.actor, r.role, r.action, r.target, r.detail, r.ip]);
+  stableJson([Number(r.t), r.actor, r.role, r.action, r.target, r.detail, r.ip]);
 
 export class AuditLog {
   private chain: Promise<unknown> = Promise.resolve();
@@ -38,7 +50,9 @@ export class AuditLog {
         const last = await this.db.query<{ hash: string }>('SELECT hash FROM audit_events ORDER BY seq DESC LIMIT 1');
         this.lastHash = last.rows[0]?.hash ?? 'GENESIS';
       }
-      const rec = { t: Date.now(), actor: input.actor, role: input.role, action: input.action, target: input.target ?? null, detail: input.detail ?? {}, ip: input.ip ?? null };
+      // Round-trip detail through JSON so what we hash is exactly what JSONB will hand back (no undefined, no Dates).
+      const detail = JSON.parse(JSON.stringify(input.detail ?? {})) as Record<string, unknown>;
+      const rec = { t: Date.now(), actor: input.actor, role: input.role, action: input.action, target: input.target ?? null, detail, ip: input.ip ?? null };
       const hash = createHash('sha256').update(this.lastHash).update(canonical(rec)).digest('hex');
       await this.db.query('INSERT INTO audit_events (t, actor, role, action, target, detail, ip, prev_hash, hash) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9)', [
         rec.t,

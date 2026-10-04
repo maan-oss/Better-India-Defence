@@ -100,9 +100,9 @@ export function buildFence(f: FacilityDef): { group: THREE.Group; segments: Map<
   return { group: g, segments };
 }
 
-const bodyMat = new THREE.MeshStandardMaterial({ color: '#2a2d31', roughness: 0.92, metalness: 0.04 });
-const reconMat = new THREE.MeshStandardMaterial({ color: '#25302e', roughness: 0.9, metalness: 0.02 });
-const edgeMat = new THREE.LineBasicMaterial({ color: '#ece6dc', transparent: true, opacity: 0.2 });
+const bodyMat = new THREE.MeshStandardMaterial({ color: '#4b5056', roughness: 0.88, metalness: 0.04 });
+const reconMat = new THREE.MeshStandardMaterial({ color: '#3f5552', roughness: 0.9, metalness: 0.02 });
+const edgeMat = new THREE.LineBasicMaterial({ color: '#ece6dc', transparent: true, opacity: 0.32 });
 const reconEdgeMat = new THREE.LineBasicMaterial({ color: '#7fb3aa', transparent: true, opacity: 0.5 });
 const ghostMat = new THREE.LineDashedMaterial({ color: '#807b72', dashSize: 2, gapSize: 2, transparent: true, opacity: 0.55 });
 

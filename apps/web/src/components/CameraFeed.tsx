@@ -13,7 +13,7 @@ interface FrameDetections {
  * detections reported for that same frame overlaid. Frames are CAPTURED evidence; boxes are the sensor's
  * own analytics output (not platform inference).
  */
-export function CameraFeed({ sensorId, t, width = 480, height = 270, live }: { sensorId: string; t: number; width?: number; height?: number; live: boolean }) {
+export function CameraFeed({ sensorId, t, width = 1920, height = 1080, live }: { sensorId: string; t: number; width?: number; height?: number; live: boolean }) {
   const tq = Math.floor(t / 2000) * 2000;
   const [frame, setFrame] = useState<{ url: string; t: number; dets: FrameDetections['detections'] } | null>(null);
   const [error, setError] = useState<string | null>(null);
