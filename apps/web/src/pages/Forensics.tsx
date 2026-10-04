@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { get, patch, post } from '../api/client';
 import { STATE_HELP_PRODUCT, STATE_LABEL, uploadEvidence, useVisionLive, type Box, type EvidenceItem, type EvidenceProduct, type FaceEvent, type VisionStatus } from '../api/vision';
@@ -29,11 +29,15 @@ export function Forensics() {
   const items = useAsync((s) => get<EvidenceItem[]>(`/api/evidence/items${q ? `?q=${encodeURIComponent(q)}` : ''}`, s), [q, version]);
   const status = useAsync((s) => get<VisionStatus>('/api/vision/status', s), []);
   const missing = status.data?.models.filter((m) => !m.installed) ?? [];
+  const first = items.data?.[0]?.id;
+  useEffect(() => {
+    if (!id && first && !q) nav(`/forensics/${first}`, { replace: true });
+  }, [id, first, q, nav]);
 
   return (
     <div className="page">
       <div className="page-h">
-        <h1>Media Forensics</h1>
+        <h1>Media forensics</h1>
         <span className="sub">Ingest, analyse and enhance imagery with a complete processing record. Originals are never altered.</span>
         <div className="spacer" />
         {status.data && (

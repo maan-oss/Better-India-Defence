@@ -30,6 +30,8 @@ const schema = z.object({
   AUTO_INCIDENTS: z.enum(['true', 'false']).default('true'),
   /** Directory from which file-based camera sources (recorded feeds) may be read. */
   STRATA_IMPORT_DIR: z.string().optional(),
+  /** Seed demonstration identities, evidence and a demo camera on the demo site (default: on, except in tests). */
+  STRATA_DEMO_CONTENT: z.enum(['true', 'false']).optional(),
   STRATA_MODELS_DIR: z.string().optional(),
 });
 

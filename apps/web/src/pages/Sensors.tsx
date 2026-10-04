@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useWorld } from '../state/world';
 import { get } from '../api/client';
 import type { SensorListItem } from '../api/types';
 import { ErrorNote, Loading, ObservationViewer, StateChip, useAsync } from '../components/common';
@@ -101,7 +102,7 @@ export function Sensors() {
             </tbody>
           </table>
         </div>
-        <div className="scroll">{id ? <SensorDetailView id={id} /> : <div className="empty">Select a sensor for diagnostics.</div>}</div>
+        <div className="scroll">{id ? <SensorDetailView id={id} /> : <SensorMap rows={data ?? []} onPick={(sid) => nav(`/sensors/${sid}`)} />}</div>
       </div>
     </div>
   );
@@ -208,4 +209,77 @@ function DeadLetters({ sensorId }: { sensorId: string }) {
       ))}
     </div>
   );
+}
+
+const KIND_GLYPH: Record<string, string> = { camera: 'M-5 -3h7l3 -2v10l-3 -2h-7z', radar: 'M-6 4a6 6 0 0 1 12 0M0 4V-5', rf: 'M-5 3a5 5 0 0 1 0-6M5 3a5 5 0 0 0 0-6M0 -1v6', lidar: 'M-5 -5h10v10h-10z', drone: 'M-6 0h12M0 -6v12', fence: 'M-6 -4v8M0 -4v8M6 -4v8M-7 0h14', bms: 'M-5 -5h10v10h-10zM-5 0h10', gps: 'M0 -6l5 12h-10z', external: 'M-6 0h12M3 -3l3 3-3 3' };
+
+/** Site plan with every positioned sensor, coloured by reporting status. */
+function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: string) => void }) {
+  const facility = useWorld((s) => s.facility);
+  const [hover, setHover] = useState<string | null>(null);
+  if (!facility) return null;
+  const H = facility.perimeterHalfM * 1.2;
+  const placed = rows.filter((r) => 'position' in r.definition) as (SensorListItem & { definition: { position: { x: number; y: number } } })[];
+  const color = (st: string | undefined) => (st === 'ok' ? 'var(--ok)' : st === 'degraded' ? 'var(--amber)' : 'var(--red)');
+  return (
+    <div className="sensor-map reveal">
+      <div className="section">
+        <h4>Sensor estate</h4>
+        <div className="muted" style={{ fontSize: 12 }}>
+          {placed.length} positioned sensors. Select one for diagnostics; feeds without a fixed position (GPS gateways, interop, satellite) are listed on the left.
+        </div>
+      </div>
+      <svg viewBox={`${-H} ${-H} ${2 * H} ${2 * H}`} className="smap" role="img" aria-label="Sensor map">
+        <g transform="scale(1,-1)">
+          {facility.zones.map((z) => (
+            <polygon key={z.id} points={z.polygon.map((p) => `${p.x},${p.y}`).join(' ')} fill={z.restricted ? 'rgba(226,167,60,0.06)' : 'rgba(170,190,210,0.03)'} stroke={z.restricted ? 'rgba(226,167,60,0.4)' : 'rgba(170,190,210,0.15)'} strokeWidth={H / 400} />
+          ))}
+          {facility.buildings.map((b) => (
+            <rect key={b.id} x={b.center.x - b.width / 2} y={b.center.y - b.depth / 2} width={b.width} height={b.depth} transform={`rotate(${b.yawDeg} ${b.center.x} ${b.center.y})`} fill="rgba(170,190,210,0.12)" />
+          ))}
+          {facility.fence.map((f) => (
+            <line key={f.id} x1={f.a.x} y1={f.a.y} x2={f.b.x} y2={f.b.y} stroke="rgba(212,176,98,0.6)" strokeWidth={H / 300} strokeDasharray={`${H / 60} ${H / 90}`} />
+          ))}
+          {placed.map((r) => {
+            const d = r.definition as SensorListItem['definition'] & { position: { x: number; y: number }; rangeM?: number; headingDeg?: number; hfovDeg?: number };
+            const st = r.status?.status;
+            const sel = hover === d.id;
+            const s = H / 70;
+            return (
+              <g key={d.id} transform={`translate(${d.position.x} ${d.position.y})`} onMouseEnter={() => setHover(d.id)} onMouseLeave={() => setHover(null)} onClick={() => onPick(d.id)} style={{ cursor: 'pointer' }}>
+                {d.kind === 'camera' && d.headingDeg !== undefined && d.hfovDeg !== undefined && (
+                  <path d={wedge(d.headingDeg, d.hfovDeg, Math.min(d.rangeM ?? 300, H / 3))} fill={sel ? 'rgba(212,176,98,0.18)' : 'rgba(170,190,210,0.05)'} stroke="none" />
+                )}
+                {(d.kind === 'radar' || d.kind === 'rf') && d.rangeM && <circle r={Math.min(d.rangeM, H * 2)} fill="none" stroke={color(st)} strokeOpacity={sel ? 0.5 : 0.12} strokeWidth={H / 500} strokeDasharray={`${H / 80} ${H / 80}`} />}
+                <circle r={s * 1.25} fill="var(--bg-1)" stroke={color(st)} strokeWidth={s / 4} />
+                <path d={KIND_GLYPH[d.kind] ?? 'M-3 0h6'} transform={`scale(${s / 7}, ${-s / 7})`} fill="none" stroke={color(st)} strokeWidth={1.4} />
+                {(sel || st !== 'ok') && (
+                  <text transform={`scale(1,-1)`} x={s * 1.8} y={s * 0.5} fontSize={s * 1.6} fill="var(--text-0)" fontFamily="IBM Plex Mono, monospace">
+                    {d.id}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+      <div className="row smap-legend">
+        <span>
+          <i style={{ background: 'var(--ok)' }} /> reporting
+        </span>
+        <span>
+          <i style={{ background: 'var(--amber)' }} /> degraded
+        </span>
+        <span>
+          <i style={{ background: 'var(--red)' }} /> silent / fault
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function wedge(headingDeg: number, fovDeg: number, r: number): string {
+  const a0 = ((90 - headingDeg - fovDeg / 2) * Math.PI) / 180;
+  const a1 = ((90 - headingDeg + fovDeg / 2) * Math.PI) / 180;
+  return `M0 0 L${Math.cos(a0) * r} ${Math.sin(a0) * r} A${r} ${r} 0 0 1 ${Math.cos(a1) * r} ${Math.sin(a1) * r} Z`;
 }

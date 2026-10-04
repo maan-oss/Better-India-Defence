@@ -31,6 +31,7 @@ COPY --from=build /app/scripts ./scripts
 COPY --from=build /app/models ./models
 COPY --from=build /app/apps/server/package.json ./apps/server/
 COPY --from=build /app/apps/server/dist ./apps/server/dist
+COPY --from=build /app/apps/server/demo-assets ./apps/server/demo-assets
 COPY --from=build /app/apps/web/dist ./apps/web/dist
 COPY --from=build /app/packages/simulator/dist ./packages/simulator/dist
 COPY --from=build /app/packages/adapters/dist ./packages/adapters/dist

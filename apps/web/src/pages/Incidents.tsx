@@ -20,6 +20,10 @@ export function Incidents() {
   useEffect(() => {
     void useData.getState().loadInitial();
   }, []);
+  // Open the most recent incident rather than an empty pane.
+  useEffect(() => {
+    if (!id && !creating && incidents[0]) nav(`/incidents/${incidents[0].id}`, { replace: true });
+  }, [id, creating, incidents, nav]);
   return (
     <div className="page">
       <div className="page-h">
@@ -34,19 +38,29 @@ export function Incidents() {
       </div>
       <div className="page-body split">
         <div className="scroll">
-          {incidents.length === 0 && <div className="empty">No incidents recorded.</div>}
+          {incidents.length === 0 && (
+            <div className="empty-state">
+              <h3>No incidents recorded</h3>
+              <p>Critical alerts open an incident automatically. Operators can also open one for any place and time window.</p>
+            </div>
+          )}
           {incidents.map((i) => (
-            <div key={i.id} className={`list-row ${i.id === id || i.code === id ? 'sel' : ''}`} style={{ padding: '10px 16px' }} onClick={() => nav(`/incidents/${i.id}`)}>
-              <span className="mono" style={{ width: 110 }}>
-                {i.code}
-              </span>
+            <div key={i.id} className={`list-row inc-row ${i.id === id || i.code === id ? 'sel' : ''}`} onClick={() => nav(`/incidents/${i.id}`)}>
+              <div className={`inc-sev s-${i.status}`} />
               <div className="grow" style={{ minWidth: 0 }}>
-                <div className="ellipsis">{i.title}</div>
-                <div className="muted mono" style={{ fontSize: 11 }}>
+                <div className="row" style={{ gap: 8 }}>
+                  <span className="mono" style={{ color: 'var(--accent-2)', fontSize: 11.5 }}>
+                    {i.code}
+                  </span>
+                  <span className={`chip ${i.status === 'open' ? 'red' : i.status === 'closed' ? '' : 'amber'}`}>{i.status}</span>
+                </div>
+                <div className="ellipsis" style={{ fontSize: 13.5, margin: '3px 0 2px' }}>
+                  {i.title}
+                </div>
+                <div className="muted mono" style={{ fontSize: 10.5 }}>
                   {dateTime(i.tStart)} · {dur(i.tEnd - i.tStart)} · {i.alertIds.length} alert(s)
                 </div>
               </div>
-              <span className="chip">{i.status}</span>
             </div>
           ))}
         </div>

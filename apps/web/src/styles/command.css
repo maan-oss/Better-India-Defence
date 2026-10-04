@@ -1,6 +1,25 @@
 /* Command console */
-.cmd-grid { display: grid; grid-template-columns: minmax(380px, 1fr) minmax(560px, 2fr); grid-auto-rows: min-content; gap: 12px; padding: 14px; align-content: start; }
-.cmd-threats { grid-column: 2; grid-row: 1 / 3; }
+.cmd-grid { display: grid; grid-template-columns: minmax(380px, 1fr) minmax(560px, 2fr); grid-auto-rows: min-content; gap: 12px; padding: 4px 20px 20px; align-content: start; }
+.cmd-threats { grid-column: 2; grid-row: 1; }
+.cmd-scope { grid-column: 2; grid-row: 2 / 5; }
+.kpis { border-bottom: 0; padding-bottom: 8px; }
+.kpis .stat { text-align: left; cursor: pointer; color: inherit; font: inherit; transition: border-color var(--t-fast), transform var(--t-fast); }
+.kpis .stat:hover { border-color: var(--accent-line); transform: translateY(-1px); }
+.kpi-sub { font-size: 11.5px; color: var(--text-2); margin-top: 6px; }
+.scope-wrap { position: relative; height: 520px; }
+.scope-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.scope-tip { position: absolute; padding: 4px 8px; font-size: 11.5px; pointer-events: none; white-space: nowrap; z-index: 3; }
+.scope-legend { position: absolute; left: 12px; bottom: 10px; display: flex; flex-direction: column; gap: 3px; font-size: 10.5px; color: var(--text-2); pointer-events: none; }
+.scope-legend span { display: flex; align-items: center; gap: 6px; }
+.lg { width: 11px; height: 8px; display: inline-block; border: 1.5px solid; }
+.lg.friend { border-color: var(--friend); background: rgba(90, 169, 230, 0.25); }
+.lg.unknown { border-color: var(--unknown-aff); border-radius: 50%; width: 9px; height: 9px; background: rgba(242, 209, 75, 0.25); }
+.lg.hostile { border-color: var(--hostile); width: 8px; height: 8px; transform: rotate(45deg); background: rgba(255, 77, 61, 0.25); }
+.lg.dashed { border-style: dashed; border-color: var(--text-1); }
+@media (max-width: 1300px) {
+  .cmd-grid { grid-template-columns: 1fr; }
+  .cmd-threats, .cmd-scope { grid-column: 1; grid-row: auto; }
+}
 .ready-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 10px 12px; }
 .ready-step { height: 44px; border: 1px solid var(--line-2); background: var(--bg-2); color: var(--text-2); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; font-weight: 600; cursor: pointer; border-radius: var(--radius); }
 .ready-step:disabled { cursor: default; }

@@ -8,6 +8,11 @@ import { useData } from '../state/data';
 import { useWorld } from '../state/world';
 import { ErrorNote, Loading, Modal, Prio, useAsync } from '../components/common';
 import { DispatchDialog, type Task, type Team } from '../components/ops/OpsWidgets';
+import { TacticalScope } from '../components/ops/TacticalScope';
+import { Spark } from '../components/charts';
+import { useVisionLive } from '../api/vision';
+import { useTime } from '../state/time';
+import { tracks as trackStore, type RenderTrack } from '../state/tracks';
 import '../styles/command.css';
 
 /**
@@ -49,11 +54,61 @@ export function Command() {
 function Overview() {
   const version = useOps((s) => s.version);
   return (
-    <div className="cmd-grid scroll">
-      <ReadinessPanel />
-      <ThreatBoard />
-      <TeamsPanel version={version} />
-      <TasksPanel version={version} />
+    <div className="scroll" style={{ minHeight: 0 }}>
+      <Kpis version={version} />
+      <div className="cmd-grid">
+        <ReadinessPanel />
+        <ThreatBoard />
+        <TacticalScope />
+        <TeamsPanel version={version} />
+        <TasksPanel version={version} />
+      </div>
+    </div>
+  );
+}
+
+/** At-a-glance state of the watch. Each figure links to where it is worked. */
+function Kpis({ version }: { version: number }) {
+  const alerts = useData((s) => s.alerts);
+  const sensors = useData((s) => s.sensors);
+  const threats = useOps((s) => s.threats);
+  const pending = useVisionLive((s) => s.pendingReview);
+  const nav = useNavigate();
+  const teams = useAsync((sig) => get<Team[]>('/api/ops/teams', sig), [version]);
+  const [trk, setTrk] = useState<RenderTrack[]>([]);
+  useEffect(() => {
+    const pull = () => setTrk(trackStore.liveAt(useTime.getState().currentLiveEdge()));
+    pull();
+    const id = setInterval(pull, 2000);
+    return () => clearInterval(id);
+  }, []);
+  const open = alerts.filter((a) => a.status === 'open');
+  const crit = open.filter((a) => a.priority === 'critical').length;
+  const edge = useTime.getState().currentLiveEdge();
+  const buckets = Array.from({ length: 12 }, (_, i) => alerts.filter((a) => a.t > edge - (12 - i) * 1800_000 && a.t <= edge - (11 - i) * 1800_000).length);
+  const hi = threats.filter((t) => t.level === 'CRITICAL' || t.level === 'HIGH').length;
+  const nonCoop = trk.filter((t) => !t.cooperative && !t.inferred).length;
+  const down = Object.values(sensors).filter((s) => s.status === 'silent' || s.status === 'offline' || s.status === 'fault').length;
+  const total = Object.keys(sensors).length;
+  const avail = (teams.data ?? []).filter((t) => t.status === 'AVAILABLE').length;
+  const k = [
+    { v: open.length, l: 'Alerts awaiting action', sub: crit ? `${crit} critical` : 'none critical', cls: crit ? 'bad' : open.length ? 'warn' : 'good', go: '/operations', spark: buckets },
+    { v: hi, l: 'High / critical threats', sub: `${threats.length} contacts evaluated`, cls: hi ? 'bad' : 'good', go: '/command' },
+    { v: nonCoop, l: 'Uncorrelated contacts', sub: `${trk.filter((t) => t.cooperative).length} friendly tracked`, cls: nonCoop > 20 ? 'warn' : '', go: '/operations' },
+    { v: `${avail}/${teams.data?.length ?? 0}`, l: 'Response teams available', sub: `${(teams.data ?? []).filter((t) => t.status !== 'AVAILABLE' && t.status !== 'OFF DUTY').length} committed`, cls: avail === 0 && (teams.data?.length ?? 0) > 0 ? 'bad' : '', go: '/command' },
+    { v: `${total - down}/${total}`, l: 'Sensors reporting', sub: down ? `${down} not reporting` : 'all nominal', cls: down ? 'warn' : 'good', go: '/sensors' },
+    { v: pending, l: 'Identity reviews pending', sub: 'recognition candidates', cls: pending ? 'warn' : '', go: '/identity' },
+  ];
+  return (
+    <div className="cards kpis">
+      {k.map((x, i) => (
+        <button key={x.l} className={`stat ${x.cls}`} style={{ animationDelay: `${i * 40}ms` }} onClick={() => nav(x.go)}>
+          <div className="v">{x.v}</div>
+          <div className="l">{x.l}</div>
+          <div className="kpi-sub">{x.sub}</div>
+          {x.spark && <Spark values={x.spark} color={crit ? 'var(--red)' : 'var(--amber)'} />}
+        </button>
+      ))}
     </div>
   );
 }

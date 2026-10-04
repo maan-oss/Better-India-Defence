@@ -7,6 +7,7 @@ import type { Logger } from './logger.ts';
 import { openDb, type Db } from './db/client.ts';
 import { migrate } from './db/migrate.ts';
 import { LocalObjectStore } from './storage/objectStore.ts';
+import { seedDemoContent } from './demo/demoContent.ts';
 import { AuditLog } from './audit/audit.ts';
 import { Metrics } from './metrics.ts';
 import { LiveHub } from './live/hub.ts';
@@ -120,6 +121,8 @@ export class Platform {
     this.ops = new OpsService(this.db, this.hub, this.alerts, this.fusion, this.incidents, this.sensors, this.identity, () => this.liveEdge(), this.site === null);
     await this.ops.load();
     this.ops.start();
+    if ((cfg.STRATA_DEMO_CONTENT ?? (cfg.NODE_ENV === 'test' ? 'false' : 'true')) === 'true')
+      void seedDemoContent(this, importDir).catch((e: unknown) => this.log.warn({ err: e instanceof Error ? e.message : String(e) }, 'demo content seeding failed'));
     const cls = (await this.db.query<{ value: { level: string; caveat: string } }>(`SELECT value FROM config WHERE key = 'ui.classification'`)).rows[0];
     if (cls) this.classification = cls.value;
     if (!this.vision.ffmpeg) this.log.warn('ffmpeg not found: video evidence and network cameras are unavailable (images still work)');
