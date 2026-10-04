@@ -53,6 +53,17 @@ export interface ThreatAssessment {
 
 const ZONE_KIND_TO_VA: Record<string, VaKind> = { secure: 'ammunition', fuel: 'fuel', substation: 'power', ops: 'command', airside: 'aircraft' };
 
+/** Configured sites use generic zone kinds; infer the asset type from the zone name where it is evident. */
+const NAME_TO_VA: [RegExp, VaKind][] = [
+  [/armou?ry|ammo|ammunition|magazine|explosive|\bfsd\b|ordnance/i, 'ammunition'],
+  [/fuel|\bpol\b|petrol|aviation turbine|\batf\b/i, 'fuel'],
+  [/command|\bhq\b|headquarters|\bops\b|operations|control room|\bc2\b/i, 'command'],
+  [/comm|signal|radar|exchange|antenna|\bsatcom/i, 'communications'],
+  [/power|substation|generator|\bdg set|grid/i, 'power'],
+  [/hangar|aircraft|dispersal|apron|blast pen|\bhas\b/i, 'aircraft'],
+  [/accommodation|barrack|lines|quarters|mess/i, 'accommodation'],
+];
+
 /** Default VAs from restricted zones (centroid + equal-area radius). Sites should survey and edit these. */
 export function defaultVitalAssets(f: FacilityDef): VitalAsset[] {
   return f.zones
@@ -66,7 +77,7 @@ export function defaultVitalAssets(f: FacilityDef): VitalAsset[] {
         area += p.x * q.y - q.x * p.y;
       }
       const radius = Math.sqrt(Math.abs(area) / 2 / Math.PI);
-      const kind = ZONE_KIND_TO_VA[z.kind] ?? 'other';
+      const kind = ZONE_KIND_TO_VA[z.kind] ?? NAME_TO_VA.find(([re]) => re.test(z.name))?.[1] ?? 'other';
       return { id: `va-${z.id.replace(/^zn-/, '')}`, name: z.name, kind, priority: kind === 'ammunition' || kind === 'fuel' || kind === 'command' ? 1 : kind === 'power' ? 2 : 3, centre: c, radiusM: Math.max(30, Math.round(radius)), zoneId: z.id };
     });
 }
@@ -106,7 +117,10 @@ export function assess(track: TrackSnapshot, va: VitalAsset): ThreatAssessment {
   }
   const cooperative = track.cooperative || track.classification === 'cooperative';
   const benign = track.classification === 'bird';
-  const wCat = cooperative || benign ? 0 : CATEGORY_WEIGHT[track.category];
+  // Another system's affiliation report adjusts, but never zeroes, the weighting: it is that system's claim.
+  const rep = track.reported?.affiliation;
+  const wRep = rep === 'hostile' ? 1.35 : rep === 'suspect' ? 1.15 : rep === 'neutral' ? 0.6 : 1;
+  const wCat = cooperative || benign ? 0 : Math.min(1.35, CATEGORY_WEIGHT[track.category] * wRep);
   const wPrio = va.priority === 1 ? 1 : va.priority === 2 ? 0.8 : 0.6;
   const proximity = inside ? 1 : Math.exp(-rangeM / (track.category === 'aerial' ? 800 : 250));
   const imminence = inside ? 1 : ttb !== null ? Math.max(0, 1 - ttb / (track.category === 'aerial' ? 180 : 600)) : 0;
@@ -135,6 +149,7 @@ export function assess(track: TrackSnapshot, va: VitalAsset): ThreatAssessment {
     level,
     factors: [
       { name: 'category', value: round2(wCat) },
+      ...(rep && rep !== 'friend' ? [{ name: `reported ${rep} (${track.reported!.system})`, value: round2(wRep) }] : []),
       { name: 'asset priority', value: round2(wPrio) },
       { name: 'track confidence', value: round2(confidence) },
       { name: 'proximity', value: round2(proximity) },

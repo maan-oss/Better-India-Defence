@@ -21,6 +21,8 @@ export interface RenderTrack {
   lastConfirmedPosition: Vec3;
   trail: Vec3[];
   contributors: string[];
+  /** Live only: another system's report about this track (interop). */
+  reported?: { system: string; affiliation: string };
 }
 
 const MAX_SPEED: Record<string, number> = { aerial: 30, person: 3, vehicle: 25, unknown: 25 };
@@ -129,6 +131,7 @@ class TrackStore {
           lastConfirmedPosition: x.lastConfirmedPosition,
           trail: (this.liveTrails.get(x.id) ?? []).map((s) => s.p),
           contributors: x.contributors,
+          ...(x.reported ? { reported: { system: x.reported.system, affiliation: x.reported.affiliation } } : {}),
         };
       });
   }

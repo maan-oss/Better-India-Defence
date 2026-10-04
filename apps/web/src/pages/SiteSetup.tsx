@@ -19,7 +19,7 @@ interface SiteResponse {
   restartRequired: boolean;
 }
 
-const blank = (origin = { lat: 28.6, lon: 77.2, alt: 0 }): SiteConfig => ({ id: 'my-site', name: 'New site', origin, halfExtentM: 2000, zones: [], buildings: [], perimeter: [], gates: [], orthophoto: null });
+const blank = (origin = { lat: 28.6, lon: 77.2, alt: 0 }): SiteConfig => ({ id: 'my-site', name: 'New site', origin, halfExtentM: 2000, zones: [], buildings: [], perimeter: [], gates: [], feeds: [{ id: 'GPS1', kind: 'gps', name: 'Personnel and vehicle position gateway' }], orthophoto: null });
 
 export function SiteSetup() {
   const [resp, setResp] = useState<SiteResponse | null>(null);
@@ -285,12 +285,49 @@ function SitePanel({ cfg, set, sel, setSel }: { cfg: SiteConfig; set: (p: Partia
           </div>
         )}
       </div>
+      <FeedsSection cfg={cfg} set={set} />
       <div className="section">
         <h4>Contents</h4>
         <div className="muted" style={{ fontSize: 12 }}>
-          {cfg.zones.length} zones ({cfg.zones.filter((x) => x.restricted).length} restricted) · {cfg.buildings.length} buildings · perimeter {cfg.perimeter.length} vertices · {cfg.gates.length} gates
+          {cfg.zones.length} zones ({cfg.zones.filter((x) => x.restricted).length} restricted) · {cfg.buildings.length} buildings · perimeter {cfg.perimeter.length} vertices · {cfg.gates.length} gates · {(cfg.feeds ?? []).length} feeds
         </div>
       </div>
+    </div>
+  );
+}
+
+const FEED_KINDS = { gps: 'Position gateway (NMEA / AVL)', drone: 'UAS telemetry (MAVLink)', external: 'Track feed (Cursor-on-Target)' } as const;
+
+function FeedsSection({ cfg, set }: { cfg: SiteConfig; set: (p: Partial<SiteConfig>) => void }) {
+  const feeds = cfg.feeds ?? [];
+  const upd = (i: number, patch: Partial<SiteConfig['feeds'][number]>) => set({ feeds: feeds.map((f, j) => (j === i ? { ...f, ...patch } : f)) });
+  return (
+    <div className="section">
+      <h4>Data feeds</h4>
+      <div className="dim" style={{ fontSize: 11, marginBottom: 6 }}>
+        Each feed is a sensor id that an adapter posts as (see <span className="mono">packages/adapters</span>: <span className="mono">strata-adapter</span> with NMEA, MAVLink or CoT listeners).
+        Cameras are added on the Cameras page.
+      </div>
+      {feeds.map((f, i) => (
+        <div key={i} className="feed-row">
+          <input className="input mono" value={f.id} style={{ width: 80 }} onChange={(e) => upd(i, { id: e.target.value.toUpperCase() })} />
+          <select className="input" value={f.kind} onChange={(e) => upd(i, { kind: e.target.value as keyof typeof FEED_KINDS })}>
+            {Object.entries(FEED_KINDS).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </select>
+          <input className="input grow" value={f.name} placeholder="name" onChange={(e) => upd(i, { name: e.target.value })} />
+          {f.kind !== 'gps' && <input className="input" value={f.system ?? ''} style={{ width: 90 }} placeholder={f.kind === 'drone' ? 'callsign' : 'system'} onChange={(e) => upd(i, { system: e.target.value })} />}
+          <button className="btn small ghost" title="Remove feed" onClick={() => set({ feeds: feeds.filter((_, j) => j !== i) })}>
+            ✕
+          </button>
+        </div>
+      ))}
+      <button className="btn small" onClick={() => set({ feeds: [...feeds, { id: `EXT${feeds.filter((f) => f.kind === 'external').length + 1}`, kind: 'external', name: 'CoT feed', system: 'CoT' }] })}>
+        Add feed
+      </button>
     </div>
   );
 }

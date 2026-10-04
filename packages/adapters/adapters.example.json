@@ -1,0 +1,40 @@
+{
+  "ingestUrl": "http://127.0.0.1:4000",
+  "listeners": [
+    {
+      "name": "qrt-avl",
+      "protocol": "nmea",
+      "transport": { "type": "udp", "port": 10110 },
+      "sensorId": "GPS1",
+      "requireChecksum": true,
+      "entities": {
+        "QRT1": { "entityId": "QRT-1", "entityKind": "vehicle", "callsign": "QRT-1", "role": "Quick reaction team" },
+        "QRT2": { "entityId": "QRT-2", "entityKind": "vehicle", "callsign": "QRT-2", "role": "Quick reaction team" }
+      }
+    },
+    {
+      "name": "patrol-handset",
+      "protocol": "nmea",
+      "transport": { "type": "file", "path": "/dev/ttyUSB0" },
+      "sensorId": "GPS1",
+      "entity": { "entityId": "PATROL-A", "entityKind": "person", "callsign": "PATROL-A", "role": "Perimeter patrol" }
+    },
+    {
+      "name": "uas-gcs",
+      "protocol": "mavlink",
+      "transport": { "type": "udp", "port": 14550 },
+      "vehicles": { "1": { "sensorId": "UAV1", "callsign": "NETRA-1", "hfovDeg": 62 } }
+    },
+    {
+      "name": "brigade-tak",
+      "protocol": "cot",
+      "transport": { "type": "udp", "port": 6969, "multicast": "239.2.3.1" },
+      "sensorId": "EXT1",
+      "system": "TAK"
+    }
+  ],
+  "cotOut": {
+    "intervalS": 5,
+    "targets": [{ "type": "udp", "host": "239.2.3.1", "port": 6969 }]
+  }
+}

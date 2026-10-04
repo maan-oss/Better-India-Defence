@@ -2,6 +2,7 @@ import type {
   BmsDef,
   BuildingDef,
   GpsGatewayDef,
+  ExternalSourceDef,
   CameraDef,
   DroneDef,
   FacilityDef,
@@ -335,7 +336,10 @@ const bms: BmsDef = {
 
 const gpsGateway: GpsGatewayDef = { id: 'GPS1', name: 'Cooperative position gateway GPS1', kind: 'gps', segment: 'core' };
 
-const sensors: SensorDef[] = [...cameras, ...radars, ...rf, ...lidars, ...drones, satellite, ...fenceSensors, bms, gpsGateway];
+/** Interop feed: tracks reported by other systems over Cursor-on-Target (see packages/adapters). */
+const external: ExternalSourceDef = { id: 'EXT1', name: 'CoT interop feed EXT1', kind: 'external', system: 'CoT', segment: 'core', silenceS: 600 };
+
+const sensors: SensorDef[] = [...cameras, ...radars, ...rf, ...lidars, ...drones, satellite, ...fenceSensors, bms, gpsGateway, external];
 
 export const FACILITY: FacilityDef = {
   id: 'site-kestrel',

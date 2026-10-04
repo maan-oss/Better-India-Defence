@@ -77,7 +77,7 @@ export class IngestPipeline {
 
   /** Serialised advance of derived state (used by the live clock). */
   tick(clock: number): Promise<void> {
-    const run = () => this.advance(clock);
+    const run = () => this.advance(clock, [], true);
     const next = this.chain.then(run, run);
     this.chain = next.catch(() => undefined);
     return next;
@@ -260,8 +260,8 @@ export class IngestPipeline {
   }
 
   /** Advance derived state to `clock`: fusion watermark, silence detection, alerts, snapshots. */
-  async advance(clock: number, transitions: StatusTransition[] = []): Promise<void> {
-    await this.fusion.flush(clock);
+  async advance(clock: number, transitions: StatusTransition[] = [], wall = false): Promise<void> {
+    await this.fusion.flush(clock, wall);
     transitions.push(...this.sensors.sweep(clock));
     await this.sensors.persist(transitions);
     for (const tr of transitions) {

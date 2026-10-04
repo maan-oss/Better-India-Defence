@@ -97,10 +97,15 @@ export class FusionService {
     }
   }
 
-  /** Release buffered measurements up to the watermark; `force` releases a bound based on wall/data clock. */
-  async flush(clock: number): Promise<TrackEvent[]> {
+  /**
+   * Release buffered measurements up to the watermark. Driven by data, the watermark trails the newest
+   * measurement; driven by the live wall clock (`wall`), it also advances when a sparse feed (a CoT report every
+   * 10 s, a GPS tag at 0.2 Hz) sends nothing newer, so its last reports are not held back indefinitely.
+   */
+  async flush(clock: number, wall = false): Promise<TrackEvent[]> {
     const t0 = performance.now();
-    const wm = Math.max(this.watermark, Math.min(this.newest, clock) - REORDER_WINDOW_MS);
+    // (The live clock passed in already trails wall time by the reorder window.)
+    const wm = Math.max(this.watermark, wall ? clock : Math.min(this.newest, clock) - REORDER_WINDOW_MS);
     const ready = this.buffer.filter((m) => m.t <= wm).sort((a, b) => a.t - b.t);
     this.buffer = this.buffer.filter((m) => m.t > wm);
     const events: TrackEvent[] = [];

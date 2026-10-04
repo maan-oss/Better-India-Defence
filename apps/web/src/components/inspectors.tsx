@@ -176,6 +176,11 @@ export function TrackInspector({ id }: { id: string }) {
           <>
             <StateChip state={state} label={`${status}`} />
             <span className="chip">{tr.classification}</span>
+            {s?.reported && (
+              <span className={`chip ${s.reported.affiliation === 'hostile' || s.reported.affiliation === 'suspect' ? 'red' : ''}`} title={`Assertion by ${s.reported.system} (feed ${s.reported.sensorId}), not this platform's judgement`}>
+                reported {s.reported.affiliation} · {s.reported.system}
+              </span>
+            )}
             {tr.merged_into && <span className="chip">merged → {tr.merged_into}</span>}
           </>
         }
@@ -198,6 +203,15 @@ export function TrackInspector({ id }: { id: string }) {
           <dd className="mono">{pct(s?.confidence ?? lastHist?.confidence, 0)} (heuristic track quality)</dd>
           <dt>Position σ</dt>
           <dd className="mono">{(s?.sigmaH ?? lastHist?.sigma_h ?? 0).toFixed(1)} m</dd>
+          {s?.reported && (
+            <>
+              <dt>External report</dt>
+              <dd>
+                {s.reported.system} uid <span className="mono">{s.reported.uid}</span>
+                {s.reported.type ? <span className="mono"> ({s.reported.type})</span> : null} at <span className="mono">{hms(s.reported.t)}Z</span> — the affiliation is that system’s assertion.
+              </dd>
+            </>
+          )}
           {s && (
             <>
               <dt>Grid (MGRS)</dt>

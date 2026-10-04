@@ -14,9 +14,9 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "seed": "npm run seed -w @strata/server",
-    "build": "npm run typecheck && npm run build -w @strata/server && npm run build -w @strata/simulator && npm run build -w @strata/web",
+    "build": "npm run typecheck && npm run build -w @strata/server && npm run build -w @strata/simulator && npm run build -w @strata/adapters && npm run build -w @strata/web",
     "start": "node scripts/start.mjs",
-    "typecheck": "tsc -p packages/domain && tsc -p packages/simulator && tsc -p apps/server && tsc -p apps/web",
+    "typecheck": "tsc -p packages/domain && tsc -p packages/simulator && tsc -p packages/adapters && tsc -p apps/server && tsc -p apps/web",
     "lint": "eslint .",
     "test": "vitest run",
     "test:e2e": "npm run build && playwright test",

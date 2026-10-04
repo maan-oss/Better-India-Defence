@@ -43,7 +43,7 @@ export interface SensorObservation {
 export interface TrackMeasurement {
   observationId: string;
   sensorId: string;
-  sensorKind: 'radar' | 'camera' | 'gps' | 'drone' | 'rf';
+  sensorKind: 'radar' | 'camera' | 'gps' | 'drone' | 'rf' | 'external';
   localId: string;
   t: number;
   position: Vec3;
@@ -64,6 +64,20 @@ export interface TrackMeasurement {
   regionRadiusM?: number;
   /** Free-form evidence attributes retained for the evidence inspector (e.g. RF protocol class). */
   attributes?: Record<string, string | number>;
+  /** Category asserted by the source (external reports); overrides class-based inference. */
+  category?: TrackCategory;
+  /** Identity/affiliation as reported by another system (external interop). */
+  reported?: ReportedIdentity;
+}
+
+/** What another system reported about a track. An assertion by that system, not this platform's judgement. */
+export interface ReportedIdentity {
+  system: string;
+  sensorId: string;
+  uid: string;
+  affiliation: 'friend' | 'hostile' | 'suspect' | 'neutral' | 'unknown' | 'pending';
+  type?: string;
+  t: number;
 }
 
 export type TrackCategory = 'aerial' | 'person' | 'vehicle' | 'unknown';
@@ -89,6 +103,8 @@ export interface TrackSnapshot {
   classification: DetectionClass | 'cooperative';
   state: EpistemicState;
   hits: number;
+  /** Latest report about this track from another system (interop), if any. */
+  reported?: ReportedIdentity;
 }
 
 export interface AlertRecord {

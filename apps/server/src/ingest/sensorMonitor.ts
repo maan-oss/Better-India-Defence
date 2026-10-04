@@ -15,6 +15,7 @@ const SILENCE_S: Record<SensorDef['kind'], number> = {
   gps: 60,
   fence: 90,
   bms: 60,
+  external: 600,
 };
 
 export interface StatusTransition {
@@ -95,7 +96,7 @@ export class SensorMonitor {
     const out: StatusTransition[] = [];
     for (const def of FACILITY.sensors) {
       const s = this.ensure(def.id);
-      const limit = SILENCE_S[def.kind] * 1000;
+      const limit = (def.kind === 'external' && def.silenceS !== undefined ? def.silenceS : SILENCE_S[def.kind]) * 1000;
       if (!Number.isFinite(limit) || s.lastSeen === null) continue;
       if (s.status !== 'silent' && now - s.lastSeen > limit) {
         out.push({ sensorId: def.id, t: s.lastSeen + limit, from: s.status, to: 'silent', message: `no traffic for ${Math.round((now - s.lastSeen) / 1000)} s` });

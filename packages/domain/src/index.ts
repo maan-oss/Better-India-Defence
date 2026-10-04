@@ -29,3 +29,4 @@ export * from './geo/mgrs.ts';
 export * from './ops/threat.ts';
 export * from './ops/sop.ts';
 export * from './facility/site.ts';
+export * from './interop/cot.ts';

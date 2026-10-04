@@ -1,0 +1,22 @@
+{
+  "name": "@strata/adapters",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Field adapters: NMEA 0183 (GPS/AVL), MAVLink (UAS telemetry, receive-only) and Cursor-on-Target (C2 track exchange) to the Strata ingest API.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "bin": {
+    "strata-adapter": "./src/cli.ts"
+  },
+  "scripts": {
+    "start": "tsx src/cli.ts",
+    "build": "esbuild src/cli.ts --bundle --platform=node --format=esm --target=node22 --outfile=dist/cli.js",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@strata/domain": "0.1.0",
+    "zod": "^4.6.5"
+  }
+}

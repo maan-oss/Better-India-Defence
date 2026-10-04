@@ -101,7 +101,7 @@ export interface StaticObjectDef {
   yawDeg: number;
 }
 
-export type SensorKind = 'camera' | 'radar' | 'rf' | 'lidar' | 'drone' | 'satellite' | 'gps' | 'fence' | 'bms';
+export type SensorKind = 'camera' | 'radar' | 'rf' | 'lidar' | 'drone' | 'satellite' | 'gps' | 'fence' | 'bms' | 'external';
 
 interface SensorBase {
   id: string;
@@ -193,7 +193,19 @@ export interface GpsGatewayDef extends SensorBase {
   kind: 'gps';
 }
 
-export type SensorDef = CameraDef | RadarDef | RfDef | LidarDef | DroneDef | SatelliteDef | FenceSensorDef | BmsDef | GpsGatewayDef;
+/**
+ * Track feed from another C2 / situational-awareness system (Cursor-on-Target, a unit's BMS, a neighbouring
+ * base's radar picture). Its tracks are reports from that system, not this site's own measurements.
+ */
+export interface ExternalSourceDef extends SensorBase {
+  kind: 'external';
+  /** Originating system (e.g. "CoT", "TAK", "ADS-B"). */
+  system: string;
+  /** Silence threshold for health monitoring (s); feeds that only report on change can set this high. */
+  silenceS?: number;
+}
+
+export type SensorDef = CameraDef | RadarDef | RfDef | LidarDef | DroneDef | SatelliteDef | FenceSensorDef | BmsDef | GpsGatewayDef | ExternalSourceDef;
 
 export interface FacilityDef {
   id: string;

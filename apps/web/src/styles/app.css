@@ -144,6 +144,7 @@ textarea.input { height: auto; padding: 6px 8px; resize: vertical; }
 .chip.INFERRED { color: var(--inferred); border-color: rgba(169, 155, 201, 0.35); border-style: dashed; }
 .chip.PRIOR i { border: 1px solid var(--prior); transform: rotate(45deg); width: 6px; height: 6px; }
 .chip.PRIOR { color: var(--text-2); }
+.chip.red { color: var(--red); border-color: var(--red); }
 .chip.UNKNOWN i { background: repeating-linear-gradient(45deg, var(--text-3) 0 1px, transparent 1px 3px); border: 1px solid var(--text-3); }
 .chip.UNKNOWN { color: var(--text-3); }
 .prio { display: inline-block; width: 8px; height: 8px; border-radius: 1px; flex: none; }

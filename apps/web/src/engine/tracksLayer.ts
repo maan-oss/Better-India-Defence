@@ -9,6 +9,8 @@ const COLORS = {
   aerial: '#d4553f',
   bird: '#8d877d',
   unknown: '#b9b3a8',
+  hostile: '#ff3b2f',
+  suspect: '#f08a24',
 };
 
 interface TrackObj {
@@ -52,7 +54,8 @@ export class TracksLayer {
         if (o) this.remove(tr.id);
         o = this.create(tr);
       }
-      const color = tr.cooperative ? COLORS.coop : tr.classification === 'bird' ? COLORS.bird : (COLORS[tr.category as keyof typeof COLORS] ?? COLORS.unknown);
+      const rep = tr.reported?.affiliation;
+      const color = tr.cooperative ? COLORS.coop : rep === 'hostile' ? COLORS.hostile : rep === 'suspect' ? COLORS.suspect : tr.classification === 'bird' ? COLORS.bird : (COLORS[tr.category as keyof typeof COLORS] ?? COLORS.unknown);
       const mat = o.body.material as THREE.MeshBasicMaterial;
       mat.color.set(color);
       mat.wireframe = tr.inferred;

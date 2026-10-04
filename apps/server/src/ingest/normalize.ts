@@ -4,7 +4,10 @@ import {
   pixelRay,
   rayTerrain,
   type CameraPose,
+  type DetectionClass,
+  type ExternalTrackPayload,
   type IngestEnvelope,
+  type TrackCategory,
   type ObservationQuality,
   type SensorObservation,
   type TrackMeasurement,
@@ -47,6 +50,9 @@ export interface Normalized {
 }
 
 const rad = Math.PI / 180;
+
+const EXT_CATEGORY: Record<ExternalTrackPayload['category'], TrackCategory> = { person: 'person', vehicle: 'vehicle', vessel: 'vehicle', aircraft: 'aerial', drone: 'aerial', unknown: 'unknown' };
+const EXT_CLASS: Record<ExternalTrackPayload['category'], DetectionClass> = { person: 'person', vehicle: 'vehicle', vessel: 'vehicle', aircraft: 'aircraft', drone: 'drone', unknown: 'unknown' };
 
 export function normalizeEnvelope(env: IngestEnvelope, frame: EnuFrame, receivedAt: number, ingestSeq: number, quality: ObservationQuality, t: number): Normalized {
   const out: Normalized = { observations: [], measurements: [], frames: [] };
@@ -246,6 +252,39 @@ export function normalizeEnvelope(env: IngestEnvelope, frame: EnuFrame, received
         label: p.callsign,
         confidence: 0.98,
         positional: true,
+      });
+      break;
+    }
+    case 'external.track': {
+      const p = env.payload;
+      const category = EXT_CATEGORY[p.category];
+      const enu = frame.toEnu(p.position);
+      // Ground reports often carry no usable height: put surface units on the terrain.
+      const pos = category === 'aerial' ? enu : { x: enu.x, y: enu.y, z: terrainHeight(enu.x, enu.y) };
+      const ce = Math.max(2, p.ceM);
+      const vel = p.speedMps !== undefined && p.courseDeg !== undefined ? { x: p.speedMps * Math.sin(p.courseDeg * rad), y: p.speedMps * Math.cos(p.courseDeg * rad), z: 0 } : null;
+      const o = { ...base(0, 'track'), position: pos, sigma: { x: ce, y: ce, z: category === 'aerial' ? Math.max(10, ce) : 2 }, velocity: vel, state: 'CAPTURED' as const, payload: { ...p }, lat: p.position.lat, lon: p.position.lon };
+      out.observations.push(o);
+      // A report past its stale time is kept as evidence but does not move or sustain a track.
+      if (p.staleAt !== undefined && p.staleAt < t) break;
+      const friend = p.affiliation === 'friend';
+      out.measurements.push({
+        observationId: o.id,
+        sensorId: env.sensorId,
+        sensorKind: 'external',
+        localId: p.uid,
+        t,
+        position: pos,
+        sigma: o.sigma,
+        ...(vel ? { velocity: vel } : {}),
+        cls: friend ? 'cooperative' : EXT_CLASS[p.category],
+        ...(friend ? { entityId: `${p.system}:${p.uid}`.slice(0, 64) } : {}),
+        ...(p.callsign ? { label: p.callsign } : {}),
+        confidence: friend ? 0.95 : 0.8,
+        positional: true,
+        category,
+        reported: { system: p.system, sensorId: env.sensorId, uid: p.uid, affiliation: p.affiliation, ...(p.type ? { type: p.type } : {}), t },
+        attributes: { system: p.system, affiliation: p.affiliation, ...(p.type ? { type: p.type } : {}) },
       });
       break;
     }

@@ -16,3 +16,13 @@
 .plan-cam line { stroke: #7fb3aa; }
 .plan-label { fill: #ece6dc; font-family: var(--font-mono); pointer-events: none; }
 .plan-draft { fill: rgba(236, 230, 220, 0.06); stroke: #ece6dc; stroke-dasharray: 4 3; }
+
+.feed-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.feed-row select {
+  width: 120px;
+}

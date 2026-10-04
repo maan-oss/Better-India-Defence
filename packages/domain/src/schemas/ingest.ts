@@ -90,7 +90,8 @@ export const droneTelemetryPayload = z.object({
   velocity: enuVelocity,
   attitude: z.object({ headingDeg: z.number(), pitchDeg: z.number(), rollDeg: z.number() }),
   gimbal: z.object({ headingDeg: z.number(), pitchDeg: z.number(), hfovDeg: z.number().positive().max(179) }),
-  batteryPct: z.number().min(0).max(100),
+  /** Omitted when the vehicle does not report it. */
+  batteryPct: z.number().min(0).max(100).optional(),
   mode: z.enum(['docked', 'patrol', 'transit', 'loiter', 'survey', 'rtb']),
   linkQuality: z.number().min(0).max(1),
 });
@@ -147,6 +148,32 @@ export const infrastructureStatePayload = z.object({
   position: geodeticSchema.optional(),
 });
 
+export const AFFILIATIONS = ['friend', 'hostile', 'suspect', 'neutral', 'unknown', 'pending'] as const;
+export const EXTERNAL_CATEGORIES = ['person', 'vehicle', 'aircraft', 'drone', 'vessel', 'unknown'] as const;
+
+/**
+ * A track reported by another system (C2 interop: Cursor-on-Target, a unit BMS, a neighbouring site's
+ * picture). The affiliation is the reporting system's assertion and is shown as such; friendly reports
+ * fuse as cooperative entities, everything else as non-cooperative measurements.
+ */
+export const externalTrackPayload = z.object({
+  system: z.string().min(1).max(32),
+  uid: z.string().min(1).max(96),
+  callsign: z.string().max(64).optional(),
+  affiliation: z.enum(AFFILIATIONS),
+  category: z.enum(EXTERNAL_CATEGORIES),
+  position: geodeticSchema,
+  /** Circular error (1-σ, metres) reported by the source; 9999999 in CoT means "unknown". */
+  ceM: z.number().positive().max(100000),
+  courseDeg: z.number().min(0).max(360).optional(),
+  speedMps: z.number().min(0).max(1000).optional(),
+  /** Source type string, kept for the evidence inspector (e.g. CoT "a-h-G-U-C"). */
+  type: z.string().max(64).optional(),
+  /** Report validity end (ms epoch); the platform does not extend a stale report. */
+  staleAt: z.number().int().positive().optional(),
+  remarks: z.string().max(500).optional(),
+});
+
 const base = {
   schema: z.literal(INGEST_SCHEMA_VERSION),
   messageId: z.string().min(6).max(96),
@@ -167,6 +194,7 @@ export const ingestEnvelopeSchema = z.discriminatedUnion('kind', [
   z.object({ ...base, kind: z.literal('imagery.capture'), payload: imageryCapturePayload }),
   z.object({ ...base, kind: z.literal('sensor.health'), payload: sensorHealthPayload }),
   z.object({ ...base, kind: z.literal('infrastructure.state'), payload: infrastructureStatePayload }),
+  z.object({ ...base, kind: z.literal('external.track'), payload: externalTrackPayload }),
 ]);
 
 export type IngestEnvelope = z.infer<typeof ingestEnvelopeSchema>;
@@ -181,6 +209,8 @@ export type LidarScanPayload = z.infer<typeof lidarScanPayload>;
 export type ImageryCapturePayload = z.infer<typeof imageryCapturePayload>;
 export type SensorHealthPayload = z.infer<typeof sensorHealthPayload>;
 export type InfrastructureStatePayload = z.infer<typeof infrastructureStatePayload>;
+export type ExternalTrackPayload = z.infer<typeof externalTrackPayload>;
+export type Affiliation = (typeof AFFILIATIONS)[number];
 export type DetectionClass = (typeof DETECTION_CLASSES)[number];
 
 export const ingestBatchSchema = z.object({ messages: z.array(z.unknown()).min(1).max(5000) });

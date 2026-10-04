@@ -340,8 +340,8 @@ export class WorldEngine {
         id: `tr:${tr.id}`,
         position: pos,
         text: tr.cooperative ? tr.label : tr.id,
-        sub: lost ? `LAST OBSERVED ${hms(tr.lastConfirmedAt)}Z · possible region ${Math.round(tr.sigmaH)} m` : tr.cooperative ? undefined : `${tr.classification === 'unknown' ? tr.category : tr.classification} · ${tr.contributors.join(' ')}`,
-        tone: lost ? 'inferred' : tr.cooperative ? 'muted' : tr.category === 'aerial' && tr.classification !== 'bird' ? 'red' : 'amber',
+        sub: lost ? `LAST OBSERVED ${hms(tr.lastConfirmedAt)}Z · possible region ${Math.round(tr.sigmaH)} m` : tr.cooperative ? undefined : `${tr.reported && tr.reported.affiliation !== 'unknown' ? `${tr.reported.affiliation.toUpperCase()} (${tr.reported.system}) · ` : ''}${tr.classification === 'unknown' ? tr.category : tr.classification} · ${tr.contributors.join(' ')}`,
+        tone: lost ? 'inferred' : tr.cooperative ? 'muted' : (tr.category === 'aerial' && tr.classification !== 'bird') || tr.reported?.affiliation === 'hostile' ? 'red' : 'amber',
         priority: tr.id === selected ? 100 : important && !lost ? 60 : 10,
       });
     }

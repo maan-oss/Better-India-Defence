@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { FacilityDef, FenceSegmentDef, GateDef } from './types.ts';
+import type { FacilityDef, FenceSegmentDef, GateDef, SensorDef } from './types.ts';
 import { FACILITY } from './layout.ts';
 import { setTerrainMode } from './terrain.ts';
 
@@ -44,6 +44,23 @@ export const SiteConfigSchema = z.object({
   /** Closed perimeter fence (vertices in order). */
   perimeter: z.array(pt).max(400).default([]),
   gates: z.array(z.object({ id: z.string().regex(/^[a-z0-9-]{2,40}$/i), name: z.string().min(2).max(60), position: pt })).max(40).default([]),
+  /**
+   * Data feeds that post to the ingest API (adapters in packages/adapters): cooperative-position gateways
+   * (NMEA/AVL), UAS telemetry (MAVLink) and track feeds from other systems (Cursor-on-Target). Cameras are
+   * configured separately on the Cameras page.
+   */
+  feeds: z
+    .array(
+      z.object({
+        id: z.string().regex(/^[A-Z0-9][A-Z0-9-]{1,23}$/, 'upper-case letters, digits and dashes'),
+        kind: z.enum(['gps', 'drone', 'external']),
+        name: z.string().min(2).max(80),
+        /** External feeds: originating system label (CoT, TAK, ADS-B…). Drones: callsign. */
+        system: z.string().max(32).optional(),
+      }),
+    )
+    .max(200)
+    .default([]),
   /** Georeferenced orthophoto used as the 3-D ground texture and the editor background. */
   orthophoto: z
     .object({
@@ -81,6 +98,17 @@ function gateSegment(fence: FenceSegmentDef[], p: { x: number; y: number }): str
   return best;
 }
 
+function feedSensor(f: SiteConfig['feeds'][number]): SensorDef {
+  switch (f.kind) {
+    case 'gps':
+      return { id: f.id, name: f.name, kind: 'gps', segment: 'core' };
+    case 'external':
+      return { id: f.id, name: f.name, kind: 'external', system: f.system || 'CoT', segment: 'core', silenceS: 600 };
+    case 'drone':
+      return { id: f.id, name: f.name, kind: 'drone', segment: 'mobile', callsign: f.system || f.id, role: 'patrol', home: { x: 0, y: 0 }, cruiseAltitudeM: 60, cameraHfovDeg: 70, gimbalPitchDeg: -45, hasLidar: false };
+  }
+}
+
 /** Replace the facility model in place with a configured site. Sensors are added at runtime (cameras etc.). */
 export function applySite(cfg: SiteConfig): void {
   const fence = fenceFromPerimeter(cfg.perimeter);
@@ -98,7 +126,7 @@ export function applySite(cfg: SiteConfig): void {
     fence,
     gates,
     staticObjects: [],
-    sensors: [],
+    sensors: cfg.feeds.map(feedSensor),
   } satisfies Partial<FacilityDef>);
   setTerrainMode('flat');
 }
@@ -121,6 +149,10 @@ export function demoAsSiteConfig(): SiteConfig {
     buildings: d.buildings.map((b) => ({ id: b.id, label: b.label, name: b.name, kind: b.kind, center: b.center, width: b.width, depth: b.depth, height: b.height, yawDeg: b.yawDeg })),
     perimeter: d.fence.map((f) => f.a),
     gates: d.gates.map((g) => ({ id: g.id, name: g.name, position: g.position })),
+    feeds: [
+      { id: 'GPS1', kind: 'gps', name: 'Personnel and vehicle position gateway' },
+      { id: 'EXT1', kind: 'external', name: 'CoT interop feed', system: 'CoT' },
+    ],
     orthophoto: null,
   };
 }

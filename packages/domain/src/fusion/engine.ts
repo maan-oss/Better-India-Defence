@@ -1,5 +1,5 @@
 import type { Vec3 } from '../math/vec.ts';
-import type { TrackCategory, TrackMeasurement, TrackSnapshot, TrackStatus } from '../schemas/model.ts';
+import type { ReportedIdentity, TrackCategory, TrackMeasurement, TrackSnapshot, TrackStatus } from '../schemas/model.ts';
 import type { DetectionClass } from '../schemas/ingest.ts';
 import {
   axisInit,
@@ -80,6 +80,7 @@ interface TrackInternal {
   lostAt: number | null;
   /** Observation ids applied in the most recent update (for provenance persistence). */
   pendingObservationIds: string[];
+  reported: ReportedIdentity | null;
 }
 
 export type TrackEvent =
@@ -97,6 +98,7 @@ export interface UnassociatedEvidence {
 }
 
 export function categoryForMeasurement(m: TrackMeasurement): TrackCategory {
+  if (m.category) return m.category;
   if (m.sensorKind === 'radar' || m.sensorKind === 'drone' || m.sensorKind === 'rf') return 'aerial';
   switch (m.cls) {
     case 'person':
@@ -152,6 +154,8 @@ export class TrackEngine {
         if (tr.status === 'closed' || tr.status === 'lost') continue;
         if (!this.compatible(tr.category, cat)) continue;
         if (tr.entityId && m.entityId && tr.entityId !== m.entityId) continue;
+        // Another system's non-friendly report never merges into a known friendly entity.
+        if (tr.entityId && m.reported && m.reported.affiliation !== 'friend') continue;
         const pred = this.predicted(tr, m.t);
         const d2 = mahalanobis2(pred, m.position, m.sigma, cat === 'aerial');
         if (d2 <= (cat === 'aerial' ? GATE_CHI2_3D : GATE_CHI2_2D)) pairs.push({ m, tr, d2 });
@@ -283,6 +287,7 @@ export class TrackEngine {
         mergedFrom: [],
         lostAt: s.status === 'lost' ? s.t : null,
         pendingObservationIds: [],
+        reported: s.reported ?? null,
       };
       this.tracks.set(tr.id, tr);
       if (tr.entityId) this.entityIndex.set(tr.entityId, tr.id);
@@ -363,6 +368,7 @@ export class TrackEngine {
       this.entityIndex.set(m.entityId, tr.id);
     }
     if (m.label && (m.entityId || !tr.label)) tr.label = m.label;
+    if (m.reported && (!tr.reported || m.reported.t >= tr.reported.t)) tr.reported = m.reported;
     if (tr.category === 'unknown') {
       const c = categoryForMeasurement(m);
       if (c !== 'unknown') tr.category = c;
@@ -404,6 +410,7 @@ export class TrackEngine {
       mergedFrom: [],
       lostAt: null,
       pendingObservationIds: [m.observationId],
+      reported: m.reported ?? null,
     };
     this.tracks.set(id, tr);
     if (m.entityId) this.entityIndex.set(m.entityId, id);
@@ -528,6 +535,7 @@ export class TrackEngine {
           for (const [k, w] of drop.classVotes) keep.classVotes.set(k, (keep.classVotes.get(k) ?? 0) + w);
           keep.hits += drop.hits;
           keep.mergedFrom.push(drop.id);
+          if (drop.reported && (!keep.reported || drop.reported.t > keep.reported.t)) keep.reported = drop.reported;
           if (!keep.entityId && drop.entityId) {
             keep.entityId = drop.entityId;
             keep.label = drop.label;
@@ -588,6 +596,7 @@ export class TrackEngine {
       classification: this.classification(tr),
       state,
       hits: tr.hits,
+      ...(tr.reported ? { reported: tr.reported } : {}),
     };
   }
 }

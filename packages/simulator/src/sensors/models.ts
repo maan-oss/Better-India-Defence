@@ -362,6 +362,59 @@ export function gpsStep(_world: TruthWorld, t: number, entities: EntityState[], 
   return out;
 }
 
+/**
+ * EXT1: a neighbouring unit's TAK picture over Cursor-on-Target, every 10 s. It reports its own friendly
+ * patrol outside the wire and, from its observation post, non-cooperative vehicles on the approaches as
+ * "suspect" — coarser (25 m) than the site's own sensors, so fusion must associate rather than duplicate.
+ */
+export function externalStep(_world: TruthWorld, t: number, entities: EntityState[]): IngestEnvelope[] {
+  if (!due(t, 10, 7)) return [];
+  const out: IngestEnvelope[] = [];
+  const P = FACILITY.perimeterHalfM;
+  // Friendly patrol on a slow loop 150 m outside the perimeter.
+  const a = ((sec(t) % 1800) / 1800) * 2 * Math.PI;
+  const r = P + 150;
+  const pos = { x: r * Math.cos(a), y: r * Math.sin(a), z: 0 };
+  out.push(
+    envelope('external.track', 'EXT1', 'tak.cot-bridge.v1', t, {
+      system: 'TAK',
+      uid: 'ANDROID-7f3c21-BRAVO2',
+      callsign: 'BRAVO-2',
+      affiliation: 'friend',
+      category: 'person',
+      position: toGeo(pos),
+      ceM: 6,
+      courseDeg: round(((90 - ((a + Math.PI / 2) * 180) / Math.PI) % 360 + 360) % 360, 1),
+      speedMps: round((2 * Math.PI * r) / 1800, 2),
+      type: 'a-f-G-U-C-I',
+      staleAt: t + 30_000,
+    }, 0),
+  );
+  let sub = 1;
+  for (const { entity, state } of entities) {
+    if (entity.gps || entity.telemetryId || entity.kind !== 'vehicle') continue;
+    const { x, y } = state.position;
+    if (Math.max(Math.abs(x), Math.abs(y)) < P + 20 || Math.max(Math.abs(x), Math.abs(y)) > FACILITY.halfExtentM) continue;
+    const eh = sensorHash(entity.id);
+    const speed = Math.hypot(state.velocity.x, state.velocity.y);
+    out.push(
+      envelope('external.track', 'EXT1', 'tak.cot-bridge.v1', t, {
+        system: 'TAK',
+        uid: `OP-NORTH.${entity.id}`,
+        affiliation: 'suspect',
+        category: 'vehicle',
+        position: toGeo({ x: x + g(eh, sec(t), 61) * 15, y: y + g(eh, sec(t), 62) * 15, z: 0 }),
+        ceM: 25,
+        ...(speed > 0.5 ? { courseDeg: round(((90 - (Math.atan2(state.velocity.y, state.velocity.x) * 180) / Math.PI) % 360 + 360) % 360, 1), speedMps: round(speed, 1) } : {}),
+        type: 'a-s-G-E-V',
+        staleAt: t + 30_000,
+        remarks: 'Unidentified vehicle on approach road (OP North)',
+      }, sub++ % 16),
+    );
+  }
+  return out;
+}
+
 export function droneTelemetryStep(world: TruthWorld, t: number): IngestEnvelope[] {
   const out: IngestEnvelope[] = [];
   for (const d of getDrones()) {
