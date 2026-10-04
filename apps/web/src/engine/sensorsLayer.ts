@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { directionFromHeadingPitch, frustumFootprint, terrainHeight, type CameraDef, type FacilityDef, type SensorDef } from '@strata/domain';
+import { P } from '../lib/palette';
 
-const STATUS_COLOR: Record<string, string> = { ok: '#8fa3ad', degraded: '#d9a441', silent: '#d4553f', offline: '#d4553f', fault: '#d4553f' };
+const STATUS_COLOR: Record<string, string> = { ok: P.text2, degraded: P.caution, silent: P.serious, offline: P.critical, fault: P.critical };
 
 interface Frustum {
   group: THREE.Group;
@@ -27,7 +28,7 @@ export class SensorsLayer {
         const r = s.kind === 'radar' ? Math.min(s.rangeM, 3600) : s.rangeM;
         const ring = new THREE.LineLoop(
           new THREE.BufferGeometry().setFromPoints(Array.from({ length: 128 }, (_, i) => new THREE.Vector3(s.position.x + r * Math.cos((i / 128) * Math.PI * 2), s.position.y + r * Math.sin((i / 128) * Math.PI * 2), 1))),
-          new THREE.LineDashedMaterial({ color: s.kind === 'lidar' ? '#7fb3aa' : '#8fa3ad', dashSize: 20, gapSize: 14, transparent: true, opacity: 0.35 }),
+          new THREE.LineDashedMaterial({ color: s.kind === 'lidar' ? P.reconstructed : P.text2, dashSize: 20, gapSize: 14, transparent: true, opacity: 0.35 }),
         );
         ring.computeLineDistances();
         this.coverageGroup.add(ring);
@@ -52,11 +53,11 @@ export class SensorsLayer {
       mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(d.x, d.y, d.z));
     } else mesh.rotation.x = Math.PI / 2;
     mesh.userData = { pick: 'sensor', id: s.id };
-    const mast = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x, p.y, ground), new THREE.Vector3(p.x, p.y, p.z)]), new THREE.LineBasicMaterial({ color: '#5c5850' }));
+    const mast = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x, p.y, ground), new THREE.Vector3(p.x, p.y, p.z)]), new THREE.LineBasicMaterial({ color: P.text3 }));
     this.group.add(mast, mesh);
     this.glyphs.set(s.id, mesh);
     if (s.kind === 'radar') {
-      const sweep = new THREE.Mesh(new THREE.BoxGeometry(5, 0.3, 0.3), new THREE.MeshBasicMaterial({ color: '#b9b3a8' }));
+      const sweep = new THREE.Mesh(new THREE.BoxGeometry(5, 0.3, 0.3), new THREE.MeshBasicMaterial({ color: P.text1 }));
       sweep.position.set(p.x, p.y, p.z + 1);
       this.radarSweeps.push(sweep);
       this.group.add(sweep);
@@ -74,9 +75,9 @@ export class SensorsLayer {
       const b = fp[(i + 1) % fp.length]!;
       seg.push(a.x, a.y, a.z + 0.3, b.x, b.y, b.z + 0.3);
     }
-    const lines = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(seg, 3)), new THREE.LineBasicMaterial({ color: '#b9b3a8', transparent: true, opacity: 0.32 }));
+    const lines = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(seg, 3)), new THREE.LineBasicMaterial({ color: P.text1, transparent: true, opacity: 0.3 }));
     const shape = new THREE.Shape(fp.map((p) => new THREE.Vector2(p.x, p.y)));
-    const fill = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshBasicMaterial({ color: '#ece6dc', transparent: true, opacity: 0.035, depthWrite: false, side: THREE.DoubleSide }));
+    const fill = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshBasicMaterial({ color: P.text0, transparent: true, opacity: 0.035, depthWrite: false, side: THREE.DoubleSide }));
     fill.position.z = terrainHeight(cam.position.x, cam.position.y) + 0.5;
     const group = new THREE.Group();
     group.add(lines, fill);
@@ -89,8 +90,8 @@ export class SensorsLayer {
     for (const [id, f] of this.frustums) {
       const st = status[id] ?? 'ok';
       const down = st === 'silent' || st === 'offline' || st === 'fault';
-      (f.lines.material as THREE.LineBasicMaterial).color.set(down ? '#d4553f' : '#b9b3a8');
-      (f.fill.material as THREE.MeshBasicMaterial).color.set(down ? '#d4553f' : '#ece6dc');
+      (f.lines.material as THREE.LineBasicMaterial).color.set(down ? P.critical : P.text1);
+      (f.fill.material as THREE.MeshBasicMaterial).color.set(down ? P.critical : P.text0);
     }
   }
 

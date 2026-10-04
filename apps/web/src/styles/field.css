@@ -4,10 +4,10 @@
 .field-top { display: flex; gap: 10px; align-items: center; }
 .field-team { flex: 1; height: 44px; font-size: 15px; }
 .fstat { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; padding: 6px 10px; border-radius: var(--radius); border: 1px solid var(--line-3); white-space: nowrap; }
-.fstat.s-AVAILABLE { color: var(--ok); border-color: var(--ok); }
-.fstat.s-DISPATCHED, .fstat.s-EN-ROUTE { color: var(--amber); border-color: var(--amber); }
-.fstat.s-ON-SCENE { color: #17120a; background: var(--amber); border-color: var(--amber); }
-.field-pos { display: flex; justify-content: space-between; font-size: 13px; color: var(--accent-2); padding: 0 2px; }
+.fstat.s-AVAILABLE { color: var(--text-0); border-color: var(--line-3); }
+.fstat.s-DISPATCHED, .fstat.s-EN-ROUTE { color: var(--st-standby); border-color: rgba(45, 204, 255, 0.5); background: var(--info-dim); }
+.fstat.s-ON-SCENE { color: #021820; background: var(--st-standby); border-color: var(--st-standby); }
+.field-pos { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-0); padding: 0 2px; }
 .ftask { background: linear-gradient(180deg, var(--bg-2), var(--bg-1)); border: 1px solid var(--line-2); border-radius: var(--radius-lg); padding: 14px; position: relative; overflow: hidden; animation: popIn 300ms var(--ease-out) both; }
 .ftask::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--line-3); }
 .ftask.p-critical::before { background: var(--red); box-shadow: 0 0 14px var(--red); }
@@ -21,13 +21,13 @@
 .field-big { width: 100%; height: 50px; justify-content: center; font-size: 15px; margin-top: 12px; }
 .fsteps { display: flex; gap: 3px; margin-top: 12px; }
 .fsteps span { flex: 1; text-align: center; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; padding: 4px 0; border-top: 3px solid var(--line-2); color: var(--text-3); }
-.fsteps span.done { border-top-color: var(--accent); color: var(--text-1); }
+.fsteps span.done { border-top-color: var(--st-standby); color: var(--text-1); }
 .fsec h4 { margin: 0 0 8px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-2); }
 .flocal { width: 100%; height: 300px; border-radius: var(--radius-lg); border: 1px solid var(--line-2); display: block; }
 .fal { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-1); margin-bottom: 6px; }
-.fal.p-critical { border-color: rgba(229, 83, 61, 0.5); background: linear-gradient(90deg, rgba(229, 83, 61, 0.12), var(--bg-1) 60%); }
+.fal.p-critical { border-color: rgba(255, 56, 56, 0.5); background: linear-gradient(90deg, rgba(255, 56, 56, 0.12), var(--bg-1) 60%); }
 .factions { display: flex; flex-direction: column; gap: 4px; padding-bottom: 20px; }
-.assist { position: relative; overflow: hidden; background: var(--red-dim); border-color: var(--red); color: #ffd2ca; font-weight: 600; letter-spacing: 0.04em; touch-action: none; user-select: none; }
+.assist { position: relative; overflow: hidden; background: var(--red-dim); border-color: var(--red); color: #ffd0d0; font-weight: 600; letter-spacing: 0.04em; touch-action: none; user-select: none; }
 .assist-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--red); }
 .assist.holding .assist-fill { width: 100%; transition: width 1.5s linear; }
 .assist.holding { color: #fff; }

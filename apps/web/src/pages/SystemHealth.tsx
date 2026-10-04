@@ -61,7 +61,7 @@ export function SystemHealth() {
           Refreshed every 3 s · up {Math.floor(m.uptimeS / 3600)} h {Math.round((m.uptimeS % 3600) / 60)} min
         </span>
       </div>
-      <div className="cards">
+      <div className="cards cards-4">
         <Stat v={`${m.ingestPerSecond}/s`} l="Ingest rate" spark={hist.ingest} />
         <Stat v={`${m.batchProcessMs.p95.toFixed(0)} ms`} l="Batch processing p95" spark={hist.batch} />
         <Stat v={`${m.fusionMs.p95.toFixed(1)} ms`} l="Fusion step p95" spark={hist.fusion} />
@@ -165,7 +165,7 @@ function Stat({ v, l, warn, spark }: { v: string; l: string; warn?: boolean; spa
     <div className={`stat ${warn ? 'warn' : ''}`}>
       <div className="v">{v}</div>
       <div className="l">{l}</div>
-      {spark && spark.length > 1 && <Spark values={spark} color={warn ? 'var(--amber)' : 'var(--info)'} />}
+      {spark && spark.length > 1 && <Spark values={spark} stretch fill={false} height={22} color={warn ? 'var(--st-serious)' : 'var(--data)'} />}
     </div>
   );
 }

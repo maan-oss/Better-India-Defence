@@ -106,7 +106,7 @@ function Kpis({ version }: { version: number }) {
           <div className="v">{x.v}</div>
           <div className="l">{x.l}</div>
           <div className="kpi-sub">{x.sub}</div>
-          {x.spark && <Spark values={x.spark} color={crit ? 'var(--red)' : 'var(--amber)'} />}
+          {x.spark && <Spark values={x.spark} stretch color={crit ? 'var(--st-critical)' : 'var(--data)'} />}
         </button>
       ))}
     </div>

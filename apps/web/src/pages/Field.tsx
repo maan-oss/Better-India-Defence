@@ -10,6 +10,7 @@ import { symbolFor, symbolTexture } from '../engine/symbols';
 import { ErrorNote, Modal, useAsync } from '../components/common';
 import { Icon } from '../components/Icons';
 import type { Task, Team } from '../components/ops/OpsWidgets';
+import { alpha, P as C } from '../lib/palette';
 import '../styles/field.css';
 
 const NEXT: Record<string, { status: string; label: string } | undefined> = {
@@ -301,21 +302,21 @@ function LocalPicture({ centre, target }: { centre: Vec3 | null; target: { x: nu
       const R = 600;
       const k = Math.min(w, h) / 2 / R;
       const P = (x: number, y: number) => [w / 2 + (x - c.x) * k, h / 2 - (y - c.y) * k] as const;
-      ctx.fillStyle = '#07090b';
+      ctx.fillStyle = C.bg0;
       ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = 'rgba(170,190,210,0.12)';
+      ctx.strokeStyle = alpha(C.grid, 0.14);
       for (const r of [150, 300, 450, 600]) {
         ctx.beginPath();
         ctx.arc(w / 2, h / 2, r * k, 0, Math.PI * 2);
         ctx.stroke();
       }
-      ctx.fillStyle = 'rgba(170,190,210,0.5)';
+      ctx.fillStyle = C.text2;
       ctx.font = '10px "IBM Plex Mono", monospace';
       ctx.fillText('300 m', w / 2 + 3, h / 2 - 300 * k + 11);
       ctx.fillText('N', w / 2 - 3, 12);
       for (const v of vas) {
         const [x, y] = P(v.centre.x, v.centre.y);
-        ctx.strokeStyle = 'rgba(212,176,98,0.5)';
+        ctx.strokeStyle = alpha(C.zone, 0.5);
         ctx.setLineDash([4, 3]);
         ctx.beginPath();
         ctx.arc(x, y, v.radiusM * k, 0, Math.PI * 2);
@@ -324,7 +325,7 @@ function LocalPicture({ centre, target }: { centre: Vec3 | null; target: { x: nu
       }
       if (target) {
         const [tx, ty] = P(target.x, target.y);
-        ctx.strokeStyle = '#e8c97f';
+        ctx.strokeStyle = C.text0;
         ctx.lineWidth = 1.5;
         ctx.setLineDash([6, 4]);
         ctx.beginPath();
@@ -352,11 +353,11 @@ function LocalPicture({ centre, target }: { centre: Vec3 | null; target: { x: nu
         ctx.globalAlpha = 1;
       }
       // Own position.
-      ctx.fillStyle = '#5aa9e6';
+      ctx.fillStyle = C.friend;
       ctx.beginPath();
       ctx.arc(w / 2, h / 2, 5, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(90,169,230,0.5)';
+      ctx.strokeStyle = alpha(C.friend, 0.5);
       ctx.beginPath();
       ctx.arc(w / 2, h / 2, 9 + ((now / 40) % 14), 0, Math.PI * 2);
       ctx.stroke();

@@ -266,7 +266,7 @@ function Handoff() {
               <div className="l">Face evidence (image quality)</div>
             </div>
             <div className="stat">
-              <div className="v" style={{ color: 'var(--amber)' }}>
+              <div className="v" style={{ color: 'var(--caution)' }}>
                 {res.result.identityState}
               </div>
               <div className="l">Identity state · human review required</div>

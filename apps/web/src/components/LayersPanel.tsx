@@ -99,7 +99,7 @@ export function LayersPanel() {
               .filter((z) => z.kind !== 'perimeter')
               .map((z) => (
                 <div key={z.id} className="tree-item" onClick={() => flyTo({ x: z.polygon.reduce((s, p) => s + p.x, 0) / z.polygon.length, y: z.polygon.reduce((s, p) => s + p.y, 0) / z.polygon.length, z: 0 }, 650)}>
-                  <span style={{ width: 8, height: 8, border: `1px solid ${z.restricted ? 'var(--amber)' : 'var(--info)'}` }} />
+                  <span style={{ width: 8, height: 8, border: `1px ${z.restricted ? 'dashed var(--text-0)' : 'solid var(--text-3)'}` }} />
                   <span className="ellipsis">{z.name}</span>
                 </div>
               ))}

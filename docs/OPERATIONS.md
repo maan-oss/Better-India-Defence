@@ -58,12 +58,18 @@ readiness changes, evidence exports) goes to an append-only, hash-chained audit 
 ### Displays
 
 - **Symbology.** Tracks are drawn with APP-6 / MIL-STD-2525-style frames: friend (blue rectangle),
-  hostile (red diamond), unknown (yellow quatrefoil), neutral (green square); air tracks use the
+  hostile (red diamond), suspect (orange diamond), unknown (yellow quatrefoil), neutral (green square);
+  air tracks use the
   open-bottom half frames. The icon inside gives the function (infantry, vehicle, UAV, aircraft). A
   **dashed** frame means the object is not currently observed (coasting or lost): its position is the
   last confirmed one. A non-cooperative track is *unknown* until identified — the platform never marks
   anything hostile by itself; "hostile" only appears when another system reported it, and says so.
-- **Map furniture.** MGRS grid (100 m lines, 1 km index lines in brass), compass (click for north-up),
+- **Colour means one thing each.** Blue is only for what you can click, select or focus. Red, orange,
+  yellow and green appear only for status (critical → serious → caution → normal), always with a shape
+  or word as well, and red is reserved for what needs action now. Zones, the fence, buildings and asset
+  rings are drawn in neutral grey-blue, so anything bright on the map is something to look at.
+  Teal marks *reconstructed* and violet *inferred* content. See [DESIGN.md](DESIGN.md).
+- **Map furniture.** MGRS grid (100 m lines, brighter 1 km index lines), compass (click for north-up),
   scale bar, and the grid reference and elevation under the cursor.
 - **Night display.** User menu → *Night display (red light)*: the whole console, imagery and 3-D view in
   monochrome red to preserve dark adaptation.

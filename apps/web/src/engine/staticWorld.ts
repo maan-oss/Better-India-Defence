@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { boxFootprint, buildingBoxes, terrainHeight, type FacilityDef, type RoadDef } from '@strata/domain';
 import type { DsmGeometry, StructureState, WorldObjectState } from '../api/types';
+import { P } from '../lib/palette';
 
 const SURFACE_COLORS: Record<RoadDef['surface'], string> = {
-  runway: '#1d1f22',
-  taxiway: '#202326',
-  apron: '#24272a',
-  asphalt: '#1a1c1e',
-  gravel: '#1f1e1b',
+  runway: '#1f2d3b',
+  taxiway: '#1c2a38',
+  apron: '#223142',
+  asphalt: '#1a2734',
+  gravel: '#1d2833',
 };
 
 /** Roads and airfield surfaces as draped ribbons (single merged mesh, vertex colours). */
@@ -60,7 +61,7 @@ export function buildRoads(f: FacilityDef): THREE.Group {
   g.add(new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ vertexColors: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })));
   const mg = new THREE.BufferGeometry();
   mg.setAttribute('position', new THREE.Float32BufferAttribute(marks, 3));
-  g.add(new THREE.LineSegments(mg, new THREE.LineBasicMaterial({ color: '#8d877d', transparent: true, opacity: 0.55 })));
+  g.add(new THREE.LineSegments(mg, new THREE.LineBasicMaterial({ color: P.roadMark, transparent: true, opacity: 0.55 })));
   return g;
 }
 
@@ -69,12 +70,13 @@ export function buildZones(f: FacilityDef): THREE.Group {
   for (const z of f.zones) {
     if (z.kind === 'perimeter') continue;
     const pts = z.polygon.map((p) => new THREE.Vector3(p.x, p.y, terrainHeight(p.x, p.y) + 0.6));
-    const color = z.restricted ? '#d9a441' : '#8fa3ad';
-    const line = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({ color, dashSize: 8, gapSize: 5, transparent: true, opacity: 0.7 }));
+    // Zones are static context: neutral. Restricted zones read as stronger, longer dashes, not a warning colour.
+    const color = P.zone;
+    const line = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({ color, dashSize: z.restricted ? 10 : 5, gapSize: z.restricted ? 4 : 6, transparent: true, opacity: z.restricted ? 0.75 : 0.4 }));
     line.computeLineDistances();
     g.add(line);
     const shape = new THREE.Shape(z.polygon.map((p) => new THREE.Vector2(p.x, p.y)));
-    const fill = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.035, depthWrite: false }));
+    const fill = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: z.restricted ? 0.05 : 0.025, depthWrite: false }));
     fill.position.z = 0.4;
     g.add(fill);
   }
@@ -92,7 +94,7 @@ export function buildFence(f: FacilityDef): { group: THREE.Group; segments: Map<
       const y = s.a.y + ((s.b.y - s.a.y) * i) / n;
       pts.push(new THREE.Vector3(x, y, terrainHeight(x, y) + 2.4));
     }
-    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: '#6f6a62', transparent: true, opacity: 0.8 }));
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: P.fence, transparent: true, opacity: 0.8 }));
     line.userData = { pick: 'fence', id: s.id };
     segments.set(s.id, line);
     g.add(line);
@@ -100,11 +102,11 @@ export function buildFence(f: FacilityDef): { group: THREE.Group; segments: Map<
   return { group: g, segments };
 }
 
-const bodyMat = new THREE.MeshStandardMaterial({ color: '#4b5056', roughness: 0.88, metalness: 0.04 });
-const reconMat = new THREE.MeshStandardMaterial({ color: '#3f5552', roughness: 0.9, metalness: 0.02 });
-const edgeMat = new THREE.LineBasicMaterial({ color: '#ece6dc', transparent: true, opacity: 0.32 });
-const reconEdgeMat = new THREE.LineBasicMaterial({ color: '#7fb3aa', transparent: true, opacity: 0.5 });
-const ghostMat = new THREE.LineDashedMaterial({ color: '#807b72', dashSize: 2, gapSize: 2, transparent: true, opacity: 0.55 });
+const bodyMat = new THREE.MeshStandardMaterial({ color: '#3d4f63', roughness: 0.88, metalness: 0.04 });
+const reconMat = new THREE.MeshStandardMaterial({ color: '#2f5554', roughness: 0.9, metalness: 0.02 });
+const edgeMat = new THREE.LineBasicMaterial({ color: P.buildingEdge, transparent: true, opacity: 0.32 });
+const reconEdgeMat = new THREE.LineBasicMaterial({ color: P.reconstructed, transparent: true, opacity: 0.5 });
+const ghostMat = new THREE.LineDashedMaterial({ color: P.prior, dashSize: 2, gapSize: 2, transparent: true, opacity: 0.55 });
 
 function decodeDsm(g: DsmGeometry): Float32Array {
   const bin = atob(g.heights);
@@ -171,7 +173,7 @@ export function buildBuildings(f: FacilityDef, structures: StructureState[] | nu
   return g;
 }
 
-const OBJ_COLORS: Record<string, string> = { expected: '#3a3c3f', confirmed: '#4a4d50', detected: '#d9a441', missing: '#d4553f' };
+const OBJ_COLORS: Record<string, string> = { expected: '#34465a', confirmed: '#46596e', detected: P.caution, missing: P.serious };
 
 export function buildObjects(objects: WorldObjectState[]): THREE.Group {
   const g = new THREE.Group();
@@ -189,7 +191,7 @@ export function buildObjects(objects: WorldObjectState[]): THREE.Group {
       g.add(edges);
       continue;
     }
-    const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: OBJ_COLORS[o.state] ?? '#3a3c3f', roughness: 0.9 }));
+    const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: OBJ_COLORS[o.state] ?? '#34465a', roughness: 0.9 }));
     mesh.position.set(o.position.x, o.position.y, z);
     mesh.rotation.z = (o.yawDeg * Math.PI) / 180;
     mesh.userData = { pick: 'object', id: o.id };

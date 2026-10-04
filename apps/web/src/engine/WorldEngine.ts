@@ -13,6 +13,7 @@ import type { RenderTrack } from '../state/tracks';
 import type { Coverage, StructureState, WorldChangeRow, WorldObjectState } from '../api/types';
 import type { LayerKey, Selection } from '../state/world';
 import { hms } from '../lib/format';
+import { P } from '../lib/palette';
 
 export interface EngineStats {
   fps: number;
@@ -74,10 +75,10 @@ export class WorldEngine {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     host.appendChild(this.renderer.domElement);
-    this.scene.background = new THREE.Color('#0a0b0c');
-    this.scene.fog = new THREE.FogExp2('#0b0c0e', 0.00009);
-    this.scene.add(new THREE.HemisphereLight('#c9c4bb', '#1a1b1d', 1.1));
-    const sun = new THREE.DirectionalLight('#f1ebe0', 1.5);
+    this.scene.background = new THREE.Color(P.bg0);
+    this.scene.fog = new THREE.FogExp2(P.bg0, 0.00009);
+    this.scene.add(new THREE.HemisphereLight('#c6d3e2', '#141d27', 1.1));
+    const sun = new THREE.DirectionalLight('#f2f5f8', 1.5);
     sun.position.set(1400, -1800, 2200);
     this.scene.add(sun);
 
@@ -203,7 +204,7 @@ export class WorldEngine {
   setInfrastructure(infra: Record<string, { state: string; alarm: boolean }>): void {
     for (const [id, line] of this.fence.segments) {
       const st = infra[id];
-      (line.material as THREE.LineBasicMaterial).color.set(st?.alarm ? '#d4553f' : '#6f6a62');
+      (line.material as THREE.LineBasicMaterial).color.set(st?.alarm ? P.critical : P.fence);
     }
   }
 

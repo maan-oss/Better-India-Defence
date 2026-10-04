@@ -58,9 +58,9 @@ export function CameraFeed({ sensorId, t, width = 1920, height = 1080, live, com
           <div
             key={d.observationId}
             className="bbox"
-            style={{ left: `${(d.bbox[0]! / width) * 100}%`, top: `${(d.bbox[1]! / height) * 100}%`, width: `${(d.bbox[2]! / width) * 100}%`, height: `${(d.bbox[3]! / height) * 100}%`, borderColor: d.isStatic ? 'rgba(143,163,173,0.8)' : undefined }}
+            style={{ left: `${(d.bbox[0]! / width) * 100}%`, top: `${(d.bbox[1]! / height) * 100}%`, width: `${(d.bbox[2]! / width) * 100}%`, height: `${(d.bbox[3]! / height) * 100}%`, borderColor: d.isStatic ? 'rgba(135,150,168,0.8)' : undefined }}
           >
-            {d.bbox[3]! > 6 && <span style={d.isStatic ? { background: 'rgba(143,163,173,0.9)' } : undefined}>{d.cls}</span>}
+            {d.bbox[3]! > 6 && <span style={d.isStatic ? { background: 'rgba(135,150,168,0.9)' } : undefined}>{d.cls}</span>}
           </div>
         ))}
       {!frame && (

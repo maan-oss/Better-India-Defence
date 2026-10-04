@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { P } from '../lib/palette';
 import { terrainHeight } from '@strata/domain';
 
 /**
@@ -48,11 +49,11 @@ const frag = /* glsl */ `
     float shade = 0.62 + 0.38 * max(dot(n, normalize(uSun)), 0.0);
     // Very slight albedo variation keeps large flat areas from looking synthetic.
     float grain = fract(sin(dot(floor(vWorld.xy / 7.0), vec2(12.9898, 78.233))) * 43758.5453);
-    vec3 base = mix(vec3(0.070, 0.078, 0.086), vec3(0.082, 0.089, 0.097), grain * 0.6);
+    vec3 base = mix(vec3(0.058, 0.080, 0.104), vec3(0.068, 0.091, 0.117), grain * 0.6);
     vec3 col = base * shade * 1.35;
     float c1 = contour(vWorld.z, 2.0, 1.0) * 0.07;
     float c2 = contour(vWorld.z, 10.0, 1.2) * 0.12;
-    col = mix(col, vec3(0.93, 0.9, 0.86), c1 + c2);
+    col = mix(col, vec3(0.78, 0.87, 0.96), c1 + c2);
 
     if (uOrthoOn > 0.5) {
       vec2 ouv = (vWorld.xy - uOrthoRect.xy) / (uOrthoRect.zw - uOrthoRect.xy);
@@ -73,8 +74,8 @@ const frag = /* glsl */ `
       float minor = 1.0 - clamp(min(m1.x, m1.y) / 1.0, 0.0, 1.0);
       float major = 1.0 - clamp(min(m2.x, m2.y) / 1.4, 0.0, 1.0);
       float fadeMinor = clamp(1.0 - length(vWorld - cameraPosition) / 3500.0, 0.0, 1.0);
-      col = mix(col, vec3(0.55, 0.68, 0.8), minor * 0.07 * fadeMinor);
-      col = mix(col, vec3(0.83, 0.69, 0.38), major * 0.26);
+      col = mix(col, vec3(0.50, 0.71, 0.90), minor * 0.08 * fadeMinor);
+      col = mix(col, vec3(0.50, 0.71, 0.90), major * 0.24);
     }
 
     if (uCoverageOn > 0.5) {
@@ -82,14 +83,15 @@ const frag = /* glsl */ `
       vec4 cv = texture2D(uCoverage, uv);
       float support = cv.r;
       float observed = cv.g;
-      vec3 low = vec3(0.70, 0.36, 0.26);
-      vec3 mid = vec3(0.62, 0.52, 0.30);
-      vec3 high = vec3(0.42, 0.62, 0.58);
+      // Sequential, colour-blind-safe ramp (viridis stops): coverage quality is a measure, not a status.
+      vec3 low = vec3(0.27, 0.20, 0.49);
+      vec3 mid = vec3(0.15, 0.50, 0.56);
+      vec3 high = vec3(0.63, 0.85, 0.22);
       vec3 tint = support < 0.5 ? mix(low, mid, support * 2.0) : mix(mid, high, (support - 0.5) * 2.0);
       if (observed < 0.5) {
         // Never observed: diagonal hatching, not colour fill. Unknown is not "zero".
         float hatch = step(0.82, fract((vWorld.x + vWorld.y) / 14.0));
-        col = mix(col, vec3(0.32, 0.31, 0.29), hatch * 0.55);
+        col = mix(col, vec3(0.34, 0.41, 0.50), hatch * 0.55);
       } else {
         col = mix(col, tint, 0.38);
       }
@@ -128,7 +130,7 @@ export function createTerrain(halfExtent: number, segments = 256): { mesh: THREE
     fragmentShader: frag,
     uniforms: {
       uSun: { value: new THREE.Vector3(0.45, -0.55, 0.7) },
-      uFogColor: { value: new THREE.Color('#0b0c0e') },
+      uFogColor: { value: new THREE.Color(P.bg0) },
       uFogDensity: { value: 1 / 9000 },
       uHalf: { value: halfExtent },
       uCoverage: { value: coverageTex },

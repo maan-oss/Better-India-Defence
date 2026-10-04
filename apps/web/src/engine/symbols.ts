@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { RenderTrack } from '../state/tracks';
+import { alpha, P } from '../lib/palette';
 
 /**
  * Tactical symbology after APP-6 / MIL-STD-2525: the frame shape carries the affiliation (friend rectangle,
@@ -12,11 +13,11 @@ export type Dimension = 'ground' | 'air';
 export type Fn = 'infantry' | 'vehicle' | 'uav' | 'aircraft' | 'bird' | 'unknown';
 
 export const AFF_COLOR: Record<Affiliation, string> = {
-  friend: '#5aa9e6',
-  hostile: '#ff4d3d',
-  suspect: '#f08a24',
-  neutral: '#5cc26f',
-  unknown: '#f2d14b',
+  friend: P.friend,
+  hostile: P.hostile,
+  suspect: P.suspect,
+  neutral: P.neutral,
+  unknown: P.unknownAff,
 };
 
 export interface SymbolSpec {
@@ -134,9 +135,9 @@ function draw(g: CanvasRenderingContext2D, s: SymbolSpec): void {
   g.lineCap = 'round';
   if (s.selected) {
     g.save();
-    g.shadowColor = '#e8c97f';
+    g.shadowColor = P.accent;
     g.shadowBlur = 18;
-    g.strokeStyle = 'rgba(232, 201, 127, 0.95)';
+    g.strokeStyle = alpha(P.accent2, 0.95);
     g.lineWidth = 3;
     g.beginPath();
     g.arc(64, 64, 58, 0, Math.PI * 2);
@@ -145,7 +146,7 @@ function draw(g: CanvasRenderingContext2D, s: SymbolSpec): void {
   }
   // Dark under-stroke so the symbol reads on any background.
   frame(g, s.aff, s.dim);
-  g.strokeStyle = 'rgba(0,0,0,0.75)';
+  g.strokeStyle = 'rgba(4, 9, 15, 0.8)';
   g.lineWidth = 9;
   g.setLineDash([]);
   g.stroke();

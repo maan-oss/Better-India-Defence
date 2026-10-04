@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { P } from '../lib/palette';
 
 /**
  * Earth → facility approach. A dark globe with a graticule and the site marker; the camera descends onto
@@ -13,10 +14,10 @@ export class GlobeIntro {
   private target: THREE.Vector3;
 
   constructor(lat: number, lon: number) {
-    const globe = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.MeshBasicMaterial({ color: '#0f1113' }));
+    const globe = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.MeshBasicMaterial({ color: P.bg1 }));
     this.scene.add(globe);
     const grat = new THREE.Group();
-    const mat = new THREE.LineBasicMaterial({ color: '#ece6dc', transparent: true, opacity: 0.08 });
+    const mat = new THREE.LineBasicMaterial({ color: P.grid, transparent: true, opacity: 0.1 });
     for (let la = -75; la <= 75; la += 15) {
       const pts: THREE.Vector3[] = [];
       for (let lo = 0; lo <= 360; lo += 3) pts.push(this.toXyz(la, lo, 1.001));
@@ -28,14 +29,14 @@ export class GlobeIntro {
       grat.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat));
     }
     this.scene.add(grat);
-    const rim = new THREE.Mesh(new THREE.SphereGeometry(1.012, 64, 48), new THREE.MeshBasicMaterial({ color: '#2a2d30', transparent: true, opacity: 0.25, side: THREE.BackSide }));
+    const rim = new THREE.Mesh(new THREE.SphereGeometry(1.012, 64, 48), new THREE.MeshBasicMaterial({ color: P.accent, transparent: true, opacity: 0.12, side: THREE.BackSide }));
     this.scene.add(rim);
     this.target = this.toXyz(lat, lon, 1);
-    const marker = new THREE.Mesh(new THREE.RingGeometry(0.006, 0.009, 32), new THREE.MeshBasicMaterial({ color: '#d9a441', side: THREE.DoubleSide }));
+    const marker = new THREE.Mesh(new THREE.RingGeometry(0.006, 0.009, 32), new THREE.MeshBasicMaterial({ color: P.accent2, side: THREE.DoubleSide }));
     marker.position.copy(this.target.clone().multiplyScalar(1.002));
     marker.lookAt(this.target.clone().multiplyScalar(2));
     this.scene.add(marker);
-    this.scene.background = new THREE.Color('#0a0b0c');
+    this.scene.background = new THREE.Color(P.bg0);
   }
 
   private toXyz(lat: number, lon: number, r: number): THREE.Vector3 {

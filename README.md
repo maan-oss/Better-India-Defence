@@ -176,6 +176,7 @@ docs                 OPERATIONS, INTEROP, ARCHITECTURE, SECURITY, REALITY_LIMITS
 - [docs/OPERATIONS.md](docs/OPERATIONS.md) — operator's guide: roles, set-up, daily routines
 - [docs/INTEROP.md](docs/INTEROP.md) — cameras, NMEA, MAVLink, Cursor-on-Target, writing adapters
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — components, algorithms, data model, runtime
+- [docs/DESIGN.md](docs/DESIGN.md) — display design: the colour system and the rules for using it
 - [docs/SECURITY.md](docs/SECURITY.md) — implemented controls and what is missing for real use
 
 ## Responsible use

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { terrainHeight } from '@strata/domain';
 import type { RenderTrack } from '../state/tracks';
 import { AFF_COLOR, pixelScale, symbolFor, symbolTexture } from './symbols';
+import { P } from '../lib/palette';
 
 /** Symbol height on screen (CSS px). */
 export const SYMBOL_PX = 24;
@@ -85,7 +86,7 @@ export class TracksLayer {
       o.ring.scale.set(r, r, 1);
       o.ring.position.set(0, 0, ground + 0.6);
       const rm = o.ring.material as THREE.LineDashedMaterial;
-      rm.color.set(tr.inferred ? '#a99bc9' : color);
+      rm.color.set(tr.inferred ? P.inferred : color);
       // Possible regions of long-lost tracks fade: they remain on record but stop dominating the view.
       const lostAge = tr.inferred ? Math.max(0, (t - tr.lastConfirmedAt) / 1000) : 0;
       rm.opacity = tr.inferred ? (tr.id === selected ? 0.85 : Math.max(0.08, 0.75 * (1 - lostAge / 900))) : 0.35;
@@ -119,9 +120,9 @@ export class TracksLayer {
     const pick = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 6), new THREE.MeshBasicMaterial({ visible: false }));
     pick.userData = { pick: 'track', id: tr.id };
     body.userData = { pick: 'track', id: tr.id };
-    const ring = new THREE.LineLoop(ringGeo, new THREE.LineDashedMaterial({ color: '#a99bc9', dashSize: 4, gapSize: 3, transparent: true, opacity: 0.7 }));
-    const drop = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: '#8d877d', transparent: true, opacity: 0.5 }));
-    const trail = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: '#cfc9bd', transparent: true, opacity: 0.45 }));
+    const ring = new THREE.LineLoop(ringGeo, new THREE.LineDashedMaterial({ color: P.inferred, dashSize: 4, gapSize: 3, transparent: true, opacity: 0.7 }));
+    const drop = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: P.text2, transparent: true, opacity: 0.5 }));
+    const trail = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: P.text1, transparent: true, opacity: 0.45 }));
     const sym = new THREE.Sprite(new THREE.SpriteMaterial({ sizeAttenuation: false, depthTest: false, depthWrite: false, transparent: true }));
     sym.renderOrder = 10;
     sym.userData = { pick: 'track', id: tr.id };

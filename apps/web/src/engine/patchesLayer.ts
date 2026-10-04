@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { SurfacePatch } from '@strata/domain';
 import type { Coverage } from '../api/types';
+import { P, qualityRamp } from '../lib/palette';
 
 /**
  * Per-surface overlay for walls and roofs. In coverage mode each patch is tinted by observation support;
@@ -54,16 +55,16 @@ export class PatchesLayer {
       const r = map.get(p.id);
       let alpha = 0.5;
       if (!r) {
-        c.set('#4d4a45');
+        c.set(P.text3);
         alpha = 0.35;
       } else if (mode === 'support') {
         const s = r[1];
         if (r[5] === 4 || r[5] === 3) {
-          c.set(r[5] === 4 ? '#3b3936' : '#5c5850');
+          c.set(r[5] === 4 ? '#2a3644' : '#4a5a6b');
           alpha = 0.55;
-        } else c.setRGB(0.7 + (0.42 - 0.7) * s, 0.36 + (0.62 - 0.36) * s, 0.26 + (0.58 - 0.26) * s);
+        } else c.setRGB(...qualityRamp(s));
       } else {
-        c.set(r[5] === 0 ? '#ece6dc' : r[5] === 1 ? '#7fb3aa' : r[5] === 2 ? '#a99bc9' : r[5] === 3 ? '#5c5850' : '#2f2d2a');
+        c.set(r[5] === 0 ? P.captured : r[5] === 1 ? P.reconstructed : r[5] === 2 ? P.inferred : r[5] === 3 ? '#4a5a6b' : '#2a3644');
         alpha = r[5] === 0 ? 0.35 : 0.55;
       }
       if (p.id === selected) {

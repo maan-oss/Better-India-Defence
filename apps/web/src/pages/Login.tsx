@@ -107,7 +107,7 @@ export function Login() {
               </div>
             )}
             <button className="btn primary" disabled={busy || !username || !password}>
-              {busy ? <span className="spinner" style={{ width: 14, height: 14, borderTopColor: '#17120a' }} /> : null}
+              {busy ? <span className="spinner" style={{ width: 14, height: 14, borderTopColor: '#06121e' }} /> : null}
               {busy ? 'Signing in…' : 'Sign in'}
             </button>
             <div className="consent" role="note">

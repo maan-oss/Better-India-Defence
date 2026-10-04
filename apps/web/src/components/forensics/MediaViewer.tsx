@@ -9,7 +9,8 @@ export interface Overlay {
   other: boolean;
 }
 
-const CAT_COLOR: Record<string, string> = { person: 'var(--amber)', vehicle: 'var(--info)', face: 'var(--text-0)', aircraft: 'var(--red)', boat: 'var(--info)', animal: 'var(--text-2)', object: 'var(--text-2)' };
+/** Categorical (not status) colours for detection classes on imagery. */
+const CAT_COLOR: Record<string, string> = { person: '#5fd4c4', vehicle: '#b39dff', face: '#eef3f8', aircraft: '#92cbff', boat: '#92cbff', animal: 'var(--text-2)', object: 'var(--text-2)' };
 
 /**
  * Frame-accurate viewer for an evidence item. Frames are decoded server-side from the immutable original
@@ -188,16 +189,16 @@ function ActivityStrip({ item, t, onT }: { item: EvidenceItem; t: number; onT: (
       const x = (s.t / dur) * w;
       const hp = (s.persons / maxP) * (h - 12);
       const hv = (s.vehicles / maxP) * (h - 12);
-      g.fillStyle = 'rgba(217,164,65,0.75)';
+      g.fillStyle = 'rgba(95,212,196,0.75)';
       g.fillRect(x, h - 8 - hp, bw, hp);
-      g.fillStyle = 'rgba(143,163,173,0.7)';
+      g.fillStyle = 'rgba(179,157,255,0.7)';
       g.fillRect(x, h - 8 - hp - hv, bw, hv);
       if (s.faces) {
-        g.fillStyle = '#ece6dc';
+        g.fillStyle = '#eef3f8';
         g.fillRect(x, h - 5, bw, 4);
       }
     }
-    g.fillStyle = '#ece6dc';
+    g.fillStyle = '#eef3f8';
     g.fillRect((t / dur) * w - 1, 0, 2 * devicePixelRatio, h);
   }, [tl, t, dur]);
   return (

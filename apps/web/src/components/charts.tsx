@@ -1,16 +1,17 @@
 import { useId } from 'react';
 
 /** Tiny inline trend line (SVG). */
-export function Spark({ values, width = 90, height = 26, color = 'var(--accent)', fill = true }: { values: number[]; width?: number; height?: number; color?: string; fill?: boolean }) {
+/** `stretch` fills its container's width (no end marker, since the aspect is not preserved). */
+export function Spark({ values, width = 90, height = 26, color = 'var(--data)', fill = true, stretch = false }: { values: number[]; width?: number; height?: number; color?: string; fill?: boolean; stretch?: boolean }) {
   const id = useId();
-  if (values.length < 2) return <svg className="spark" width={width} height={height} />;
+  if (values.length < 2) return <svg className="spark" width={stretch ? '100%' : width} height={height} />;
   const max = Math.max(...values, 1e-9);
   const min = Math.min(...values, 0);
   const span = max - min || 1;
   const pts = values.map((v, i) => [(i / (values.length - 1)) * width, height - 2 - ((v - min) / span) * (height - 4)] as const);
   const d = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
   return (
-    <svg className="spark" width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
+    <svg className="spark" width={stretch ? '100%' : width} height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio={stretch ? 'none' : undefined} aria-hidden="true">
       {fill && (
         <>
           <defs>
@@ -22,14 +23,14 @@ export function Spark({ values, width = 90, height = 26, color = 'var(--accent)'
           <path d={`${d} L${width} ${height} L0 ${height} Z`} fill={`url(#${id})`} />
         </>
       )}
-      <path d={d} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
-      <circle cx={pts[pts.length - 1]![0]} cy={pts[pts.length - 1]![1]} r="2.2" fill={color} />
+      <path d={d} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      {!stretch && <circle cx={pts[pts.length - 1]![0]} cy={pts[pts.length - 1]![1]} r="2.2" fill={color} />}
     </svg>
   );
 }
 
 /** Responsive area chart with gridlines and y labels (SVG, scales to its container width). */
-export function AreaChart({ values, labels, height = 120, color = 'var(--accent)', unit = '' }: { values: number[]; labels?: string[]; height?: number; color?: string; unit?: string }) {
+export function AreaChart({ values, labels, height = 120, color = 'var(--data)', unit = '' }: { values: number[]; labels?: string[]; height?: number; color?: string; unit?: string }) {
   const id = useId();
   const W = 600;
   const H = height;
@@ -66,7 +67,7 @@ export function AreaChart({ values, labels, height = 120, color = 'var(--accent)
       )}
       {labels?.map((l, i) =>
         l ? (
-          <text key={i} x={x(i)} y={H - 3} textAnchor="middle" fontSize="10" fill="var(--text-3)" fontFamily="IBM Plex Mono, monospace">
+          <text key={i} x={x(i)} y={H - 3} textAnchor={i === 0 ? 'start' : i === labels.length - 1 ? 'end' : 'middle'} fontSize="10" fill="var(--text-3)" fontFamily="IBM Plex Mono, monospace">
             {l}
           </text>
         ) : null,

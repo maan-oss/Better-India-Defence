@@ -4,17 +4,18 @@ import { useData } from '../state/data';
 import { useWorld } from '../state/world';
 import { Icon } from './Icons';
 import { hm, hms } from '../lib/format';
+import { alpha, P, PRIORITY_COLOR } from '../lib/palette';
 
+// Observation density is a measure, not a status: muted categorical tones from the cool family.
 const KIND_COLORS: Record<string, string> = {
-  track: 'rgba(185,179,168,0.55)',
-  media: 'rgba(143,163,173,0.5)',
-  position: 'rgba(127,179,170,0.45)',
-  rf: 'rgba(169,155,201,0.6)',
-  infrastructure: 'rgba(217,164,65,0.45)',
-  spatial: 'rgba(236,230,220,0.9)',
-  imagery: 'rgba(236,230,220,0.9)',
+  track: alpha(P.text1, 0.5),
+  media: alpha(P.accent2, 0.42),
+  position: alpha(P.reconstructed, 0.45),
+  rf: alpha(P.inferred, 0.55),
+  infrastructure: alpha(P.off, 0.4),
+  spatial: alpha(P.text0, 0.9),
+  imagery: alpha(P.text0, 0.9),
 };
-const PRIO: Record<string, string> = { critical: '#d4553f', high: '#d9a441', medium: '#a8916a', low: '#6f6a62' };
 
 interface Hit {
   kind: 'alert' | 'change' | 'incident' | 'imagery' | 'lidar' | 'outage';
@@ -92,9 +93,9 @@ export function Timeline() {
       // future (no data yet)
       const xe = xOf(edge, W, v);
       if (xe < W) {
-        g.fillStyle = 'rgba(255,255,255,0.015)';
+        g.fillStyle = alpha(P.text0, 0.015);
         g.fillRect(xe, 0, W - xe, H - 16);
-        g.strokeStyle = 'rgba(255,255,255,0.04)';
+        g.strokeStyle = alpha(P.text0, 0.04);
         for (let x = xe; x < W; x += 6) {
           g.beginPath();
           g.moveTo(x, 0);
@@ -107,9 +108,9 @@ export function Timeline() {
         for (const inc of data.incidents) {
           const x0 = xOf(inc.tStart, W, v);
           const x1 = xOf(inc.tEnd, W, v);
-          g.fillStyle = inc.id === incidentId ? 'rgba(212,85,63,0.16)' : 'rgba(212,85,63,0.07)';
+          g.fillStyle = inc.id === incidentId ? alpha(P.serious, 0.14) : alpha(P.serious, 0.06);
           g.fillRect(x0, 0, Math.max(2, x1 - x0), H - 16);
-          g.fillStyle = 'rgba(212,85,63,0.8)';
+          g.fillStyle = alpha(P.serious, 0.85);
           g.font = '10px IBM Plex Mono';
           g.fillText(inc.code, x0 + 3, H - 20);
           hits.current.push({ x: x0 + 20, y: H - 24, hit: { kind: 'incident', id: inc.id, t: inc.tStart, label: `${inc.code} — ${inc.title}` } });
@@ -126,7 +127,7 @@ export function Timeline() {
         for (const k of order) {
           const arr = data.observations[k];
           if (!arr) continue;
-          g.fillStyle = KIND_COLORS[k] ?? 'rgba(255,255,255,0.3)';
+          g.fillStyle = KIND_COLORS[k] ?? alpha(P.text0, 0.3);
           for (let i = 0; i < n; i++) {
             const val = arr[i] ?? 0;
             if (!val) continue;
@@ -143,7 +144,7 @@ export function Timeline() {
           if (ch.kind === 'sensor_restored') continue;
           const x = xOf(ch.t, W, v);
           const y = 48;
-          g.fillStyle = ch.kind.startsWith('sensor') ? '#a35445' : '#d9a441';
+          g.fillStyle = ch.kind.startsWith('sensor') ? P.critical : P.caution;
           g.beginPath();
           g.moveTo(x, y - 4);
           g.lineTo(x + 4, y);
@@ -155,19 +156,19 @@ export function Timeline() {
         }
         for (const a of data.alerts) {
           const x = xOf(a.t, W, v);
-          g.fillStyle = PRIO[a.priority] ?? '#888';
+          g.fillStyle = PRIORITY_COLOR[a.priority] ?? P.off;
           g.fillRect(x - 1, 54, 2, 9);
           hits.current.push({ x, y: 58, hit: { kind: 'alert', id: a.id, t: a.t, label: `${a.priority.toUpperCase()} · ${a.title}` } });
         }
         for (const im of data.imagery) {
           const x = xOf(im.t, W, v);
-          g.strokeStyle = 'rgba(236,230,220,0.75)';
+          g.strokeStyle = alpha(P.text0, 0.75);
           g.strokeRect(x - 3, 38, 6, 6);
           hits.current.push({ x, y: 41, hit: { kind: 'imagery', id: im.id, t: im.t, label: `Overhead imagery acquired ${hms(im.t)}Z` } });
         }
         for (const l of data.lidar) {
           const x = xOf(l.t, W, v);
-          g.fillStyle = 'rgba(127,179,170,0.8)';
+          g.fillStyle = alpha(P.reconstructed, 0.8);
           g.beginPath();
           g.arc(x, 41, 2, 0, Math.PI * 2);
           g.fill();
@@ -182,13 +183,13 @@ export function Timeline() {
           const x1 = Math.min(W, xOf(o.to ?? edge, W, v));
           const y = lanes.outages[0] + row * (lh + 1);
           if (y > lanes.outages[1]) return;
-          g.fillStyle = 'rgba(212,85,63,0.55)';
+          g.fillStyle = alpha(P.critical, 0.55);
           g.fillRect(x0, y, Math.max(1, x1 - x0), lh);
           hits.current.push({ x: (x0 + x1) / 2, y: y + lh / 2, hit: { kind: 'outage', id: o.sensorId, t: o.from, label: `${o.sensorId} ${o.status} ${hms(o.from)}–${o.to ? hms(o.to) : 'ongoing'}` } });
         });
       }
       // axis
-      g.fillStyle = 'rgba(236,230,220,0.38)';
+      g.fillStyle = P.text3;
       g.font = '10px IBM Plex Mono';
       const span = v.to - v.from;
       const steps = [60_000, 300_000, 600_000, 900_000, 1800_000, 3600_000, 7200_000];
@@ -201,27 +202,27 @@ export function Timeline() {
       // DIFF handles
       const d = useWorld.getState().diff;
       if (mode === 'DIFF' && d) {
-        for (const [k, tt, col] of [['A', d.a, '#d9a441'], ['B', d.b, '#7fb3aa']] as const) {
+        for (const [k, tt, col] of [['A', d.a, P.accent], ['B', d.b, P.reconstructed]] as const) {
           const x = xOf(tt, W, v);
           g.fillStyle = col;
           g.fillRect(x - 1, 0, 2, H - 16);
           g.fillRect(x - 7, 0, 14, 13);
-          g.fillStyle = '#0a0b0c';
+          g.fillStyle = P.bg0;
           g.font = '600 10px IBM Plex Sans';
           g.fillText(k, x - 3, 10);
         }
         const xa = xOf(Math.min(d.a, d.b), W, v);
         const xb = xOf(Math.max(d.a, d.b), W, v);
-        g.fillStyle = 'rgba(127,179,170,0.06)';
+        g.fillStyle = alpha(P.accent, 0.06);
         g.fillRect(xa, 0, xb - xa, H - 16);
       }
       // live edge + playhead
-      g.fillStyle = 'rgba(142,168,138,0.9)';
+      g.fillStyle = alpha(P.normal, 0.85);
       g.fillRect(xe - 0.5, 0, 1, H - 16);
       g.font = '600 9.5px IBM Plex Sans';
       g.fillText('NOW', xe + 3, 10);
       const xp = xOf(time.mode === 'live' ? edge : time.t, W, v);
-      g.fillStyle = '#ece6dc';
+      g.fillStyle = P.text0;
       g.fillRect(xp - 1, 0, 2, H - 16);
       g.beginPath();
       g.moveTo(xp - 5, 0);
@@ -339,7 +340,7 @@ export function Timeline() {
         <div className="spacer" />
         {mode === 'DIFF' && (
           <span className="row muted" style={{ fontSize: 11.5 }}>
-            Drag <b style={{ color: 'var(--amber)' }}>A</b> and <b style={{ color: 'var(--reconstructed)' }}>B</b> handles to choose the comparison
+            Drag <b style={{ color: 'var(--accent)' }}>A</b> and <b style={{ color: 'var(--reconstructed)' }}>B</b> handles to choose the comparison
           </span>
         )}
         <div className="seg" role="group" aria-label="Zoom">

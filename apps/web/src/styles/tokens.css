@@ -1,50 +1,81 @@
+/*
+ * STRATA colour system.
+ *
+ * Principles (ISA-101 high-performance HMI; Astro UXDS — US Space Force operations design system):
+ *  1. Surfaces are calm, cool, desaturated navy-slate. Depth comes from a small luminance ladder, not colour.
+ *  2. ONE interactive colour (blue) for everything you can click, select or focus. It never means "status".
+ *  3. Status colours (critical → serious → caution → normal → standby → off) are reserved for status and
+ *     alarms, always paired with shape or text. Red appears only for what needs action now.
+ *  4. Static context (zones, buildings, roads, grid, asset rings) is neutral, so alarms are the only bright
+ *     things on screen.
+ */
 :root {
-  /* Surfaces: deep, slightly cool neutrals with clear elevation steps. */
-  --bg-0: #07090b;
-  --bg-1: #0c0f12;
-  --bg-2: #11151a;
-  --bg-3: #171c22;
-  --bg-4: #1e242c;
-  --bg-hover: #1b2128;
-  --line: rgba(196, 212, 228, 0.07);
-  --line-2: rgba(196, 212, 228, 0.12);
-  --line-3: rgba(196, 212, 228, 0.22);
+  /* Surface ladder (dark → light). */
+  --bg-0: #0b131c;   /* app base, map frame, wells */
+  --bg-1: #101b27;   /* panels */
+  --bg-2: #15222f;   /* raised: cards, headers, inputs on panels */
+  --bg-3: #1b2c3d;   /* strongly raised / selected */
+  --bg-4: #233850;   /* popovers, menus */
+  --bg-hover: #182838;
+  --line: rgba(130, 163, 199, 0.11);
+  --line-2: rgba(130, 163, 199, 0.19);
+  --line-3: rgba(130, 163, 199, 0.32);
 
   /* Text */
-  --text-0: #e9edf0;
-  --text-1: #aeb7bf;
-  --text-2: #77818b;
-  --text-3: #525a63;
+  --text-0: #eef3f8;
+  --text-1: #c1ccd8;
+  --text-2: #8796a8;
+  --text-3: #5b6b7d;
 
-  /* Accent: brass — interaction, selection, focus. */
-  --accent: #d4b062;
-  --accent-2: #e8c97f;
-  --accent-dim: rgba(212, 176, 98, 0.14);
-  --accent-line: rgba(212, 176, 98, 0.45);
+  /* Interaction — Astro interactive blue. */
+  --accent: #4dacff;
+  --accent-2: #92cbff;
+  --accent-ink: #06121e;
+  --accent-dim: rgba(77, 172, 255, 0.13);
+  --accent-line: rgba(77, 172, 255, 0.5);
 
-  /* Operational states */
-  --amber: #e2a73c;
-  --amber-dim: rgba(226, 167, 60, 0.15);
-  --red: #e5533d;
-  --red-dim: rgba(229, 83, 61, 0.15);
-  --ok: #67b97f;
-  --ok-dim: rgba(103, 185, 127, 0.14);
-  --info: #5fa8d3;
-  --info-dim: rgba(95, 168, 211, 0.14);
+  /* Status — Astro status scale. */
+  --st-critical: #ff3838;
+  --st-serious: #ffb302;
+  --st-caution: #fce83a;
+  --st-normal: #56f000;
+  --st-standby: #2dccff;
+  --st-off: #a4abb6;
+  /* Legacy names mapped onto the scale. */
+  --red: var(--st-critical);
+  --red-dim: rgba(255, 56, 56, 0.14);
+  --amber: var(--st-serious);
+  --amber-dim: rgba(255, 179, 2, 0.13);
+  --caution: var(--st-caution);
+  --caution-dim: rgba(252, 232, 58, 0.12);
+  --ok: var(--st-normal);
+  --ok-dim: rgba(86, 240, 0, 0.1);
+  --info: var(--st-standby);
+  --info-dim: rgba(45, 204, 255, 0.12);
 
-  /* Affiliation (APP-6 / MIL-STD-2525 convention) */
-  --friend: #5aa9e6;
-  --hostile: #ff4d3d;
-  --suspect: #f08a24;
-  --neutral: #5cc26f;
-  --unknown-aff: #f2d14b;
+  /* Data (charts, sparklines): a calm neutral so measures never read as status or as clickable. */
+  --data: #9fb6cd;
 
-  /* Epistemic states (paired with shape/pattern everywhere — never colour alone). */
-  --captured: #e9edf0;
-  --reconstructed: #6fc0b2;
-  --inferred: #ad9ee0;
-  --prior: #77818b;
-  --unknown: #4a5058;
+  /* Affiliation (APP-6 / MIL-STD-2525, dark-background variants) — map symbology only. */
+  --friend: #3fc6ff;
+  --hostile: #ff4747;
+  --suspect: #ff9a3d;
+  --neutral: #4cd964;
+  --unknown-aff: #ffe14d;
+
+  /* Epistemic states (paired with shape/pattern everywhere). */
+  --captured: #eef3f8;
+  --reconstructed: #5fd4c4;
+  --inferred: #b39dff;
+  --prior: #8796a8;
+  --unknown: #4a5a6b;
+
+  /* Classification markings. */
+  --cls-unclassified: #007a33;
+  --cls-restricted: #502b85;
+  --cls-confidential: #0033a0;
+  --cls-secret: #c8102e;
+  --cls-topsecret: #ff8c00;
 
   --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
@@ -54,12 +85,12 @@
   --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --t-fast: 140ms;
-  --t-med: 260ms;
+  --t-med: 240ms;
   --t-slow: 480ms;
 
-  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 6px 18px rgba(0, 0, 0, 0.28);
-  --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 48px rgba(0, 0, 0, 0.5);
-  --glow-accent: 0 0 0 3px var(--accent-dim);
+  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.025) inset, 0 4px 14px rgba(2, 8, 16, 0.35);
+  --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 48px rgba(2, 8, 16, 0.6);
+  --glow-accent: 0 0 0 3px rgba(77, 172, 255, 0.22);
 
   --rail-w: 56px;
   --rail-w-open: 212px;
@@ -70,15 +101,15 @@
 }
 
 /*
- * Night (red-light) theme for darkened operations rooms: preserves dark adaptation. Monochrome red; state is
- * still carried by shape, text and position, as everywhere else.
+ * Night (red-light) display for darkened operations rooms: monochrome red preserves dark adaptation.
+ * State is still carried by shape, text and position, as everywhere else.
  */
 :root[data-theme='night'] {
   --bg-0: #000000;
   --bg-1: #070101;
   --bg-2: #0d0202;
-  --bg-3: #140303;
-  --bg-4: #1c0505;
+  --bg-3: #160404;
+  --bg-4: #1f0606;
   --bg-hover: #190404;
   --line: rgba(255, 60, 40, 0.1);
   --line-2: rgba(255, 60, 40, 0.18);
@@ -89,21 +120,25 @@
   --text-3: #6e2116;
   --accent: #ff6a52;
   --accent-2: #ff8a76;
+  --accent-ink: #1a0000;
   --accent-dim: rgba(255, 90, 70, 0.14);
   --accent-line: rgba(255, 90, 70, 0.45);
-  --amber: #ff7a3c;
-  --amber-dim: rgba(255, 122, 60, 0.15);
-  --red: #ff3020;
+  --st-critical: #ff2a1a;
+  --st-serious: #ff6a30;
+  --st-caution: #ff8a5a;
+  --st-normal: #c8402e;
+  --st-standby: #d94533;
+  --st-off: #8a2a1e;
   --red-dim: rgba(255, 48, 32, 0.2);
-  --ok: #c8402e;
+  --amber-dim: rgba(255, 106, 48, 0.15);
   --ok-dim: rgba(200, 64, 46, 0.14);
-  --info: #d94533;
   --info-dim: rgba(217, 69, 51, 0.14);
   --friend: #e0503c;
   --hostile: #ff2a1a;
   --suspect: #ff6a30;
   --neutral: #b83a2a;
   --unknown-aff: #ff8a5a;
+  --data: #d94533;
   --captured: #ff5a46;
   --reconstructed: #d94533;
   --inferred: #b8402f;
@@ -111,9 +146,10 @@
   --unknown: #5a1a12;
   --shadow-1: none;
   --shadow-2: 0 18px 48px rgba(0, 0, 0, 0.8);
+  --glow-accent: 0 0 0 3px rgba(255, 90, 70, 0.2);
 }
 :root[data-theme='night'] canvas,
 :root[data-theme='night'] img,
 :root[data-theme='night'] video {
-  filter: grayscale(1) sepia(1) saturate(5) hue-rotate(-38deg) brightness(0.62);
+  filter: url(#night-red) brightness(0.85);
 }

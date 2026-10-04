@@ -5,8 +5,8 @@ import { useOps } from '../../state/ops';
 import { useTime } from '../../state/time';
 import { tracks as trackStore, type RenderTrack } from '../../state/tracks';
 import { symbolFor, symbolTexture } from '../../engine/symbols';
+import { alpha, LEVEL_COLOR, P as C } from '../../lib/palette';
 
-const LEVEL_COLOR: Record<string, string> = { CRITICAL: '#e5533d', HIGH: '#e2a73c', MEDIUM: 'rgba(226,167,60,0.6)', LOW: 'rgba(170,180,190,0.4)' };
 
 /**
  * Plan-position display of the site: perimeter, restricted zones, vital-asset protection rings, every track
@@ -32,8 +32,8 @@ export function TacticalScope() {
     const R = rangeM ?? Math.max(400, facility.perimeterHalfM * 1.3);
     const css = getComputedStyle(document.documentElement);
     const col = (v: string, f: string) => css.getPropertyValue(v).trim() || f;
-    const accent = col('--accent', '#d4b062');
-    const text2 = col('--text-2', '#77818b');
+    const text1 = col('--text-1', C.text1);
+    const text2 = col('--text-2', C.text2);
     const draw = (now: number) => {
       raf = requestAnimationFrame(draw);
       if (now - lastPull > 1000) {
@@ -58,8 +58,8 @@ export function TacticalScope() {
       const P = (x: number, y: number) => [cx + x * k, cy - y * k] as const;
       // Scope background and range rings.
       const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
-      bg.addColorStop(0, 'rgba(30, 40, 46, 0.55)');
-      bg.addColorStop(1, 'rgba(8, 10, 12, 0.2)');
+      bg.addColorStop(0, alpha(C.bg3, 0.7));
+      bg.addColorStop(1, alpha(C.bg0, 0.3));
       ctx.fillStyle = bg;
       ctx.beginPath();
       ctx.arc(cx, cy, rad, 0, Math.PI * 2);
@@ -67,7 +67,7 @@ export function TacticalScope() {
       const step = niceStep(R / 4);
       ctx.font = '10px "IBM Plex Mono", monospace';
       for (let r = step; r <= R + 1; r += step) {
-        ctx.strokeStyle = 'rgba(170, 190, 210, 0.12)';
+        ctx.strokeStyle = alpha(C.grid, 0.14);
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.arc(cx, cy, r * k, 0, Math.PI * 2);
@@ -75,7 +75,7 @@ export function TacticalScope() {
         ctx.fillStyle = text2;
         ctx.fillText(r >= 1000 ? `${r / 1000} km` : `${r} m`, cx + 4, cy - r * k + 12);
       }
-      ctx.strokeStyle = 'rgba(170, 190, 210, 0.1)';
+      ctx.strokeStyle = alpha(C.grid, 0.08);
       for (let a = 0; a < 12; a++) {
         const ang = (a * Math.PI) / 6;
         ctx.beginPath();
@@ -92,7 +92,7 @@ export function TacticalScope() {
       ctx.beginPath();
       ctx.arc(cx, cy, rad, 0, Math.PI * 2);
       ctx.clip();
-      ctx.strokeStyle = 'rgba(212, 176, 98, 0.55)';
+      ctx.strokeStyle = alpha(C.fence, 0.7);
       ctx.setLineDash([6, 4]);
       ctx.lineWidth = 1.2;
       ctx.beginPath();
@@ -113,14 +113,14 @@ export function TacticalScope() {
           else ctx.moveTo(x, y);
         });
         ctx.closePath();
-        ctx.fillStyle = 'rgba(226, 167, 60, 0.06)';
+        ctx.fillStyle = alpha(C.zone, 0.05);
         ctx.fill();
-        ctx.strokeStyle = 'rgba(226, 167, 60, 0.35)';
+        ctx.strokeStyle = alpha(C.zone, 0.4);
         ctx.lineWidth = 1;
         ctx.stroke();
       }
       // Buildings as faint footprints.
-      ctx.fillStyle = 'rgba(170, 190, 210, 0.08)';
+      ctx.fillStyle = alpha(C.zone, 0.1);
       for (const b of facility.buildings) {
         const [x, y] = P(b.center.x, b.center.y);
         ctx.save();
@@ -133,14 +133,14 @@ export function TacticalScope() {
       const ops = useOps.getState();
       for (const v of ops.vitalAssets) {
         const [x, y] = P(v.centre.x, v.centre.y);
-        ctx.strokeStyle = v.priority === 1 ? 'rgba(212, 176, 98, 0.85)' : 'rgba(95, 168, 211, 0.6)';
+        ctx.strokeStyle = alpha(C.zone, v.priority === 1 ? 0.75 : 0.4);
         ctx.setLineDash([4, 3]);
         ctx.lineWidth = 1.2;
         ctx.beginPath();
         ctx.arc(x, y, Math.max(4, v.radiusM * k), 0, Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = v.priority === 1 ? accent : 'rgba(95, 168, 211, 0.9)';
+        ctx.fillStyle = v.priority === 1 ? text1 : text2;
         ctx.font = '9.5px "IBM Plex Sans", sans-serif';
         ctx.fillText(v.name.toUpperCase(), x + Math.max(4, v.radiusM * k) + 3, y + 3);
       }
@@ -164,9 +164,9 @@ export function TacticalScope() {
       // Sweep.
       const ang = ((now - t0) / 1000) * 0.9;
       const g = ctx.createConicGradient(ang - Math.PI / 2 - 0.8, cx, cy);
-      g.addColorStop(0, 'rgba(212, 176, 98, 0)');
-      g.addColorStop(0.127, 'rgba(212, 176, 98, 0.13)');
-      g.addColorStop(0.128, 'rgba(212, 176, 98, 0)');
+      g.addColorStop(0, alpha(C.grid, 0));
+      g.addColorStop(0.127, alpha(C.grid, 0.12));
+      g.addColorStop(0.128, alpha(C.grid, 0));
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(cx, cy, rad, 0, Math.PI * 2);
@@ -188,7 +188,7 @@ export function TacticalScope() {
           const dy = b.y - a.y;
           const len = Math.hypot(dx, dy);
           if (len > 0.5) {
-            ctx.strokeStyle = 'rgba(233, 237, 240, 0.4)';
+            ctx.strokeStyle = alpha(C.text0, 0.4);
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(x, y);
@@ -200,14 +200,14 @@ export function TacticalScope() {
         ctx.drawImage(img, x - s / 2, y - s / 2, s, s);
         ctx.globalAlpha = 1;
         if (!tr.cooperative) {
-          ctx.fillStyle = 'rgba(233, 237, 240, 0.8)';
+          ctx.fillStyle = alpha(C.text0, 0.8);
           ctx.font = '9.5px "IBM Plex Mono", monospace';
           ctx.fillText(tr.id, x + s / 2 + 2, y + 3);
         }
         hitList.push({ x, y, tr });
       }
       ctx.restore();
-      ctx.strokeStyle = 'rgba(212, 176, 98, 0.35)';
+      ctx.strokeStyle = alpha(C.grid, 0.3);
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.arc(cx, cy, rad, 0, Math.PI * 2);

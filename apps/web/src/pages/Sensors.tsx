@@ -56,7 +56,7 @@ export function Sensors() {
           <div className="l">Reporting normally</div>
         </div>
         <div className="stat">
-          <div className="v" style={{ color: counts.degraded ? 'var(--amber)' : undefined }}>
+          <div className="v" style={{ color: counts.degraded ? 'var(--st-caution)' : undefined }}>
             {counts.degraded}
           </div>
           <div className="l">Degraded</div>
@@ -213,14 +213,14 @@ function DeadLetters({ sensorId }: { sensorId: string }) {
 
 const KIND_GLYPH: Record<string, string> = { camera: 'M-5 -3h7l3 -2v10l-3 -2h-7z', radar: 'M-6 4a6 6 0 0 1 12 0M0 4V-5', rf: 'M-5 3a5 5 0 0 1 0-6M5 3a5 5 0 0 0 0-6M0 -1v6', lidar: 'M-5 -5h10v10h-10z', drone: 'M-6 0h12M0 -6v12', fence: 'M-6 -4v8M0 -4v8M6 -4v8M-7 0h14', bms: 'M-5 -5h10v10h-10zM-5 0h10', gps: 'M0 -6l5 12h-10z', external: 'M-6 0h12M3 -3l3 3-3 3' };
 
-/** Site plan with every positioned sensor, coloured by reporting status. */
+/** Site plan with every positioned sensor. Healthy sensors are drawn neutral (ISA-101): only a problem gets colour. */
 function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: string) => void }) {
   const facility = useWorld((s) => s.facility);
   const [hover, setHover] = useState<string | null>(null);
   if (!facility) return null;
   const H = facility.perimeterHalfM * 1.2;
   const placed = rows.filter((r) => 'position' in r.definition) as (SensorListItem & { definition: { position: { x: number; y: number } } })[];
-  const color = (st: string | undefined) => (st === 'ok' ? 'var(--ok)' : st === 'degraded' ? 'var(--amber)' : 'var(--red)');
+  const color = (st: string | undefined) => (st === 'ok' ? 'var(--text-1)' : st === 'degraded' ? 'var(--st-caution)' : 'var(--st-critical)');
   return (
     <div className="sensor-map reveal">
       <div className="section">
@@ -232,13 +232,13 @@ function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: stri
       <svg viewBox={`${-H} ${-H} ${2 * H} ${2 * H}`} className="smap" role="img" aria-label="Sensor map">
         <g transform="scale(1,-1)">
           {facility.zones.map((z) => (
-            <polygon key={z.id} points={z.polygon.map((p) => `${p.x},${p.y}`).join(' ')} fill={z.restricted ? 'rgba(226,167,60,0.06)' : 'rgba(170,190,210,0.03)'} stroke={z.restricted ? 'rgba(226,167,60,0.4)' : 'rgba(170,190,210,0.15)'} strokeWidth={H / 400} />
+            <polygon key={z.id} points={z.polygon.map((p) => `${p.x},${p.y}`).join(' ')} fill={z.restricted ? 'rgba(169,187,207,0.06)' : 'rgba(169,187,207,0.025)'} stroke={z.restricted ? 'rgba(169,187,207,0.45)' : 'rgba(169,187,207,0.15)'} strokeDasharray={z.restricted ? undefined : `${H / 120} ${H / 160}`} strokeWidth={H / 400} />
           ))}
           {facility.buildings.map((b) => (
-            <rect key={b.id} x={b.center.x - b.width / 2} y={b.center.y - b.depth / 2} width={b.width} height={b.depth} transform={`rotate(${b.yawDeg} ${b.center.x} ${b.center.y})`} fill="rgba(170,190,210,0.12)" />
+            <rect key={b.id} x={b.center.x - b.width / 2} y={b.center.y - b.depth / 2} width={b.width} height={b.depth} transform={`rotate(${b.yawDeg} ${b.center.x} ${b.center.y})`} fill="rgba(169,187,207,0.12)" />
           ))}
           {facility.fence.map((f) => (
-            <line key={f.id} x1={f.a.x} y1={f.a.y} x2={f.b.x} y2={f.b.y} stroke="rgba(212,176,98,0.6)" strokeWidth={H / 300} strokeDasharray={`${H / 60} ${H / 90}`} />
+            <line key={f.id} x1={f.a.x} y1={f.a.y} x2={f.b.x} y2={f.b.y} stroke="rgba(143,162,184,0.7)" strokeWidth={H / 300} strokeDasharray={`${H / 60} ${H / 90}`} />
           ))}
           {placed.map((r) => {
             const d = r.definition as SensorListItem['definition'] & { position: { x: number; y: number }; rangeM?: number; headingDeg?: number; hfovDeg?: number };
@@ -248,7 +248,7 @@ function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: stri
             return (
               <g key={d.id} transform={`translate(${d.position.x} ${d.position.y})`} onMouseEnter={() => setHover(d.id)} onMouseLeave={() => setHover(null)} onClick={() => onPick(d.id)} style={{ cursor: 'pointer' }}>
                 {d.kind === 'camera' && d.headingDeg !== undefined && d.hfovDeg !== undefined && (
-                  <path d={wedge(d.headingDeg, d.hfovDeg, Math.min(d.rangeM ?? 300, H / 3))} fill={sel ? 'rgba(212,176,98,0.18)' : 'rgba(170,190,210,0.05)'} stroke="none" />
+                  <path d={wedge(d.headingDeg, d.hfovDeg, Math.min(d.rangeM ?? 300, H / 3))} fill={sel ? 'rgba(77,172,255,0.2)' : 'rgba(169,187,207,0.05)'} stroke="none" />
                 )}
                 {(d.kind === 'radar' || d.kind === 'rf') && d.rangeM && <circle r={Math.min(d.rangeM, H * 2)} fill="none" stroke={color(st)} strokeOpacity={sel ? 0.5 : 0.12} strokeWidth={H / 500} strokeDasharray={`${H / 80} ${H / 80}`} />}
                 <circle r={s * 1.25} fill="var(--bg-1)" stroke={color(st)} strokeWidth={s / 4} />
@@ -265,10 +265,10 @@ function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: stri
       </svg>
       <div className="row smap-legend">
         <span>
-          <i style={{ background: 'var(--ok)' }} /> reporting
+          <i style={{ background: 'var(--text-1)' }} /> reporting
         </span>
         <span>
-          <i style={{ background: 'var(--amber)' }} /> degraded
+          <i style={{ background: 'var(--st-caution)' }} /> degraded
         </span>
         <span>
           <i style={{ background: 'var(--red)' }} /> silent / fault
