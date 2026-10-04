@@ -56,6 +56,37 @@ export const Icon = {
       <path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5" />
     </svg>
   ),
+  Forensics: () => (
+    <svg {...p}>
+      <rect x="3" y="5" width="14" height="11" rx="1" />
+      <circle cx="16.5" cy="15.5" r="3.5" />
+      <path d="M19 18l2.5 2.5M6 9h5M6 12h3" />
+    </svg>
+  ),
+  Identity: () => (
+    <svg {...p}>
+      <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" />
+      <circle cx="12" cy="10" r="3" />
+      <path d="M7.5 17a4.5 4.5 0 0 1 9 0" />
+    </svg>
+  ),
+  Command: () => (
+    <svg {...p}>
+      <path d="M12 3l8 4v5c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V7z" />
+      <path d="M9 12l2 2 4-4" />
+    </svg>
+  ),
+  Camera: () => (
+    <svg {...p}>
+      <path d="M3 8h11l3-2v10l-3-2H3z" />
+      <path d="M7 14v5M5 19h4" />
+    </svg>
+  ),
+  Upload: () => (
+    <svg {...p}>
+      <path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+    </svg>
+  ),
   Search: () => (
     <svg {...p} width={15} height={15}>
       <circle cx="11" cy="11" r="6" />

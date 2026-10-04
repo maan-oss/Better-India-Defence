@@ -4,6 +4,7 @@ import { useSession } from '../state/session';
 import { MODES, useWorld, type GlobalMode } from '../state/world';
 import { useTime } from '../state/time';
 import { useData } from '../state/data';
+import { useVisionLive } from '../api/vision';
 import { get } from '../api/client';
 import { Icon } from './Icons';
 import { dateTime } from '../lib/format';
@@ -15,6 +16,8 @@ const NAV: { to: string; label: string; icon: keyof typeof Icon; perm?: string }
   { to: '/sensors', label: 'Sensors', icon: 'Sensors' },
   { to: '/reconstructions', label: 'Reconstructions', icon: 'Recon' },
   { to: '/evidence', label: 'Evidence', icon: 'Evidence' },
+  { to: '/forensics', label: 'Media Forensics', icon: 'Forensics' },
+  { to: '/identity', label: 'Identity', icon: 'Identity', perm: 'identity.view' },
   { to: '/simulation', label: 'Simulation Lab', icon: 'Sim', perm: 'simulation.control' },
   { to: '/system', label: 'System Health', icon: 'Health', perm: 'system.view' },
   { to: '/audit', label: 'Audit', icon: 'Audit', perm: 'audit.view' },
@@ -23,6 +26,7 @@ const NAV: { to: string; label: string; icon: keyof typeof Icon; perm?: string }
 
 export function Shell({ children }: { children: ReactNode }) {
   const can = useSession((s) => s.can);
+  const pending = useVisionLive((s) => s.pendingReview);
   return (
     <div className="shell">
       <TopBar />
@@ -32,6 +36,7 @@ export function Shell({ children }: { children: ReactNode }) {
           return (
             <NavLink key={n.to} to={n.to} className={({ isActive }) => (isActive ? 'active' : '')} aria-label={n.label}>
               <I />
+              {n.to === '/identity' && pending > 0 && <span className="rail-badge">{pending > 99 ? '99+' : pending}</span>}
               <span className="tip">{n.label}</span>
             </NavLink>
           );

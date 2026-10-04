@@ -6,6 +6,7 @@ import { useTime } from './state/time';
 import { useData } from './state/data';
 import { tracks } from './state/tracks';
 import { live } from './api/live';
+import { useVisionLive } from './api/vision';
 import { get, setUnauthorizedHandler } from './api/client';
 import type { FacilityResponse } from './api/types';
 import type { SurfacePatch } from '@strata/domain';
@@ -22,6 +23,8 @@ const SimulationLab = lazy(() => import('./pages/SimulationLab').then((m) => ({ 
 const SystemHealth = lazy(() => import('./pages/SystemHealth').then((m) => ({ default: m.SystemHealth })));
 const Audit = lazy(() => import('./pages/Audit').then((m) => ({ default: m.Audit })));
 const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
+const Forensics = lazy(() => import('./pages/Forensics').then((m) => ({ default: m.Forensics })));
+const Identity = lazy(() => import('./pages/Identity').then((m) => ({ default: m.Identity })));
 
 /** Connects live data once signed in and loads the facility model. */
 function useBootstrap(enabled: boolean): { ready: boolean; error: string | null } {
@@ -39,6 +42,7 @@ function useBootstrap(enabled: boolean): { ready: boolean; error: string | null 
         if (f.range.from) useTime.getState().setRange(f.range.from);
         useTime.setState({ t: f.liveEdge || Date.now() });
         await useData.getState().loadInitial();
+        void useVisionLive.getState().refreshCounts();
         setReady(true);
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
@@ -47,7 +51,10 @@ function useBootstrap(enabled: boolean): { ready: boolean; error: string | null 
     const offMsg = live.on((m) => {
       if (m.type === 'tracks') tracks.ingestLive(m.t, m.tracks);
       else if (m.type === 'tick' || m.type === 'hello') useTime.getState().setLiveEdge(m.liveEdge);
-      else useData.getState().onLive(m);
+      else {
+        useData.getState().onLive(m);
+        useVisionLive.getState().onLive(m);
+      }
     });
     const offStatus = live.onStatus((s) => useData.getState().setWs(s));
     live.start();
@@ -79,6 +86,9 @@ function Authenticated() {
             <Route path="/reconstructions" element={<Reconstructions />} />
             <Route path="/reconstructions/:id" element={<Reconstructions />} />
             <Route path="/evidence" element={<Evidence />} />
+            <Route path="/forensics" element={<Forensics />} />
+            <Route path="/forensics/:id" element={<Forensics />} />
+            <Route path="/identity" element={<Identity />} />
             <Route path="/simulation" element={<SimulationLab />} />
             <Route path="/system" element={<SystemHealth />} />
             <Route path="/audit" element={<Audit />} />

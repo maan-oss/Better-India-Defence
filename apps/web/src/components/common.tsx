@@ -135,12 +135,23 @@ export function Modal({ title, children, onClose, wide }: { title: string; child
 /** Clickable evidence reference: routes to the right viewer for its kind. */
 export function EvidenceLink({ ev, onObservation }: { ev: EvidenceRef; onObservation: (id: string) => void }) {
   const select = useWorld((s) => s.select);
-  const label = ev.kind === 'observation' ? `${ev.sensorId ?? 'obs'} ${ev.t ? hms(ev.t) : ''}` : ev.kind === 'media' ? `media ${ev.sensorId ?? ''} ${ev.t ? hms(ev.t) : ''}` : `${ev.kind} ${ev.id.slice(0, 14)}`;
+  const label =
+    ev.kind === 'observation'
+      ? `${ev.sensorId ?? 'obs'} ${ev.t ? hms(ev.t) : ''}`
+      : ev.kind === 'media'
+        ? `media ${ev.sensorId ?? ''} ${ev.t ? hms(ev.t) : ''}`
+        : ev.kind === 'face_event'
+          ? `face ${ev.note ?? ev.id}`
+          : ev.kind === 'evidence_item'
+            ? `evidence ${ev.id}`
+            : `${ev.kind} ${ev.id.slice(0, 14)}`;
   const open = () => {
     if (ev.kind === 'observation') onObservation(ev.id);
     else if (ev.kind === 'media') window.open(ev.id.includes('@') ? `/api/media/frame?sensorId=${ev.sensorId}&t=${ev.t}&audit=1` : `/api/media/${encodeURIComponent(ev.id)}`, '_blank', 'noopener');
     else if (ev.kind === 'track' || ev.kind === 'change' || ev.kind === 'alert' || ev.kind === 'incident') select({ kind: ev.kind, id: ev.id });
     else if (ev.kind === 'reconstruction') window.open(`/reconstructions/${ev.id}`, '_self');
+    else if (ev.kind === 'face_event') window.open(`/identity?tab=review&face=${ev.id}`, '_self');
+    else if (ev.kind === 'evidence_item') window.open(`/forensics/${ev.id}`, '_self');
   };
   return (
     <span className="ev-link mono" onClick={open} title={ev.note ?? ''} role="link" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && open()}>
