@@ -6,6 +6,7 @@
 import type { ReactNode } from 'react';
 import { Dialog as D, DropdownMenu as DM, Tabs as T, ToggleGroup as TG, Tooltip as TT } from 'radix-ui';
 import { Icon } from './Icons';
+import ArcSegmented from './arc/segmented-control/segmented-control';
 
 type Option<V> = V | { value: V; label: ReactNode; title?: string; disabled?: boolean };
 interface Item<V> {
@@ -37,6 +38,20 @@ export function Segmented<V extends string | number>({
   className?: string;
 }) {
   const list = items(options);
+  // Arc's segmented control (gliding selection) whenever the options are plain labels; Radix toggle group otherwise.
+  if (list.every((i) => typeof i.label === 'string' && !i.disabled && !i.title))
+    return (
+      <ArcSegmented
+        className={`arc-seg ${size} ${fill ? 'fill' : ''} ${className}`}
+        label={label}
+        value={value === null || value === undefined ? '' : String(value)}
+        options={list.map((i) => ({ value: String(i.value), label: i.label as string }))}
+        onValueChange={(v: string) => {
+          const it = list.find((i) => String(i.value) === v);
+          if (it) onChange(it.value);
+        }}
+      />
+    );
   return (
     <TG.Root
       type="single"

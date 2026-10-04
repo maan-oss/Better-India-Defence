@@ -8,6 +8,7 @@ import { useData } from '../state/data';
 import { useWorld } from '../state/world';
 import { ErrorNote, Loading, Modal, Prio, useAsync } from '../components/common';
 import { DispatchDialog, type Task, type Team } from '../components/ops/OpsWidgets';
+import { TaskBoard } from '../components/ops/TaskBoard';
 import { TacticalScope } from '../components/ops/TacticalScope';
 import { Spark } from '../components/charts';
 import { useVisionLive } from '../api/vision';
@@ -300,66 +301,18 @@ function TeamsPanel({ version }: { version: number }) {
   );
 }
 
-const NEXT: Record<string, string[]> = {
-  ISSUED: ['ACKNOWLEDGED', 'EN ROUTE', 'CANCELLED'],
-  ACKNOWLEDGED: ['EN ROUTE', 'ON SCENE', 'CANCELLED'],
-  'EN ROUTE': ['ON SCENE', 'CANCELLED'],
-  'ON SCENE': ['COMPLETE'],
-};
-
 function TasksPanel({ version }: { version: number }) {
   const can = useSession((s) => s.can);
-  const tasks = useAsync((s) => get<Task[]>('/api/ops/tasks?limit=40', s), [version]);
-  const [closing, setClosing] = useState<Task | null>(null);
-  const [outcome, setOutcome] = useState('');
-  const upd = (t: Task, status: string, out?: string) => void post(`/api/ops/tasks/${t.id}/status`, { status, ...(out ? { outcome: out } : {}) }).then(() => useOps.setState((s) => ({ version: s.version + 1 })));
+  const tasks = useAsync((s) => get<Task[]>('/api/ops/tasks?limit=60', s), [version]);
   return (
-    <section className="panel">
+    <section className="panel tasks-panel">
       <div className="panel-h">
         <h3>Tasks</h3>
+        <span className="muted" style={{ fontSize: 12 }}>
+          {can('ops.dispatch') ? 'Drag a card to record its progress' : 'Read only'}
+        </span>
       </div>
-      <div className="scroll" style={{ maxHeight: 420 }}>
-        {(tasks.data ?? []).map((t) => (
-          <div key={t.id} className={`task ${t.status === 'COMPLETE' || t.status === 'CANCELLED' ? 'closed' : ''}`}>
-            <div className="row">
-              <Prio p={t.priority} />
-              <b className="mono">
-                #{t.number} {t.callsign}
-              </b>
-              <span className={`tstat ${t.status.replace(' ', '-')}`}>{t.status}</span>
-              <div className="spacer" />
-              <span className="mono dim">{dtg(t.createdAt)}</span>
-            </div>
-            <div style={{ fontSize: 12.5 }}>{t.orders}</div>
-            <div className="mono dim" style={{ fontSize: 11 }}>
-              {t.mgrs ? `grid ${t.mgrs}` : (t.locationText ?? '')}
-              {t.etaS !== null && t.status !== 'COMPLETE' ? ` · ETA ~${Math.ceil(t.etaS / 60)} min from dispatch` : ''}
-              {t.outcome ? ` · outcome: ${t.outcome}` : ''}
-            </div>
-            {can('ops.dispatch') && NEXT[t.status] && (
-              <div className="row" style={{ gap: 4 }}>
-                {NEXT[t.status]!.map((s) => (
-                  <button key={s} className={`btn small ${s === 'CANCELLED' ? 'ghost' : ''}`} onClick={() => (s === 'COMPLETE' ? (setClosing(t), setOutcome('')) : upd(t, s))}>
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-        {tasks.data?.length === 0 && <div className="empty">No tasks issued.</div>}
-      </div>
-      {closing && (
-        <Modal title={`Complete task #${closing.number} (${closing.callsign})`} onClose={() => setClosing(null)}>
-          <textarea className="input" rows={3} style={{ width: '100%' }} autoFocus placeholder="Outcome as reported by the team" value={outcome} onChange={(e) => setOutcome(e.target.value)} />
-          <div className="row" style={{ marginTop: 8 }}>
-            <div className="spacer" />
-            <button className="btn primary" disabled={outcome.trim().length < 3} onClick={() => (upd(closing, 'COMPLETE', outcome), setClosing(null))}>
-              Record outcome
-            </button>
-          </div>
-        </Modal>
-      )}
+      {tasks.data && tasks.data.length === 0 ? <div className="empty">No tasks issued. Dispatch a team to a grid reference to create one.</div> : <TaskBoard tasks={tasks.data ?? []} canDispatch={can('ops.dispatch')} />}
     </section>
   );
 }

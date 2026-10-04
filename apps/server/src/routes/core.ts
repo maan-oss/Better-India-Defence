@@ -110,7 +110,9 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     )).rows[0]!;
     const dbMs = Math.round(performance.now() - dbStart);
     const mediaBytes = (await p.db.query<{ b: number | null }>('SELECT sum(bytes)::bigint AS b FROM media_assets')).rows[0]?.b ?? 0;
-    const vms = await p.media.vmsHealthy();
+    const vms = p.simulated ? await p.media.vmsHealthy() : false;
+    const cams = p.simulated ? [] : await p.cameras.list();
+    const camsLive = cams.filter((c) => c.enabled && c.status.state === 'live').length;
     const jobs = (await p.db.query<{ status: string; n: number }>('SELECT status, count(*)::int AS n FROM reconstructions GROUP BY status')).rows;
     return {
       services: [
@@ -119,7 +121,9 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
         { name: 'Ingestion pipeline', status: p.ingest.queueDepth > 10_000 ? 'degraded' : 'ok', detail: `queue ${p.ingest.queueDepth}` },
         { name: 'Fusion engine', status: 'ok', detail: `${p.fusion.engine.size} tracks in working set` },
         { name: 'Reconstruction workers', status: 'ok', detail: `${p.pool.busy} busy, ${p.pool.queued} queued` },
-        { name: 'Video management (VMS adapter)', status: vms ? 'ok' : 'offline', detail: vms ? cfg.SIM_URL : 'unreachable — recorded frames unavailable' },
+        p.simulated
+          ? { name: 'Video management (VMS adapter)', status: vms ? 'ok' : 'offline', detail: vms ? cfg.SIM_URL : 'unreachable — recorded frames unavailable' }
+          : { name: 'Camera analytics', status: cams.some((c) => c.enabled && c.status.state === 'error') ? 'degraded' : 'ok', detail: cams.length ? `${camsLive} of ${cams.filter((c) => c.enabled).length} enabled cameras live${p.vision.ffmpeg ? '' : ' · ffmpeg not installed (device cameras only)'}` : 'no cameras configured' },
         { name: 'Copilot provider', status: 'ok', detail: p.copilot.providerStatus.mode },
         { name: 'Live hub', status: 'ok', detail: `${p.hub.size} WebSocket client(s)` },
       ],

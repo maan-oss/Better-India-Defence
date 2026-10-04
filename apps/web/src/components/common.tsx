@@ -4,6 +4,7 @@ import { get } from '../api/client';
 import { hms, dateTime } from '../lib/format';
 import { useWorld } from '../state/world';
 import { Dialog } from './ui';
+import { Alert, Skeleton, TextShimmer } from './kit';
 
 export function StateChip({ state, label }: { state: EpistemicState | string; label?: string }) {
   return (
@@ -41,12 +42,25 @@ export function useAsync<T>(fn: (signal: AbortSignal) => Promise<T>, deps: unkno
   return { ...state, reload: () => setN((x) => x + 1) };
 }
 
+/** Loading state: Arc's text shimmer over a short skeleton, so the page keeps its shape while data arrives. */
 export function Loading({ what }: { what?: string }) {
-  return <div className="empty pulse">Loading{what ? ` ${what}` : ''}…</div>;
+  return (
+    <div className="loading-block" role="status">
+      <TextShimmer>{`Loading${what ? ` ${what}` : ''}…`}</TextShimmer>
+      <Skeleton lines={3} label={`Loading${what ? ` ${what}` : ''}`} />
+    </div>
+  );
 }
 
+/** A failed request, as an Arc alert. */
 export function ErrorNote({ error }: { error: string }) {
-  return <div className="err">{error}</div>;
+  return (
+    <div className="err-block">
+      <Alert tone="danger" title="Something went wrong">
+        {error}
+      </Alert>
+    </div>
+  );
 }
 
 /** Modal showing the original observation record with full provenance. */

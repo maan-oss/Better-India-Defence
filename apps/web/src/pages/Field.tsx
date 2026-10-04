@@ -10,7 +10,7 @@ import { symbolFor, symbolTexture } from '../engine/symbols';
 import { ErrorNote, Modal, useAsync } from '../components/common';
 import { Icon } from '../components/Icons';
 import type { Task, Team } from '../components/ops/OpsWidgets';
-import { Switch } from '../components/kit';
+import { HoldToConfirm, Switch } from '../components/kit';
 import { alpha, P as C } from '../lib/palette';
 import '../styles/field.css';
 
@@ -201,31 +201,29 @@ function NearAlert({ a, from }: { a: AlertRecord; from: Vec3 | null }) {
   );
 }
 
-/** Press and hold for 1.5 s: an emergency control must not fire from a stray tap. */
+/** Press and hold for 1.5 s (Arc hold-to-confirm): an emergency control must not fire from a stray tap. */
 function AssistButton({ teamId }: { teamId: string }) {
-  const [hold, setHold] = useState(false);
   const [sent, setSent] = useState<string | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const start = () => {
-    setHold(true);
-    timer.current = setTimeout(() => {
-      setHold(false);
-      void post<AlertRecord>(`/api/ops/teams/${teamId}/assistance`, { note: '' })
-        .then((a) => (setSent(`Sent ${new Date(a.t).toISOString().slice(11, 19)}Z — control room alerted`), useData.getState().onLive({ type: 'alert', alert: a })))
-        .catch((e: unknown) => setSent(e instanceof Error ? e.message : String(e)));
-    }, 1500);
-  };
-  const cancel = () => {
-    setHold(false);
-    if (timer.current) clearTimeout(timer.current);
+  const [done, setDone] = useState<boolean | undefined>(undefined);
+  const send = () => {
+    void post<AlertRecord>(`/api/ops/teams/${teamId}/assistance`, { note: '' })
+      .then((a) => {
+        setSent(`Sent ${new Date(a.t).toISOString().slice(11, 19)}Z — control room alerted`);
+        useData.getState().onLive({ type: 'alert', alert: a });
+        // Ready for another request after a few seconds.
+        setTimeout(() => setDone(false), 6000);
+        setTimeout(() => setDone(undefined), 6100);
+      })
+      .catch((e: unknown) => {
+        setSent(e instanceof Error ? e.message : String(e));
+        setDone(false);
+        setTimeout(() => setDone(undefined), 100);
+      });
   };
   return (
     <div className="col" style={{ gap: 4 }}>
-      <button className={`btn field-big assist ${hold ? 'holding' : ''}`} onPointerDown={start} onPointerUp={cancel} onPointerLeave={cancel} onContextMenu={(e) => e.preventDefault()}>
-        <span className="assist-fill" />
-        <span style={{ position: 'relative' }}>{hold ? 'Keep holding…' : 'Hold to request assistance'}</span>
-      </button>
-      {sent && <span className="mono" style={{ fontSize: 11.5, color: 'var(--red)' }}>{sent}</span>}
+      <HoldToConfirm className="field-assist" label="Hold to request assistance" confirmedLabel="Assistance requested" tone="danger" duration={1500} onConfirm={send} confirmed={done} />
+      {sent && <span className="mono" style={{ fontSize: 11.5, color: 'var(--st-critical-text)' }}>{sent}</span>}
     </div>
   );
 }

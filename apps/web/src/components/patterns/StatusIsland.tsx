@@ -49,9 +49,11 @@ export function StatusIsland() {
   const crit = open_.filter((a) => a.priority === 'critical').length;
   const high = open_.filter((a) => a.priority === 'high').length;
   const configured = facility?.sensors.length ?? 0;
-  const states = Object.values(sensors);
-  const down = states.filter((s) => s.status === 'silent' || s.status === 'offline' || s.status === 'fault').length;
-  const degraded = states.filter((s) => s.status === 'degraded').length;
+  // A configured sensor counts as down until it has actually reported.
+  const ids = facility?.sensors.map((s) => s.id) ?? [];
+  const reporting = ids.filter((id) => sensors[id]?.status === 'ok' || sensors[id]?.status === 'degraded').length;
+  const down = configured - reporting;
+  const degraded = ids.filter((id) => sensors[id]?.status === 'degraded').length;
   const level = readiness?.level ?? 'NORMAL';
 
   useEffect(() => {
@@ -100,9 +102,9 @@ export function StatusIsland() {
         <i />
         {level}
       </span>
-      <span className="isl-seg isl-alerts" title={`${crit} critical, ${high} high-priority alerts open`}>
+      <span className="isl-seg isl-alerts" title={`${crit} critical, ${high} high-priority and ${open_.length - crit - high} other alerts open`}>
         {crit + high === 0 ? (
-          <span className="dim">No alerts</span>
+          <span className="dim">{open_.length ? `${open_.length} open` : 'No alerts'}</span>
         ) : (
           <>
             {crit > 0 && (

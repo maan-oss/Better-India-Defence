@@ -3,6 +3,8 @@ import { useSession } from '../state/session';
 import { Icon } from '../components/Icons';
 import { TopoHero } from '../components/TopoHero';
 import { get } from '../api/client';
+import { Alert } from '../components/kit';
+import { DitherGradient } from '../components/vendor/componentry/dither-gradient';
 
 interface Banner {
   classification: { level: string; caveat: string };
@@ -61,6 +63,7 @@ export function Login() {
       <div className="cls-banner">{clsText}</div>
       <div className="login-main">
         <section className="login-hero" aria-hidden="true">
+          <DitherGradient className="hero-dither" colorFrom="#141414" colorMid="#262523" colorTo="#3b3934" intensity={0.22} speed={1.2} angle={155} />
           <TopoHero />
           <div className="hero-clock">
             <span>
@@ -102,8 +105,10 @@ export function Login() {
             <label htmlFor="p">Password</label>
             <input id="p" className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" autoFocus />
             {error && (
-              <div className="note warn reveal" style={{ marginTop: 12 }} role="alert">
-                {error}
+              <div style={{ marginTop: 12 }}>
+                <Alert tone="danger" title="Sign-in failed">
+                  {error}
+                </Alert>
               </div>
             )}
             <button className="btn primary" disabled={busy || !username || !password}>

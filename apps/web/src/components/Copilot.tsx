@@ -7,6 +7,8 @@ import { useTime } from '../state/time';
 import { Icon } from './Icons';
 import { ObservationViewer, StateChip } from './common';
 import { hms } from '../lib/format';
+import { TextShimmer } from './kit';
+import { LoadingOrb } from './vendor/spaceui/components/orb/loading';
 
 interface Turn {
   q: string;
@@ -143,7 +145,12 @@ export function Copilot() {
         {turns.map((t, i) => (
           <div key={i} className="col" style={{ gap: 6 }}>
             <div className="cp-q">{t.q}</div>
-            {!t.a && !t.error && <div className="cp-a muted pulse">Querying the record…</div>}
+            {!t.a && !t.error && (
+              <div className="cp-thinking">
+                <LoadingOrb size={22} radius={1.5} gap={2} speed={600} className="cp-orb" />
+                <TextShimmer>Querying the record…</TextShimmer>
+              </div>
+            )}
             {t.error && <div className="cp-a insufficient">{t.error}</div>}
             {t.a && (
               <div className={`cp-a ${t.a.insufficient ? 'insufficient' : ''}`}>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { get } from '../api/client';
 import { ErrorNote, Loading } from '../components/common';
 import { bytes, hms } from '../lib/format';
-import { AreaChart, Spark } from '../components/charts';
+import { AnimatedCounter, DonutChart, Gauge, LineChart, Sparkline } from '../components/kit';
 
 interface Health {
   services: { name: string; status: string; detail: string }[];
@@ -28,7 +28,7 @@ interface Health {
 export function SystemHealth() {
   const [h, setH] = useState<Health | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [hist, setHist] = useState<{ ingest: number[]; fusion: number[]; lag: number[]; mem: number[]; batch: number[] }>({ ingest: [], fusion: [], lag: [], mem: [], batch: [] });
+  const [hist, setHist] = useState<{ ingest: number[]; rejects: number[]; fusion: number[]; lag: number[]; mem: number[]; batch: number[] }>({ ingest: [], rejects: [], fusion: [], lag: [], mem: [], batch: [] });
   useEffect(() => {
     const load = () =>
       get<Health>('/api/system/health')
@@ -37,6 +37,7 @@ export function SystemHealth() {
           setError(null);
           setHist((hh) => ({
             ingest: [...hh.ingest.slice(-59), x.metrics.ingestPerSecond],
+            rejects: [...hh.rejects.slice(-59), x.metrics.rejectsPerSecond],
             fusion: [...hh.fusion.slice(-59), x.metrics.fusionMs.p95],
             lag: [...hh.lag.slice(-59), x.metrics.eventLoopLagMs.p99],
             mem: [...hh.mem.slice(-59), x.metrics.memoryMb],
@@ -51,7 +52,6 @@ export function SystemHealth() {
   if (error) return <ErrorNote error={error} />;
   if (!h) return <Loading what="system health" />;
   const m = h.metrics;
-  const lag = (h.clock.serverTime - h.clock.dataClock) / 1000;
   return (
     <div className="page">
       <div className="page-h">
@@ -62,14 +62,18 @@ export function SystemHealth() {
         </span>
       </div>
       <div className="cards cards-4">
-        <Stat v={`${m.ingestPerSecond}/s`} l="Ingest rate" spark={hist.ingest} />
-        <Stat v={`${m.batchProcessMs.p95.toFixed(0)} ms`} l="Batch processing p95" spark={hist.batch} />
-        <Stat v={`${m.fusionMs.p95.toFixed(1)} ms`} l="Fusion step p95" spark={hist.fusion} />
-        <Stat v={`${m.eventLoopLagMs.p99} ms`} l="Event-loop lag p99" spark={hist.lag} warn={m.eventLoopLagMs.p99 > 200} />
-        <Stat v={`${m.memoryMb} MB`} l="API memory" spark={hist.mem} />
-        <Stat v={`${lag.toFixed(1)} s`} l="Data clock behind wall clock" warn={lag > 30} />
-        <Stat v={`${m.ingestLatencyMs.p95} ms`} l="Ingest latency p95 (sent → received)" />
-        <Stat v={`${m.rejectsPerSecond}/s`} l="Rejected messages" warn={m.rejectsPerSecond > 0} />
+        <Stat v={m.ingestPerSecond} unit="/s" l="Ingest rate" spark={hist.ingest} />
+        <Stat v={m.batchProcessMs.p95} unit=" ms" l="Batch processing p95" spark={hist.batch} />
+        <Stat v={m.fusionMs.p95} decimals={1} unit=" ms" l="Fusion step p95" spark={hist.fusion} />
+        <Stat v={m.ingestLatencyMs.p95} unit=" ms" l="Ingest latency p95 (sent → received)" />
+      </div>
+      <div className="health-gauges">
+        <Gauge label="API memory" value={Math.min(100, (m.memoryMb / 4096) * 100)} detail={`${m.memoryMb} MB of 4 GB`} thresholds={[{ from: 0, tone: 'success', label: 'Normal' }, { from: 50, tone: 'warning', label: 'High' }, { from: 85, tone: 'danger', label: 'Critical' }]} />
+        <Gauge label="Sensors reporting" value={h.sensors.length ? (h.sensors.filter((x) => x.status === 'ok' || x.status === 'degraded').length / h.sensors.length) * 100 : 0} detail={h.sensors.length ? `${h.sensors.filter((x) => x.status === 'ok' || x.status === 'degraded').length} of ${h.sensors.length}` : 'none configured'} thresholds={[{ from: 0, tone: 'danger', label: 'Blind' }, { from: 50, tone: 'warning', label: 'Partial' }, { from: 90, tone: 'success', label: 'Covered' }]} />
+        <div className="health-mini">
+          <Stat v={m.eventLoopLagMs.p99} unit=" ms" l="Event-loop lag p99" spark={hist.lag} warn={m.eventLoopLagMs.p99 > 200} />
+          <Stat v={m.rejectsPerSecond} unit="/s" l="Rejected messages" warn={m.rejectsPerSecond > 0} />
+        </div>
       </div>
       <div className="page-body split">
         <div className="scroll">
@@ -92,8 +96,23 @@ export function SystemHealth() {
             </table>
           </div>
           <div className="section">
-            <h4>Ingest rate (messages/s, last 3 min)</h4>
-            <AreaChart values={hist.ingest} height={130} labels={hist.ingest.map((_, i) => (i === 0 ? '−3 min' : i === hist.ingest.length - 1 ? 'now' : ''))} />
+            <h4>Ingest (messages/s, last 3 min)</h4>
+            {hist.ingest.length > 1 ? (
+              <LineChart
+                label="Ingest rate"
+                unit="/s"
+                height={160}
+                series={[
+                  { key: 'ingest', label: 'Accepted', area: true },
+                  { key: 'rejects', label: 'Rejected', dashed: true },
+                ]}
+                data={hist.ingest.map((v, i) => ({ key: String(i), label: i === hist.ingest.length - 1 ? 'now' : `−${(hist.ingest.length - 1 - i) * 3} s`, values: { ingest: v, rejects: hist.rejects[i] ?? 0 } }))}
+              />
+            ) : (
+              <div className="muted" style={{ fontSize: 12 }}>
+                Collecting…
+              </div>
+            )}
           </div>
           <div className="section">
             <h4>Pipeline counters</h4>
@@ -110,6 +129,11 @@ export function SystemHealth() {
         <div className="scroll">
           <div className="section">
             <h4>Storage · {h.storage.engine === 'pglite' ? 'embedded PostgreSQL (PGlite)' : 'PostgreSQL'}</h4>
+            {Object.values(h.storage.counts).some((v) => v > 0) && (
+              <div className="health-donut">
+                <DonutChart label="Stored records" unit="records" totalLabel="Records" size={168} thickness={18} maxSegments={6} data={Object.entries(h.storage.counts).map(([k, v]) => ({ key: k, label: k, value: v }))} />
+              </div>
+            )}
             <dl className="kv">
               {Object.entries(h.storage.counts).map(([k, v]) => (
                 <div key={k} style={{ display: 'contents' }}>
@@ -138,6 +162,8 @@ export function SystemHealth() {
               <dd className="mono">{hms(h.clock.serverTime)}Z</dd>
               <dt>Data clock</dt>
               <dd className="mono">{hms(h.clock.dataClock)}Z</dd>
+              <dt>Data clock behind</dt>
+              <dd className="mono">{((h.clock.serverTime - h.clock.dataClock) / 1000).toFixed(1)} s</dd>
               <dt>Live edge</dt>
               <dd className="mono">{hms(h.clock.liveEdge)}Z</dd>
               <dt>Uptime</dt>
@@ -160,12 +186,14 @@ export function SystemHealth() {
   );
 }
 
-function Stat({ v, l, warn, spark }: { v: string; l: string; warn?: boolean; spark?: number[] }) {
+function Stat({ v, unit, l, decimals = 0, warn, spark }: { v: number; unit: string; l: string; decimals?: number; warn?: boolean; spark?: number[] }) {
   return (
     <div className={`stat ${warn ? 'warn' : ''}`}>
-      <div className="v">{v}</div>
+      <div className="v">
+        <AnimatedCounter value={Number(v.toFixed(decimals))} decimals={decimals} suffix={unit} />
+      </div>
       <div className="l">{l}</div>
-      {spark && spark.length > 1 && <Spark values={spark} stretch fill={false} height={22} color={warn ? 'var(--st-serious)' : 'var(--data)'} />}
+      {spark && spark.length > 1 && <Sparkline data={spark} label={l} tone={warn ? 'warning' : 'accent'} height={26} width={240} area />}
     </div>
   );
 }

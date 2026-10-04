@@ -66,3 +66,31 @@
 
 .cmd-grid .table td { white-space: nowrap; }
 .cmd-grid .table td .muted, .cmd-grid .table td .dim { white-space: normal; }
+
+/* Tasks board (Space UI Kanban). */
+.tasks-panel { grid-column: 1 / -1; }
+.tb-board { display: grid !important; grid-template-columns: repeat(5, minmax(180px, 1fr)); gap: 1px !important; background: var(--line); overflow-x: auto; }
+.tb-col { background: var(--bg-1); display: flex; flex-direction: column; min-height: 220px; min-width: 0; }
+.tb-col-h { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; font-size: 12px; font-weight: 600; color: var(--text-1); border-bottom: 1px solid var(--line); }
+.tb-col-h::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); }
+.c-EN-ROUTE .tb-col-h::before, .c-ACKNOWLEDGED .tb-col-h::before { background: var(--st-caution); }
+.c-ON-SCENE .tb-col-h::before { background: var(--st-serious); }
+.c-CLOSED .tb-col-h::before { background: var(--st-normal); }
+.tb-n { margin-left: auto; color: var(--text-3); font-variant-numeric: tabular-nums; font-weight: 500; }
+.tb-col-body { flex: 1; padding: 8px; gap: 8px !important; }
+.tb-empty { color: var(--text-3); text-align: center; padding: 16px 0; font-size: 12px; }
+.tb-card { position: relative; background: var(--bg-2); border: 1px solid var(--line-2); border-radius: var(--radius); padding: 8px 10px 9px 6px; display: flex; flex-direction: column; gap: 4px; transition: border-color var(--t-fast), box-shadow var(--t-fast); }
+.tb-card:hover { border-color: var(--line-3); }
+.tb-card.overlay { box-shadow: var(--shadow-2); border-color: var(--line-3); rotate: 1.5deg; cursor: grabbing; }
+.tb-card.cancelled { opacity: 0.55; }
+.tb-card-h { display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 0; }
+.tb-call { color: var(--text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tb-grip { width: 16px; height: 18px; display: grid; place-items: center; color: var(--text-3); border-radius: 4px; cursor: grab; flex: none; touch-action: none; }
+.tb-grip:hover { color: var(--text-0); background: var(--bg-4); }
+.tb-grip.off { cursor: default; }
+.tb-orders { margin: 0 0 0 22px; font-size: 12.5px; line-height: 17px; color: var(--text-0); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.tb-meta { margin-left: 22px; font-size: 11px; color: var(--text-3); }
+.tb-cancel { position: absolute; right: 4px; bottom: 4px; width: 18px; height: 18px; display: grid; place-items: center; border: 0; border-radius: 4px; background: none; color: var(--text-3); cursor: pointer; opacity: 0; transition: opacity var(--t-fast); }
+.tb-card:hover .tb-cancel, .tb-cancel:focus-visible { opacity: 1; }
+.tb-cancel:hover { color: var(--st-critical-text); background: var(--st-critical-tint); }
+.tb-err { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding: 6px 8px 6px 14px; font-size: 12.5px; color: var(--st-caution-text); background: var(--st-caution-tint); border-bottom: 1px solid var(--st-caution-line); }

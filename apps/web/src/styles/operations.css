@@ -125,3 +125,5 @@
 .alert-row.s-resolved, .alert-row.s-dismissed { opacity: 0.5; }
 .al-status { margin-left: var(--sp-2); padding: 0 6px; border: 1px solid var(--line-2); border-radius: var(--radius-sm); font-size: 11px; }
 .al-status.acknowledged { color: var(--text-1); border-color: var(--line-3); }
+.cp-thinking { display: flex; align-items: center; gap: 10px; padding: 4px 0 4px 2px; color: var(--text-2); font-size: 13px; }
+.cp-orb { color: var(--text-1); flex: none; }

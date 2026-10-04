@@ -449,3 +449,26 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 @media (max-width: 1280px) { .page-h .sub { display: none; } }
 .tab-count { margin-left: 6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--bg-4); color: var(--text-1); font-size: 11px; font-weight: 600; display: inline-grid; place-items: center; font-variant-numeric: tabular-nums; }
 @media (max-width: 760px) { .tb-crumbs li:last-child > svg { display: none; } }
+
+/* Arc segmented control at console density (see components/ui.tsx). */
+.arc-seg { flex: none; }
+.arc-seg.sm { --control-height-sm: 22px; font-size: 12px; }
+.arc-seg.sm button { padding: 0 9px; font-size: 12px; }
+.arc-seg.md { --control-height-sm: 24px; }
+.arc-seg.md button { font-size: 12.5px; }
+.arc-seg.fill { display: flex; }
+.arc-seg.fill > div { flex: 1; }
+.arc-seg.fill button { flex: 1; }
+.loading-block { padding: var(--sp-6) var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-4); color: var(--text-2); max-width: 560px; }
+.err-block { padding: var(--sp-3); }
+.login-hero .hero-dither { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.55; }
+:root[data-theme='night'] .login-hero .hero-dither { display: none; }
+.health-gauges { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 1px; background: var(--line); border-bottom: 1px solid var(--line-2); }
+.health-gauges > * { background: var(--bg-1); padding: var(--sp-4) var(--sp-5); }
+@media (max-width: 1100px) { .health-gauges { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.health-donut { display: grid; place-items: center; padding: var(--sp-2) 0 var(--sp-4); }
+.stat figure { margin-top: auto; padding-top: var(--sp-3); }
+.stat figure figcaption { display: none; }
+.stat figure svg { width: 100%; }
+.health-mini { display: grid; grid-template-rows: 1fr 1fr; padding: 0 !important; gap: 1px; background: var(--line) !important; }
+.health-mini .stat { padding: var(--sp-3) var(--sp-5); }
