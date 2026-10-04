@@ -8,4 +8,3 @@ test-results/
 coverage/
 .DS_Store
 models/*.onnx
-.shots/

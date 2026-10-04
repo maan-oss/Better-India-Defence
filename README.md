@@ -22,9 +22,15 @@ What runs on real inputs today:
 - **Real sites** defined from a surveyed anchor and an orthophoto; MGRS throughout.
 - **Interop**: NMEA 0183, MAVLink (receive-only) and Cursor-on-Target in/out (ATAK/TAK).
 
-It also ships with **Site KESTREL**, a fictional 5 × 5 km demo facility, and a deterministic simulator
-that drives synthetic cameras, radar, passive RF, LiDAR, drones, GPS, fence sensors, building systems,
-a satellite and a neighbouring unit's CoT feed through the same ingestion API real equipment uses.
+It runs in one of two modes:
+
+- **Operational** (the default): no demonstration accounts, data or simulator. The first start prints a
+  one-time setup code; the browser walks you through creating the first administrator, placing the
+  site and choosing ground imagery. The picture fills in only from equipment you connect.
+- **Demo** (`npm run demo` / `npm run dev:demo`): **Site KESTREL**, a fictional 5 × 5 km facility, with
+  a deterministic simulator that drives synthetic cameras, radar, passive RF, LiDAR, drones, GPS, fence
+  sensors, building systems, a satellite and a neighbouring unit's CoT feed through the same ingestion
+  API real equipment uses.
 
 > Before relying on anything here, read **[docs/REALITY_LIMITS.md](docs/REALITY_LIMITS.md)** — what
 > works now (with measured accuracy and speed), what needs real hardware, data and validation, and what
@@ -32,23 +38,40 @@ a satellite and a neighbouring unit's CoT feed through the same ingestion API re
 
 ## Quick start
 
-Requirements: Node.js ≥ 22.12, npm; ffmpeg for video and network cameras (images work without it).
-No database, Docker, GPU or network access needed at run time.
+Requirements: Node.js ≥ 22.12, npm; ffmpeg for video and network cameras (images, phone and laptop
+cameras work without it). No database, Docker, GPU or network access needed at run time.
 
 ```bash
 npm install
 npm run models:fetch     # once: downloads the vision models (≈ 76 MB) and verifies their SHA-256
-npm run dev
+npm run dev              # operational: first-run setup in the browser
 ```
 
-Open <http://127.0.0.1:5173> and sign in as `analyst` / `strata-demo`.
+Open <http://127.0.0.1:5173>. The terminal shows `FIRST RUN — … setup code XXXX-XXXX` (also written to
+`data/setup-code.txt`, readable only by the service account). Enter it, then:
 
-On first run `npm run dev` starts the API with an embedded PostgreSQL (under `data/`), records two
-hours of synthetic history through the ingestion API (about a minute), then starts the live simulator
-and the web client. Later runs resume from the stored data. To start over, stop the stack and delete
-`data/`.
+1. **Administrator** — your account (password strength is checked; at least 12 characters).
+2. **Site** — name, classification banner and the anchor point: this device's location, latitude /
+   longitude, or an MGRS grid reference; and the area to cover.
+3. **Ground imagery** — none, your own XYZ tile server, or OpenStreetMap (shown with an OPSEC warning:
+   every console then asks a third party for tiles around your site).
+4. **Review** — the API restarts with the site (a few seconds) and opens the operational picture.
 
-Demo accounts (development only), all with password `strata-demo`:
+The empty picture shows **Bring the site online**: draw the perimeter and zones, add a camera (an IP
+camera, or the camera of the phone or laptop you are holding), share positions from responders' phones
+(Field view → *Share my position*), and connect data feeds. Each step ticks itself when data arrives.
+
+To explore with synthetic data instead:
+
+```bash
+npm run dev:demo         # demo site, simulator, sample content; sign in as analyst / strata-demo
+```
+
+On first demo run the API records two hours of synthetic history through the ingestion API (about a
+minute), then starts the live simulator. Demo and operational data live in the same `data/` folder by
+default, so use a separate `DATA_DIR` for each, or delete `data/` to start over.
+
+Demo accounts (demo mode only), all with password `strata-demo`:
 
 | User | Role | Can |
 |---|---|---|
@@ -58,6 +81,17 @@ Demo accounts (development only), all with password `strata-demo`:
 | `admin` | Administrator | + users, cameras, site definition, configuration, failure injection |
 
 How an installation uses each screen day to day: **[docs/OPERATIONS.md](docs/OPERATIONS.md)**.
+
+## Using the console
+
+- **⌘K / Ctrl K** opens the command bar: search the site, jump to an MGRS grid reference, go to any area,
+  run actions. **?** lists every shortcut; **G** then a letter goes to an area (G O operational picture,
+  G C command, G W camera wall, G I incidents, G F field view, G S sensors).
+- The **status island** in the top bar shows the time (live or replay), readiness, open alerts and
+  sensors. Select it for the Zulu clock, open alerts, sensor and link state.
+- The operational picture is the whole pane: the picture mode sits top left, the tool dock (layers,
+  navigation, fit the site, inspector) on the left; drag the divider to resize the inspector or collapse
+  it; the timeline collapses to its transport bar.
 
 ## What to try
 
@@ -110,7 +144,9 @@ How an installation uses each screen day to day: **[docs/OPERATIONS.md](docs/OPE
 
 | Command | Does |
 |---|---|
-| `npm run dev` | Development stack: API + seed on first run + live simulator + Vite |
+| `npm run dev` | Development stack, operational mode: API (supervised) + Vite; first-run setup in the browser |
+| `npm run dev:demo` | Development stack, demo mode: API + seed on first run + live simulator + Vite |
+| `npm start` / `npm run demo` | Built application, operational / demo mode |
 | `npm run seed` | Seed recorded history into an empty database (`SEED_MINUTES`, default 120) |
 | `npm run db:migrate` | Apply database migrations |
 | `npm run models:fetch` | Download and verify the vision models (`STRATA_MODELS_DIR` to choose where) |
@@ -127,19 +163,22 @@ How an installation uses each screen day to day: **[docs/OPERATIONS.md](docs/OPE
 ## Production
 
 ```bash
-cp .env.example .env     # set STRATA_SERVICE_TOKEN, STRATA_ADMIN_PASSWORD, STRATA_DEMO_USERS=false …
+cp .env.example .env     # set STRATA_SERVICE_TOKEN, STORAGE_ENCRYPTION_KEY, TLS …
 npm run build
-npm start                # API + web client on PORT (default 4000); simulator unless STRATA_SIMULATOR=false
+npm start                # API + web client on PORT (default 4000), operational mode
 ```
 
-Production mode refuses to start with development secrets or demo users. Set `DATABASE_URL` to use an
-external PostgreSQL 16 (PostGIS optional), `TLS_CERT_FILE`/`TLS_KEY_FILE` for TLS (or
-`COOKIE_SECURE=true` behind a TLS proxy), and `STORAGE_ENCRYPTION_KEY` to encrypt stored media.
+`npm start` runs operational mode and supervises the API (the setup wizard and **Site setup → Restart
+to apply** restart it with exit code 75). `npm run demo` serves the built demo instead. Demo mode
+refuses to start with `NODE_ENV=production`. Set `DATABASE_URL` to use an external PostgreSQL 16
+(PostGIS optional), `TLS_CERT_FILE`/`TLS_KEY_FILE` for TLS (or `COOKIE_SECURE=true` behind a TLS proxy),
+and `STORAGE_ENCRYPTION_KEY` to encrypt stored media. Phone and laptop cameras and phone GPS need the
+console served over HTTPS (browsers allow camera and location access only in a secure context).
 
-For a real installation: define the site in **Site setup** (a configured site turns the simulator
-off), add cameras in **Live Cameras**, run the field adapters, and use a fresh database. Air-gapped
-hosts: run `npm run models:fetch` on a connected machine, copy the `models/` files across and set
-`STRATA_MODELS_DIR` (hashes are checked against the manifest that ships with the code).
+Air-gapped hosts: run `npm run models:fetch` on a connected machine, copy the `models/` files across and
+set `STRATA_MODELS_DIR` (hashes are checked against the manifest that ships with the code). For ground
+imagery on a closed network, run your own XYZ tile server (or upload a georeferenced orthophoto in
+Site setup).
 
 `docker-compose.yml` runs PostgreSQL + PostGIS and the application image (`Dockerfile`, which includes
 ffmpeg, the models and the adapters; `--profile adapters` adds the adapter service). Note: the image
@@ -148,7 +187,9 @@ was not built in the development environment (no Docker daemon was available); t
 
 ## Connecting equipment
 
-Cameras connect directly (RTSP/HTTP). GPS/AVL (NMEA), UAS ground stations (MAVLink) and TAK/C2 systems
+Cameras connect directly (RTSP/HTTP), or as *This device* from any signed-in phone, tablet or laptop
+(Camera wall → Add camera; the device then streams from `/cameras/<id>/stream`). Responders' phones
+report their team's position from Field view. GPS/AVL (NMEA), UAS ground stations (MAVLink) and TAK/C2 systems
 (Cursor-on-Target) connect through `strata-adapter`. Anything else that can POST `strata.ingest/v1`
 envelopes to `/api/ingest/batch` with the service token and is registered for the site is a sensor.
 See **[docs/INTEROP.md](docs/INTEROP.md)**.

@@ -54,7 +54,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   }
   const raw = parsed.data;
   const mode = raw.STRATA_MODE ?? (raw.NODE_ENV === 'test' ? 'demo' : 'operational');
-  const c = { ...raw, STRATA_MODE: mode, STRATA_DEMO_USERS: raw.STRATA_DEMO_USERS ?? (mode === 'demo' ? 'true' : 'false') } as const;
+  // Demo accounts share a published password, so they exist only in demo mode, whatever the environment says.
+  const c = { ...raw, STRATA_MODE: mode, STRATA_DEMO_USERS: mode === 'demo' ? (raw.STRATA_DEMO_USERS ?? 'true') : 'false' } as const;
   if (mode === 'demo' && c.NODE_ENV === 'production') throw new Error('STRATA_MODE=demo is not allowed with NODE_ENV=production');
   if (c.NODE_ENV === 'production') {
     if (c.STRATA_SERVICE_TOKEN === 'dev-service-token-change-me') throw new Error('STRATA_SERVICE_TOKEN must be set in production');

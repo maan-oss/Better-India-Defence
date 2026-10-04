@@ -25,29 +25,29 @@ test('operations: the 4D world loads with live data and modes switch', async ({ 
   const errors = await signIn(page, 'analyst');
   await expect(page).toHaveURL(/\/operations/);
   await expect(page.locator('canvas').first()).toBeVisible();
-  await expect(page.locator('.clock-mode')).toHaveText('LIVE');
-  for (const mode of ['HISTORY', 'COVERAGE', 'DIFF', 'EVIDENCE', 'INCIDENT', 'NOW']) {
-    const tab = page.getByRole('tablist', { name: 'Global mode' }).getByRole('tab', { name: mode });
-    await tab.click();
-    await expect(tab).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('button.island .isl-mode')).toHaveText('Live');
+  for (const mode of ['History', 'Coverage', 'Diff', 'Evidence', 'Incident', 'Now']) {
+    const button = page.getByRole('group', { name: 'Picture mode' }).getByRole('button', { name: mode, exact: true });
+    await button.click();
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
   }
   expect(errors).toEqual([]);
 });
 
 test('time engine: leave live, step, change speed, return to live', async ({ page }) => {
   await signIn(page, 'analyst');
-  const clock = page.locator('.clock-mode');
-  await expect(clock).toHaveText('LIVE');
+  const clock = page.locator('button.island .isl-mode');
+  await expect(clock).toHaveText('Live');
   await page.getByRole('button', { name: 'Step back' }).click();
-  await expect(clock).toHaveText('PAUSED');
+  await expect(clock).toHaveText('Paused');
   const before = await page.getByRole('slider', { name: 'Timeline' }).getAttribute('aria-valuenow');
   await page.getByRole('button', { name: 'Step back' }).click({ modifiers: ['Shift'] });
   await expect.poll(async () => page.getByRole('slider', { name: 'Timeline' }).getAttribute('aria-valuenow')).not.toBe(before);
-  await page.getByRole('radiogroup', { name: 'Playback speed' }).getByRole('radio', { name: '×4', exact: true }).click();
+  await page.getByRole('group', { name: 'Playback speed' }).getByRole('button', { name: '×4', exact: true }).click();
   await page.getByRole('button', { name: 'Play', exact: true }).click();
-  await expect(clock).toHaveText('×4');
+  await expect(clock).toHaveText('Replay ×4');
   await page.getByTitle('Return to live').click();
-  await expect(clock).toHaveText('LIVE');
+  await expect(clock).toHaveText('Live');
 });
 
 test('incidents: the recorded drone incursion produced an incident with gathered evidence', async ({ page }) => {
@@ -84,7 +84,8 @@ test('audit: administrator verifies the hash chain', async ({ page }) => {
   await signIn(page, 'admin');
   await page.getByRole('link', { name: 'Audit' }).click();
   await page.getByRole('button', { name: 'Verify chain' }).click();
-  await expect(page.getByText(/Chain intact · \d+ records verified/)).toBeVisible();
+  await expect(page.getByText('Chain intact')).toBeVisible();
+  await expect(page.getByText(/\d+ records verified/)).toBeVisible();
 });
 
 test('identity hand-off demo returns scored segments with real frame crops and requires human review', async ({ page }) => {
@@ -182,7 +183,7 @@ test('camera wall: site cameras render in a selectable grid layout', async ({ pa
   const errors = await signIn(page, 'operator');
   await page.getByRole('link', { name: 'Camera wall' }).click();
   await expect(page.locator('.wtile').first()).toBeVisible();
-  await page.getByRole('radio', { name: '2×2' }).click();
+  await page.getByRole('group', { name: 'Layout' }).getByRole('button', { name: '2×2' }).click();
   await expect(page.locator('.wtile')).toHaveCount(4);
   await page.locator('.wtile').first().click();
   await expect(page.locator('.focus-panel')).toBeVisible();
@@ -197,4 +198,44 @@ test('night (red-light) display can be switched from the user menu', async ({ pa
   await page.locator('.user-btn').click();
   await page.getByRole('menuitem', { name: /Standard display/ }).click();
   await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'night');
+});
+
+test('command bar: Ctrl K searches areas and navigates; G then letter jumps', async ({ page }) => {
+  const errors = await signIn(page, 'analyst');
+  await page.keyboard.press('Control+k');
+  const input = page.getByPlaceholder('Search the site, enter a grid reference, or type a command');
+  await expect(input).toBeVisible();
+  await input.fill('camera wall');
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/cameras/);
+  await expect(input).toBeHidden();
+  await page.keyboard.press('g');
+  await page.keyboard.press('c');
+  await expect(page).toHaveURL(/\/command/);
+  expect(errors).toEqual([]);
+});
+
+test('status island opens to show readiness, alerts and sensor state', async ({ page }) => {
+  await signIn(page, 'analyst');
+  await page.getByRole('button', { name: 'Console status' }).click();
+  const panel = page.getByRole('dialog', { name: 'Console status' });
+  await expect(panel).toBeVisible();
+  await expect(panel.getByText('Readiness')).toBeVisible();
+  await expect(panel.getByText('Open alerts').first()).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(panel).toHaveCount(0);
+});
+
+test('operational picture: layers sheet toggles a layer and the inspector collapses', async ({ page }) => {
+  const errors = await signIn(page, 'analyst');
+  await page.getByRole('button', { name: 'Layers' }).click();
+  const terrain = page.getByRole('switch', { name: 'Terrain' });
+  await expect(terrain).toBeVisible();
+  const before = await terrain.getAttribute('aria-checked');
+  await terrain.click();
+  await expect(terrain).not.toHaveAttribute('aria-checked', before ?? 'true');
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Hide inspector' }).click();
+  await expect(page.getByRole('button', { name: 'Show inspector' })).toBeVisible();
+  expect(errors).toEqual([]);
 });

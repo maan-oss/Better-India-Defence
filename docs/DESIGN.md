@@ -20,11 +20,39 @@ component and colour libraries rather than hand-picked values.
 | Library | Used for |
 |---|---|
 | [Radix Colors](https://www.radix-ui.com/colors) | Status, affiliation and provenance colours. 12-step dark scales: steps 3 tint, 6 border, 9 solid fill, 11 text. Red / orange / amber / grass / cyan for status; blue / teal / violet for affiliation and provenance. |
-| [Radix Primitives](https://www.radix-ui.com/primitives) | Dialog, dropdown menu, tabs, toggle group (segmented controls) and tooltip, in `apps/web/src/components/ui.tsx`. Focus trapping, keyboard navigation, collision-aware placement and ARIA roles come from the library. |
+| [Radix Primitives](https://www.radix-ui.com/primitives) | Dialogs, tabs, tooltips and the toggle-group fallback for segmented controls with rich labels, in `apps/web/src/components/ui.tsx`; Arc builds on Radix too. Focus trapping, keyboard navigation, collision-aware placement and ARIA roles come from the library. |
+| [Arc](https://uiarc.dev/components) (MIT, free tier) | The main component kit, vendored in `apps/web/src/components/arc/` (105 components, CSS modules + Motion) and re-exported from `components/kit.ts`. Used for segmented controls everywhere, breadcrumb, popovers, user menu, toast stack, resizable panels, floating button group (map dock), switches, accordion, bottom sheet (phone inspector), stepper, inputs, password strength, radio cards, sliders, alerts, badges, empty states, skeleton and text shimmer, hold-to-confirm (assistance request), file dropzone, image compare, JSON viewer, pagination, search field, gauges, line and donut charts, sparklines, animated counters. Arc's tokens are mapped onto ours in `styles/arc-theme.css`. |
+| [Space UI](https://www.spaceui.one/components) (MIT) | Vendored in `components/vendor/spaceui/`: Kanban (Command tasks board), timeline (incident chronology), notification list (status island alerts), status badge, loading orb (copilot). Tailwind utilities, mapped to our tokens in `styles/tw.css`. |
+| [Componentry](https://componentry.dev/) (MIT) | Vendored in `components/vendor/componentry/`: split-flap display (status island Zulu clock), dither gradient (sign-in hero), Mac keyboard (shortcuts sheet). |
+| [Bencho](https://bencho.dev/) and [Skecher UI](https://skecher-ui.com/docs) | Interaction patterns only — their code carries no open licence, so nothing is copied. Original implementations after their patterns: the command bar and the dynamic-island status pill (Bencho), the one-time-code input (Bencho), the morphing tool dock grouping (Skecher). Each file says so in its header. |
+| [Tailwind CSS v4](https://tailwindcss.com) | Only the theme and utility layers (no Preflight reset), for the Space UI and Componentry components. Our own CSS is unlayered, so it wins over utilities. |
 | [Inter](https://rsms.me/inter/) and [JetBrains Mono](https://www.jetbrains.com/lp/mono/) | Interface text, and data (grid references, IDs, timestamps). Both are bundled with the build, because installations run air-gapped. |
 
 Tokens are in `apps/web/src/styles/tokens.css`. Canvas and WebGL code, which cannot read CSS variables,
 uses the same values from `apps/web/src/lib/palette.ts`. Change the two files together.
+
+## Layout
+
+```
+┌──────────────────────── classification banner (16 px) ────────────────────────┐
+│ logo │ Site › Page            [ Search or run a command  ⌘K ]   (status island) (user) │  48 px
+│ rail │                                                                                │
+│ 56px │  content: pages, or the full-bleed operational picture                         │
+│ icons│  ┌ mode ┐                                              ┌ compass ┐ ║ inspector │
+│ with │  │ dock │              map                              └─────────┘ ║ (resizable,│
+│ names│  └──────┘                                                          ║ collapsible)│
+│ on   │  ═════════ timeline (folds to its 40 px transport bar) ═════════   ║            │
+│ hover│                                                                                │
+└──────────────────────── classification banner (16 px) ────────────────────────┘
+```
+
+- **Rail** — 56 px, icons only, names and shortcuts in tooltips, groups split by hairlines, badges only
+  for work (identity reviews) or for critical alerts (red). On phones it becomes the bottom tab bar.
+- **Top bar** — where you are (site › page; the site opens its details), one way to find anything (the
+  command bar), the state of the watch (the status island), and the account menu. Nothing else: picture
+  modes live on the map, page actions in the page header.
+- **Operational picture** — the map is never boxed in by fixed side panels; controls float on it, and
+  the inspector is a resizable split the operator can close.
 
 ## Colour roles
 

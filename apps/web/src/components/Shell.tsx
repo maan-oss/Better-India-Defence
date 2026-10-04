@@ -94,7 +94,7 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
   const critical = useMemo(() => alerts.filter((a) => a.status === 'open' && a.priority === 'critical').length, [alerts]);
   return (
     <nav className="rail" aria-label="Application areas">
-      <Link to="/operations" className="rail-logo" aria-label="Strata — operational picture">
+      <Link to="/operations" className="rail-logo" aria-label="Strata home">
         <Icon.Logo />
       </Link>
       <div className="rail-items">

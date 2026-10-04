@@ -21,20 +21,28 @@ readiness changes, evidence exports) goes to an append-only, hash-chained audit 
 
 ## Setting up an installation (administrator, once)
 
+0. **First run** — start the service (`npm start`). It prints a one-time setup code (also in
+   `<DATA_DIR>/setup-code.txt`, mode 600). Open the console in a browser and follow the wizard:
+   enter the code, create your administrator account, place the site (this device's location, lat/lon or
+   MGRS), choose the classification banner and the ground imagery, review. The service restarts with the
+   site and opens the operational picture; the code stops working once the administrator exists. Until
+   the site is placed, other users who sign in see a waiting screen.
 1. **Site setup** — set the surveyed anchor (lat/lon or MGRS), load an orthophoto (survey cell, drone
    mosaic or licensed imagery) and trace the perimeter, gates, buildings and zones on it. Mark the zones
    that must be protected as *restricted*; their names drive the default vital-asset type and priority
    ("Armoury", "Fuel point", "Ops room", "Substation"…). Add the **data feeds** the adapters will post as
    (`GPS1` for AVL/NMEA, `UAV1` for a MAVLink ground station, `EXT1` for a CoT/TAK feed). Save and
-   restart; the demo simulator does not run on a configured site. Use a fresh database for a real site.
-2. **Live cameras** — add each camera (RTSP/HTTP URL; credentials are stored encrypted), its surveyed
+   *Restart to apply*. Use a fresh database for a real site.
+2. **Camera wall → Add camera** — either a *network stream* (RTSP/HTTP URL; credentials are stored
+   encrypted) or *this device's camera*: a phone on a mount, a tablet or a laptop webcam streams its frames
+   from `/cameras/<id>/stream` while that page stays open (needs HTTPS). For either, give its surveyed
    position, mounting height, heading, tilt and field of view, the zone it watches and the analysis rate.
    *Test* shows a frame before saving. Detections are geolocated from this pose, so survey it.
 3. **Command → Vital assets** — check the derived assets, priorities (1 = highest) and protection radii.
 4. **Field adapters** — run `strata-adapter` with a config listing the NMEA, MAVLink and CoT listeners
    ([INTEROP.md](INTEROP.md)).
-5. **Users** — create accounts with the least role each person needs; disable demo users (production
-   mode refuses to start with them).
+5. **Users** — create accounts with the least role each person needs (Users & settings; weak passwords
+   are refused). Demo accounts exist only in demo mode.
 
 ## Daily routines
 
@@ -54,6 +62,21 @@ readiness changes, evidence exports) goes to an append-only, hash-chained audit 
   events) that the incoming operator acknowledges.
 - **SITREP**: *Draft* fills a report from the record (DTG, MGRS grid references, alerts, incidents,
   teams, the top threats); edit, then *Issue*. Amendments are kept as versions.
+
+### Finding your way
+
+- **⌘K / Ctrl K** — command bar: type a place, sensor, track or incident; an MGRS grid reference to fly
+  there; an area to go to; or an action (return to live, night display, alarm sound). **?** lists the
+  shortcuts; **G** then a letter jumps to an area.
+- **Status island** (top bar) — live or replay time, readiness, open alerts, sensors reporting. Select it
+  for the Zulu clock, the open critical and high alerts (select one to see it on the map), and sensor and
+  live-link state.
+- **Operational picture** — the map takes the whole pane. Picture mode (now, history, incident, diff,
+  evidence, coverage) is top left; the tool dock on the left opens the layers sheet and navigation modes,
+  fits the site and hides or shows the inspector. Drag the divider to size the inspector, or drag it shut.
+  The timeline folds to its transport bar.
+- **Command → Tasks** is a board: drag a task card to its new state (only valid transitions are accepted;
+  closing asks for the outcome). Every move is audited.
 
 ### Displays
 
@@ -114,13 +137,17 @@ readiness changes, evidence exports) goes to an append-only, hash-chained audit 
 
 - Open **Field view** on a phone or tablet (the navigation moves to the bottom of the screen) and pick
   your team; the choice is remembered on the device.
+- **Share my position** sends the phone's GNSS fix as the team's position (every 3 s, or sooner after
+  15 m of movement) while the page is open; the team appears on the operational picture as a friendly
+  track and tasks complete their *on scene* step automatically. Needs HTTPS and location permission.
 - The current task shows the orders, grid reference, distance and bearing from your tracker's last fix,
   ETA, and one large button for the next status (acknowledge → en route → on scene → complete, with an
   outcome). Each step is logged; *on scene* is also set automatically within 35 m of the task.
 - **Local picture**: north-up plot of everything within 600 m, the task location and a bearing line.
 - **Contact report (SALUTE)**: Size, Activity, Location, Unit, Time, Equipment — goes to the duty log
   and raises a medium alert in the control room.
-- **Request assistance**: press and hold for 1.5 s (so a stray tap cannot send it); raises a critical
+- **Request assistance**: press and hold the button for 1.5 s until it fills (so a stray tap cannot
+  send it); raises a critical
   alert at your last known position with its own standing orders.
 
 ## Working with other systems
