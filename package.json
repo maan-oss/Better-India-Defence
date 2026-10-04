@@ -1,0 +1,37 @@
+{
+  "name": "strata",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Strata — 4D Reality Intelligence Platform: a persistent spatial memory of a physical environment.",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "seed": "npm run seed -w @strata/server",
+    "build": "npm run typecheck && npm run build -w @strata/server && npm run build -w @strata/simulator && npm run build -w @strata/web",
+    "start": "node scripts/start.mjs",
+    "typecheck": "tsc -p packages/domain && tsc -p packages/simulator && tsc -p apps/server && tsc -p apps/web",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "db:migrate": "npm run migrate -w @strata/server"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.10.0",
+    "concurrently": "^10.0.5",
+    "esbuild": "^0.25.0",
+    "eslint": "^9.39.0",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^3.2.7"
+  }
+}
