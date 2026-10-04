@@ -23,6 +23,9 @@ import { ReplayQueries } from './replay/queries.ts';
 import { CopilotService } from './copilot/copilot.ts';
 import { AuthService } from './auth/authService.ts';
 import { HandoffService } from './handoff/handoffService.ts';
+import { VisionService } from './vision/visionService.ts';
+import { IdentityService } from './identity/identityService.ts';
+import { EvidenceService } from './evidence/evidenceService.ts';
 
 /** Composition root: constructs and wires every service, restores persisted state, starts timers. */
 export class Platform {
@@ -45,6 +48,9 @@ export class Platform {
   copilot!: CopilotService;
   auth!: AuthService;
   handoff!: HandoffService;
+  vision!: VisionService;
+  identity!: IdentityService;
+  evidence!: EvidenceService;
   private timers: NodeJS.Timeout[] = [];
 
   constructor(
@@ -81,6 +87,21 @@ export class Platform {
     this.replay = new ReplayQueries(this.db, this.world);
     this.copilot = new CopilotService(this.db, this.log, this.fusion, this.replay, this.coverage, this.incidents, this.alerts, this.sensors, { apiKey: cfg.ANTHROPIC_API_KEY, model: cfg.COPILOT_MODEL, provider: cfg.COPILOT_PROVIDER });
     this.handoff = new HandoffService(this.db);
+    this.vision = new VisionService();
+    this.identity = new IdentityService(this.db, this.store, this.alerts, this.hub);
+    await this.identity.load();
+    this.evidence = new EvidenceService(this.db, this.store, this.vision, this.identity, this.hub, this.audit, this.log);
+    void this.evidence.resume();
+    if (!this.vision.ffmpeg) this.log.warn('ffmpeg not found: video evidence and network cameras are unavailable (images still work)');
+    // Face-data retention: unmatched sightings are purged after the configured period.
+    this.timers.push(
+      setInterval(() => {
+        void this.identity
+          .purge()
+          .then((n) => n && this.log.info({ purged: n }, 'face retention purge'))
+          .catch((e: unknown) => this.log.error({ err: e instanceof Error ? e.message : String(e) }, 'face purge failed'));
+      }, 3600_000),
+    );
 
     // Wiring.
     this.fusion.listeners.push((events, snaps) => this.alerts.onTracks(events, snaps));
@@ -135,6 +156,7 @@ export class Platform {
     for (const t of this.timers) clearInterval(t);
     this.hub.close();
     await this.pool?.close();
+    await this.vision?.close();
     await this.db?.close();
   }
 }

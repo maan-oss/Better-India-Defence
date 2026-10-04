@@ -195,4 +195,20 @@ export type LiveMessage =
   | { type: 'sensor'; status: SensorStatusRecord }
   | { type: 'observations'; observations: Pick<SensorObservation, 'id' | 'sensorId' | 'kind' | 't' | 'position' | 'state'>[] }
   | { type: 'infrastructure'; assetId: string; state: string; alarm: boolean; t: number }
-  | { type: 'reconstruction'; id: string; status: string };
+  | { type: 'reconstruction'; id: string; status: string }
+  | { type: 'face_event'; event: FaceEventSummary }
+  | { type: 'evidence'; id: string; status: string }
+  | { type: 'ops'; topic: 'readiness' | 'teams' | 'tasks' | 'log'; payload: unknown };
+
+/** Minimal face-sighting shape pushed to consoles (full record via the API). */
+export interface FaceEventSummary {
+  id: string;
+  t: number;
+  sourceKind: 'camera' | 'evidence';
+  sourceId: string;
+  decision: 'STRONG' | 'POSSIBLE' | 'NO_MATCH' | 'NOT_COMPARABLE';
+  reviewStatus: 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'NOT_REQUIRED';
+  bestIdentityId: string | null;
+  bestScore: number | null;
+  alertId: string | null;
+}

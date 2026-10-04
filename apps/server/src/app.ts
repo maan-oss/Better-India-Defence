@@ -7,13 +7,14 @@ import type { Platform } from './platform.ts';
 import { SESSION_COOKIE, bearer, readCookie } from './http/guards.ts';
 import { registerCore } from './routes/core.ts';
 import { registerOperations } from './routes/operations.ts';
+import { registerVision } from './routes/vision.ts';
 
 export async function buildApp(p: Platform): Promise<FastifyInstance> {
   const cfg = p.cfg;
   const https = cfg.TLS_CERT_FILE && cfg.TLS_KEY_FILE ? { https: { cert: readFileSync(cfg.TLS_CERT_FILE), key: readFileSync(cfg.TLS_KEY_FILE) } } : {};
   const app = Fastify({ loggerInstance: p.log.child({ component: 'http' }), logController: new LogController({ disableRequestLogging: true }), bodyLimit: 2 * 1024 * 1024, trustProxy: false, ...https }) as unknown as FastifyInstance;
 
-  app.addContentTypeParser(['application/octet-stream', 'application/x-strata-rangescan', 'image/png', 'image/jpeg'], { parseAs: 'buffer', bodyLimit: 32 * 1024 * 1024 }, (_req, body, done) => done(null, body));
+  app.addContentTypeParser(['application/octet-stream', 'application/x-strata-rangescan', 'image/png', 'image/jpeg', 'image/webp'], { parseAs: 'buffer', bodyLimit: 40 * 1024 * 1024 }, (_req, body, done) => done(null, body));
   await app.register(rateLimit, { max: 600, timeWindow: '1 minute', allowList: (req) => req.url.startsWith('/api/ingest') });
   await app.register(websocket, { options: { maxPayload: 64 * 1024 } });
 
@@ -44,6 +45,7 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
 
   registerCore(app, p);
   registerOperations(app, p);
+  registerVision(app, p);
 
   app.get('/ws', { websocket: true }, (socket, req) => {
     if (!req.user) {

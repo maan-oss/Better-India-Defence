@@ -20,7 +20,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:e2e": "npm run build && playwright test",
-    "db:migrate": "npm run migrate -w @strata/server"
+    "db:migrate": "npm run migrate -w @strata/server",
+    "models:fetch": "node scripts/fetch-models.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",

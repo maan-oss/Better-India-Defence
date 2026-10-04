@@ -15,7 +15,7 @@ export type EpistemicState = (typeof EPISTEMIC_STATES)[number];
 
 export interface EvidenceRef {
   /** What kind of record backs the claim. */
-  kind: 'observation' | 'media' | 'track' | 'reconstruction' | 'change' | 'alert' | 'incident' | 'snapshot';
+  kind: 'observation' | 'media' | 'track' | 'reconstruction' | 'change' | 'alert' | 'incident' | 'snapshot' | 'evidence_item' | 'face_event';
   id: string;
   sensorId?: string;
   t?: number;

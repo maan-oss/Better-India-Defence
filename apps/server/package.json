@@ -9,7 +9,8 @@
     "build": "node build.mjs",
     "migrate": "tsx src/db/migrate-cli.ts",
     "seed": "tsx src/seed.ts",
-    "typecheck": "tsc -p ."
+    "typecheck": "tsc -p .",
+    "vision:eval": "tsx src/vision/evaluate.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
@@ -21,6 +22,7 @@
     "@strata/simulator": "0.1.0",
     "fastify": "^5.12.5",
     "jpeg-js": "^0.4.4",
+    "onnxruntime-node": "^1.30.0",
     "pg": "^8.23.1",
     "pino": "^10.4.0",
     "pino-pretty": "^13.1.3",

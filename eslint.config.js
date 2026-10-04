@@ -22,7 +22,7 @@ export default tseslint.config(
   },
   {
     files: ['**/*.{js,mjs}'],
-    languageOptions: { globals: { process: 'readonly', console: 'readonly', fetch: 'readonly', setTimeout: 'readonly', URL: 'readonly' } },
+    languageOptions: { globals: { process: 'readonly', console: 'readonly', fetch: 'readonly', setTimeout: 'readonly', URL: 'readonly', Buffer: 'readonly' } },
     rules: { 'no-empty': ['error', { allowEmptyCatch: true }] },
   },
 );

@@ -162,6 +162,13 @@ export class AlertEngine {
     await this.save(a);
   }
 
+  async addNote(id: string, by: string, text: string): Promise<void> {
+    const a = [...this.open.values()].find((x) => x.id === id) ?? (await this.byId(id));
+    if (!a) return;
+    a.notes = [...a.notes, { at: Date.now(), by, text }];
+    await this.save(a);
+  }
+
   async byId(id: string): Promise<AlertRecord | null> {
     const r = (await this.db.query<AlertRow>('SELECT * FROM alerts WHERE id = $1', [id])).rows[0];
     return r ? toAlert(r) : null;
