@@ -26,3 +26,16 @@
 .wall-pager .dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--line-3); background: transparent; padding: 0; cursor: pointer; transition: background var(--t-fast), transform var(--t-fast); }
 .wall-pager .dot.on { background: var(--accent); border-color: var(--accent); transform: scale(1.25); }
 .focus-panel { border-left: 1px solid var(--line); background: var(--bg-1); min-height: 0; }
+
+/* Stream this device */
+.devcam-body { flex: 1; min-height: 0; overflow: auto; padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-4); max-width: 880px; width: 100%; margin: 0 auto; }
+.devcam-view { position: relative; aspect-ratio: 16 / 9; border-radius: var(--radius-lg); overflow: hidden; background: var(--bg-0); border: 1px solid var(--line-2); }
+.devcam-view video { width: 100%; height: 100%; object-fit: contain; display: block; background: #000; }
+.devcam-view:not(.streaming) video { visibility: hidden; }
+.devcam-idle { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: var(--sp-2); color: var(--text-3); font-size: 13px; }
+.devcam-hud { position: absolute; left: 10px; top: 10px; right: 10px; display: flex; align-items: center; gap: var(--sp-3); font-size: 11.5px; color: var(--text-1); text-shadow: 0 1px 2px #000; }
+.devcam-actions { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+.devcam-count { font-size: 12px; }
+.devcam-note { margin: 0; font-size: 12px; }
+@media (max-width: 760px) { .devcam-body { padding: var(--sp-3); } .devcam-view { aspect-ratio: 3 / 4; } }
+.wall-empty { margin: auto; padding: 72px 24px; max-width: 520px; }

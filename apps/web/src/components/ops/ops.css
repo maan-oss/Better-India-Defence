@@ -41,3 +41,15 @@
 .gs-step:hover .gs-go { color: var(--text-0); }
 .gs-progress { width: 100%; }
 @media (max-width: 760px) { .get-started { width: calc(100% - 24px); top: auto; bottom: 12px; translate: -50% 0; } }
+
+/* Phones: map and timeline only; the inspector is a bottom sheet. */
+.ops.narrow { flex-direction: column; }
+.ops-col { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.ops.narrow .map-modes { right: 12px; max-width: none; }
+.ops.narrow .map-dock { top: 64px; }
+.ops.narrow .get-started { display: none; }
+.ops-sheet .ops-right { height: auto; background: transparent; }
+.ops-sheet .ops-right > .panel-h { display: none; }
+.ops.narrow .compass { top: 64px; }
+.ops.narrow .cursor-ref { display: none; }
+.ops.narrow .scalebar { left: 12px; bottom: 64px; }

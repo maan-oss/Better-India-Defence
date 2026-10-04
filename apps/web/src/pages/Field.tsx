@@ -10,6 +10,7 @@ import { symbolFor, symbolTexture } from '../engine/symbols';
 import { ErrorNote, Modal, useAsync } from '../components/common';
 import { Icon } from '../components/Icons';
 import type { Task, Team } from '../components/ops/OpsWidgets';
+import { Switch } from '../components/kit';
 import { alpha, P as C } from '../lib/palette';
 import '../styles/field.css';
 
@@ -93,6 +94,7 @@ export function Field() {
           <span className="dim">{team.positionAgeS !== null ? `fix ${Math.round(team.positionAgeS)} s ago` : ''}</span>
         </div>
       )}
+      {team && can('ops.log') && <ShareLocation teamId={team.id} onFix={() => teams.reload()} />}
       {!team && (
         <div className="empty-state">
           <Icon.Field />
@@ -369,6 +371,90 @@ function LocalPicture({ centre, target }: { centre: Vec3 | null; target: { x: nu
     <section className="fsec">
       <h4>Local picture · 600 m</h4>
       <canvas ref={ref} className="flocal" aria-label="Local picture around your team" />
+    </section>
+  );
+}
+
+/**
+ * Share this phone's GNSS position as the team's position. Fixes go to the server's field-device feed (as a
+ * gps.position observation), at most every 3 s, or sooner after moving 15 m. Works only while this page is open.
+ */
+function ShareLocation({ teamId, onFix }: { teamId: string; onFix: () => void }) {
+  const key = `strata.field.share.${teamId}`;
+  const [on, setOn] = useState(() => {
+    try {
+      return localStorage.getItem(key) === 'on';
+    } catch {
+      return false;
+    }
+  });
+  const [status, setStatus] = useState<string | null>(null);
+  const [bad, setBad] = useState(false);
+  const last = useRef<{ t: number; lat: number; lon: number } | null>(null);
+  const fixed = useRef(onFix);
+  fixed.current = onFix;
+  const toggle = (v: boolean) => {
+    setOn(v);
+    try {
+      localStorage.setItem(key, v ? 'on' : 'off');
+    } catch {
+      /* session only */
+    }
+  };
+  useEffect(() => {
+    if (!on) {
+      setStatus(null);
+      return;
+    }
+    if (!navigator.geolocation) {
+      setBad(true);
+      setStatus('This browser cannot report its location.');
+      return;
+    }
+    if (!window.isSecureContext) {
+      setBad(true);
+      setStatus('Location needs a secure connection (HTTPS).');
+      return;
+    }
+    setStatus('Waiting for a GNSS fix…');
+    const id = navigator.geolocation.watchPosition(
+      (p) => {
+        const { latitude: lat, longitude: lon, accuracy, altitude, speed, heading } = p.coords;
+        const prev = last.current;
+        const moved = prev ? Math.hypot((lat - prev.lat) * 111_320, (lon - prev.lon) * 111_320 * Math.cos((lat * Math.PI) / 180)) : Infinity;
+        if (prev && Date.now() - prev.t < 3000 && moved < 15) return;
+        last.current = { t: Date.now(), lat, lon };
+        void post(`/api/ops/teams/${teamId}/position`, {
+          lat,
+          lon,
+          accuracyM: Math.max(1, Math.min(1000, accuracy)),
+          ...(altitude != null ? { alt: altitude } : {}),
+          ...(speed != null && speed >= 0 ? { speedMps: Math.min(200, speed) } : {}),
+          ...(heading != null && !Number.isNaN(heading) ? { headingDeg: heading % 360 } : {}),
+          at: Math.round(p.timestamp),
+        })
+          .then(() => {
+            setBad(false);
+            setStatus(`Sharing · ±${Math.round(accuracy)} m · sent ${new Date().toISOString().slice(11, 19)}Z`);
+            fixed.current();
+          })
+          .catch((e: unknown) => {
+            setBad(true);
+            setStatus(e instanceof Error ? e.message : String(e));
+          });
+      },
+      (e) => {
+        setBad(true);
+        setStatus(e.code === e.PERMISSION_DENIED ? 'Location permission was refused. Allow it for this site in the browser settings.' : `No fix: ${e.message}`);
+      },
+      { enableHighAccuracy: true, maximumAge: 2000, timeout: 30_000 },
+    );
+    return () => navigator.geolocation.clearWatch(id);
+  }, [on, teamId]);
+  return (
+    <section className="fshare">
+      <Switch checked={on} onCheckedChange={toggle} label="Share my position" />
+      {status && <span className={`mono fshare-st ${bad ? 'bad' : ''}`}>{status}</span>}
     </section>
   );
 }

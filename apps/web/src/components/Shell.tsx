@@ -158,7 +158,7 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
   const crumbs = [
     { label: siteName, onClick: () => setSiteOpen((o) => !o) },
     rest.length && area ? { label: title, href: area.to } : { label: title },
-    ...(rest.length ? [{ label: decodeURIComponent(rest[rest.length - 1]!) }] : []),
+    ...(rest.length ? [{ label: rest.map((x) => decodeURIComponent(x)).join(' · ') }] : []),
   ];
   const role = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '';
 

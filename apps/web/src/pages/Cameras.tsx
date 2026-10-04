@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Cctv, Smartphone } from 'lucide-react';
+import { Button, EmptyState } from '../components/kit';
 import { FACILITY } from '@strata/domain';
 import { api, get, post } from '../api/client';
 import { useVisionLive, type FaceEvent } from '../api/vision';
@@ -70,7 +72,12 @@ export function Cameras() {
   const alerts = useData((s) => s.alerts);
   const [n, setN] = useState(0);
   const data = useAsync((s) => get<{ sources: Source[]; siteCameras: { id: string; name: string }[]; ffmpeg: boolean }>('/api/cameras', s), [n]);
-  const [edit, setEdit] = useState<Source | 'new' | null>(null);
+  const [params, setParams] = useSearchParams();
+  const [edit, setEdit] = useState<Source | 'new' | 'new-device' | null>(() => (params.get('add') && can('cameras.manage') ? (params.get('add') === 'device' ? 'new-device' : 'new') : null));
+  useEffect(() => {
+    if (params.get('add')) setParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [focus, setFocus] = useState<string | null>(null);
   const [layout, setLayout] = useState<Layout>(() => (Number(localStorage.getItem('strata.wall.layout')) as Layout) || 9);
   const [filter, setFilter] = useState<Filter>('all');
@@ -163,7 +170,27 @@ export function Cameras() {
         <div className="wall-wrap">
           {data.error && <ErrorNote error={data.error} />}
           {!data.data && <Loading />}
-          {data.data && !shown.length && <div className="empty">{filter === 'alerting' ? 'No camera has an active alert.' : 'No cameras match this filter.'}</div>}
+          {data.data && !cams.length && (
+            <EmptyState
+              className="wall-empty"
+              icon={<Cctv size={28} strokeWidth={1.5} />}
+              title="No cameras yet"
+              description="Add an IP camera by its RTSP or HTTP address, or turn a phone, tablet or laptop into a camera. Every frame is analysed on this server for people and vehicles."
+              action={
+                can('cameras.manage') ? (
+                  <div className="row" style={{ justifyContent: 'center' }}>
+                    <Button variant="primary" onClick={() => setEdit('new')}>
+                      <Cctv size={16} /> Add a network camera
+                    </Button>
+                    <Button variant="secondary" onClick={() => setEdit('new-device')}>
+                      <Smartphone size={16} /> Use this device
+                    </Button>
+                  </div>
+                ) : undefined
+              }
+            />
+          )}
+          {data.data && cams.length > 0 && !shown.length && <div className="empty">{filter === 'alerting' ? 'No camera has an active alert.' : 'No cameras match this filter.'}</div>}
           <div className="wall" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gridTemplateRows: `repeat(${cols}, 1fr)` }}>
             {tiles.map((c) => (
               <WallTile key={c.id} c={c} t={now} alert={alerting.get(c.id) ?? null} selected={focus === c.id} onSelect={() => setFocus(focus === c.id ? null : c.id)} />
@@ -187,7 +214,8 @@ export function Cameras() {
       </div>
       {edit && data.data && (
         <CameraForm
-          initial={edit === 'new' ? null : edit}
+          initial={edit === 'new' || edit === 'new-device' ? null : edit}
+          startAs={edit === 'new-device' ? 'device' : 'network'}
           siteCameras={data.data.siteCameras}
           onClose={() => setEdit(null)}
           onSaved={() => {
@@ -296,6 +324,11 @@ function FocusPanel({ c, alert, onClose, onEdit, onChanged }: { c: WallCam; aler
               </button>
             </>
           )}
+          {s && s.scheme === 'device' && can('ops.log') && (
+            <button className="btn small primary" onClick={() => nav(`/cameras/${encodeURIComponent(s.id)}/stream`)}>
+              Stream from this device
+            </button>
+          )}
         </div>
         {msg && <div className="err-inline">{msg}</div>}
       </div>
@@ -364,7 +397,7 @@ function CameraFaces({ id }: { id: string }) {
   );
 }
 
-function CameraForm({ initial, siteCameras, onClose, onSaved }: { initial: Source | null; siteCameras: { id: string; name: string }[]; onClose: () => void; onSaved: () => void }) {
+function CameraForm({ initial, startAs = 'network', siteCameras, onClose, onSaved }: { initial: Source | null; startAs?: 'network' | 'device'; siteCameras: { id: string; name: string }[]; onClose: () => void; onSaved: () => void }) {
   const files = useAsync((s) => get<{ dir: string; files: { name: string; bytes: number }[] }>('/api/cameras/import-files', s), []);
   const [f, setF] = useState({
     id: initial?.id ?? '',
@@ -387,7 +420,23 @@ function CameraForm({ initial, siteCameras, onClose, onSaved }: { initial: Sourc
   });
   const [test, setTest] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const isFile = f.url !== '' && !/^[a-z][a-z0-9+.-]*:\/\//i.test(f.url);
+  const [kind, setKind] = useState<'network' | 'device'>(initial ? (initial.scheme === 'device' ? 'device' : 'network') : startAs);
+  const [locating, setLocating] = useState<string | null>(null);
+  const nav = useNavigate();
+  const device = kind === 'device';
+  const isFile = !device && f.url !== '' && !/^[a-z][a-z0-9+.-]*:\/\//i.test(f.url);
+  const here = () => {
+    if (!navigator.geolocation) return setLocating('This browser cannot report its location.');
+    setLocating('Locating…');
+    navigator.geolocation.getCurrentPosition(
+      (p) => {
+        setF((cur) => ({ ...cur, lat: Number(p.coords.latitude.toFixed(6)), lon: Number(p.coords.longitude.toFixed(6)) }));
+        setLocating(`Located to ±${Math.round(p.coords.accuracy)} m`);
+      },
+      (e) => setLocating(e.code === e.PERMISSION_DENIED ? 'Location permission was refused.' : `Could not get a fix: ${e.message}`),
+      { enableHighAccuracy: true, timeout: 15_000 },
+    );
+  };
   const save = async () => {
     setErr(null);
     try {
@@ -395,7 +444,7 @@ function CameraForm({ initial, siteCameras, onClose, onSaved }: { initial: Sourc
         id: f.id,
         name: f.name,
         binding: f.binding,
-        ...(f.url ? { url: f.url } : {}),
+        ...(device && !initial ? { url: 'device:' } : f.url ? { url: f.url } : {}),
         enabled: f.enabled,
         pose: f.binding === 'new' ? { lat: f.lat, lon: f.lon, heightM: f.heightM, headingDeg: f.headingDeg, pitchDeg: f.pitchDeg, hfovDeg: f.hfovDeg } : null,
         zoneId: f.zoneId || null,
@@ -406,6 +455,7 @@ function CameraForm({ initial, siteCameras, onClose, onSaved }: { initial: Sourc
         loopFile: isFile ? f.loopFile : false,
       });
       onSaved();
+      if (device && !initial) nav(`/cameras/${encodeURIComponent(f.id)}/stream`);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     }
@@ -414,6 +464,16 @@ function CameraForm({ initial, siteCameras, onClose, onSaved }: { initial: Sourc
   return (
     <Modal title={initial ? `Camera ${initial.id}` : 'Add camera'} onClose={onClose} wide>
       <div className="formgrid">
+        <label>Source</label>
+        <Segmented
+          label="Camera source"
+          value={kind}
+          onChange={(k) => setKind(k)}
+          options={[
+            { value: 'network', label: 'Network stream (RTSP / HTTP / file)', disabled: Boolean(initial) },
+            { value: 'device', label: 'This device’s camera', disabled: Boolean(initial) },
+          ]}
+        />
         <label>Binding</label>
         <Segmented
           label="Camera binding"
@@ -439,6 +499,15 @@ function CameraForm({ initial, siteCameras, onClose, onSaved }: { initial: Sourc
         )}
         <label>Name</label>
         <input className="input" value={f.name} placeholder="e.g. Gate 2 vehicle lane" onChange={(e) => setF({ ...f, name: e.target.value })} />
+        {device ? (
+          <>
+            <label>Stream</label>
+            <span className="muted" style={{ fontSize: 12.5 }}>
+              After saving, this browser opens the camera and sends frames to the server for analysis. Any signed-in phone, tablet or laptop can stream to this camera from <span className="mono">/cameras/{f.id || 'ID'}/stream</span>. Needs HTTPS or localhost.
+            </span>
+          </>
+        ) : (
+          <>
         <label>Stream</label>
         <div className="col">
           <div className="row">
@@ -471,6 +540,8 @@ function CameraForm({ initial, siteCameras, onClose, onSaved }: { initial: Sourc
             Credentials in the URL are stored encrypted when a storage key is configured and are never shown again. Files must be in the import folder.
           </span>
         </div>
+          </>
+        )}
         {f.binding === 'new' && (
           <>
             <label>Position (WGS84)</label>
@@ -480,6 +551,10 @@ function CameraForm({ initial, siteCameras, onClose, onSaved }: { initial: Sourc
               <span className="muted">height above ground</span>
               <input className="input" type="number" step={0.1} value={f.heightM} onChange={num('heightM')} style={{ width: 70 }} />
               <span className="muted">m</span>
+              <button className="btn small" type="button" onClick={here}>
+                Use this device’s location
+              </button>
+              {locating && <span className="muted" style={{ fontSize: 12 }}>{locating}</span>}
             </div>
             <label>Orientation</label>
             <div className="row">
@@ -546,8 +621,8 @@ function CameraForm({ initial, siteCameras, onClose, onSaved }: { initial: Sourc
         <button className="btn" onClick={onClose}>
           Cancel
         </button>
-        <button className="btn primary" disabled={!f.id || !f.name || (!f.url && !initial)} onClick={() => void save()}>
-          Save (audited)
+        <button className="btn primary" disabled={!f.id || !f.name || (!device && !f.url && !initial)} onClick={() => void save()}>
+          {device && !initial ? 'Save and start streaming' : 'Save (audited)'}
         </button>
       </div>
     </Modal>

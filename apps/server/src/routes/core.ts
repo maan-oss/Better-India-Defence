@@ -197,6 +197,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     return u;
   });
   app.get('/api/admin/config', { preHandler: requirePerm('admin.config') }, async () => ({
+    mode: p.cfg.STRATA_MODE,
     stored: (await p.db.query('SELECT key, value, updated_by, updated_at FROM config ORDER BY key')).rows,
     effective: {
       database: p.db.engine,
@@ -209,13 +210,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
       demoUsers: cfg.STRATA_DEMO_USERS === 'true',
       facilityOrigin: FACILITY.origin,
     },
-    integrations: [
-      { name: 'Video management system', adapter: 'vms.onvif-analytics-bridge.v1 (synthetic VMS)', status: 'connected (simulated)' },
-      { name: 'Surveillance radar', adapter: 'radar.generic-asterix-bridge.v1', status: 'simulated source — real ASTERIX CAT-048/062 decoder not included' },
-      { name: 'Passive RF', adapter: 'rf.passive-df.v1', status: 'simulated source' },
-      { name: 'Satellite imagery provider', adapter: 'eo.provider-delivery.v1', status: 'simulated deliveries — no commercial provider contract' },
-      { name: 'LLM provider', adapter: 'anthropic', status: p.copilot.providerStatus.configured ? `configured (${p.copilot.providerStatus.model})` : 'not configured — deterministic copilot only' },
-    ],
+    integrations: await integrations(p),
   }));
   app.put('/api/admin/config/:key', { preHandler: requirePerm('admin.config') }, async (req, reply) => {
     const { key } = req.params as { key: string };
@@ -226,4 +221,42 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     await audit(p, req, 'config_changed', key, { value: body.value });
     return { ok: true };
   });
+}
+
+/**
+ * What is actually connected. The simulated demo reports its simulated sources as such; an operational site reports
+ * its configured cameras and feeds with their live state, and the optional language-model provider.
+ */
+async function integrations(p: Platform): Promise<{ name: string; adapter: string; status: string }[]> {
+  const llm = { name: 'Language model provider', adapter: 'anthropic', status: p.copilot.providerStatus.configured ? `configured (${p.copilot.providerStatus.model})` : 'not configured — deterministic copilot only' };
+  if (p.simulated)
+    return [
+      { name: 'Video management system', adapter: 'vms.onvif-analytics-bridge.v1 (synthetic VMS)', status: 'connected (simulated)' },
+      { name: 'Surveillance radar', adapter: 'radar.generic-asterix-bridge.v1', status: 'simulated source — real ASTERIX CAT-048/062 decoder not included' },
+      { name: 'Passive RF', adapter: 'rf.passive-df.v1', status: 'simulated source' },
+      { name: 'Satellite imagery provider', adapter: 'eo.provider-delivery.v1', status: 'simulated deliveries — no commercial provider contract' },
+      llm,
+    ];
+  const now = Date.now();
+  const status = await p.replay.sensorStatusAt(now).catch(() => ({}) as Record<string, { status: string; lastSeen: number | null }>);
+  const seen = (id: string) => {
+    const s = status[id];
+    if (!s?.lastSeen) return 'configured — no data received yet';
+    const age = Math.round((now - s.lastSeen) / 1000);
+    return `${s.status} — last data ${age < 120 ? `${age} s` : `${Math.round(age / 60)} min`} ago`;
+  };
+  const cams = await p.cameras.list();
+  const out = cams.map((c) => ({
+    name: `Camera ${c.id} · ${c.name}`,
+    adapter: c.scheme === 'device' ? 'browser device camera' : `${c.scheme} stream${p.vision.ffmpeg ? '' : ' (ffmpeg not installed)'}`,
+    status: c.enabled ? `${c.status.state}${c.status.lastError ? ` — ${c.status.lastError}` : ''}` : 'disabled',
+  }));
+  for (const s of FACILITY.sensors) {
+    if (s.kind === 'gps') out.push({ name: s.name, adapter: 'gps.position (NMEA / AVL / field devices)', status: seen(s.id) });
+    else if (s.kind === 'external') out.push({ name: s.name, adapter: `track feed (${s.system})`, status: seen(s.id) });
+    else if (s.kind === 'drone') out.push({ name: s.name, adapter: 'MAVLink telemetry', status: seen(s.id) });
+  }
+  if (!out.length) out.push({ name: 'Sensors', adapter: '—', status: 'none connected — add cameras on the camera wall and feeds in Site setup' });
+  out.push(llm);
+  return out;
 }

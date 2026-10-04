@@ -448,3 +448,4 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 @media (min-width: 1100px) { .cards.cards-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 1280px) { .page-h .sub { display: none; } }
 .tab-count { margin-left: 6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--bg-4); color: var(--text-1); font-size: 11px; font-weight: 600; display: inline-grid; place-items: center; font-variant-numeric: tabular-nums; }
+@media (max-width: 760px) { .tb-crumbs li:last-child > svg { display: none; } }

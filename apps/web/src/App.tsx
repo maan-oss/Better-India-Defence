@@ -25,6 +25,7 @@ const Evidence = lazy(() => import('./pages/Evidence').then((m) => ({ default: m
 const SimulationLab = lazy(() => import('./pages/SimulationLab').then((m) => ({ default: m.SimulationLab })));
 const SystemHealth = lazy(() => import('./pages/SystemHealth').then((m) => ({ default: m.SystemHealth })));
 const Audit = lazy(() => import('./pages/Audit').then((m) => ({ default: m.Audit })));
+const DeviceCamera = lazy(() => import('./pages/DeviceCamera').then((m) => ({ default: m.DeviceCamera })));
 const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
 const Forensics = lazy(() => import('./pages/Forensics').then((m) => ({ default: m.Forensics })));
 const Command = lazy(() => import('./pages/Command').then((m) => ({ default: m.Command })));
@@ -117,6 +118,7 @@ function Authenticated() {
             <Route path="/forensics/:id" element={<Forensics />} />
             <Route path="/identity" element={<Identity />} />
             <Route path="/cameras" element={<Cameras />} />
+            <Route path="/cameras/:id/stream" element={<DeviceCamera />} />
             <Route path="/command" element={<Command />} />
             <Route path="/field" element={<Field />} />
             <Route path="/site" element={<SiteSetup />} />
