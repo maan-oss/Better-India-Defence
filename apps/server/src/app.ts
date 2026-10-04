@@ -10,6 +10,7 @@ import { registerOperations } from './routes/operations.ts';
 import { registerVision } from './routes/vision.ts';
 import { registerCameras } from './routes/cameras.ts';
 import { registerOps } from './routes/ops.ts';
+import { registerSite } from './routes/site.ts';
 
 export async function buildApp(p: Platform): Promise<FastifyInstance> {
   const cfg = p.cfg;
@@ -50,6 +51,7 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
   registerVision(app, p);
   registerCameras(app, p);
   registerOps(app, p);
+  registerSite(app, p);
 
   app.get('/ws', { websocket: true }, (socket, req) => {
     if (!req.user) {

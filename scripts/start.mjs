@@ -69,7 +69,7 @@ api.on('exit', (c) => {
 if (!(await waitFor(`${API}/api/health`))) {
   console.error('API failed to become healthy');
   shutdown(1);
-} else if (env.STRATA_SIMULATOR !== 'false') {
+} else if (env.STRATA_SIMULATOR !== 'false' && (await fetch(`${API}/api/health`).then((r) => r.json()).catch(() => ({ simulated: true }))).simulated !== false) {
   const stateFile = resolve(root, env.SIM_STATE_FILE ?? 'data/sim-state.json');
   if (!existsSync(stateFile)) {
     console.log('First run: recording synthetic scenario history…');

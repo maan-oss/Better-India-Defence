@@ -1,0 +1,18 @@
+.site-body { grid-template-columns: 360px 1fr; }
+.site-panel { border-right: 1px solid var(--line); min-height: 0; }
+.plan { display: flex; flex-direction: column; min-height: 0; }
+.plan-tools { padding: 8px 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.plan-svg { flex: 1; min-height: 0; width: 100%; background: #0d0e10; touch-action: none; user-select: none; }
+.plan-svg.tool-zone, .plan-svg.tool-perimeter, .plan-svg.tool-building, .plan-svg.tool-gate { cursor: crosshair; }
+.plan-grid line { stroke: rgba(236, 230, 220, 0.07); }
+.plan-extent { fill: none; stroke: rgba(236, 230, 220, 0.25); stroke-dasharray: 8 6; }
+.plan-zone { fill: rgba(143, 163, 173, 0.08); stroke: #8fa3ad; cursor: pointer; }
+.plan-zone.r { fill: rgba(217, 164, 65, 0.1); stroke: #d9a441; }
+.plan-zone.sel, .plan-bld.sel, .plan-perim.sel, .plan-gate.sel { stroke: #ece6dc; }
+.plan-perim { fill: none; stroke: #b9b3a8; stroke-dasharray: 10 5; cursor: pointer; }
+.plan-bld { fill: rgba(236, 230, 220, 0.12); stroke: #b9b3a8; cursor: pointer; }
+.plan-gate { fill: #ece6dc; stroke: #0a0b0c; cursor: pointer; }
+.plan-cam circle { fill: #7fb3aa; }
+.plan-cam line { stroke: #7fb3aa; }
+.plan-label { fill: #ece6dc; font-family: var(--font-mono); pointer-events: none; }
+.plan-draft { fill: rgba(236, 230, 220, 0.06); stroke: #ece6dc; stroke-dasharray: 4 3; }

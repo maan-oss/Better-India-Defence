@@ -65,8 +65,19 @@ function flatMask(x: number, y: number): number {
   return best;
 }
 
+/**
+ * Terrain model: the synthetic DEM of the demo site, or flat ground (z = 0) for a configured real site.
+ * (Importing a surveyed DTM for a real site is not implemented — see docs/REALITY_LIMITS.md.)
+ */
+let terrainMode: 'synthetic' | 'flat' = 'synthetic';
+export const setTerrainMode = (m: 'synthetic' | 'flat'): void => {
+  terrainMode = m;
+};
+export const getTerrainMode = (): 'synthetic' | 'flat' => terrainMode;
+
 /** Terrain elevation (m) at local ENU (x, y). Pure and deterministic. */
 export function terrainHeight(x: number, y: number): number {
+  if (terrainMode === 'flat') return 0;
   const mask = flatMask(x, y);
   if (mask <= 0) return 0;
   const ridgeD = Math.hypot(x + 1900, y - 400) / 700;

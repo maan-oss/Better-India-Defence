@@ -168,6 +168,12 @@ export class OpsService {
   async load(): Promise<void> {
     const r = (await this.db.query<{ t: number; level: ReadinessLevel; reason: string; set_by: string }>('SELECT * FROM readiness_log ORDER BY id DESC LIMIT 1')).rows[0];
     if (r) this.readiness = { level: r.level, reason: r.reason, t: r.t, by: r.set_by };
+    if (!this.demoSite) {
+      // Assets derived from zones that no longer exist (e.g. the demo site) and demo teams do not belong to a real site.
+      const zoneIds = FACILITY.zones.map((z) => z.id);
+      await this.db.query(`DELETE FROM vital_assets WHERE zone_id IS NOT NULL AND NOT (zone_id = ANY($1::text[]))`, [zoneIds]);
+      await this.db.query(`DELETE FROM teams WHERE leader LIKE '%(demo)%' AND id NOT IN (SELECT team_id FROM tasks)`);
+    }
     const n = (await this.db.query<{ n: number }>('SELECT count(*)::int AS n FROM vital_assets')).rows[0]!.n;
     if (n === 0) for (const va of defaultVitalAssets(FACILITY)) await this.saveVa({ ...va, x: va.centre.x, y: va.centre.y, notes: 'derived from restricted zone — survey and confirm' });
     await this.loadVas();

@@ -28,6 +28,9 @@ const frag = /* glsl */ `
   uniform float uFeedOn;
   uniform vec3 uFeedPos;
   uniform float uFeedRange;
+  uniform sampler2D uOrtho;
+  uniform float uOrthoOn;
+  uniform vec4 uOrthoRect;
   varying vec3 vWorld;
   varying vec3 vNormal;
 
@@ -47,6 +50,16 @@ const frag = /* glsl */ `
     float c1 = contour(vWorld.z, 2.0, 1.0) * 0.07;
     float c2 = contour(vWorld.z, 10.0, 1.2) * 0.12;
     col = mix(col, vec3(0.93, 0.9, 0.86), c1 + c2);
+
+    if (uOrthoOn > 0.5) {
+      vec2 ouv = (vWorld.xy - uOrthoRect.xy) / (uOrthoRect.zw - uOrthoRect.xy);
+      if (ouv.x >= 0.0 && ouv.x <= 1.0 && ouv.y >= 0.0 && ouv.y <= 1.0) {
+        vec3 ortho = texture2D(uOrtho, ouv).rgb;
+        // Muted so operational overlays stay legible on top of imagery.
+        float l = dot(ortho, vec3(0.299, 0.587, 0.114));
+        col = mix(vec3(l), ortho, 0.65) * 0.62 * shade + col * 0.15;
+      }
+    }
 
     if (uCoverageOn > 0.5) {
       vec2 uv = (vWorld.xy + uHalf) / (2.0 * uHalf);
@@ -109,6 +122,9 @@ export function createTerrain(halfExtent: number, segments = 256): { mesh: THREE
       uFeedOn: { value: 0 },
       uFeedPos: { value: new THREE.Vector3() },
       uFeedRange: { value: 500 },
+      uOrtho: { value: null },
+      uOrthoOn: { value: 0 },
+      uOrthoRect: { value: new THREE.Vector4(0, 0, 1, 1) },
     },
   });
   const mesh = new THREE.Mesh(geom, material);

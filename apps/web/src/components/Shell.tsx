@@ -25,6 +25,7 @@ const NAV: { to: string; label: string; icon: keyof typeof Icon; perm?: string }
   { to: '/system', label: 'System Health', icon: 'Health', perm: 'system.view' },
   { to: '/audit', label: 'Audit', icon: 'Audit', perm: 'audit.view' },
   { to: '/admin', label: 'Administration', icon: 'Admin', perm: 'admin.users' },
+  { to: '/site', label: 'Site setup', icon: 'Recon', perm: 'admin.config' },
 ];
 
 export function Shell({ children }: { children: ReactNode }) {

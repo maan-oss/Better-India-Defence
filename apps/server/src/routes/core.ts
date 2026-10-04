@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { FACILITY, permissionsFor, ROLE_DESCRIPTIONS, type Role } from '@strata/domain';
+import { getTerrainMode, FACILITY, permissionsFor, ROLE_DESCRIPTIONS, type Role } from '@strata/domain';
 import type { Platform } from '../platform.ts';
 import { SESSION_COOKIE, audit, isService, parse, requirePerm } from '../http/guards.ts';
 
@@ -8,7 +8,7 @@ import { SESSION_COOKIE, audit, isService, parse, requirePerm } from '../http/gu
 export function registerCore(app: FastifyInstance, p: Platform): void {
   const cfg = p.cfg;
 
-  app.get('/api/health', async () => ({ ok: true, service: 'strata', time: Date.now() }));
+  app.get('/api/health', async () => ({ ok: true, service: 'strata', time: Date.now(), site: FACILITY.id, simulated: p.site === null }));
 
   // ------------------------------------------------------------------ auth
   app.post('/api/auth/login', { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } }, async (req, reply) => {
@@ -79,7 +79,14 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
   app.get('/api/ingest/dead-letters', { preHandler: requirePerm('system.view') }, async () => (await p.db.query('SELECT id, received_at, reason, sensor_id, message_id, left(raw, 400) AS raw FROM dead_letters ORDER BY id DESC LIMIT 200')).rows);
 
   // ------------------------------------------------------------------ facility
-  app.get('/api/facility', { preHandler: requirePerm('world.view') }, async () => ({ facility: FACILITY, liveEdge: p.liveEdge(), range: await p.replay.range() }));
+  app.get('/api/facility', { preHandler: requirePerm('world.view') }, async () => ({
+    facility: FACILITY,
+    liveEdge: p.liveEdge(),
+    range: await p.replay.range(),
+    terrain: getTerrainMode(),
+    simulated: p.site === null,
+    orthophoto: p.site?.orthophoto ? { bounds: p.site.orthophoto.bounds, url: '/api/site/orthophoto' } : null,
+  }));
   app.get('/api/world/patches', { preHandler: requirePerm('world.view') }, async () => ({ patches: p.coverage.patchList }));
 
   // ------------------------------------------------------------------ system

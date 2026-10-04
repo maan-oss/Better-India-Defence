@@ -20,6 +20,9 @@ export class Overlays {
   readonly alerts = new THREE.Group();
   readonly incidents = new THREE.Group();
   readonly rf = new THREE.Group();
+  readonly threat = new THREE.Group();
+  private lastVa: unknown = null;
+  private lastThreats: unknown = null;
   private alertRings: { mesh: THREE.LineLoop; priority: string }[] = [];
 
   setChanges(rows: WorldChangeRow[], emphasise: Set<string> | null): void {
@@ -38,6 +41,33 @@ export class Overlays {
       extent.position.set(c.x, c.y, ground + 0.7);
       extent.computeLineDistances();
       this.changes.add(line, head, extent);
+    }
+  }
+
+  /** Vital-asset protection rings and lines from HIGH/CRITICAL threats to the asset they threaten. */
+  setThreat(vas: { id: string; name: string; priority: number; centre: { x: number; y: number }; radiusM: number }[], threats: { trackId: string; level: string; assetId: string; position: { x: number; y: number; z: number } }[]): void {
+    if (vas === this.lastVa && threats === this.lastThreats) return;
+    this.lastVa = vas;
+    this.lastThreats = threats;
+    clear(this.threat);
+    for (const v of vas) {
+      const g = terrainHeight(v.centre.x, v.centre.y);
+      const ring = new THREE.LineLoop(circle(v.radiusM), new THREE.LineDashedMaterial({ color: v.priority === 1 ? '#d9a441' : '#8fa3ad', dashSize: 8, gapSize: 6, transparent: true, opacity: v.priority === 1 ? 0.7 : 0.45 }));
+      ring.position.set(v.centre.x, v.centre.y, g + 1.2);
+      ring.computeLineDistances();
+      this.threat.add(ring);
+    }
+    for (const t of threats) {
+      if (t.level !== 'CRITICAL' && t.level !== 'HIGH') continue;
+      const v = vas.find((x) => x.id === t.assetId);
+      if (!v) continue;
+      const g = terrainHeight(v.centre.x, v.centre.y);
+      const line = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(t.position.x, t.position.y, Math.max(t.position.z, terrainHeight(t.position.x, t.position.y) + 1)), new THREE.Vector3(v.centre.x, v.centre.y, g + 1.2)]),
+        new THREE.LineDashedMaterial({ color: t.level === 'CRITICAL' ? '#d4553f' : '#d9a441', dashSize: 6, gapSize: 4, transparent: true, opacity: 0.85 }),
+      );
+      line.computeLineDistances();
+      this.threat.add(line);
     }
   }
 

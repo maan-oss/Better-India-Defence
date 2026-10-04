@@ -5,6 +5,8 @@ import { WorldEngine } from '../engine/WorldEngine';
 import { useWorld } from '../state/world';
 import { useTime } from '../state/time';
 import { useData } from '../state/data';
+import { useOps } from '../state/ops';
+import { EnuFrame } from '@strata/domain';
 import { tracks } from '../state/tracks';
 import { live } from '../api/live';
 import { get, qs } from '../api/client';
@@ -53,6 +55,13 @@ export function Operations() {
       return;
     }
     engineRef.current = engine;
+    const ortho = useWorld.getState().orthophoto;
+    if (ortho) {
+      const fr = new EnuFrame(facility.origin);
+      const sw = fr.toEnu({ lat: ortho.bounds.south, lon: ortho.bounds.west, alt: 0 });
+      const ne = fr.toEnu({ lat: ortho.bounds.north, lon: ortho.bounds.east, alt: 0 });
+      engine.setOrthophoto(ortho.url, { x0: sw.x, y0: sw.y, x1: ne.x, y1: ne.y });
+    }
     const host = hostRef.current;
     const afterIntro = () => {
       try {
@@ -186,6 +195,8 @@ export function Operations() {
       const changes = w.mode === 'DIFF' && w.diff ? d.changes.filter((c) => c.t > Math.min(w.diff!.a, w.diff!.b) && c.t <= Math.max(w.diff!.a, w.diff!.b)) : d.changes.filter((c) => c.t <= t && c.t > t - 3 * 3600_000);
       engine.setChanges(changes, w.selection?.kind === 'change' ? new Set([w.selection.id]) : null);
       engine.setIncidents(d.incidents, w.incidentId, null);
+      const ops = useOps.getState();
+      engine.setThreat(w.layers.zones ? ops.vitalAssets : [], isLive && w.layers.zones ? ops.threats : []);
       // RF evidence regions.
       if (w.layers.rf) {
         if (isLive) engine.setRf(rfLive.map((g) => ({ x: g.x, y: g.y, r: g.r, age: t - g.at })));

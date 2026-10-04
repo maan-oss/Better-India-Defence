@@ -1,6 +1,6 @@
 import { join, resolve } from 'node:path';
 import { mkdir } from 'node:fs/promises';
-import { FACILITY } from '@strata/domain';
+import { FACILITY, SiteConfigSchema, applySite, type SiteConfig } from '@strata/domain';
 import { SCENARIO_INFO } from '@strata/simulator';
 import type { Config } from './config.ts';
 import type { Logger } from './logger.ts';
@@ -56,6 +56,8 @@ export class Platform {
   evidence!: EvidenceService;
   cameras!: CameraService;
   ops!: OpsService;
+  /** Configured real site (null = demo facility with simulator). */
+  site: SiteConfig | null = null;
   /** Classification banner shown on every console and printed product. */
   classification: { level: string; caveat: string } = { level: 'RESTRICTED', caveat: '' };
   private timers: NodeJS.Timeout[] = [];
@@ -70,6 +72,16 @@ export class Platform {
     this.db = await openDb(cfg.DATABASE_URL, cfg.dataDir);
     this.log.info({ engine: this.db.engine }, 'database connected');
     await migrate(this.db, this.log);
+    // A configured real site replaces the demo facility before any service reads the model.
+    const site = (await this.db.query<{ value: unknown }>(`SELECT value FROM config WHERE key = 'site.definition'`)).rows[0];
+    if (site) {
+      const parsed = SiteConfigSchema.safeParse(site.value);
+      if (parsed.success) {
+        this.site = parsed.data;
+        applySite(parsed.data);
+        this.log.info({ site: parsed.data.id, origin: parsed.data.origin }, 'configured site applied');
+      } else this.log.error({ issues: parsed.error.issues.slice(0, 3) }, 'stored site definition is invalid — running the demo site');
+    }
     await this.seedRegistry();
     this.store = new LocalObjectStore(join(cfg.dataDir, 'objects'), cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null);
     this.audit = new AuditLog(this.db);
@@ -85,6 +97,7 @@ export class Platform {
     await this.alerts.load();
     this.incidents = new IncidentService(this.db, this.hub, this.alerts);
     this.pool = new WorkerPool(2);
+    if (this.site) await this.pool.broadcast('apply_site', this.site);
     this.media = new MediaService(this.db, this.store, cfg.SIM_URL, cfg.STRATA_SERVICE_TOKEN);
     this.recon = new ReconstructionService(this.db, this.pool, this.world, this.media, this.fusion, this.hub, this.log);
     this.coverage = new CoverageService(this.db, this.pool, this.world, join(cfg.dataDir, 'cache'));
@@ -104,7 +117,7 @@ export class Platform {
     this.cameras = new CameraService(this.db, this.log, this.ingest, this.vision, this.identity, this.evidence, this.store, cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null, importDir);
     this.ingest.supersede = (sid, adapter) => this.cameras.superseded(sid, adapter);
     await this.cameras.load();
-    this.ops = new OpsService(this.db, this.hub, this.alerts, this.fusion, this.incidents, this.sensors, this.identity, () => this.liveEdge(), FACILITY.id === 'site-kestrel');
+    this.ops = new OpsService(this.db, this.hub, this.alerts, this.fusion, this.incidents, this.sensors, this.identity, () => this.liveEdge(), this.site === null);
     await this.ops.load();
     this.ops.start();
     const cls = (await this.db.query<{ value: { level: string; caveat: string } }>(`SELECT value FROM config WHERE key = 'ui.classification'`)).rows[0];

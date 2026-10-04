@@ -8,7 +8,7 @@
 .clock-mode.live { background: var(--ok); }
 .clock-mode.replay { background: var(--amber); }
 .clock-t { font-size: 12.5px; }
-.search { position: relative; display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--bg-0); flex: 1 1 260px; max-width: 360px; min-width: 150px; color: var(--text-2); }
+.search { position: relative; display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--bg-0); flex: 1 1 200px; max-width: 320px; min-width: 120px; color: var(--text-2); }
 .search-input { border: 0; outline: 0; background: transparent; flex: 1; min-width: 0; color: var(--text-0); font-size: 12.5px; }
 .search-results { position: absolute; top: 32px; left: 0; right: 0; background: var(--bg-2); border: 1px solid var(--line-2); max-height: 380px; overflow: auto; z-index: 60; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
 .status-sum .btn { gap: 5px; }
@@ -134,4 +134,9 @@
   .ops { grid-template-columns: 0 1fr 320px; }
   .ops-left { display: none; }
   .status-sum .dim { display: none; }
+}
+
+@media (max-width: 1700px) {
+  .topbar .site span { display: none; }
+  .topbar .modes button { padding: 0 7px; }
 }

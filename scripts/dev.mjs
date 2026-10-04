@@ -65,6 +65,13 @@ if (!(await waitFor(`${API}/api/health`))) {
   console.error('API failed to start');
   shutdown();
 }
+// The simulator drives only the demo site; a configured real site gets its data from real sensors.
+const health = await fetch(`${API}/api/health`).then((r) => r.json()).catch(() => ({ simulated: true }));
+if (health.simulated === false) {
+  console.log(`Configured site "${health.site}": simulator not started (real sensors only).`);
+  run('web', [resolve(root, 'node_modules/vite/bin/vite.js')], resolve(root, 'apps/web'));
+  console.log('\n  Strata is starting — open \x1b[1mhttp://127.0.0.1:5173\x1b[0m\n');
+} else {
 // Seed on first run: the simulator fast-forwards recorded history through the live API.
 const stateFile = resolve(root, env.SIM_STATE_FILE ?? 'data/sim-state.json');
 if (!existsSync(stateFile)) {
@@ -76,3 +83,4 @@ if (!existsSync(stateFile)) {
 run('sim', [...tsx, 'packages/simulator/src/cli.ts', 'live']);
 run('web', [resolve(root, 'node_modules/vite/bin/vite.js')], resolve(root, 'apps/web'));
 console.log('\n  Strata is starting — open \x1b[1mhttp://127.0.0.1:5173\x1b[0m\n');
+}

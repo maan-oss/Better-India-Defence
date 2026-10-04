@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
+import type { SiteConfig } from '@strata/domain';
 import type { computeVisibility, dsmReconstruct, imageryDiff, lidarCompare, multiFrame } from './analysis.ts';
 
 export type AnalysisKinds = {
@@ -11,6 +12,7 @@ export type AnalysisKinds = {
   dsm: { input: Parameters<typeof dsmReconstruct>[0]; output: ReturnType<typeof dsmReconstruct> };
   imagery_diff: { input: Parameters<typeof imageryDiff>[0]; output: ReturnType<typeof imageryDiff> };
   multi_frame: { input: Parameters<typeof multiFrame>[0]; output: ReturnType<typeof multiFrame> };
+  apply_site: { input: SiteConfig; output: boolean };
 };
 
 type KindMap = Record<string, { input: unknown; output: unknown }>;
@@ -81,6 +83,21 @@ export class WorkerPool<K extends KindMap = AnalysisKinds> {
       this.queue.push({ kind, input, transfer, resolve: resolve as (v: unknown) => void, reject });
       this.pump();
     });
+  }
+
+  /** Run the same job on every worker (e.g. configuration that each worker's module state must see). */
+  broadcast<N extends keyof K & string>(kind: N, input: K[N]['input']): Promise<K[N]['output'][]> {
+    return Promise.all(
+      this.workers.map(
+        (slot) =>
+          new Promise<K[N]['output']>((resolve, reject) => {
+            const id = ++this.seq;
+            slot.w.ref();
+            this.pending.set(id, { resolve: resolve as (v: unknown) => void, reject, slot });
+            slot.w.postMessage({ id, kind, input });
+          }),
+      ),
+    );
   }
 
   private pump(): void {

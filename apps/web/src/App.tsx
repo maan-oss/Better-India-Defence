@@ -10,7 +10,7 @@ import { useVisionLive } from './api/vision';
 import { useOps } from './state/ops';
 import { get, setUnauthorizedHandler } from './api/client';
 import type { FacilityResponse } from './api/types';
-import type { SurfacePatch } from '@strata/domain';
+import { FACILITY, setTerrainMode, type SurfacePatch } from '@strata/domain';
 import { Login } from './pages/Login';
 import { Shell } from './components/Shell';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -26,6 +26,7 @@ const Audit = lazy(() => import('./pages/Audit').then((m) => ({ default: m.Audit
 const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
 const Forensics = lazy(() => import('./pages/Forensics').then((m) => ({ default: m.Forensics })));
 const Command = lazy(() => import('./pages/Command').then((m) => ({ default: m.Command })));
+const SiteSetup = lazy(() => import('./pages/SiteSetup').then((m) => ({ default: m.SiteSetup })));
 const Cameras = lazy(() => import('./pages/Cameras').then((m) => ({ default: m.Cameras })));
 const Identity = lazy(() => import('./pages/Identity').then((m) => ({ default: m.Identity })));
 
@@ -40,6 +41,10 @@ function useBootstrap(enabled: boolean): { ready: boolean; error: string | null 
       try {
         const [f, p] = await Promise.all([get<FacilityResponse>('/api/facility'), get<{ patches: SurfacePatch[] }>('/api/world/patches')]);
         if (cancelled) return;
+        // The server's site model replaces the bundled demo model everywhere in the client.
+        Object.assign(FACILITY, f.facility);
+        setTerrainMode(f.terrain);
+        useWorld.setState({ orthophoto: f.orthophoto, simulated: f.simulated });
         useWorld.getState().setFacility(f.facility, p.patches);
         useTime.getState().setLiveEdge(f.liveEdge || Date.now());
         if (f.range.from) useTime.getState().setRange(f.range.from);
@@ -97,6 +102,7 @@ function Authenticated() {
             <Route path="/identity" element={<Identity />} />
             <Route path="/cameras" element={<Cameras />} />
             <Route path="/command" element={<Command />} />
+            <Route path="/site" element={<SiteSetup />} />
             <Route path="/simulation" element={<SimulationLab />} />
             <Route path="/system" element={<SystemHealth />} />
             <Route path="/audit" element={<Audit />} />

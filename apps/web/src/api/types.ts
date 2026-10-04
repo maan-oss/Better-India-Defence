@@ -25,6 +25,9 @@ export interface FacilityResponse {
   facility: FacilityDef;
   liveEdge: number;
   range: { from: number | null; to: number | null };
+  terrain: 'synthetic' | 'flat';
+  simulated: boolean;
+  orthophoto: { url: string; bounds: { west: number; south: number; east: number; north: number } } | null;
 }
 
 export interface TrackWindow {

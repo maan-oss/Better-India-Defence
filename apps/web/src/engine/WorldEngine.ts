@@ -88,7 +88,7 @@ export class WorldEngine {
     this.buildings = buildBuildings(facility, null);
     this.sensors = new SensorsLayer(facility);
     this.patches = new PatchesLayer(patchList);
-    this.scene.add(this.terrain.mesh, this.roads, this.zones, this.fence.group, this.buildings, this.objects, this.sensors.group, this.sensors.frustumGroup, this.sensors.coverageGroup, this.tracksLayer.group, this.overlays.changes, this.overlays.alerts, this.overlays.incidents, this.overlays.rf, this.patches.mesh);
+    this.scene.add(this.terrain.mesh, this.roads, this.zones, this.fence.group, this.buildings, this.objects, this.sensors.group, this.sensors.frustumGroup, this.sensors.coverageGroup, this.tracksLayer.group, this.overlays.changes, this.overlays.alerts, this.overlays.incidents, this.overlays.rf, this.overlays.threat, this.patches.mesh);
     this.labels = new LabelLayer(labelRoot);
     this.controls = new CameraController(this.camera, this.renderer.domElement);
     this.controls.onUserInput = () => this.onUserMove?.();
@@ -185,6 +185,26 @@ export class WorldEngine {
   setIncidents(list: IncidentRecord[], focus: string | null, involvedSensors: string[] | null): void {
     this.overlays.setIncidents(list, focus);
     this.involvedSensors = involvedSensors ? new Set(involvedSensors) : null;
+  }
+
+  /** Georeferenced orthophoto as the ground texture; rect in site ENU metres (west, south, east, north). */
+  setOrthophoto(url: string | null, rect: { x0: number; y0: number; x1: number; y1: number } | null): void {
+    const u = this.terrain.material.uniforms;
+    if (!url || !rect) {
+      u.uOrthoOn!.value = 0;
+      return;
+    }
+    new THREE.TextureLoader().load(url, (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = 8;
+      u.uOrtho!.value = tex;
+      u.uOrthoRect!.value = new THREE.Vector4(rect.x0, rect.y0, rect.x1, rect.y1);
+      u.uOrthoOn!.value = 1;
+    });
+  }
+
+  setThreat(...a: Parameters<Overlays['setThreat']>): void {
+    this.overlays.setThreat(...a);
   }
 
   setRf(regions: { x: number; y: number; r: number; age: number }[]): void {
