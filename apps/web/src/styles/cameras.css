@@ -58,3 +58,6 @@
 .camform-foot { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
 .wall-tour { display: flex; align-items: center; }
 @media (max-width: 760px) { .camform-two, .camform-grid, .camform-switches { grid-template-columns: 1fr; } }
+.wall-pins { width: 100%; } :where(.wall-pins) button { background: transparent; border: 0; color: inherit; }
+.wall-toolbar { display: flex; align-items: center; gap: 12px; padding: 8px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; min-height: 52px; }
+.wall-find { width: 300px; display: flex; justify-content: flex-end; position: relative; } .wall-find > * { width: 100%; }
