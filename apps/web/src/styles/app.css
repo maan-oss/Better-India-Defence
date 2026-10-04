@@ -569,3 +569,10 @@ button.rc-job:focus-visible { box-shadow: var(--glow-accent); border-radius: 3px
 .rc-media { display: block; width: 100%; aspect-ratio: 2 / 1; object-fit: contain; background: var(--bg-0); image-rendering: pixelated; }
 .rc-media.empty { display: grid; place-items: center; color: var(--text-2); font-size: 12px; }
 .rc-media-full { display: block; width: 100%; max-height: 70vh; object-fit: contain; image-rendering: pixelated; background: var(--bg-0); }
+.audit-form { display: flex; align-items: flex-end; gap: 16px; padding: 14px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.audit-chips { flex: 1; min-width: 240px; padding-bottom: 2px; }
+.audit-table { padding: 0 8px; }
+.audit-detail-cell { display: block; max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.audit-drawer { display: flex; flex-direction: column; gap: 16px; }
+.audit-hash { overflow-wrap: anywhere; font-size: 11.5px; display: flex; align-items: flex-start; gap: 6px; }
+.audit-table td .mono { white-space: nowrap; }

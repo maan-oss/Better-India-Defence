@@ -151,7 +151,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
 
   // ------------------------------------------------------------------ audit
   app.get('/api/audit', { preHandler: requirePerm('audit.view') }, async (req, reply) => {
-    const q = parse(z.object({ q: z.string().max(100).optional(), action: z.string().max(64).optional(), actor: z.string().max(64).optional(), before: z.coerce.number().optional(), limit: z.coerce.number().int().min(1).max(500).default(200) }), req.query, reply);
+    const q = parse(z.object({ q: z.string().max(100).optional(), action: z.string().max(64).optional(), actor: z.string().max(64).optional(), before: z.coerce.number().optional(), from: z.coerce.number().optional(), to: z.coerce.number().optional(), limit: z.coerce.number().int().min(1).max(500).default(200) }), req.query, reply);
     if (!q) return;
     const where: string[] = [];
     const params: unknown[] = [];
@@ -166,6 +166,14 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     if (q.before) {
       params.push(q.before);
       where.push(`seq < $${params.length}`);
+    }
+    if (q.from !== undefined) {
+      params.push(q.from);
+      where.push(`t >= $${params.length}`);
+    }
+    if (q.to !== undefined) {
+      params.push(q.to);
+      where.push(`t <= $${params.length}`);
     }
     if (q.q) {
       params.push(`%${q.q}%`);
