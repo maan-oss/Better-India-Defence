@@ -51,6 +51,9 @@ export interface FlyRequest {
 interface WorldState {
   facility: FacilityDef | null;
   orthophoto: { url: string; bounds: { west: number; south: number; east: number; north: number } } | null;
+  basemap: { url: string; attribution: string; maxZoom: number } | null;
+  /** operational = real site; demo = synthetic evaluation facility. */
+  runMode: 'operational' | 'demo';
   simulated: boolean;
   patches: SurfacePatch[];
   layers: Record<LayerKey, boolean>;
@@ -94,6 +97,8 @@ let flyId = 0;
 export const useWorld = create<WorldState>((set, get) => ({
   facility: null,
   orthophoto: null,
+  basemap: null,
+  runMode: 'operational',
   simulated: true,
   patches: [],
   layers: {

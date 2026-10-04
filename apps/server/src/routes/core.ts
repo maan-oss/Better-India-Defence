@@ -8,7 +8,7 @@ import { SESSION_COOKIE, audit, isService, parse, requirePerm } from '../http/gu
 export function registerCore(app: FastifyInstance, p: Platform): void {
   const cfg = p.cfg;
 
-  app.get('/api/health', async () => ({ ok: true, service: 'strata', time: Date.now(), site: FACILITY.id, simulated: p.site === null }));
+  app.get('/api/health', async () => ({ ok: true, service: 'strata', time: Date.now(), site: FACILITY.id, simulated: p.simulated, mode: p.cfg.STRATA_MODE, needsSetup: p.needsSetup }));
 
   // ------------------------------------------------------------------ auth
   app.post('/api/auth/login', { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } }, async (req, reply) => {
@@ -41,7 +41,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
   app.get('/api/auth/banner', async () => ({
     classification: p.classification,
     site: FACILITY.name,
-    simulated: p.site === null,
+    simulated: p.simulated,
     notice:
       'This is a government information system for authorised use only. Activity on this system is monitored and recorded, and may be used as evidence. Unauthorised access or use may result in disciplinary and criminal proceedings.',
   }));
@@ -93,8 +93,10 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     liveEdge: p.liveEdge(),
     range: await p.replay.range(),
     terrain: getTerrainMode(),
-    simulated: p.site === null,
+    simulated: p.simulated,
     orthophoto: p.site?.orthophoto ? { bounds: p.site.orthophoto.bounds, url: '/api/site/orthophoto' } : null,
+    basemap: p.site?.basemap ?? null,
+    mode: p.cfg.STRATA_MODE,
   }));
   app.get('/api/world/patches', { preHandler: requirePerm('world.view') }, async () => ({ patches: p.coverage.patchList }));
 

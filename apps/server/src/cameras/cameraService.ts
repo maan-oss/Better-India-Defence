@@ -194,7 +194,9 @@ export class CameraService {
   validateUrl(url: string): { url: string; scheme: string } {
     const m = /^([a-z][a-z0-9+.-]*):/i.exec(url);
     const scheme = (m?.[1] ?? 'file').toLowerCase();
-    if (!['rtsp', 'rtsps', 'http', 'https', 'file'].includes(scheme)) throw new CameraError(`unsupported stream scheme "${scheme}" (use rtsp, rtsps, http, https or file)`);
+    // device: frames are pushed by a signed-in browser (a phone, tablet or laptop camera) — no ffmpeg needed.
+    if (scheme === 'device') return { url: 'device:', scheme };
+    if (!['rtsp', 'rtsps', 'http', 'https', 'file'].includes(scheme)) throw new CameraError(`unsupported stream scheme "${scheme}" (use rtsp, rtsps, http, https, file or device)`);
     if (scheme === 'file' || !m) {
       const path = resolve(this.importDir, url.replace(/^file:(\/\/)?/i, ''));
       if (!path.startsWith(resolve(this.importDir) + sep)) throw new CameraError(`file sources must be inside the import directory (${this.importDir})`);
@@ -206,11 +208,35 @@ export class CameraService {
   async load(): Promise<void> {
     const rows = (await this.db.query<Row>('SELECT * FROM camera_sources ORDER BY id')).rows;
     for (const r of rows) this.registerSensor(r);
-    if (!this.vision.ffmpeg) {
-      if (rows.some((r) => r.enabled)) this.log.warn('camera sources configured but ffmpeg is not installed — live cameras disabled');
-      return;
+    if (!this.vision.ffmpeg && rows.some((r) => r.enabled && !this.isDevice(r))) this.log.warn('network camera sources configured but ffmpeg is not installed — only device cameras will run');
+    for (const r of rows) if (r.enabled && this.canRun(r)) this.start(r);
+  }
+
+  private isDevice(r: Row): boolean {
+    try {
+      return this.decUrl(r.url_enc).startsWith('device:');
+    } catch {
+      return false;
     }
-    for (const r of rows) if (r.enabled) this.start(r);
+  }
+  /** Network sources need ffmpeg; device sources are fed by the browser. */
+  private canRun(r: Row): boolean {
+    return this.isDevice(r) || Boolean(this.vision.ffmpeg);
+  }
+
+  /** Device cameras have no process to fail: they are live while frames arrive and in error when they stop. */
+  private liveStatus(run: Runner): CameraSourceStatus {
+    if (!run.url.startsWith('device:') || !run.status.lastFrameAt) return run.status;
+    if (Date.now() - run.status.lastFrameAt > 10_000) return { ...run.status, state: 'error', lastError: 'the device stopped sending frames' };
+    return run.status;
+  }
+
+  /** A frame from a device camera (the browser pushes JPEG frames at the analytics rate). */
+  pushFrame(id: string, jpeg: Uint8Array): void {
+    const run = this.runners.get(id);
+    if (!run || !run.url.startsWith('device:')) throw new CameraError(run ? `${id} is not a device camera` : `${id} is not running (enable it first)`);
+    if (jpeg.length < 4 || jpeg[0] !== 0xff || jpeg[1] !== 0xd8) throw new CameraError('expected a JPEG frame');
+    this.onFrame(run, jpeg);
   }
 
   /** New cameras are added to the site model so ingestion, geolocation, coverage and the 3-D view know them. */
@@ -269,7 +295,7 @@ export class CameraService {
       loopFile: r.loop_file,
       createdBy: r.created_by,
       createdAt: r.created_at,
-      status: run?.status ?? { state: 'stopped', lastFrameAt: null, lastError: null, framesReceived: 0, framesAnalysed: 0, framesDropped: 0, width: null, height: null, analysisMs: null, restarts: 0 },
+      status: run ? this.liveStatus(run) : { state: 'stopped', lastFrameAt: null, lastError: null, framesReceived: 0, framesAnalysed: 0, framesDropped: 0, width: null, height: null, analysisMs: null, restarts: 0 },
     };
   }
 
@@ -305,7 +331,7 @@ export class CameraService {
     const row = (await this.db.query<Row>('SELECT * FROM camera_sources WHERE id = $1', [input.id])).rows[0]!;
     this.registerSensor(row);
     this.stop(row.id);
-    if (row.enabled && this.vision.ffmpeg) this.start(row);
+    if (row.enabled && this.canRun(row)) this.start(row);
     return this.toRecord(row);
   }
 
@@ -324,7 +350,7 @@ export class CameraService {
     const row = (await this.db.query<Row>('SELECT * FROM camera_sources WHERE id = $1', [id])).rows[0];
     if (!row) return null;
     this.stop(id);
-    if (enabled && this.vision.ffmpeg) this.start(row);
+    if (enabled && this.canRun(row)) this.start(row);
     return this.toRecord(row);
   }
 
@@ -354,6 +380,10 @@ export class CameraService {
       recentFaces: [],
     };
     this.runners.set(row.id, run);
+    if (url.startsWith('device:')) {
+      run.status.lastError = 'waiting for the device to start streaming';
+      return;
+    }
     void this.loop(run);
   }
 

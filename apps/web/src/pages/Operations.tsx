@@ -18,6 +18,7 @@ import { Copilot } from '../components/Copilot';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { StateChip } from '../components/common';
 import { hms } from '../lib/format';
+import { buildBasemap } from '../lib/basemap';
 
 const now = () => {
   const s = useTime.getState();
@@ -56,13 +57,16 @@ export function Operations() {
       return;
     }
     engineRef.current = engine;
-    const ortho = useWorld.getState().orthophoto;
-    if (ortho) {
+    const placeImagery = (img: { url: string; bounds: { west: number; south: number; east: number; north: number } }) => {
       const fr = new EnuFrame(facility.origin);
-      const sw = fr.toEnu({ lat: ortho.bounds.south, lon: ortho.bounds.west, alt: 0 });
-      const ne = fr.toEnu({ lat: ortho.bounds.north, lon: ortho.bounds.east, alt: 0 });
-      engine.setOrthophoto(ortho.url, { x0: sw.x, y0: sw.y, x1: ne.x, y1: ne.y });
-    }
+      const sw = fr.toEnu({ lat: img.bounds.south, lon: img.bounds.west, alt: 0 });
+      const ne = fr.toEnu({ lat: img.bounds.north, lon: img.bounds.east, alt: 0 });
+      engine.setOrthophoto(img.url, { x0: sw.x, y0: sw.y, x1: ne.x, y1: ne.y });
+    };
+    const { orthophoto: ortho, basemap } = useWorld.getState();
+    // A surveyed orthophoto wins; otherwise the site's tile server, if one is configured.
+    if (ortho) placeImagery(ortho);
+    else if (basemap) void buildBasemap(facility.origin, facility.halfExtentM, basemap).then((m) => m && engineRef.current === engine && placeImagery(m));
     engine.setGridFrame(facility.origin);
     const host = hostRef.current;
     const afterIntro = () => {

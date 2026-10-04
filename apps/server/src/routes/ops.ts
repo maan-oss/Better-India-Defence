@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { READINESS_LEVELS, TASK_STATUSES, DEFAULT_SOPS, READINESS_INFO, fromMgrs } from '@strata/domain';
+import { READINESS_LEVELS, TASK_STATUSES, DEFAULT_SOPS, READINESS_INFO, fromMgrs, FACILITY, INGEST_SCHEMA_VERSION } from '@strata/domain';
 import type { Platform } from '../platform.ts';
 import { audit, parse, requirePerm } from '../http/guards.ts';
 import { OpsError, TeamInput, VaInput } from '../ops/opsService.ts';
@@ -58,6 +58,56 @@ export function registerOps(app: FastifyInstance, p: Platform): void {
     const t = await o.saveTeam(b, b.id);
     await audit(p, req, 'team_saved', t.id, b);
     return t;
+  });
+  /**
+   * Field device position: a team leader's phone (Field view) reports its GNSS fix, which enters the normal
+   * ingestion pipeline as a gps.position observation from the site's GPS gateway feed — exactly as a
+   * hardware tracker would. The team gets a tracker entity id on first use.
+   */
+  let gpsSeq = 0;
+  app.post('/api/ops/teams/:id/position', { preHandler: requirePerm('ops.log'), config: { rateLimit: { max: 240, timeWindow: '1 minute' } } }, async (req, reply) => {
+    const b = parse(
+      z.object({ lat: z.number().min(-90).max(90), lon: z.number().min(-180).max(180), alt: z.number().min(-500).max(9000).nullish(), accuracyM: z.number().positive().max(1000), speedMps: z.number().min(0).max(200).nullish(), headingDeg: z.number().min(0).max(360).nullish(), at: z.number().int().positive().optional() }),
+      req.body,
+      reply,
+    );
+    if (!b) return;
+    const id = (req.params as { id: string }).id;
+    const team = (await o.teams()).find((t) => t.id === id);
+    if (!team) return reply.code(404).send({ error: 'unknown team' });
+    const gps = FACILITY.sensors.find((s) => s.kind === 'gps');
+    if (!gps) return reply.code(409).send({ error: 'this site has no GPS feed — add one in Site setup' });
+    let entityId = team.entityId;
+    if (!entityId) {
+      entityId = `fd-${team.id}`.slice(0, 32);
+      await o.saveTeam({ callsign: team.callsign, kind: team.kind as TeamInput['kind'], strength: team.strength, leader: team.leader, channel: team.channel, entityId, mode: team.mode, status: team.status, notes: team.notes }, team.id);
+    }
+    const now = Date.now();
+    const observedAt = Math.min(now, b.at ?? now);
+    const env = {
+      schema: INGEST_SCHEMA_VERSION,
+      messageId: `fld-${team.id}-${observedAt}-${gpsSeq}`,
+      sensorId: gps.id,
+      adapter: 'strata.field-device.v1',
+      seq: gpsSeq++,
+      observedAt,
+      sentAt: now,
+      kind: 'gps.position' as const,
+      payload: {
+        entityId,
+        entityKind: team.mode === 'vehicle' ? ('vehicle' as const) : ('person' as const),
+        callsign: team.callsign,
+        role: team.kind,
+        status: team.status === 'AVAILABLE' ? ('available' as const) : ('responding' as const),
+        position: { lat: b.lat, lon: b.lon, alt: b.alt ?? 0 },
+        accuracyM: Math.max(1, b.accuracyM),
+        ...(b.speedMps != null ? { speedMps: b.speedMps } : {}),
+        ...(b.headingDeg != null ? { headingDeg: b.headingDeg } : {}),
+      },
+    };
+    const r = await p.ingest.process([env]);
+    if (r.rejected.length) return reply.code(422).send({ error: 'position rejected', detail: r.rejected[0] });
+    return { ok: true, entityId };
   });
   app.post('/api/ops/teams/:id/assistance', { preHandler: requirePerm('ops.log') }, async (req, reply) => {
     const b = parse(z.object({ note: z.string().max(300).default('') }), req.body ?? {}, reply);

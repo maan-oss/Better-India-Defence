@@ -20,7 +20,7 @@ interface SiteResponse {
   restartRequired: boolean;
 }
 
-const blank = (origin = { lat: 28.6, lon: 77.2, alt: 0 }): SiteConfig => ({ id: 'my-site', name: 'New site', origin, halfExtentM: 2000, zones: [], buildings: [], perimeter: [], gates: [], feeds: [{ id: 'GPS1', kind: 'gps', name: 'Personnel and vehicle position gateway' }], orthophoto: null });
+const blank = (origin = { lat: 28.6, lon: 77.2, alt: 0 }): SiteConfig => ({ id: 'my-site', name: 'New site', origin, halfExtentM: 2000, zones: [], buildings: [], perimeter: [], gates: [], feeds: [{ id: 'GPS1', kind: 'gps', name: 'Personnel and vehicle position gateway' }], orthophoto: null, basemap: null });
 
 export function SiteSetup() {
   const [resp, setResp] = useState<SiteResponse | null>(null);

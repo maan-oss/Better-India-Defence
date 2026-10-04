@@ -38,6 +38,7 @@ const SITE: SiteConfig = {
     { id: 'EXT1', kind: 'external', name: 'Brigade CoT feed', system: 'TAK' },
   ],
   orthophoto: null,
+  basemap: null,
 };
 
 afterAll(() => {

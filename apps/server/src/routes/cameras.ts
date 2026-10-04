@@ -62,6 +62,16 @@ export function registerCameras(app: FastifyInstance, p: Platform): void {
     return { ok: true };
   });
 
+  /** Frames from a device camera: a signed-in phone, tablet or laptop streaming its own camera (JPEG body). */
+  app.post('/api/cameras/:id/frame', { preHandler: requirePerm('ops.log'), bodyLimit: 6 * 1024 * 1024, config: { rateLimit: { max: 1200, timeWindow: '1 minute' } } }, async (req, reply) => {
+    if (!(req.body instanceof Buffer)) return reply.code(415).send({ error: 'send the frame as image/jpeg' });
+    try {
+      p.cameras.pushFrame((req.params as { id: string }).id, new Uint8Array(req.body));
+      return reply.code(204).send();
+    } catch (e) {
+      return reply.code(409).send({ error: e instanceof Error ? e.message : String(e) });
+    }
+  });
   app.get('/api/cameras/:id/snapshot', { preHandler: requirePerm('media.view') }, async (req, reply) => {
     const l = p.cameras.latest((req.params as { id: string }).id);
     if (!l) return reply.code(404).send({ error: 'no live frame' });

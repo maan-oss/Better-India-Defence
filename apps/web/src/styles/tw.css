@@ -1,0 +1,39 @@
+/*
+ * Tailwind v4 for the vendored Space UI and Componentry components only: theme and utilities, no Preflight,
+ * so it cannot restyle the rest of the console. Our own CSS is unlayered and wins over these layers.
+ * Colour names follow the shadcn convention those libraries use, mapped onto STRATA tokens (tokens.css).
+ */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@source '../components/vendor';
+@source '../components';
+@source '../pages';
+
+@custom-variant dark (&:where(:root, :root *));
+
+@theme inline {
+  --color-background: var(--bg-1);
+  --color-foreground: var(--text-0);
+  --color-card: var(--bg-2);
+  --color-card-foreground: var(--text-0);
+  --color-popover: var(--bg-2);
+  --color-popover-foreground: var(--text-0);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-ink);
+  --color-secondary: var(--bg-3);
+  --color-secondary-foreground: var(--text-0);
+  --color-muted: var(--bg-3);
+  --color-muted-foreground: var(--text-2);
+  --color-accent: var(--bg-4);
+  --color-accent-foreground: var(--text-0);
+  --color-destructive: var(--st-critical);
+  --color-destructive-foreground: #fff;
+  --color-success: var(--st-normal);
+  --color-warning: var(--st-caution);
+  --color-info: var(--st-standby);
+  --color-border: var(--line-2);
+  --color-input: var(--line-2);
+  --color-ring: var(--focus);
+}

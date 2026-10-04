@@ -12,6 +12,7 @@ import { get, setUnauthorizedHandler } from './api/client';
 import type { FacilityResponse } from './api/types';
 import { FACILITY, setTerrainMode, type SurfacePatch } from '@strata/domain';
 import { Login } from './pages/Login';
+import { Setup, type SetupStatus } from './pages/Setup';
 import { Shell } from './components/Shell';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Icon } from './components/Icons';
@@ -46,7 +47,7 @@ function useBootstrap(enabled: boolean): { ready: boolean; error: string | null 
         // The server's site model replaces the bundled demo model everywhere in the client.
         Object.assign(FACILITY, f.facility);
         setTerrainMode(f.terrain);
-        useWorld.setState({ orthophoto: f.orthophoto, simulated: f.simulated });
+        useWorld.setState({ orthophoto: f.orthophoto, basemap: f.basemap ?? null, runMode: f.mode ?? 'operational', simulated: f.simulated });
         useWorld.getState().setFacility(f.facility, p.patches);
         useTime.getState().setLiveEdge(f.liveEdge || Date.now());
         if (f.range.from) useTime.getState().setRange(f.range.from);
@@ -150,12 +151,36 @@ function Boot({ label }: { label: string }) {
 
 export function App() {
   const status = useSession((s) => s.status);
+  const role = useSession((s) => s.user?.role);
   const refresh = useSession((s) => s.refresh);
+  const [setup, setSetup] = useState<SetupStatus | null>(null);
+  const [setupError, setSetupError] = useState<string | null>(null);
   useEffect(() => {
     void refresh();
     setUnauthorizedHandler(() => void refresh());
+    get<SetupStatus>('/api/setup/status')
+      .then(setSetup)
+      .catch((e: unknown) => setSetupError(e instanceof Error ? e.message : String(e)));
   }, [refresh]);
-  if (status === 'unknown') return <Boot label="Connecting" />;
+  if (setupError) return <Boot label={`Cannot reach the Strata service: ${setupError}`} />;
+  if (status === 'unknown' || !setup) return <Boot label="Connecting" />;
+  // First run of an operational install: the wizard creates the administrator, then the site.
+  if (setup.needsAdmin) return <Setup status={setup} />;
+  if (setup.needsSite && status === 'authenticated') {
+    if (role === 'administrator') return <Setup status={setup} />;
+    return (
+      <div className="waiting-setup">
+        <div className="empty-state">
+          <Icon.Logo size={36} />
+          <h3>The site has not been set up yet</h3>
+          <p>An administrator needs to define the installation before the operational picture can start. Sign in as an administrator, or ask yours to finish setup.</p>
+          <button className="btn" onClick={() => void useSession.getState().logout()}>
+            Sign out
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
     <BrowserRouter>
       <ErrorBoundary area="Strata">{status === 'authenticated' ? <Authenticated /> : <Login />}</ErrorBoundary>

@@ -1,0 +1,71 @@
+/*
+ * Arc (uiarc.dev) design tokens, defined from STRATA's own tokens so every Arc component follows the
+ * grey/cream theme and the red-light night theme automatically. Sizes are tightened from Arc's consumer
+ * defaults (44 px controls, 18 px radii) to console density (32 px controls, 8 px radii).
+ * Arc's upstream foundation removes all focus outlines; we keep a visible focus ring for keyboard operators.
+ */
+:root {
+  --background: var(--bg-1);
+  --surface: var(--bg-2);
+  --surface-raised: var(--bg-3);
+  --surface-muted: var(--bg-3);
+  --foreground: var(--text-0);
+  --text-secondary: var(--text-1);
+  --text-muted: var(--text-2);
+  --border: var(--line-2);
+  --border-subtle: var(--line);
+  --border-strong: var(--line-3);
+  --accent-strong: var(--accent-2);
+  --accent-subtle: var(--accent-dim);
+  --accent-foreground: var(--accent-ink);
+  --control-on: var(--accent);
+  --control-glyph: var(--accent-ink);
+  --control-track: var(--bg-4);
+  --control-track-hover: #444444;
+  --control-thumb: var(--text-0);
+  --control-thumb-on: var(--accent-ink);
+  --control-fill: var(--text-1);
+  --control-thumb-shadow: 0 0 0 .5px rgba(0, 0, 0, .3), 0 1px 2px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .2);
+  --control-on-subtle: var(--accent-dim);
+  --focus-ring: var(--focus);
+  --success: var(--st-normal-text);
+  --warning: var(--st-caution-text);
+  --danger: var(--st-critical-text);
+  --shadow-resting: 0 1px 2px rgba(0, 0, 0, .18);
+  --shadow-raised: 0 8px 22px rgba(0, 0, 0, .28);
+  --shadow-floating: var(--shadow-2);
+  --neutral-0: var(--bg-1); --neutral-1: var(--bg-1); --neutral-2: var(--bg-2); --neutral-3: var(--bg-3);
+  --neutral-4: var(--bg-4); --neutral-5: #4a4a4a; --neutral-6: #6e6c66; --neutral-7: var(--text-2);
+  --neutral-8: var(--text-1); --neutral-9: #dcd9d0; --neutral-10: var(--text-0); --neutral-11: var(--accent-2);
+  --arc-gradient-from: var(--bg-3);
+  --arc-gradient-to: var(--bg-4);
+  --arc-gradient: linear-gradient(100deg, var(--bg-3), var(--bg-4));
+  --arc-gradient-foreground: var(--text-0);
+  --arc-gradient-soft: linear-gradient(135deg, var(--bg-2), var(--bg-3));
+  --arc-gradient-line: linear-gradient(100deg, var(--line-3), var(--line-2));
+  --arc-gradient-ink: linear-gradient(100deg, var(--text-0), var(--text-1));
+
+  --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem;
+  --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+  --space-12: 3rem; --space-16: 4rem; --space-20: 5rem; --space-24: 6rem;
+  --radius-control: 8px; --radius-panel: 12px; --radius-surface: 16px; --radius-pill: 9999px;
+  --control-height-sm: 28px; --control-height-md: 32px; --control-height-lg: 40px;
+  --font-display: var(--font-sans);
+  --font-body: var(--font-sans);
+  --text-xs: .75rem; --text-sm: .8125rem; --text-base: .875rem; --text-lg: 1rem;
+  --text-xl: 1.25rem; --text-2xl: 1.5rem; --text-3xl: 2rem; --text-4xl: 2.75rem; --text-5xl: 3.5rem;
+  --tracking-display: -.02em; --tracking-body: -.005em;
+  --leading-display: 1.15; --leading-body: 1.45;
+  --ease-enter: cubic-bezier(.16, 1, .3, 1);
+  --ease-standard: cubic-bezier(.22, 1, .36, 1);
+  --ease-exit: cubic-bezier(.7, 0, .84, 0);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-spring: linear(0, 0.0258, 0.09, 0.1763, 0.2732, 0.3724, 0.4683, 0.5573, 0.6376, 0.7082, 0.7689, 0.8202, 0.8628, 0.8976, 0.9256, 0.9476, 0.9648, 0.9778, 0.9875, 0.9945, 0.9994, 1.0026, 1.0047, 1.0058, 1.0062, 1.0062, 1.0059, 1.0055, 1.0049, 1.0043, 1.0036, 1.0031, 1.0025, 1.002, 1.0016, 1.0013, 1);
+  --duration-instant: 120ms; --duration-fast: 160ms; --duration-standard: 240ms; --duration-considered: 480ms; --duration-spring: 580ms;
+
+  /* Chart series: muted categorical data colours, distinct from status and affiliation hues. */
+  --series-1: #d6d3ca;
+  --series-2: #7aa2c8;
+  --series-3: #b39ddb;
+  --series-4: #8fbf9f;
+}

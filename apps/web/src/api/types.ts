@@ -28,6 +28,8 @@ export interface FacilityResponse {
   terrain: 'synthetic' | 'flat';
   simulated: boolean;
   orthophoto: { url: string; bounds: { west: number; south: number; east: number; north: number } } | null;
+  basemap: { url: string; attribution: string; maxZoom: number } | null;
+  mode: 'operational' | 'demo';
 }
 
 export interface TrackWindow {

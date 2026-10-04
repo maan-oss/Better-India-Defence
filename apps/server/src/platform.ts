@@ -57,8 +57,10 @@ export class Platform {
   evidence!: EvidenceService;
   cameras!: CameraService;
   ops!: OpsService;
-  /** Configured real site (null = demo facility with simulator). */
+  /** Configured real site (null = demo facility in demo mode, or awaiting setup in operational mode). */
   site: SiteConfig | null = null;
+  /** One-time code for the first-run setup wizard (operational mode, no accounts yet). */
+  setupCode: string | null = null;
   /** Classification banner shown on every console and printed product. */
   classification: { level: string; caveat: string } = { level: 'RESTRICTED', caveat: '' };
   private timers: NodeJS.Timeout[] = [];
@@ -67,6 +69,31 @@ export class Platform {
     readonly cfg: Config,
     readonly log: Logger,
   ) {}
+
+  /** Demo mode: synthetic facility, simulator and sample content. */
+  get demo(): boolean {
+    return this.cfg.STRATA_MODE === 'demo';
+  }
+  /** The synthetic simulator feeds this instance (demo mode without a configured site). */
+  get simulated(): boolean {
+    return this.demo && this.site === null;
+  }
+  /** Operational install that has not been set up yet (no site and/or no accounts). */
+  get needsSetup(): boolean {
+    return !this.demo && (this.site === null || this.setupCode !== null);
+  }
+
+  /** First run: a one-time code printed to the service log (and saved under the data directory) unlocks the setup wizard. */
+  private async issueSetupCode(): Promise<void> {
+    const { randomInt } = await import('node:crypto');
+    const { writeFile } = await import('node:fs/promises');
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    this.setupCode = Array.from({ length: 8 }, () => alphabet[randomInt(alphabet.length)]).join('');
+    await mkdir(this.cfg.dataDir, { recursive: true });
+    await writeFile(join(this.cfg.dataDir, 'setup-code.txt'), `${this.setupCode}\n`, { mode: 0o600 });
+    const shown = `${this.setupCode.slice(0, 4)}-${this.setupCode.slice(4)}`;
+    this.log.warn({ setupCode: shown }, `FIRST RUN — open the console and enter setup code ${shown} (also in ${join(this.cfg.dataDir, 'setup-code.txt')})`);
+  }
 
   async start(): Promise<void> {
     const cfg = this.cfg;
@@ -83,11 +110,13 @@ export class Platform {
         this.log.info({ site: parsed.data.id, origin: parsed.data.origin }, 'configured site applied');
       } else this.log.error({ issues: parsed.error.issues.slice(0, 3) }, 'stored site definition is invalid — running the demo site');
     }
-    await this.seedRegistry();
+    // The demo facility's sensors and zones are registered only in demo mode; an operational install starts empty.
+    if (this.site || this.demo) await this.seedRegistry();
     this.store = new LocalObjectStore(join(cfg.dataDir, 'objects'), cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null);
     this.audit = new AuditLog(this.db);
     this.auth = new AuthService(this.db, cfg.SESSION_TTL_HOURS);
     await this.auth.ensureUsers(cfg.STRATA_DEMO_USERS === 'true', cfg.STRATA_DEMO_PASSWORD, cfg.STRATA_ADMIN_PASSWORD);
+    if (!this.demo && (await this.auth.count()) === 0) await this.issueSetupCode();
     this.sensors = new SensorMonitor(this.db, this.hub);
     await this.sensors.load();
     this.fusion = new FusionService(this.db, this.hub, this.metrics);
@@ -118,10 +147,10 @@ export class Platform {
     this.cameras = new CameraService(this.db, this.log, this.ingest, this.vision, this.identity, this.evidence, this.store, cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null, importDir);
     this.ingest.supersede = (sid, adapter) => this.cameras.superseded(sid, adapter);
     await this.cameras.load();
-    this.ops = new OpsService(this.db, this.hub, this.alerts, this.fusion, this.incidents, this.sensors, this.identity, () => this.liveEdge(), this.site === null);
+    this.ops = new OpsService(this.db, this.hub, this.alerts, this.fusion, this.incidents, this.sensors, this.identity, () => this.liveEdge(), this.demo && this.site === null);
     await this.ops.load();
     this.ops.start();
-    if ((cfg.STRATA_DEMO_CONTENT ?? (cfg.NODE_ENV === 'test' ? 'false' : 'true')) === 'true')
+    if (this.demo && this.site === null && (cfg.STRATA_DEMO_CONTENT ?? (cfg.NODE_ENV === 'test' ? 'false' : 'true')) === 'true')
       void seedDemoContent(this, importDir).catch((e: unknown) => this.log.warn({ err: e instanceof Error ? e.message : String(e) }, 'demo content seeding failed'));
     const cls = (await this.db.query<{ value: { level: string; caveat: string } }>(`SELECT value FROM config WHERE key = 'ui.classification'`)).rows[0];
     if (cls) this.classification = cls.value;

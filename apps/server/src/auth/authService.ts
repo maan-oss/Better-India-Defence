@@ -28,6 +28,10 @@ export class AuthService {
     } else if (adminPassword) await this.create('admin', 'Administrator', 'administrator', adminPassword);
   }
 
+  async count(): Promise<number> {
+    return (await this.db.query<{ n: number }>('SELECT count(*)::int AS n FROM users')).rows[0]!.n;
+  }
+
   async create(username: string, displayName: string, role: Role, password: string): Promise<UserRecord> {
     if (!ROLE_ORDER.includes(role)) throw new Error('invalid role');
     const id = `usr-${randomUUID().slice(0, 8)}`;

@@ -2,9 +2,9 @@
 /**
  * Production entry point: `npm run build && npm start`.
  *  - runs the bundled API server (apps/server/dist), which also serves the built web client (apps/web/dist)
- *  - unless STRATA_SIMULATOR=false, seeds recorded history on first run and starts the live simulator
- *    (the simulator is the synthetic data source for this test facility; real deployments replace it with
- *    sensor adapters that POST to /api/ingest)
+ *  - STRATA_MODE=operational (default): real site and sensors only; the first run opens the setup wizard
+ *  - STRATA_MODE=demo (`npm run demo`): seeds recorded history on first run and starts the scenario simulator
+ *    for the synthetic KESTREL facility (evaluation only)
  *
  * NODE_ENV defaults to "production", which refuses to start with development secrets. See .env.example.
  */
@@ -15,7 +15,8 @@ import { resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '..');
 loadEnv(resolve(root, '.env'));
 const env = { ...process.env };
-env.NODE_ENV ??= 'production';
+// Demo mode is for evaluation and never runs with production settings.
+env.NODE_ENV ??= env.STRATA_MODE === 'demo' ? 'development' : 'production';
 env.WEB_DIST ??= resolve(root, 'apps/web/dist');
 const scheme = env.TLS_CERT_FILE ? 'https' : 'http';
 const API = `${scheme}://${env.HOST ?? '127.0.0.1'}:${env.PORT ?? '4000'}`;
@@ -61,11 +62,27 @@ async function waitFor(url, tries = 120) {
   return false;
 }
 
-const api = run('api', [serverJs]);
-api.on('exit', (c) => {
-  console.error(`API exited (${c})`);
-  shutdown(c ?? 1);
-});
+// The API exits with code 75 when an administrator applies start-up configuration (e.g. a new site) from the
+// console; restart it in place. Any other exit stops everything.
+function startApi() {
+  const api = run('api', [serverJs]);
+  api.on('exit', (c) => {
+    if (c === 75) {
+      console.log('API restarting to apply configuration…');
+      procs.splice(procs.indexOf(api), 1);
+      const sim = procs.find((p) => p.spawnargs.includes('live'));
+      if (sim) {
+        sim.kill('SIGTERM');
+        procs.splice(procs.indexOf(sim), 1);
+      }
+      startApi();
+      return;
+    }
+    console.error(`API exited (${c})`);
+    shutdown(c ?? 1);
+  });
+}
+startApi();
 if (!(await waitFor(`${API}/api/health`))) {
   console.error('API failed to become healthy');
   shutdown(1);
@@ -80,5 +97,6 @@ if (!(await waitFor(`${API}/api/health`))) {
   run('sim', [simJs, 'live']);
   console.log(`\n  Strata is running — open ${API}\n`);
 } else {
-  console.log(`\n  Strata is running (simulator disabled) — ${API}\n`);
+  const h = await fetch(`${API}/api/health`).then((r) => r.json()).catch(() => ({}));
+  console.log(`\n  Strata is running — open ${API}${h.needsSetup ? '  (first run: enter the setup code shown above)' : ''}\n`);
 }

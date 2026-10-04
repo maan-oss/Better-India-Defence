@@ -69,6 +69,22 @@ export const SiteConfigSchema = z.object({
     })
     .nullable()
     .default(null),
+  /**
+   * Optional web-map tile service (XYZ template with {z}/{x}/{y}) drawn as ground imagery for the site extent.
+   * Tiles are fetched by each console browser, so the template reveals the site's location to that server:
+   * use your own tile server on a secure network.
+   */
+  basemap: z
+    .object({
+      url: z
+        .string()
+        .max(300)
+        .regex(/^https?:\/\/[^\s]*\{z\}[^\s]*\{x\}[^\s]*\{y\}/, 'an http(s) XYZ template containing {z}, {x} and {y}'),
+      attribution: z.string().max(200).default(''),
+      maxZoom: z.number().int().min(1).max(22).default(19),
+    })
+    .nullable()
+    .default(null),
 });
 export type SiteConfig = z.infer<typeof SiteConfigSchema>;
 
@@ -154,5 +170,6 @@ export function demoAsSiteConfig(): SiteConfig {
       { id: 'EXT1', kind: 'external', name: 'CoT interop feed', system: 'CoT' },
     ],
     orthophoto: null,
+    basemap: null,
   };
 }

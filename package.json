@@ -2,7 +2,7 @@
   "name": "strata",
   "private": true,
   "version": "0.1.0",
-  "description": "Strata — 4D Reality Intelligence Platform: a persistent spatial memory of a physical environment.",
+  "description": "Strata \u2014 4D Reality Intelligence Platform: a persistent spatial memory of a physical environment.",
   "type": "module",
   "workspaces": [
     "packages/*",
@@ -13,9 +13,11 @@
   },
   "scripts": {
     "dev": "node scripts/dev.mjs",
+    "dev:demo": "STRATA_MODE=demo node scripts/dev.mjs",
     "seed": "npm run seed -w @strata/server",
     "build": "npm run typecheck && npm run build -w @strata/server && npm run build -w @strata/simulator && npm run build -w @strata/adapters && npm run build -w @strata/web",
     "start": "node scripts/start.mjs",
+    "demo": "STRATA_MODE=demo node scripts/start.mjs",
     "typecheck": "tsc -p packages/domain && tsc -p packages/simulator && tsc -p packages/adapters && tsc -p apps/server && tsc -p apps/web",
     "lint": "eslint .",
     "test": "vitest run",
