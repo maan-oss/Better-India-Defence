@@ -532,3 +532,4 @@ button.list-row:focus-visible { box-shadow: inset var(--glow-accent); }
 .inc-create h3 { margin: 0 0 4px; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
 .inc-create p { margin: 0; font-size: 13px; line-height: 20px; }
 .inc-create-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+.site-tree { height: 100%; padding: 10px 8px; }

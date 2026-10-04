@@ -12,6 +12,52 @@ import { ErrorNote, Loading, Prio, StateChip, useAsync } from './common';
 import { VirtualList } from './VirtualList';
 import { tracks as trackStore, type RenderTrack } from '../state/tracks';
 import { Segmented, Tabs } from './ui';
+import { Building2, Cctv, Fence, Radar, Radio, ShieldAlert, SquareDashed } from 'lucide-react';
+import { terrainHeight, type Vec3 } from '@strata/domain';
+import { TreeView, type TreeNode } from './kit';
+
+/** The site as a hierarchy (Arc tree view): zones, buildings and sensors by kind. Choosing one flies the view to it. */
+function SiteTree() {
+  const facility = useWorld((s) => s.facility);
+  const sensors = useData((s) => s.sensors);
+  if (!facility) return <Loading />;
+  const at = (x: number, y: number): Vec3 => ({ x, y, z: terrainHeight(x, y) });
+  const places = new Map<string, () => void>();
+  const w = useWorld.getState();
+  const zones: TreeNode[] = facility.zones.map((z) => {
+    const cx = z.polygon.reduce((a, p) => a + p.x, 0) / z.polygon.length;
+    const cy = z.polygon.reduce((a, p) => a + p.y, 0) / z.polygon.length;
+    const r = Math.max(...z.polygon.map((p) => Math.hypot(p.x - cx, p.y - cy)));
+    places.set(`zone:${z.id}`, () => w.flyTo(at(cx, cy), Math.max(250, r * 2.2)));
+    return { id: `zone:${z.id}`, label: `${z.name}${z.restricted ? ' · restricted' : ''}`, icon: z.restricted ? <ShieldAlert size={14} /> : <SquareDashed size={14} /> };
+  });
+  const buildings: TreeNode[] = facility.buildings.map((b) => {
+    places.set(`bld:${b.id}`, () => (w.select({ kind: 'building', id: b.id }), w.flyTo(at(b.center.x, b.center.y), Math.max(160, Math.max(b.width, b.depth) * 3))));
+    return { id: `bld:${b.id}`, label: b.name ?? b.id, icon: <Building2 size={14} /> };
+  });
+  const byKind = new Map<string, TreeNode[]>();
+  for (const sd of facility.sensors) {
+    const st = sensors[sd.id]?.status;
+    const label = `${sd.id} · ${sd.name}${st && st !== 'ok' ? ` (${st})` : ''}`;
+    if ('position' in sd && sd.position) {
+      const p = sd.position as Vec3;
+      places.set(`sen:${sd.id}`, () => (w.select({ kind: 'sensor', id: sd.id }), w.flyTo(at(p.x, p.y), 420)));
+    } else places.set(`sen:${sd.id}`, () => w.select({ kind: 'sensor', id: sd.id }));
+    const list = byKind.get(sd.kind) ?? [];
+    list.push({ id: `sen:${sd.id}`, label, icon: sd.kind === 'camera' ? <Cctv size={14} /> : sd.kind === 'radar' ? <Radar size={14} /> : sd.kind === 'fence' ? <Fence size={14} /> : <Radio size={14} /> });
+    byKind.set(sd.kind, list);
+  }
+  const nodes: TreeNode[] = [
+    { id: 'zones', label: `Zones (${zones.length})`, children: zones },
+    { id: 'buildings', label: `Buildings (${buildings.length})`, children: buildings },
+    { id: 'sensors', label: `Sensors (${facility.sensors.length})`, children: [...byKind.entries()].map(([k, list]) => ({ id: `kind:${k}`, label: `${titleCase(k)} (${list.length})`, children: list })) },
+  ];
+  return (
+    <div className="site-tree scroll">
+      <TreeView aria-label={`${facility.name} site`} nodes={nodes} defaultExpandedIds={['zones']} onSelect={(n) => places.get(n.id)?.()} />
+    </div>
+  );
+}
 
 export function IncidentPanel({ id }: { id: string }) {
   const { data, error } = useAsync((s) => get<IncidentPackage>(`/api/incidents/${encodeURIComponent(id)}`, s), [id]);
@@ -392,7 +438,7 @@ function ago(t: number): string {
 }
 
 export function Overview() {
-  const [tab, setTab] = useState<'alerts' | 'tracks' | 'changes'>('alerts');
+  const [tab, setTab] = useState<'alerts' | 'tracks' | 'changes' | 'site'>('alerts');
   const alerts = useData((s) => s.alerts);
   const changes = useData((s) => s.changes);
   const select = useWorld((s) => s.select);
@@ -421,9 +467,11 @@ export function Overview() {
           { value: 'alerts', label: <>Alerts<span className="tab-count">{openAlerts.length}</span></> },
           { value: 'tracks', label: <>Tracks<span className="tab-count">{list.length}</span></> },
           { value: 'changes', label: 'Changes' },
+          { value: 'site', label: 'Site' },
         ]}
       />
       <div style={{ flex: 1, minHeight: 0 }}>
+        {tab === 'site' && <SiteTree />}
         {tab === 'alerts' && (
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <div className="row" style={{ padding: '10px 16px', borderBottom: '1px solid var(--line)' }}>

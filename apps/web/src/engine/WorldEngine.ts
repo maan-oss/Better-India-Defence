@@ -424,6 +424,18 @@ export class WorldEngine {
     return hit ? { x: hit.point.x, y: hit.point.y, z: hit.point.z } : null;
   }
 
+  /** What is under a viewport point: an object, or a ground point. */
+  pickAt(x: number, y: number): Selection | null {
+    return this.pick(x, y);
+  }
+
+  /** The ground point under a viewport point, ignoring anything standing on it. */
+  groundAt(x: number, y: number): Vec3 | null {
+    this.raycaster.setFromCamera(this.ndc(x, y), this.camera);
+    const h = this.raycaster.intersectObject(this.terrain.mesh, true)[0];
+    return h ? { x: h.point.x, y: h.point.y, z: h.point.z } : null;
+  }
+
   private pick(x: number, y: number, hoverOnly = false): Selection | null {
     this.raycaster.setFromCamera(this.ndc(x, y), this.camera);
     this.raycaster.params.Line = { threshold: 3 };

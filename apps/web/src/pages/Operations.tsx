@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { getCameras, terrainHeight } from "@strata/domain";
 import { WorldEngine } from "../engine/WorldEngine";
+import { MapMenu } from "../components/ops/MapMenu";
 import { useWorld } from "../state/world";
 import { useTime } from "../state/time";
 import { useData } from "../state/data";
@@ -436,7 +437,9 @@ export function Operations() {
       </div>
         ) : (
       <>
-        <div ref={hostRef} className="world-canvas" />
+        <MapMenu engineRef={engineRef}>
+          <div ref={hostRef} className="world-canvas" />
+        </MapMenu>
         <div ref={labelRef} className="world-labels" />
         <div className="intro-fade" style={{ opacity: introFade }} />
         {facility && (

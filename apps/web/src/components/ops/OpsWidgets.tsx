@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { AlertRecord } from '@strata/domain';
 import { get, post } from '../../api/client';
 import { useSession } from '../../state/session';
-import { useOps } from '../../state/ops';
+import { useOps, grid as gridRef } from '../../state/ops';
 import { ErrorNote, Modal, useAsync } from '../common';
 
 export interface Team {
@@ -81,19 +81,19 @@ const DEFAULT_ORDERS: Record<string, string> = {
   THREAT_IMMINENT: 'Move to the threatened asset, warn personnel and report.',
 };
 
-export function DispatchDialog({ alert, onClose }: { alert: AlertRecord | null; onClose: () => void }) {
+export function DispatchDialog({ alert, place, onClose }: { alert: AlertRecord | null; place?: { x: number; y: number } | null; onClose: () => void }) {
   const teams = useAsync((s) => get<Team[]>('/api/ops/teams', s), []);
   const [teamId, setTeamId] = useState('');
-  const [orders, setOrders] = useState(alert ? (DEFAULT_ORDERS[alert.rule] ?? 'Proceed to the location, assess and report.') : '');
+  const [orders, setOrders] = useState(alert ? (DEFAULT_ORDERS[alert.rule] ?? 'Proceed to the location, assess and report.') : place ? 'Proceed to the location, assess and report.' : '');
   const [grid, setGrid] = useState('');
   const [err, setErr] = useState<string | null>(null);
-  const target = alert?.position ?? null;
+  const target = alert?.position ?? place ?? null;
   const dist = (t: Team) => (t.position && target ? Math.hypot(t.position.x - target.x, t.position.y - target.y) : null);
   const sorted = [...(teams.data ?? [])].sort((a, b) => (a.taskId ? 1 : 0) - (b.taskId ? 1 : 0) || (dist(a) ?? 1e9) - (dist(b) ?? 1e9));
   const go = async () => {
     setErr(null);
     try {
-      await post('/api/ops/tasks', { teamId, alertId: alert?.id ?? null, orders, priority: alert?.priority ?? 'high', ...(grid ? { mgrs: grid } : {}) });
+      await post('/api/ops/tasks', { teamId, alertId: alert?.id ?? null, orders, priority: alert?.priority ?? 'high', ...(grid ? { mgrs: grid } : place ? { target: { x: place.x, y: place.y } } : {}) });
       useOps.setState((s) => ({ version: s.version + 1 }));
       onClose();
     } catch (e) {
@@ -101,7 +101,7 @@ export function DispatchDialog({ alert, onClose }: { alert: AlertRecord | null; 
     }
   };
   return (
-    <Modal title={alert ? `Dispatch — ${alert.title}` : 'Dispatch team'} onClose={onClose}>
+    <Modal title={alert ? `Dispatch — ${alert.title}` : place ? `Dispatch team to ${gridRef(place)}` : 'Dispatch team'} onClose={onClose}>
       <div className="col" style={{ gap: 10 }}>
         <table className="table">
           <thead>

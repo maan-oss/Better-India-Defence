@@ -22,6 +22,11 @@ export interface ContextMenuProps {
   children: ReactNode;
   items: ContextMenuItem[];
   label?: string;
+  /** Strata adaptation. "still-right-click" opens only on a right click that did not drag (right-drag pans the 3D map),
+   *  never on a left click; the keyboard shortcuts still open it. */
+  trigger?: "default" | "still-right-click";
+  /** Strata adaptation: called with the viewport point just before the menu opens, so the items can describe what is under it. */
+  onOpenAt?: (x: number, y: number) => void;
 }
 
 type Highlight = { index: number; top: number; height: number; danger: boolean; glide: boolean };
@@ -36,7 +41,7 @@ function clampTo(x: number, y: number, width: number, height: number) {
   return { x: left, y: top, originX: Math.max(0, Math.min(width, x - left)), originY: Math.max(0, Math.min(height, y - top)) };
 }
 
-export function ContextMenu({ children, items, label = "Context menu" }: ContextMenuProps) {
+export function ContextMenu({ children, items, label = "Context menu", trigger = "default", onOpenAt }: ContextMenuProps) {
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
   // The portal mounts on first open (client only) and stays so the menu can animate out.
@@ -85,7 +90,9 @@ export function ContextMenu({ children, items, label = "Context menu" }: Context
     };
   }, [open, point.key]);
 
+  const rightDown = useRef<{ x: number; y: number } | null>(null);
   function showMenu(x: number, y: number) {
+    onOpenAt?.(x, y);
     anchor.current = { x, y };
     const estimate = clampTo(x, y, MENU_WIDTH, Math.min(300, items.length * 34 + 12));
     setPoint(current => ({ ...estimate, key: current.key + 1 }));
@@ -105,6 +112,7 @@ export function ContextMenu({ children, items, label = "Context menu" }: Context
   }
 
   function onTargetClick() {
+    if (trigger === "still-right-click") return;
     if (pressedWhileOpen.current) { pressedWhileOpen.current = false; return; }
     const rect = targetRef.current?.getBoundingClientRect();
     if (rect) showMenu(rect.left + 12, rect.bottom + 8);
@@ -146,7 +154,9 @@ export function ContextMenu({ children, items, label = "Context menu" }: Context
   }
 
   return <>
-    <div ref={targetRef} className={styles.target} tabIndex={0} onPointerDown={event => { pressedWhileOpen.current = open && event.button === 0; }} onClick={onTargetClick} onContextMenu={event => { event.preventDefault(); showMenu(event.clientX, event.clientY); }} onKeyDown={onTargetKeyDown} aria-label={label} aria-haspopup="menu" aria-expanded={open}>
+    <div ref={targetRef} className={styles.target} tabIndex={0} onPointerDown={event => { pressedWhileOpen.current = open && event.button === 0; if (event.button === 2) rightDown.current = { x: event.clientX, y: event.clientY }; }}
+      onPointerUp={event => { if (trigger !== "still-right-click" || event.button !== 2 || !rightDown.current) return; const d = Math.hypot(event.clientX - rightDown.current.x, event.clientY - rightDown.current.y); rightDown.current = null; if (d < 5) showMenu(event.clientX, event.clientY); }}
+      onClick={onTargetClick} onContextMenu={event => { event.preventDefault(); if (trigger === "default") showMenu(event.clientX, event.clientY); }} onKeyDown={onTargetKeyDown} aria-label={label} aria-haspopup="menu" aria-expanded={open}>
       {children}
     </div>
     {portal ? createPortal(<AnimatePresence>
