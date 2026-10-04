@@ -96,7 +96,14 @@ export class WorkerPool<K extends KindMap = AnalysisKinds> {
     }
   }
 
-  async close(): Promise<void> {
+  /**
+   * Stop accepting work, let in-flight jobs finish (terminating a worker inside native inference aborts the
+   * process), then terminate. Queued jobs are rejected.
+   */
+  async close(timeoutMs = 15_000): Promise<void> {
+    for (const j of this.queue.splice(0)) j.reject(new Error('worker pool closed'));
+    const t0 = Date.now();
+    while (this.pending.size > 0 && Date.now() - t0 < timeoutMs) await new Promise((r) => setTimeout(r, 25));
     await Promise.all(this.workers.map((w) => w.w.terminate()));
   }
 }

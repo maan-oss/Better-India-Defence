@@ -20,6 +20,8 @@ export interface IngestResult {
   rejected: { index: number; reason: string }[];
   late: number;
   outOfOrder: number;
+  /** Messages from simulated adapters for sensors now driven by a live source (ignored, not errors). */
+  superseded?: number;
 }
 
 /**
@@ -36,6 +38,8 @@ export class IngestPipeline {
   private lastSnapshotAt = 0;
   queueDepth = 0;
   readonly frame = new EnuFrame(FACILITY.origin);
+  /** Set by the camera service: true when a message is superseded by a live source. */
+  supersede: ((sensorId: string, adapter: string) => boolean) | null = null;
 
   constructor(
     private readonly db: Db,
@@ -108,6 +112,10 @@ export class IngestPipeline {
         continue;
       }
       const env = parsed.data;
+      if (this.supersede?.(env.sensorId, env.adapter)) {
+        result.superseded = (result.superseded ?? 0) + 1;
+        continue;
+      }
       if (!findSensor(env.sensorId)) {
         result.rejected.push({ index: i, reason: 'unregistered sensor' });
         await this.deadLetter('unregistered sensor', raw[i], sid, mid, receivedAt);

@@ -3,7 +3,7 @@
 /* top bar parts */
 .modes { flex: none; }
 .modes button { padding: 0 9px; }
-.clock { display: flex; align-items: center; gap: 8px; padding: 0 10px; height: 28px; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.clock { display: flex; align-items: center; gap: 8px; padding: 0 10px; height: 28px; white-space: nowrap; flex: none; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
 .clock-mode { font-size: 10px; letter-spacing: 0.12em; font-weight: 600; padding: 2px 6px; border-radius: 2px; color: var(--bg-0); background: var(--text-1); }
 .clock-mode.live { background: var(--ok); }
 .clock-mode.replay { background: var(--amber); }
@@ -12,7 +12,7 @@
 .search-input { border: 0; outline: 0; background: transparent; flex: 1; min-width: 0; color: var(--text-0); font-size: 12.5px; }
 .search-results { position: absolute; top: 32px; left: 0; right: 0; background: var(--bg-2); border: 1px solid var(--line-2); max-height: 380px; overflow: auto; z-index: 60; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
 .status-sum .btn { gap: 5px; }
-.user { border-left: 1px solid var(--line); padding-left: 12px; }
+.user { border-left: 1px solid var(--line); padding-left: 12px; white-space: nowrap; flex: none; }
 
 /* operations layout */
 .ops {

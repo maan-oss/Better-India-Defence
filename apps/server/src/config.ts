@@ -28,6 +28,9 @@ const schema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   WEB_DIST: z.string().optional(),
   AUTO_INCIDENTS: z.enum(['true', 'false']).default('true'),
+  /** Directory from which file-based camera sources (recorded feeds) may be read. */
+  STRATA_IMPORT_DIR: z.string().optional(),
+  STRATA_MODELS_DIR: z.string().optional(),
 });
 
 export type Config = z.infer<typeof schema> & { dataDir: string };

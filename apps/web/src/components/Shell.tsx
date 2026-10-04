@@ -14,6 +14,7 @@ const NAV: { to: string; label: string; icon: keyof typeof Icon; perm?: string }
   { to: '/operations', label: 'Operations', icon: 'Ops' },
   { to: '/incidents', label: 'Incidents', icon: 'Incidents' },
   { to: '/sensors', label: 'Sensors', icon: 'Sensors' },
+  { to: '/cameras', label: 'Live Cameras', icon: 'Camera', perm: 'media.view' },
   { to: '/reconstructions', label: 'Reconstructions', icon: 'Recon' },
   { to: '/evidence', label: 'Evidence', icon: 'Evidence' },
   { to: '/forensics', label: 'Media Forensics', icon: 'Forensics' },

@@ -1,4 +1,5 @@
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+import { mkdir } from 'node:fs/promises';
 import { FACILITY } from '@strata/domain';
 import { SCENARIO_INFO } from '@strata/simulator';
 import type { Config } from './config.ts';
@@ -26,6 +27,7 @@ import { HandoffService } from './handoff/handoffService.ts';
 import { VisionService } from './vision/visionService.ts';
 import { IdentityService } from './identity/identityService.ts';
 import { EvidenceService } from './evidence/evidenceService.ts';
+import { CameraService } from './cameras/cameraService.ts';
 
 /** Composition root: constructs and wires every service, restores persisted state, starts timers. */
 export class Platform {
@@ -51,6 +53,7 @@ export class Platform {
   vision!: VisionService;
   identity!: IdentityService;
   evidence!: EvidenceService;
+  cameras!: CameraService;
   private timers: NodeJS.Timeout[] = [];
 
   constructor(
@@ -92,6 +95,11 @@ export class Platform {
     await this.identity.load();
     this.evidence = new EvidenceService(this.db, this.store, this.vision, this.identity, this.hub, this.audit, this.log);
     void this.evidence.resume();
+    const importDir = resolve(cfg.STRATA_IMPORT_DIR ?? join(cfg.dataDir, 'import'));
+    await mkdir(importDir, { recursive: true });
+    this.cameras = new CameraService(this.db, this.log, this.ingest, this.vision, this.identity, this.evidence, this.store, cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null, importDir);
+    this.ingest.supersede = (sid, adapter) => this.cameras.superseded(sid, adapter);
+    await this.cameras.load();
     if (!this.vision.ffmpeg) this.log.warn('ffmpeg not found: video evidence and network cameras are unavailable (images still work)');
     // Face-data retention: unmatched sightings are purged after the configured period.
     this.timers.push(
@@ -154,6 +162,7 @@ export class Platform {
 
   async stop(): Promise<void> {
     for (const t of this.timers) clearInterval(t);
+    this.cameras?.stopAll();
     this.hub.close();
     await this.pool?.close();
     await this.vision?.close();

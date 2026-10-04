@@ -151,3 +151,18 @@
   .custody, .custody * { color: #000 !important; background: transparent !important; border-color: #999 !important; }
   .print-banner { display: block; text-align: center; font-weight: 600; letter-spacing: 0.2em; border: 1px solid #000; padding: 4px; }
 }
+
+/* live cameras */
+.camwall { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 12px; }
+.camtile { border: 1px solid var(--line); background: var(--bg-1); display: flex; flex-direction: column; }
+.camtile.sel { border-color: var(--text-1); }
+.camtile-v { position: relative; aspect-ratio: 16 / 9; background: var(--bg-0); cursor: pointer; overflow: hidden; }
+.camtile-v img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.camtile-off { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-2); font-size: 12px; padding: 12px; text-align: center; }
+.camtile-off.error { color: #f0b4a8; }
+.camtile-state { position: absolute; left: 8px; top: 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; padding: 1px 6px; background: rgba(10, 11, 12, 0.75); }
+.camtile-state.live { color: var(--ok); }
+.camtile-state.error { color: var(--red); }
+.camtile-state.connecting { color: var(--amber); }
+.camtile-zone { position: absolute; right: 8px; top: 8px; font-size: 10px; padding: 1px 6px; background: var(--amber); color: var(--bg-0); font-weight: 500; }
+.camtile-b { padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }

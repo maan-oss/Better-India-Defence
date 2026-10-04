@@ -49,6 +49,16 @@ export class SensorMonitor {
     return this.state.get(sensorId);
   }
 
+  /** State for a sensor, created on demand (sensors can be added to the site at runtime). */
+  private ensure(sensorId: string): SensorStatusRecord {
+    let s = this.state.get(sensorId);
+    if (!s) {
+      s = { sensorId, status: 'silent', lastSeen: null, lastSeq: null, message: 'no data received yet', metrics: {}, updatedAt: 0 };
+      this.state.set(sensorId, s);
+    }
+    return s;
+  }
+
   all(): SensorStatusRecord[] {
     return [...this.state.values()];
   }
@@ -59,8 +69,7 @@ export class SensorMonitor {
 
   /** Record traffic; returns a transition if the sensor came back. */
   seen(sensorId: string, t: number, seq: number, health?: { status: 'ok' | 'degraded' | 'fault' | 'offline'; message?: string; metrics?: Record<string, number> }): StatusTransition | null {
-    const s = this.state.get(sensorId);
-    if (!s) return null;
+    const s = this.ensure(sensorId);
     const firstContact = s.lastSeen === null;
     if (s.lastSeen === null || t > s.lastSeen) s.lastSeen = t;
     if (s.lastSeq === null || seq > s.lastSeq) s.lastSeq = seq;
@@ -85,7 +94,7 @@ export class SensorMonitor {
   sweep(now: number): StatusTransition[] {
     const out: StatusTransition[] = [];
     for (const def of FACILITY.sensors) {
-      const s = this.state.get(def.id)!;
+      const s = this.ensure(def.id);
       const limit = SILENCE_S[def.kind] * 1000;
       if (!Number.isFinite(limit) || s.lastSeen === null) continue;
       if (s.status !== 'silent' && now - s.lastSeen > limit) {
@@ -107,7 +116,7 @@ export class SensorMonitor {
     const ids = [...this.dirty];
     this.dirty.clear();
     for (const id of ids) {
-      const s = this.state.get(id)!;
+      const s = this.ensure(id);
       await this.db.query(
         `INSERT INTO sensor_status (sensor_id, status, last_seen, last_seq, message, metrics, updated_at) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7)
          ON CONFLICT (sensor_id) DO UPDATE SET status=EXCLUDED.status, last_seen=EXCLUDED.last_seen, last_seq=EXCLUDED.last_seq, message=EXCLUDED.message, metrics=EXCLUDED.metrics, updated_at=EXCLUDED.updated_at`,
