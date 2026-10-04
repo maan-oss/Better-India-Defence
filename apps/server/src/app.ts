@@ -1,4 +1,4 @@
-import Fastify, { type FastifyInstance } from 'fastify';
+import Fastify, { LogController, type FastifyInstance } from 'fastify';
 import websocket from '@fastify/websocket';
 import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
@@ -11,7 +11,7 @@ import { registerOperations } from './routes/operations.ts';
 export async function buildApp(p: Platform): Promise<FastifyInstance> {
   const cfg = p.cfg;
   const https = cfg.TLS_CERT_FILE && cfg.TLS_KEY_FILE ? { https: { cert: readFileSync(cfg.TLS_CERT_FILE), key: readFileSync(cfg.TLS_KEY_FILE) } } : {};
-  const app = Fastify({ loggerInstance: p.log.child({ component: 'http' }), disableRequestLogging: true, bodyLimit: 2 * 1024 * 1024, trustProxy: false, ...https }) as unknown as FastifyInstance;
+  const app = Fastify({ loggerInstance: p.log.child({ component: 'http' }), logController: new LogController({ disableRequestLogging: true }), bodyLimit: 2 * 1024 * 1024, trustProxy: false, ...https }) as unknown as FastifyInstance;
 
   app.addContentTypeParser(['application/octet-stream', 'application/x-strata-rangescan', 'image/png', 'image/jpeg'], { parseAs: 'buffer', bodyLimit: 32 * 1024 * 1024 }, (_req, body, done) => done(null, body));
   await app.register(rateLimit, { max: 600, timeWindow: '1 minute', allowList: (req) => req.url.startsWith('/api/ingest') });

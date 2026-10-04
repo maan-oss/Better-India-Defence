@@ -19,7 +19,7 @@
     "typecheck": "tsc -p packages/domain && tsc -p packages/simulator && tsc -p apps/server && tsc -p apps/web",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "npm run build && playwright test",
     "db:migrate": "npm run migrate -w @strata/server"
   },
   "devDependencies": {

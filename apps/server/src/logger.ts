@@ -1,6 +1,8 @@
 import pino from 'pino';
 
+/** Structured JSON logs. Human-readable output (pino-pretty worker) only when running from TypeScript source. */
 export function createLogger(level: string, pretty: boolean) {
+  pretty = pretty && import.meta.url.endsWith('.ts');
   return pino({
     level,
     base: { service: 'strata-server' },

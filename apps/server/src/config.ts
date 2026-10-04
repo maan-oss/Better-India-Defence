@@ -20,6 +20,8 @@ const schema = z.object({
     .optional(),
   TLS_CERT_FILE: z.string().optional(),
   TLS_KEY_FILE: z.string().optional(),
+  /** Set when TLS is terminated by a reverse proxy in front of this process. */
+  COOKIE_SECURE: z.enum(['true', 'false']).default('false'),
   ANTHROPIC_API_KEY: z.string().optional(),
   COPILOT_MODEL: z.string().default('claude-opus-5-5'),
   COPILOT_PROVIDER: z.enum(['auto', 'deterministic', 'anthropic']).default('auto'),

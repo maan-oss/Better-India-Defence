@@ -19,7 +19,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
       await p.audit.append({ actor: b.username, role: 'none', action: 'login_failed', target: null, detail: { locked: Boolean(r) }, ip: req.ip });
       return reply.code(r ? 429 : 401).send({ error: r ? 'too many failed attempts; try again in a minute' : 'invalid credentials' });
     }
-    const secure = Boolean(cfg.TLS_CERT_FILE);
+    const secure = Boolean(cfg.TLS_CERT_FILE) || cfg.COOKIE_SECURE === 'true';
     void reply.header('set-cookie', `${SESSION_COOKIE}=${encodeURIComponent(r.token)}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${cfg.SESSION_TTL_HOURS * 3600}${secure ? '; Secure' : ''}`);
     await p.audit.append({ actor: r.user.username, role: r.user.role, action: 'login', target: null, detail: {}, ip: req.ip });
     return { user: r.user, permissions: permissionsFor(r.user.role), expiresAt: r.expiresAt, token: r.token };
