@@ -4,6 +4,8 @@ import { FACILITY, findSensor, formatGeodetic, EnuFrame, type AlertRecord, type 
 import { get, post, qs } from '../api/client';
 import type { PatchDetail, TrackDetail, WorldChangeRow } from '../api/types';
 import { useWorld } from '../state/world';
+import { grid } from '../state/ops';
+import { Checklist, DispatchDialog } from './ops/OpsWidgets';
 import { useTime } from '../state/time';
 import { useData } from '../state/data';
 import { useSession } from '../state/session';
@@ -198,6 +200,8 @@ export function TrackInspector({ id }: { id: string }) {
           <dd className="mono">{(s?.sigmaH ?? lastHist?.sigma_h ?? 0).toFixed(1)} m</dd>
           {s && (
             <>
+              <dt>Grid (MGRS)</dt>
+              <dd className="mono">{grid(s.position)}</dd>
               <dt>Position</dt>
               <dd className="mono">
                 {enu(s.position.x, s.position.y)} · {s.position.z.toFixed(0)} m
@@ -310,6 +314,8 @@ export function SensorInspector({ id }: { id: string }) {
             <>
               <dt>Position</dt>
               <dd className="mono">{formatGeodetic(geo)}</dd>
+              <dt>Grid (MGRS)</dt>
+              <dd className="mono">{'position' in def ? grid(def.position) : '—'}</dd>
             </>
           )}
           {def.kind === 'camera' && (
@@ -433,6 +439,7 @@ export function AlertInspector({ id }: { id: string }) {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [obs, setObs] = useState<string | null>(null);
+  const [dispatch, setDispatch] = useState(false);
   const flyTo = useWorld((s) => s.flyTo);
   const nav = useNavigate();
   if (!alert) return <ErrorNote error="Alert not loaded" />;
@@ -459,6 +466,12 @@ export function AlertInspector({ id }: { id: string }) {
           <dd className="mono">{dateTime(alert.t)}</dd>
           <dt>Source</dt>
           <dd className="mono">{alert.source}</dd>
+          {alert.position && (
+            <>
+              <dt>Grid (MGRS)</dt>
+              <dd className="mono">{grid(alert.position)}</dd>
+            </>
+          )}
           {alert.trackId && (
             <>
               <dt>Track</dt>
@@ -510,8 +523,15 @@ export function AlertInspector({ id }: { id: string }) {
               Open incident
             </button>
           )}
+          {can('ops.dispatch') && alert.status !== 'resolved' && alert.status !== 'dismissed' && (
+            <button className="btn small" onClick={() => setDispatch(true)}>
+              Dispatch team…
+            </button>
+          )}
         </div>
       </div>
+      <Checklist alertId={alert.id} />
+      {dispatch && <DispatchDialog alert={alert} onClose={() => setDispatch(false)} />}
       <div className="ledger">
         <h5>Evidence</h5>
         {alert.evidence.map((e, i) => (
@@ -639,11 +659,13 @@ export function PointInspector({ x, y, z }: { x: number; y: number; z: number })
   const cell = `ground:${Math.floor(x / 80)}:${Math.floor(y / 80)}`;
   return (
     <div>
-      <Header kind="Location" title={enu(x, y)} />
+      <Header kind="Location" title={grid({ x, y })} />
       <div className="ledger">
         <dl className="kv">
           <dt>WGS84</dt>
           <dd className="mono">{formatGeodetic(geo)}</dd>
+          <dt>Site ENU</dt>
+          <dd className="mono">{enu(x, y)}</dd>
           <dt>Elevation</dt>
           <dd className="mono">{z.toFixed(1)} m (synthetic DEM)</dd>
         </dl>

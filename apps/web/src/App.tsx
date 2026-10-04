@@ -7,6 +7,7 @@ import { useData } from './state/data';
 import { tracks } from './state/tracks';
 import { live } from './api/live';
 import { useVisionLive } from './api/vision';
+import { useOps } from './state/ops';
 import { get, setUnauthorizedHandler } from './api/client';
 import type { FacilityResponse } from './api/types';
 import type { SurfacePatch } from '@strata/domain';
@@ -24,6 +25,7 @@ const SystemHealth = lazy(() => import('./pages/SystemHealth').then((m) => ({ de
 const Audit = lazy(() => import('./pages/Audit').then((m) => ({ default: m.Audit })));
 const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
 const Forensics = lazy(() => import('./pages/Forensics').then((m) => ({ default: m.Forensics })));
+const Command = lazy(() => import('./pages/Command').then((m) => ({ default: m.Command })));
 const Cameras = lazy(() => import('./pages/Cameras').then((m) => ({ default: m.Cameras })));
 const Identity = lazy(() => import('./pages/Identity').then((m) => ({ default: m.Identity })));
 
@@ -44,6 +46,8 @@ function useBootstrap(enabled: boolean): { ready: boolean; error: string | null 
         useTime.setState({ t: f.liveEdge || Date.now() });
         await useData.getState().loadInitial();
         void useVisionLive.getState().refreshCounts();
+        await useOps.getState().load();
+        for (const a of useData.getState().alerts) useOps.getState().seenAlerts.add(a.id);
         setReady(true);
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
@@ -55,6 +59,7 @@ function useBootstrap(enabled: boolean): { ready: boolean; error: string | null 
       else {
         useData.getState().onLive(m);
         useVisionLive.getState().onLive(m);
+        useOps.getState().onLive(m);
       }
     });
     const offStatus = live.onStatus((s) => useData.getState().setWs(s));
@@ -91,6 +96,7 @@ function Authenticated() {
             <Route path="/forensics/:id" element={<Forensics />} />
             <Route path="/identity" element={<Identity />} />
             <Route path="/cameras" element={<Cameras />} />
+            <Route path="/command" element={<Command />} />
             <Route path="/simulation" element={<SimulationLab />} />
             <Route path="/system" element={<SystemHealth />} />
             <Route path="/audit" element={<Audit />} />

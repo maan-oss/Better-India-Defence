@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import type { FastifyInstance } from 'fastify';
-import { INGEST_SCHEMA_VERSION } from '@strata/domain';
+import { FACILITY, INGEST_SCHEMA_VERSION } from '@strata/domain';
 import { loadConfig } from '../src/config.ts';
 import { createLogger } from '../src/logger.ts';
 import { Platform } from '../src/platform.ts';
@@ -72,7 +72,7 @@ describe.skipIf(!ready)('live cameras (requires ffmpeg and models)', () => {
       method: 'POST',
       url: '/api/cameras',
       headers: H(),
-      payload: { id: 'GATE2-CAM1', name: 'Gate 2 entry', binding: 'new', url: 'gate2.mp4', loopFile: true, pose: { lat: 0.0004, lon: 0.0004, heightM: 6, headingDeg: 200, pitchDeg: -12, hfovDeg: 70 }, zoneId: 'zn-secure', analyticsFps: 2 },
+      payload: { id: 'GATE2-CAM1', name: 'Gate 2 entry', binding: 'new', url: 'gate2.mp4', loopFile: true, pose: { lat: FACILITY.origin.lat + 0.0004, lon: FACILITY.origin.lon + 0.0004, heightM: 6, headingDeg: 200, pitchDeg: -12, hfovDeg: 70 }, zoneId: 'zn-secure', analyticsFps: 2 },
     });
     expect(saved.statusCode).toBe(200);
     expect((saved.json() as { urlMasked: string }).urlMasked).toContain('gate2.mp4');

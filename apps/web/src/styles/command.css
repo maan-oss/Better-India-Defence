@@ -1,0 +1,42 @@
+/* Command console */
+.cmd-grid { display: grid; grid-template-columns: minmax(380px, 1fr) minmax(560px, 2fr); grid-auto-rows: min-content; gap: 12px; padding: 14px; align-content: start; }
+.cmd-threats { grid-column: 2; grid-row: 1 / 3; }
+.ready-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 10px 12px; }
+.ready-step { height: 44px; border: 1px solid var(--line-2); background: var(--bg-2); color: var(--text-2); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; font-weight: 600; cursor: pointer; border-radius: var(--radius); }
+.ready-step:disabled { cursor: default; }
+.ready-step.on.r-NORMAL { color: var(--bg-0); background: var(--ok); border-color: var(--ok); }
+.ready-step.on.r-ALERT { color: var(--bg-0); background: #d9c27a; border-color: #d9c27a; }
+.ready-step.on.r-HIGH-ALERT { color: var(--bg-0); background: var(--amber); border-color: var(--amber); }
+.ready-step.on.r-LOCKDOWN { color: #fff; background: var(--red); border-color: var(--red); }
+.tlevel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; padding: 1px 5px; border-radius: 2px; border: 1px solid var(--line-3); }
+.tlevel.CRITICAL { background: var(--red); color: #fff; border-color: var(--red); }
+.tlevel.HIGH { background: var(--amber); color: var(--bg-0); border-color: var(--amber); }
+.tlevel.MEDIUM { color: var(--amber); border-color: var(--amber); }
+.tlevel.LOW { color: var(--text-2); }
+.tstat { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.05em; color: var(--text-1); }
+.tstat.DISPATCHED, .tstat.EN-ROUTE, .tstat.ISSUED, .tstat.ACKNOWLEDGED { color: var(--amber); }
+.tstat.ON-SCENE { color: var(--bg-0); background: var(--amber); padding: 0 4px; }
+.tstat.AVAILABLE, .tstat.COMPLETE { color: var(--ok); }
+.task { border-bottom: 1px solid var(--line); padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
+.task.closed { opacity: 0.55; }
+.sop { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.sop li { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+.sop li.done span { color: var(--text-2); text-decoration: line-through; }
+.handover { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; }
+.handover b { color: var(--text-2); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; margin-right: 6px; }
+.handover ul { margin: 2px 0 4px 18px; padding: 0; }
+.sitrep-layout { display: grid; grid-template-columns: 300px 1fr; min-height: 0; height: 100%; }
+.sitrep-doc { max-width: 900px; margin: 16px auto; padding: 24px 32px; background: var(--bg-1); border: 1px solid var(--line-2); font-family: var(--font-mono); font-size: 12.5px; }
+.sitrep-doc .cls-line { text-align: center; font-weight: 600; letter-spacing: 0.24em; margin: 4px 0 14px; }
+.sitrep-head { display: flex; flex-direction: column; gap: 2px; margin-bottom: 16px; }
+.sitrep-sec { margin-bottom: 14px; }
+.sitrep-title { font-weight: 600; margin-bottom: 4px; }
+.sitrep-sec pre { white-space: pre-wrap; margin: 0; font-family: var(--font-mono); }
+.sitrep-sec textarea { width: 100%; font-family: var(--font-mono); font-size: 12px; }
+@media print {
+  .sitrep-layout { display: block; }
+  .sitrep-layout > .scroll:first-child { display: none !important; }
+  .sitrep-doc { border: 0; margin: 0; padding: 0; max-width: none; background: #fff !important; color: #000 !important; }
+  .sitrep-doc * { color: #000 !important; }
+  .cls-banner { display: none !important; }
+}

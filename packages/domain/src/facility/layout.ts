@@ -340,7 +340,8 @@ const sensors: SensorDef[] = [...cameras, ...radars, ...rf, ...lidars, ...drones
 export const FACILITY: FacilityDef = {
   id: 'site-kestrel',
   name: 'Site KESTREL — Synthetic Test Facility',
-  origin: { lat: 0, lon: 0, alt: 0 },
+  // Fictional site in open sea, mid-UTM-zone 31N so grid references are consistent across the site.
+  origin: { lat: 0.5, lon: 3.0, alt: 0 },
   halfExtentM: 2560,
   perimeterHalfM: P,
   buildings,

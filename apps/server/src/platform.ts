@@ -28,6 +28,7 @@ import { VisionService } from './vision/visionService.ts';
 import { IdentityService } from './identity/identityService.ts';
 import { EvidenceService } from './evidence/evidenceService.ts';
 import { CameraService } from './cameras/cameraService.ts';
+import { OpsService } from './ops/opsService.ts';
 
 /** Composition root: constructs and wires every service, restores persisted state, starts timers. */
 export class Platform {
@@ -54,6 +55,9 @@ export class Platform {
   identity!: IdentityService;
   evidence!: EvidenceService;
   cameras!: CameraService;
+  ops!: OpsService;
+  /** Classification banner shown on every console and printed product. */
+  classification: { level: string; caveat: string } = { level: 'RESTRICTED', caveat: '' };
   private timers: NodeJS.Timeout[] = [];
 
   constructor(
@@ -100,6 +104,11 @@ export class Platform {
     this.cameras = new CameraService(this.db, this.log, this.ingest, this.vision, this.identity, this.evidence, this.store, cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null, importDir);
     this.ingest.supersede = (sid, adapter) => this.cameras.superseded(sid, adapter);
     await this.cameras.load();
+    this.ops = new OpsService(this.db, this.hub, this.alerts, this.fusion, this.incidents, this.sensors, this.identity, () => this.liveEdge(), FACILITY.id === 'site-kestrel');
+    await this.ops.load();
+    this.ops.start();
+    const cls = (await this.db.query<{ value: { level: string; caveat: string } }>(`SELECT value FROM config WHERE key = 'ui.classification'`)).rows[0];
+    if (cls) this.classification = cls.value;
     if (!this.vision.ffmpeg) this.log.warn('ffmpeg not found: video evidence and network cameras are unavailable (images still work)');
     // Face-data retention: unmatched sightings are purged after the configured period.
     this.timers.push(
@@ -138,6 +147,11 @@ export class Platform {
     );
   }
 
+  async setClassification(c: { level: string; caveat: string }, by: string): Promise<void> {
+    this.classification = c;
+    await this.db.query(`INSERT INTO config (key, value, updated_by, updated_at) VALUES ('ui.classification', $1::jsonb, $2, $3) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_by = EXCLUDED.updated_by, updated_at = EXCLUDED.updated_at`, [JSON.stringify(c), by, Date.now()]);
+  }
+
   liveEdge(): number {
     const now = Date.now();
     const c = this.ingest?.dataClock ?? 0;
@@ -163,6 +177,7 @@ export class Platform {
   async stop(): Promise<void> {
     for (const t of this.timers) clearInterval(t);
     this.cameras?.stopAll();
+    this.ops?.stop();
     this.hub.close();
     await this.pool?.close();
     await this.vision?.close();

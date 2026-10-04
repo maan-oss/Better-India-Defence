@@ -198,7 +198,7 @@ export type LiveMessage =
   | { type: 'reconstruction'; id: string; status: string }
   | { type: 'face_event'; event: FaceEventSummary }
   | { type: 'evidence'; id: string; status: string }
-  | { type: 'ops'; topic: 'readiness' | 'teams' | 'tasks' | 'log'; payload: unknown };
+  | { type: 'ops'; topic: 'readiness' | 'teams' | 'tasks' | 'log' | 'threats'; payload: unknown };
 
 /** Minimal face-sighting shape pushed to consoles (full record via the API). */
 export interface FaceEventSummary {

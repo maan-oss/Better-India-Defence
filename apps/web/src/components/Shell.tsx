@@ -8,10 +8,12 @@ import { useVisionLive } from '../api/vision';
 import { get } from '../api/client';
 import { Icon } from './Icons';
 import { dateTime } from '../lib/format';
-import { EnuFrame, terrainHeight } from '@strata/domain';
+import { EnuFrame, fromMgrs, terrainHeight } from '@strata/domain';
+import { useOps } from '../state/ops';
 
 const NAV: { to: string; label: string; icon: keyof typeof Icon; perm?: string }[] = [
   { to: '/operations', label: 'Operations', icon: 'Ops' },
+  { to: '/command', label: 'Command', icon: 'Command' },
   { to: '/incidents', label: 'Incidents', icon: 'Incidents' },
   { to: '/sensors', label: 'Sensors', icon: 'Sensors' },
   { to: '/cameras', label: 'Live Cameras', icon: 'Camera', perm: 'media.view' },
@@ -28,8 +30,13 @@ const NAV: { to: string; label: string; icon: keyof typeof Icon; perm?: string }
 export function Shell({ children }: { children: ReactNode }) {
   const can = useSession((s) => s.can);
   const pending = useVisionLive((s) => s.pendingReview);
+  const cls = useOps((s) => s.classification);
+  const banner = `${cls.level}${cls.caveat ? ` // ${cls.caveat}` : ''}`;
   return (
-    <div className="shell">
+    <div className={`shell cls-${cls.level}`}>
+      <div className="cls-banner top" role="note" aria-label={`Classification ${banner}`}>
+        {banner}
+      </div>
       <TopBar />
       <nav className="rail" aria-label="Application areas">
         {NAV.filter((n) => !n.perm || can(n.perm)).map((n) => {
@@ -44,6 +51,7 @@ export function Shell({ children }: { children: ReactNode }) {
         })}
       </nav>
       <main className="main">{children}</main>
+      <div className="cls-banner bottom">{banner}</div>
     </div>
   );
 }
@@ -96,9 +104,10 @@ function SearchBox() {
     }
     const ctl = new AbortController();
     const id = setTimeout(() => {
+      const grid = /^\s*\d{1,2}\s*[C-HJ-NP-X]\s*[A-HJ-NP-Z]{2}\s*\d{2,10}\s*\d*\s*$/i.test(q) ? [{ kind: 'mgrs', id: q.trim(), label: `Grid ${q.trim().toUpperCase()}`, detail: 'MGRS — fly to' }] : [];
       get<typeof res>(`/api/search?q=${encodeURIComponent(q.trim())}`, ctl.signal)
-        .then(setRes)
-        .catch(() => undefined);
+        .then((r) => setRes([...grid, ...r]))
+        .catch(() => setRes(grid));
     }, 150);
     return () => {
       clearTimeout(id);
@@ -114,6 +123,18 @@ function SearchBox() {
       return;
     }
     nav('/operations');
+    if (r.kind === 'mgrs' && facility) {
+      try {
+        const g = fromMgrs(r.id);
+        const p = new EnuFrame(facility.origin).toEnu({ lat: g.lat, lon: g.lon, alt: 0 });
+        const z = terrainHeight(p.x, p.y);
+        w.flyTo({ x: p.x, y: p.y, z }, Math.max(200, g.precisionM * 2));
+        w.select({ kind: 'point', position: { x: p.x, y: p.y, z } });
+      } catch {
+        /* invalid reference */
+      }
+      return;
+    }
     if (r.kind === 'coordinates' && facility) {
       const [a, b] = r.id.split(',').map(Number) as [number, number];
       const isGeo = r.label.includes('.') && Math.abs(a) <= 90 && Math.abs(b) <= 180 && Math.abs(a) < 1 && Math.abs(b) < 1;
@@ -202,6 +223,10 @@ function StatusSummary() {
 
 function TopBar() {
   const user = useSession((s) => s.user);
+  const facility = useWorld((s) => s.facility);
+  const readiness = useOps((s) => s.readiness);
+  const sound = useOps((s) => s.sound);
+  const setSound = useOps((s) => s.setSound);
   const logout = useSession((s) => s.logout);
   const mode = useWorld((s) => s.mode);
   const setMode = useWorld((s) => s.setMode);
@@ -220,9 +245,14 @@ function TopBar() {
         <Icon.Logo />
       </div>
       <div className="site">
-        <b>Site KESTREL</b>
-        <span>Synthetic test facility · 5.1 × 5.1 km</span>
+        <b>{facility?.name.split(' — ')[0] ?? 'Site'}</b>
+        <span>{facility?.name.split(' — ')[1] ?? ''}</span>
       </div>
+      {readiness && (
+        <button className={`readiness r-${readiness.level.replace(' ', '-')}`} onClick={() => nav('/command')} title={`Readiness set ${new Date(readiness.t || Date.now()).toISOString().slice(0, 16)}Z by ${readiness.by}: ${readiness.reason}`}>
+          {readiness.level}
+        </button>
+      )}
       <div className="seg modes" role="tablist" aria-label="Global mode">
         {MODES.map((m) => (
           <button key={m} role="tab" aria-selected={mode === m} className={mode === m ? 'on' : ''} onClick={() => pick(m)}>
@@ -234,6 +264,9 @@ function TopBar() {
       <SearchBox />
       <div className="spacer" />
       <StatusSummary />
+      <button className={`btn small ghost ${sound ? '' : 'muted'}`} onClick={() => setSound(!sound)} title={sound ? 'Alarm sound on (critical/high alerts)' : 'Alarm sound muted'} aria-label="Toggle alarm sound">
+        {sound ? 'ALARM ON' : 'ALARM OFF'}
+      </button>
       <div className="row user">
         <div className="col" style={{ gap: 0, alignItems: 'flex-end' }}>
           <span style={{ fontSize: 12 }}>{user?.displayName}</span>

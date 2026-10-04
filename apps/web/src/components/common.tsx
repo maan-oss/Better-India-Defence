@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import type { EpistemicState, EvidenceRef } from '@strata/domain';
 import { get } from '../api/client';
 import { hms, dateTime } from '../lib/format';
@@ -114,7 +115,7 @@ export function Modal({ title, children, onClose, wide }: { title: string; child
     ref.current?.focus();
     return () => window.removeEventListener('keydown', k);
   }, [onClose]);
-  return (
+  return createPortal(
     <div className="modal-back" onMouseDown={onClose}>
       <div ref={ref} tabIndex={-1} className={`modal panel reveal ${wide ? 'wide' : ''}`} role="dialog" aria-label={title} onMouseDown={(e) => e.stopPropagation()}>
         <div className="panel-h">
@@ -128,7 +129,8 @@ export function Modal({ title, children, onClose, wide }: { title: string; child
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

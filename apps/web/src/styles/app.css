@@ -31,9 +31,17 @@ a { color: var(--text-0); }
 .shell {
   display: grid;
   grid-template-columns: var(--rail-w) 1fr;
-  grid-template-rows: var(--top-h) 1fr;
+  grid-template-rows: 16px var(--top-h) 1fr 16px;
   height: 100%;
 }
+.cls-banner { grid-column: 1 / 3; display: grid; place-items: center; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.24em; font-weight: 600; color: var(--bg-0); background: #6f8a6a; z-index: 30; user-select: none; }
+.cls-RESTRICTED .cls-banner { background: #b08a3e; }
+.cls-CONFIDENTIAL .cls-banner { background: #4f6f91; color: #f3efe7; }
+.cls-SECRET .cls-banner { background: #a34436; color: #f3efe7; }
+.readiness { height: 26px; padding: 0 10px; border-radius: var(--radius); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; font-weight: 600; cursor: pointer; border: 1px solid var(--line-3); background: transparent; color: var(--ok); white-space: nowrap; }
+.readiness.r-ALERT { color: var(--amber); border-color: var(--amber); }
+.readiness.r-HIGH-ALERT { color: var(--bg-0); background: var(--amber); border-color: var(--amber); }
+.readiness.r-LOCKDOWN { color: #fff; background: var(--red); border-color: var(--red); animation: pulse 1.6s ease-in-out infinite; }
 .topbar {
   grid-column: 1 / 3;
   display: flex;

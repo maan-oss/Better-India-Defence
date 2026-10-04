@@ -25,3 +25,6 @@ export * from './lidar/change.ts';
 export * from './handoff/handoff.ts';
 export * from './diff/diff.ts';
 export * from './copilot/intent.ts';
+export * from './geo/mgrs.ts';
+export * from './ops/threat.ts';
+export * from './ops/sop.ts';
