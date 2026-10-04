@@ -64,11 +64,12 @@ readiness changes, evidence exports) goes to an append-only, hash-chained audit 
   **dashed** frame means the object is not currently observed (coasting or lost): its position is the
   last confirmed one. A non-cooperative track is *unknown* until identified — the platform never marks
   anything hostile by itself; "hostile" only appears when another system reported it, and says so.
-- **Colour means one thing each.** Blue is only for what you can click, select or focus. Red, orange,
-  yellow and green appear only for status (critical → serious → caution → normal), always with a shape
-  or word as well, and red is reserved for what needs action now. Zones, the fence, buildings and asset
-  rings are drawn in neutral grey-blue, so anything bright on the map is something to look at.
-  Teal marks *reconstructed* and violet *inferred* content. See [DESIGN.md](DESIGN.md).
+- **Colour means one thing each.** The interface itself is grey; colour on screen always means
+  something. Blue is a friendly track. Red, orange, amber and green are status (critical → high →
+  medium → normal), always shown with a shape or word as well, and red is kept for what needs action
+  now. Teal marks *reconstructed* and violet *inferred* content. Zones, the fence, buildings and asset
+  rings are drawn in neutral grey, so anything bright on the map is something to look at. See
+  [DESIGN.md](DESIGN.md).
 - **Map furniture.** MGRS grid (100 m lines, brighter 1 km index lines), compass (click for north-up),
   scale bar, and the grid reference and elevation under the cursor.
 - **Night display.** User menu → *Night display (red light)*: the whole console, imagery and 3-D view in

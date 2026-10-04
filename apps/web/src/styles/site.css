@@ -4,18 +4,18 @@
 .plan-tools { padding: 8px 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .plan-svg { flex: 1; min-height: 0; width: 100%; background: var(--bg-0); touch-action: none; user-select: none; }
 .plan-svg.tool-zone, .plan-svg.tool-perimeter, .plan-svg.tool-building, .plan-svg.tool-gate { cursor: crosshair; }
-.plan-grid line { stroke: rgba(130, 163, 199, 0.09); }
-.plan-extent { fill: none; stroke: rgba(130, 163, 199, 0.3); stroke-dasharray: 8 6; }
-.plan-zone { fill: rgba(169, 187, 207, 0.06); stroke: #a9bbcf; cursor: pointer; }
-.plan-zone.r { fill: rgba(169, 187, 207, 0.1); stroke: #dbe5f0; stroke-dasharray: 8 4; }
+.plan-grid line { stroke: rgba(221, 234, 248, 0.09); }
+.plan-extent { fill: none; stroke: rgba(221, 234, 248, 0.3); stroke-dasharray: 8 6; }
+.plan-zone { fill: rgba(176, 180, 186, 0.06); stroke: #b0b4ba; cursor: pointer; }
+.plan-zone.r { fill: rgba(176, 180, 186, 0.1); stroke: #edeef0; stroke-dasharray: 8 4; }
 .plan-zone.sel, .plan-bld.sel, .plan-perim.sel, .plan-gate.sel { stroke: var(--accent); }
-.plan-perim { fill: none; stroke: #8fa2b8; stroke-dasharray: 10 5; cursor: pointer; }
-.plan-bld { fill: rgba(130, 163, 199, 0.18); stroke: #8fa2b8; cursor: pointer; }
-.plan-gate { fill: #eef3f8; stroke: var(--bg-0); cursor: pointer; }
+.plan-perim { fill: none; stroke: #8b8f98; stroke-dasharray: 10 5; cursor: pointer; }
+.plan-bld { fill: rgba(221, 234, 248, 0.18); stroke: #8b8f98; cursor: pointer; }
+.plan-gate { fill: #edeef0; stroke: var(--bg-0); cursor: pointer; }
 .plan-cam circle { fill: var(--accent); }
 .plan-cam line { stroke: var(--accent); }
-.plan-label { fill: #eef3f8; font-family: var(--font-mono); pointer-events: none; }
-.plan-draft { fill: rgba(77, 172, 255, 0.08); stroke: var(--accent); stroke-dasharray: 4 3; }
+.plan-label { fill: #edeef0; font-family: var(--font-mono); pointer-events: none; }
+.plan-draft { fill: rgba(237, 238, 240, 0.06); stroke: var(--accent); stroke-dasharray: 4 3; }
 
 .site-panel .formgrid { grid-template-columns: 110px 1fr; }
 .feed-row {

@@ -7,6 +7,7 @@ import { useSession } from '../state/session';
 import { dateTime } from '../lib/format';
 import { ErrorNote, Loading, useAsync } from '../components/common';
 import { DECISION_TEXT, DecisionChip, FaceCard, QualityLine } from '../components/identity/FaceCard';
+import { Segmented, Tabs } from '../components/ui';
 import '../styles/forensics.css';
 
 /**
@@ -28,14 +29,20 @@ export function Identity() {
         <h1>Identity</h1>
         <span className="sub">Recognition proposes candidates; trained personnel decide. Results are not identifications until confirmed.</span>
         <div className="spacer" />
-        <div className="seg">
-          {tabs.map((t) => (
-            <button key={t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>
-              {t}
-              {t === 'REVIEW' && pending > 0 ? ` (${pending})` : ''}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          label="Identity views"
+          value={tab}
+          onChange={setTab}
+          options={tabs.map((t) => ({
+            value: t,
+            label: (
+              <>
+                {t.charAt(0) + t.slice(1).toLowerCase()}
+                {t === 'REVIEW' && pending > 0 && <span className="tab-count">{pending}</span>}
+              </>
+            ),
+          }))}
+        />
       </div>
       <div className="page-body id-body">
         {tab === 'REVIEW' && <Review faceId={params.get('face')} />}
@@ -220,13 +227,18 @@ function Sightings() {
     <div className="scroll" style={{ padding: 16 }}>
       <div className="row" style={{ marginBottom: 12 }}>
         <span className="muted">Filter</span>
-        <div className="seg">
-          {['', 'STRONG', 'POSSIBLE', 'NO_MATCH', 'NOT_COMPARABLE'].map((d) => (
-            <button key={d} className={decision === d ? 'on' : ''} onClick={() => setDecision(d)}>
-              {d ? d.replace('_', ' ') : 'ALL'}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          label="Decision"
+          value={decision}
+          onChange={setDecision}
+          options={[
+            { value: '', label: 'All' },
+            { value: 'STRONG', label: 'Strong' },
+            { value: 'POSSIBLE', label: 'Possible' },
+            { value: 'NO_MATCH', label: 'No match' },
+            { value: 'NOT_COMPARABLE', label: 'Not comparable' },
+          ]}
+        />
         <div className="spacer" />
         <span className="muted">Unmatched sightings are deleted automatically after the retention period (Settings).</span>
       </div>
@@ -256,14 +268,15 @@ function Register({ selected, onSelect }: { selected: string | null; onSelect: (
     <div className="reg">
       <div className="reg-list">
         <div className="row" style={{ padding: 10, borderBottom: '1px solid var(--line)' }}>
-          <div className="seg">
-            <button className={list === 'AUTHORISED' ? 'on' : ''} onClick={() => setList('AUTHORISED')}>
-              AUTHORISED
-            </button>
-            <button className={list === 'WATCHLIST' ? 'on' : ''} onClick={() => setList('WATCHLIST')}>
-              WATCHLIST
-            </button>
-          </div>
+          <Segmented
+            label="Register"
+            value={list}
+            onChange={setList}
+            options={[
+              { value: 'AUTHORISED', label: 'Authorised' },
+              { value: 'WATCHLIST', label: 'Watchlist' },
+            ]}
+          />
           <div className="spacer" />
           {can('identity.enrol') && (list === 'AUTHORISED' || can('identity.watchlist')) && (
             <button className="btn small primary" onClick={() => setCreating(true)}>

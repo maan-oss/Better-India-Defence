@@ -219,7 +219,7 @@ function draw(g: CanvasRenderingContext2D, s: SymbolSpec): void {
       g.stroke();
       break;
     default:
-      g.font = '600 34px "IBM Plex Sans", sans-serif';
+      g.font = '600 34px "Inter Variable", sans-serif';
       g.textAlign = 'center';
       g.textBaseline = 'middle';
       g.fillText('?', cx, cy + 2);

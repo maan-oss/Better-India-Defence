@@ -43,7 +43,7 @@ test('time engine: leave live, step, change speed, return to live', async ({ pag
   const before = await page.getByRole('slider', { name: 'Timeline' }).getAttribute('aria-valuenow');
   await page.getByRole('button', { name: 'Step back' }).click({ modifiers: ['Shift'] });
   await expect.poll(async () => page.getByRole('slider', { name: 'Timeline' }).getAttribute('aria-valuenow')).not.toBe(before);
-  await page.getByRole('group', { name: 'Playback speed' }).getByRole('button', { name: '×4', exact: true }).click();
+  await page.getByRole('radiogroup', { name: 'Playback speed' }).getByRole('radio', { name: '×4', exact: true }).click();
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(clock).toHaveText('×4');
   await page.getByTitle('Return to live').click();
@@ -90,7 +90,7 @@ test('audit: administrator verifies the hash chain', async ({ page }) => {
 test('identity hand-off demo returns scored segments with real frame crops and requires human review', async ({ page }) => {
   await signIn(page, 'analyst');
   await page.getByRole('link', { name: 'Evidence' }).click();
-  await page.getByRole('button', { name: /IDENTITY HAND-OFF/ }).click();
+  await page.getByRole('tab', { name: /Identity hand-off/ }).click();
   await page.getByRole('button', { name: /Search recorded observations/ }).click();
   await expect(page.getByText(/HUMAN REVIEW/i).first()).toBeVisible({ timeout: 30_000 });
   const thumb = page.locator('img[alt="candidate appearance"]').first();
@@ -108,7 +108,7 @@ test('command: readiness, threat board, and a SITREP drafted from the record', a
   await expect(page.getByRole('heading', { name: 'Command' })).toBeVisible();
   await expect(page.getByText('Threat evaluation')).toBeVisible();
   await expect(page.getByText('Response teams', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'SITREP', exact: true }).click();
+  await page.getByRole('tab', { name: 'SITREP', exact: true }).click();
   await page.getByRole('button', { name: 'Draft from record' }).click();
   const doc = page.locator('.sitrep-doc');
   await expect(doc).toBeVisible();
@@ -182,7 +182,7 @@ test('camera wall: site cameras render in a selectable grid layout', async ({ pa
   const errors = await signIn(page, 'operator');
   await page.getByRole('link', { name: 'Camera wall' }).click();
   await expect(page.locator('.wtile').first()).toBeVisible();
-  await page.getByRole('button', { name: '2×2' }).click();
+  await page.getByRole('radio', { name: '2×2' }).click();
   await expect(page.locator('.wtile')).toHaveCount(4);
   await page.locator('.wtile').first().click();
   await expect(page.locator('.focus-panel')).toBeVisible();

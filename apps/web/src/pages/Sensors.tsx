@@ -254,7 +254,7 @@ function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: stri
                 <circle r={s * 1.25} fill="var(--bg-1)" stroke={color(st)} strokeWidth={s / 4} />
                 <path d={KIND_GLYPH[d.kind] ?? 'M-3 0h6'} transform={`scale(${s / 7}, ${-s / 7})`} fill="none" stroke={color(st)} strokeWidth={1.4} />
                 {(sel || st !== 'ok') && (
-                  <text transform={`scale(1,-1)`} x={s * 1.8} y={s * 0.5} fontSize={s * 1.6} fill="var(--text-0)" fontFamily="IBM Plex Mono, monospace">
+                  <text transform={`scale(1,-1)`} x={s * 1.8} y={s * 0.5} fontSize={s * 1.6} fill="var(--text-0)" fontFamily="JetBrains Mono Variable, monospace">
                     {d.id}
                   </text>
                 )}

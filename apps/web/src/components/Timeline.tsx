@@ -5,6 +5,7 @@ import { useWorld } from '../state/world';
 import { Icon } from './Icons';
 import { hm, hms } from '../lib/format';
 import { alpha, P, PRIORITY_COLOR } from '../lib/palette';
+import { Segmented } from './ui';
 
 // Observation density is a measure, not a status: muted categorical tones from the cool family.
 const KIND_COLORS: Record<string, string> = {
@@ -111,7 +112,7 @@ export function Timeline() {
           g.fillStyle = inc.id === incidentId ? alpha(P.serious, 0.14) : alpha(P.serious, 0.06);
           g.fillRect(x0, 0, Math.max(2, x1 - x0), H - 16);
           g.fillStyle = alpha(P.serious, 0.85);
-          g.font = '10px IBM Plex Mono';
+          g.font = '10px "JetBrains Mono Variable"';
           g.fillText(inc.code, x0 + 3, H - 20);
           hits.current.push({ x: x0 + 20, y: H - 24, hit: { kind: 'incident', id: inc.id, t: inc.tStart, label: `${inc.code} — ${inc.title}` } });
         }
@@ -190,7 +191,7 @@ export function Timeline() {
       }
       // axis
       g.fillStyle = P.text3;
-      g.font = '10px IBM Plex Mono';
+      g.font = '10px "JetBrains Mono Variable"';
       const span = v.to - v.from;
       const steps = [60_000, 300_000, 600_000, 900_000, 1800_000, 3600_000, 7200_000];
       const step = steps.find((s) => (s / span) * W > 70) ?? 7200_000;
@@ -208,7 +209,7 @@ export function Timeline() {
           g.fillRect(x - 1, 0, 2, H - 16);
           g.fillRect(x - 7, 0, 14, 13);
           g.fillStyle = P.bg0;
-          g.font = '600 10px IBM Plex Sans';
+          g.font = '600 10px "Inter Variable"';
           g.fillText(k, x - 3, 10);
         }
         const xa = xOf(Math.min(d.a, d.b), W, v);
@@ -219,7 +220,7 @@ export function Timeline() {
       // live edge + playhead
       g.fillStyle = alpha(P.normal, 0.85);
       g.fillRect(xe - 0.5, 0, 1, H - 16);
-      g.font = '600 9.5px IBM Plex Sans';
+      g.font = '600 9.5px "Inter Variable"';
       g.fillText('NOW', xe + 3, 10);
       const xp = xOf(time.mode === 'live' ? edge : time.t, W, v);
       g.fillStyle = P.text0;
@@ -327,15 +328,9 @@ export function Timeline() {
         <button className="btn icon small ghost" title="Step forward (frame)" aria-label="Step forward" onClick={(e) => time.step(e.shiftKey ? 10 : 1)}>
           <Icon.StepF />
         </button>
-        <div className="seg speed" role="group" aria-label="Playback speed">
-          {RATES.map((r) => (
-            <button key={r} className={rate === r ? 'on' : ''} onClick={() => time.setRate(r)}>
-              ×{r}
-            </button>
-          ))}
-        </div>
+        <Segmented size="sm" className="speed" label="Playback speed" value={rate} onChange={(r) => time.setRate(r)} options={RATES.map((r) => ({ value: r, label: `×${r}` }))} />
         <button className={`btn small ${tmode === 'live' ? 'on' : ''}`} onClick={() => time.goLive()} title="Return to live">
-          <span className={`status-dot ${tmode === 'live' ? 'ok' : 'degraded'}`} /> LIVE
+          <span className={`status-dot ${tmode === 'live' ? 'ok' : 'degraded'}`} /> Live
         </button>
         <div className="spacer" />
         {mode === 'DIFF' && (

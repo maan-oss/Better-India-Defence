@@ -150,7 +150,7 @@ export function Field() {
           ) : (
             <section className="ftask idle">
               <div className="ftask-h">
-                <span className="mono">NO ACTIVE TASK</span>
+                <span>No active task</span>
               </div>
               <div className="muted">Standing by. New tasks from the control room appear here and sound the alarm.</div>
             </section>
@@ -311,7 +311,7 @@ function LocalPicture({ centre, target }: { centre: Vec3 | null; target: { x: nu
         ctx.stroke();
       }
       ctx.fillStyle = C.text2;
-      ctx.font = '10px "IBM Plex Mono", monospace';
+      ctx.font = '10px "JetBrains Mono Variable", monospace';
       ctx.fillText('300 m', w / 2 + 3, h / 2 - 300 * k + 11);
       ctx.fillText('N', w / 2 - 3, 12);
       for (const v of vas) {

@@ -74,7 +74,7 @@ export function Login() {
               <b>STRATA</b>
             </div>
             <h2>
-              One picture of the installation — <em>what is happening, what happened, and the evidence for both.</em>
+              One picture of the installation. <em>What is happening, what happened, and the evidence for both.</em>
             </h2>
             <p>Cameras, trackers, UAS, radar and allied feeds fused into a single operational picture with threat evaluation, recognition and response coordination.</p>
             <div className="hero-pillars">
@@ -111,7 +111,7 @@ export function Login() {
               {busy ? 'Signing in…' : 'Sign in'}
             </button>
             <div className="consent" role="note">
-              <b>AUTHORISED USE ONLY</b>
+              <b>Authorised use only</b>
               {banner?.notice ?? 'This system is for authorised use only. Activity is monitored and recorded.'} By signing in you acknowledge this notice.
             </div>
             {demo?.password && (

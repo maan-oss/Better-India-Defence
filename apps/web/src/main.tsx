@@ -1,19 +1,18 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import '@fontsource/ibm-plex-sans/300.css';
-import '@fontsource/ibm-plex-sans/400.css';
-import '@fontsource/ibm-plex-sans/500.css';
-import '@fontsource/ibm-plex-sans/600.css';
-import '@fontsource/ibm-plex-mono/400.css';
-import '@fontsource/ibm-plex-mono/500.css';
-import '@fontsource/ibm-plex-mono/600.css';
+// Fonts are bundled (no CDN): installations run air-gapped.
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
 import './styles/app.css';
 import './styles/operations.css';
 import './state/ui';
 import { App } from './App';
+import { TooltipProvider } from './components/ui';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <TooltipProvider>
+      <App />
+    </TooltipProvider>
   </StrictMode>,
 );

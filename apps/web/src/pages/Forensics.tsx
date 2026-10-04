@@ -10,6 +10,7 @@ import { MediaViewer, type Overlay } from '../components/forensics/MediaViewer';
 import { ProductView, Workbench } from '../components/forensics/Workbench';
 import { FaceCard } from '../components/identity/FaceCard';
 import { Icon } from '../components/Icons';
+import { Segmented, Tabs } from '../components/ui';
 import '../styles/forensics.css';
 
 /**
@@ -166,13 +167,7 @@ function Workspace({ id, version }: { id: string; version: number }) {
             {it.id} · SHA-256 {it.sha256}
           </div>
         </div>
-        <div className="seg">
-          {(['VIEW', 'ENHANCE', 'FACES', 'PRODUCTS', 'CUSTODY'] as Tab[]).map((k) => (
-            <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>
-              {k}
-            </button>
-          ))}
-        </div>
+        <Tabs label="Evidence item views" value={tab} onChange={setTab} options={(['VIEW', 'ENHANCE', 'FACES', 'PRODUCTS', 'CUSTODY'] as Tab[]).map((k) => ({ value: k, label: k.charAt(0) + k.slice(1).toLowerCase() }))} />
       </div>
       <div className="ws-meta">
         <span>
@@ -684,14 +679,15 @@ function UploadDialog({ onClose, onDone }: { onClose: () => void; onDone: (it: E
           ))}
         </select>
         <label>Analysis</label>
-        <div className="seg">
-          <button className={mode === 'standard' ? 'on' : ''} onClick={() => setMode('standard')}>
-            STANDARD
-          </button>
-          <button className={mode === 'thorough' ? 'on' : ''} onClick={() => setMode('thorough')}>
-            THOROUGH
-          </button>
-        </div>
+        <Segmented
+          label="Analysis depth"
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'standard', label: 'Standard' },
+            { value: 'thorough', label: 'Thorough' },
+          ]}
+        />
         <label>Notes</label>
         <textarea className="input" rows={2} value={notes} placeholder="Where it came from, who handed it over, seal numbers…" onChange={(e) => setNotes(e.target.value)} />
       </div>

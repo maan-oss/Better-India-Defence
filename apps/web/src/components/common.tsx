@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { EpistemicState, EvidenceRef } from '@strata/domain';
 import { get } from '../api/client';
 import { hms, dateTime } from '../lib/format';
 import { useWorld } from '../state/world';
-import { Icon } from './Icons';
+import { Dialog } from './ui';
 
 export function StateChip({ state, label }: { state: EpistemicState | string; label?: string }) {
   return (
@@ -107,30 +106,12 @@ export function ObservationViewer({ id, onClose }: { id: string; onClose: () => 
   );
 }
 
+/** Modal dialog (Radix Dialog; see ui.tsx). */
 export function Modal({ title, children, onClose, wide }: { title: string; children: ReactNode; onClose: () => void; wide?: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    window.addEventListener('keydown', k);
-    ref.current?.focus();
-    return () => window.removeEventListener('keydown', k);
-  }, [onClose]);
-  return createPortal(
-    <div className="modal-back" onMouseDown={onClose}>
-      <div ref={ref} tabIndex={-1} className={`modal panel reveal ${wide ? 'wide' : ''}`} role="dialog" aria-label={title} onMouseDown={(e) => e.stopPropagation()}>
-        <div className="panel-h">
-          <h3>{title}</h3>
-          <div className="spacer" />
-          <button className="btn icon small ghost" onClick={onClose} aria-label="Close">
-            <Icon.Close />
-          </button>
-        </div>
-        <div className="scroll" style={{ padding: 14, maxHeight: 'calc(100vh - 160px)' }}>
-          {children}
-        </div>
-      </div>
-    </div>,
-    document.body,
+  return (
+    <Dialog title={title} onClose={onClose} wide={wide}>
+      {children}
+    </Dialog>
   );
 }
 

@@ -4,6 +4,7 @@ import { post, qs } from '../../api/client';
 import { STATE_HELP_PRODUCT, STATE_LABEL, type Box, type EnhanceOp, type EvidenceItem, type EvidenceProduct } from '../../api/vision';
 import { useSession } from '../../state/session';
 import { ErrorNote } from '../common';
+import { Segmented } from '../ui';
 
 type OpKey = EnhanceOp['op'];
 
@@ -124,17 +125,16 @@ export function Workbench({ item, t, roi, onProduct }: { item: EvidenceItem; t: 
                 <div className="row">
                   <b>{opLabel(o.op)}</b>
                   {o.op === 'deblur' && (
-                    <div className="seg" style={{ marginLeft: 6 }}>
-                      {(['gaussian', 'motion'] as const).map((k) => (
-                        <button
-                          key={k}
-                          className={o.psf === k ? 'on' : ''}
-                          onClick={() => setOps((cur) => cur.map((x, j) => (j === i ? (k === 'gaussian' ? { op: 'deblur', psf: 'gaussian', sigma: 1.2, iterations: o.iterations } : { op: 'deblur', psf: 'motion', length: 9, angleDeg: 0, iterations: o.iterations }) : x)))}
-                        >
-                          {k === 'gaussian' ? 'Defocus' : 'Motion'}
-                        </button>
-                      ))}
-                    </div>
+                    <Segmented
+                      size="sm"
+                      label="Blur model"
+                      value={o.psf}
+                      onChange={(k) => setOps((cur) => cur.map((x, j) => (j === i ? (k === 'gaussian' ? { op: 'deblur', psf: 'gaussian', sigma: 1.2, iterations: o.iterations } : { op: 'deblur', psf: 'motion', length: 9, angleDeg: 0, iterations: o.iterations }) : x)))}
+                      options={[
+                        { value: 'gaussian', label: 'Defocus' },
+                        { value: 'motion', label: 'Motion' },
+                      ]}
+                    />
                   )}
                   <div className="spacer" />
                   <button className="btn icon small ghost" disabled={i === 0} onClick={() => setOps((c) => swap(c, i, i - 1))} aria-label="Move up">

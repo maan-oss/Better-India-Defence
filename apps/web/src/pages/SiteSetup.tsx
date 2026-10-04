@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { EnuFrame, fromMgrs, toMgrs, type SiteConfig } from '@strata/domain';
 import { api, get } from '../api/client';
 import { ErrorNote, Loading } from '../components/common';
+import { Segmented } from '../components/ui';
 import '../styles/site.css';
 
 /**
@@ -407,13 +408,7 @@ function PlanEditor({
   return (
     <div className="plan">
       <div className="plan-tools row">
-        <div className="seg">
-          {(['select', 'zone', 'building', 'perimeter', 'gate'] as Tool[]).map((t) => (
-            <button key={t} className={tool === t ? 'on' : ''} onClick={() => (setTool(t), setDraft([]))}>
-              {t.toUpperCase()}
-            </button>
-          ))}
-        </div>
+        <Segmented label="Drawing tool" value={tool} onChange={(t) => (setTool(t), setDraft([]))} options={(['select', 'zone', 'building', 'perimeter', 'gate'] as Tool[]).map((t) => ({ value: t, label: t.charAt(0).toUpperCase() + t.slice(1) }))} />
         <span className="muted" style={{ fontSize: 12 }}>
           {tool === 'zone' || tool === 'perimeter' ? `Click to add vertices (${draft.length}); Enter or double-click to finish; Esc to cancel.` : tool === 'building' ? 'Drag a footprint; then set height and rotation.' : tool === 'gate' ? 'Click on the perimeter to place a gate.' : 'Click an item to edit. Drag to pan; wheel to zoom.'}
         </span>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useWorld, LAYERS, type LayerKey } from '../state/world';
 import { useData } from '../state/data';
 import { useTime } from '../state/time';
+import { Segmented } from './ui';
 
 const GROUPS: { title: string; keys: LayerKey[] }[] = [
   { title: 'World', keys: ['terrain', 'grid', 'buildings', 'roads', 'zones', 'objects'] },
@@ -31,13 +32,17 @@ export function LayersPanel() {
         <h3>Navigation</h3>
       </div>
       <div className="layer-group">
-        <div className="seg" role="group" aria-label="Navigation mode" style={{ width: '100%' }}>
-          {(['orbit', 'fly', 'walk'] as const).map((m) => (
-            <button key={m} className={nav === m ? 'on' : ''} style={{ flex: 1 }} onClick={() => setNav(m)}>
-              {m.toUpperCase()}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          fill
+          label="Navigation mode"
+          value={nav}
+          onChange={setNav}
+          options={[
+            { value: 'orbit', label: 'Orbit' },
+            { value: 'fly', label: 'Fly' },
+            { value: 'walk', label: 'Walk' },
+          ]}
+        />
         <div className="dim" style={{ fontSize: 11, marginTop: 6 }}>
           {nav === 'orbit' && 'Drag to orbit · right-drag to pan · wheel to zoom · double-click to focus'}
           {nav === 'fly' && 'W A S D move · Q / E down / up · drag to look · Shift faster'}

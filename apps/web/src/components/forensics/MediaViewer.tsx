@@ -10,7 +10,7 @@ export interface Overlay {
 }
 
 /** Categorical (not status) colours for detection classes on imagery. */
-const CAT_COLOR: Record<string, string> = { person: '#5fd4c4', vehicle: '#b39dff', face: '#eef3f8', aircraft: '#92cbff', boat: '#92cbff', animal: 'var(--text-2)', object: 'var(--text-2)' };
+const CAT_COLOR: Record<string, string> = { person: '#0bd8b6', vehicle: '#baa7ff', face: '#edeef0', aircraft: '#70b8ff', boat: '#70b8ff', animal: 'var(--text-2)', object: 'var(--text-2)' };
 
 /**
  * Frame-accurate viewer for an evidence item. Frames are decoded server-side from the immutable original
@@ -114,7 +114,7 @@ export function MediaViewer({
                 <g key={i}>
                   <rect x={d.box.x} y={d.box.y} width={d.box.w} height={d.box.h} fill="none" stroke={c} strokeWidth={sw} strokeDasharray={d.kind === 'face' && d.quality?.grade === 'UNUSABLE' ? `${sw * 3} ${sw * 2}` : undefined} />
                   {(d.box.w > W / 40 || d.kind === 'face') && (
-                    <text x={d.box.x} y={Math.max(10, d.box.y - sw * 2)} fill={c} fontSize={Math.max(11, W / 110)} fontFamily="IBM Plex Mono, monospace">
+                    <text x={d.box.x} y={Math.max(10, d.box.y - sw * 2)} fill={c} fontSize={Math.max(11, W / 110)} fontFamily="JetBrains Mono Variable, monospace">
                       {d.kind === 'face' ? `face ${d.quality?.grade ?? ''}` : `${d.label} ${Math.round(d.score * 100)}`}
                     </text>
                   )}
@@ -189,16 +189,16 @@ function ActivityStrip({ item, t, onT }: { item: EvidenceItem; t: number; onT: (
       const x = (s.t / dur) * w;
       const hp = (s.persons / maxP) * (h - 12);
       const hv = (s.vehicles / maxP) * (h - 12);
-      g.fillStyle = 'rgba(95,212,196,0.75)';
+      g.fillStyle = 'rgba(11,216,182,0.75)';
       g.fillRect(x, h - 8 - hp, bw, hp);
-      g.fillStyle = 'rgba(179,157,255,0.7)';
+      g.fillStyle = 'rgba(186,167,255,0.7)';
       g.fillRect(x, h - 8 - hp - hv, bw, hv);
       if (s.faces) {
-        g.fillStyle = '#eef3f8';
+        g.fillStyle = '#edeef0';
         g.fillRect(x, h - 5, bw, 4);
       }
     }
-    g.fillStyle = '#eef3f8';
+    g.fillStyle = '#edeef0';
     g.fillRect((t / dur) * w - 1, 0, 2 * devicePixelRatio, h);
   }, [tl, t, dur]);
   return (

@@ -7,6 +7,7 @@ import { ErrorNote, Loading, StateChip, useAsync } from '../components/common';
 import { useSession } from '../state/session';
 import { useTime } from '../state/time';
 import { dateTime, dur, hms, pct, titleCase } from '../lib/format';
+import { Segmented } from '../components/ui';
 
 /** RECONSTRUCTIONS — jobs with inputs (evidence), outputs, confidence and failures. */
 export function Reconstructions() {
@@ -96,14 +97,15 @@ function NewJob({ onCreated }: { onCreated: (id: string) => void }) {
     <div className="section">
       <h4>New reconstruction</h4>
       <div className="row" style={{ flexWrap: 'wrap' }}>
-        <div className="seg">
-          <button className={kind === 'multi_frame' ? 'on' : ''} onClick={() => setKind('multi_frame')}>
-            MULTI-FRAME
-          </button>
-          <button className={kind === 'lidar_dsm' ? 'on' : ''} onClick={() => setKind('lidar_dsm')}>
-            LIDAR SURFACE
-          </button>
-        </div>
+        <Segmented
+          label="Reconstruction kind"
+          value={kind}
+          onChange={setKind}
+          options={[
+            { value: 'multi_frame', label: 'Multi-frame' },
+            { value: 'lidar_dsm', label: 'LiDAR surface' },
+          ]}
+        />
         {kind === 'multi_frame' ? (
           <>
             <select className="input" value={camera} onChange={(e) => setCamera(e.target.value)}>

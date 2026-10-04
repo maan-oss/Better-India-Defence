@@ -53,7 +53,7 @@ export function AreaChart({ values, labels, height = 120, color = 'var(--data)',
       {ticks.map((t) => (
         <g key={t}>
           <line x1={padL} x2={W} y1={y(t)} y2={y(t)} stroke="var(--line)" />
-          <text x={padL - 6} y={y(t) + 3} textAnchor="end" fontSize="10" fill="var(--text-3)" fontFamily="IBM Plex Mono, monospace">
+          <text x={padL - 6} y={y(t) + 3} textAnchor="end" fontSize="10" fill="var(--text-3)" fontFamily="JetBrains Mono Variable, monospace">
             {fmt(t)}
             {unit}
           </text>
@@ -67,7 +67,7 @@ export function AreaChart({ values, labels, height = 120, color = 'var(--data)',
       )}
       {labels?.map((l, i) =>
         l ? (
-          <text key={i} x={x(i)} y={H - 3} textAnchor={i === 0 ? 'start' : i === labels.length - 1 ? 'end' : 'middle'} fontSize="10" fill="var(--text-3)" fontFamily="IBM Plex Mono, monospace">
+          <text key={i} x={x(i)} y={H - 3} textAnchor={i === 0 ? 'start' : i === labels.length - 1 ? 'end' : 'middle'} fontSize="10" fill="var(--text-3)" fontFamily="JetBrains Mono Variable, monospace">
             {l}
           </text>
         ) : null,

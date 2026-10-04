@@ -1,74 +1,77 @@
 /*
- * STRATA colour system.
+ * STRATA design tokens. See docs/DESIGN.md.
  *
- * Principles (ISA-101 high-performance HMI; Astro UXDS — US Space Force operations design system):
- *  1. Surfaces are calm, cool, desaturated navy-slate. Depth comes from a small luminance ladder, not colour.
- *  2. ONE interactive colour (blue) for everything you can click, select or focus. It never means "status".
- *  3. Status colours (critical → serious → caution → normal → standby → off) are reserved for status and
- *     alarms, always paired with shape or text. Red appears only for what needs action now.
- *  4. Static context (zones, buildings, roads, grid, asset rings) is neutral, so alarms are the only bright
- *     things on screen.
+ * Built on Radix Colors (radix-ui.com/colors): 12-step scales tuned for dark UIs, where steps 1–2 are
+ * backgrounds, 3–5 component states, 6–8 borders, 9–10 solid fills and 11–12 text. Using a calibrated
+ * system rather than hand-picked hex values keeps contrast and tint consistent everywhere.
+ *
+ * The chrome is monochrome (Radix Slate), as on operational consoles such as Anduril Lattice and
+ * Palantir Gotham: colour on screen is reserved for meaning — status, affiliation, provenance — so it is
+ * never spent on buttons or decoration (ISA-101). Primary actions and selection use the brightest neutral.
  */
 :root {
-  /* Surface ladder (dark → light). */
-  --bg-0: #0b131c;   /* app base, map frame, wells */
-  --bg-1: #101b27;   /* panels */
-  --bg-2: #15222f;   /* raised: cards, headers, inputs on panels */
-  --bg-3: #1b2c3d;   /* strongly raised / selected */
-  --bg-4: #233850;   /* popovers, menus */
-  --bg-hover: #182838;
-  --line: rgba(130, 163, 199, 0.11);
-  --line-2: rgba(130, 163, 199, 0.19);
-  --line-3: rgba(130, 163, 199, 0.32);
+  color-scheme: dark;
 
-  /* Text */
-  --text-0: #eef3f8;
-  --text-1: #c1ccd8;
-  --text-2: #8796a8;
-  --text-3: #5b6b7d;
+  /* Neutral ladder — Radix Slate (dark). */
+  --bg-0: #0c0d0e;   /* map frame, wells, deepest */
+  --bg-1: #111113;   /* app surface: pages, panels, chrome (slate-1) */
+  --bg-2: #18191b;   /* raised: cards, inputs, headers (slate-2) */
+  --bg-3: #212225;   /* hover / pressed (slate-3) */
+  --bg-4: #272a2d;   /* selected, menus (slate-4) */
+  --bg-hover: #1c1d20;
+  --line: rgba(216, 244, 246, 0.06);    /* hairline (slate-a2/a3) */
+  --line-2: rgba(221, 234, 248, 0.09);  /* default border */
+  --line-3: rgba(217, 237, 255, 0.18);  /* strong border, hover (slate-a6/a7) */
 
-  /* Interaction — Astro interactive blue. */
-  --accent: #4dacff;
-  --accent-2: #92cbff;
-  --accent-ink: #06121e;
-  --accent-dim: rgba(77, 172, 255, 0.13);
-  --accent-line: rgba(77, 172, 255, 0.5);
+  /* Text — Radix Slate 12 / 11 and two interpolated steps. Contrast on --bg-1: 16.4, 9.6, 5.6, 3.6. */
+  --text-0: #edeef0;
+  --text-1: #b0b4ba;
+  --text-2: #8b8f98;
+  --text-3: #62666e;
 
-  /* Status — Astro status scale. */
-  --st-critical: #ff3838;
-  --st-serious: #ffb302;
-  --st-caution: #fce83a;
-  --st-normal: #56f000;
-  --st-standby: #2dccff;
-  --st-off: #a4abb6;
+  /* Interaction — neutral. Bright fill for the one primary action; selection is a lighter surface. */
+  --accent: #edeef0;
+  --accent-2: #ffffff;
+  --accent-ink: #111113;
+  --accent-dim: rgba(221, 234, 248, 0.08);
+  --accent-line: rgba(241, 247, 254, 0.42);
+  --focus: rgba(237, 238, 240, 0.7);
+
+  /* Status — Radix scales: solid (9), text (11), tint (3), border (6). */
+  --st-critical: #e5484d;  --st-critical-text: #ff9592; --st-critical-tint: #3b1219; --st-critical-line: #72232d;
+  --st-serious: #f76b15;   --st-serious-text: #ffa057;  --st-serious-tint: #331e0b;  --st-serious-line: #66350c;
+  --st-caution: #ffc53d;   --st-caution-text: #ffca16;  --st-caution-tint: #302008;  --st-caution-line: #5c3d05;
+  --st-normal: #46a758;    --st-normal-text: #71d083;   --st-normal-tint: #1b2a1e;   --st-normal-line: #2d5736;
+  --st-standby: #00a2c7;   --st-standby-text: #4ccce6;  --st-standby-tint: #082c36;  --st-standby-line: #045468;
+  --st-off: #696e77;
   /* Legacy names mapped onto the scale. */
   --red: var(--st-critical);
-  --red-dim: rgba(255, 56, 56, 0.14);
+  --red-dim: var(--st-critical-tint);
   --amber: var(--st-serious);
-  --amber-dim: rgba(255, 179, 2, 0.13);
+  --amber-dim: var(--st-serious-tint);
   --caution: var(--st-caution);
-  --caution-dim: rgba(252, 232, 58, 0.12);
+  --caution-dim: var(--st-caution-tint);
   --ok: var(--st-normal);
-  --ok-dim: rgba(86, 240, 0, 0.1);
+  --ok-dim: var(--st-normal-tint);
   --info: var(--st-standby);
-  --info-dim: rgba(45, 204, 255, 0.12);
+  --info-dim: var(--st-standby-tint);
 
-  /* Data (charts, sparklines): a calm neutral so measures never read as status or as clickable. */
-  --data: #9fb6cd;
+  /* Data (charts, sparklines): neutral so measures never read as status. */
+  --data: #9ba1aa;
 
-  /* Affiliation (APP-6 / MIL-STD-2525, dark-background variants) — map symbology only. */
-  --friend: #3fc6ff;
-  --hostile: #ff4747;
-  --suspect: #ff9a3d;
-  --neutral: #4cd964;
-  --unknown-aff: #ffe14d;
+  /* Affiliation (APP-6 / MIL-STD-2525) — map symbology only. Radix blue/red/orange/grass/yellow 11. */
+  --friend: #70b8ff;
+  --hostile: #ff6369;
+  --suspect: #ffa057;
+  --neutral: #71d083;
+  --unknown-aff: #f5e147;
 
-  /* Epistemic states (paired with shape/pattern everywhere). */
-  --captured: #eef3f8;
-  --reconstructed: #5fd4c4;
-  --inferred: #b39dff;
-  --prior: #8796a8;
-  --unknown: #4a5a6b;
+  /* Epistemic state — paired with pattern everywhere (solid / half / dashed). Radix teal 11, violet 11. */
+  --captured: #edeef0;
+  --reconstructed: #0bd8b6;
+  --inferred: #baa7ff;
+  --prior: #8b8f98;
+  --unknown: #43484e;
 
   /* Classification markings. */
   --cls-unclassified: #007a33;
@@ -77,25 +80,40 @@
   --cls-secret: #c8102e;
   --cls-topsecret: #ff8c00;
 
-  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --radius: 4px;
+  /* Spacing — 4 px base. Use these, not ad-hoc values. */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+
+  /* Radius — controls 6, containers 8, overlays 10. */
+  --radius-sm: 4px;
+  --radius: 6px;
   --radius-lg: 8px;
-  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --t-fast: 140ms;
-  --t-med: 240ms;
-  --t-slow: 480ms;
+  --radius-xl: 10px;
 
-  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.025) inset, 0 4px 14px rgba(2, 8, 16, 0.35);
-  --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 48px rgba(2, 8, 16, 0.6);
-  --glow-accent: 0 0 0 3px rgba(77, 172, 255, 0.22);
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --t-fast: 120ms;
+  --t-med: 200ms;
+  --t-slow: 420ms;
 
-  --rail-w: 56px;
-  --rail-w-open: 212px;
-  --left-w: 268px;
-  --right-w: 380px;
+  /* Dark UI separates with hairlines; shadow only for things that float. */
+  --shadow-1: none;
+  --shadow-2: 0 0 0 1px rgba(221, 234, 248, 0.08), 0 12px 32px -8px rgba(0, 0, 0, 0.6), 0 4px 10px -4px rgba(0, 0, 0, 0.4);
+  --glow-accent: 0 0 0 1px var(--bg-1), 0 0 0 3px var(--focus);
+
+  --rail-w: 52px;
+  --rail-w-open: 216px;
+  --left-w: 272px;
+  --right-w: 384px;
   --top-h: 48px;
   --timeline-h: 128px;
 }
@@ -106,47 +124,42 @@
  */
 :root[data-theme='night'] {
   --bg-0: #000000;
-  --bg-1: #070101;
-  --bg-2: #0d0202;
-  --bg-3: #160404;
-  --bg-4: #1f0606;
-  --bg-hover: #190404;
-  --line: rgba(255, 60, 40, 0.1);
-  --line-2: rgba(255, 60, 40, 0.18);
-  --line-3: rgba(255, 60, 40, 0.3);
+  --bg-1: #060101;
+  --bg-2: #0c0202;
+  --bg-3: #140303;
+  --bg-4: #1c0505;
+  --bg-hover: #100303;
+  --line: rgba(255, 60, 40, 0.08);
+  --line-2: rgba(255, 60, 40, 0.14);
+  --line-3: rgba(255, 60, 40, 0.28);
   --text-0: #ff5a46;
   --text-1: #d94533;
   --text-2: #a33224;
   --text-3: #6e2116;
-  --accent: #ff6a52;
-  --accent-2: #ff8a76;
-  --accent-ink: #1a0000;
-  --accent-dim: rgba(255, 90, 70, 0.14);
+  --accent: #ff5a46;
+  --accent-2: #ff7a66;
+  --accent-ink: #120000;
+  --accent-dim: rgba(255, 90, 70, 0.1);
   --accent-line: rgba(255, 90, 70, 0.45);
-  --st-critical: #ff2a1a;
-  --st-serious: #ff6a30;
-  --st-caution: #ff8a5a;
-  --st-normal: #c8402e;
-  --st-standby: #d94533;
+  --focus: rgba(255, 90, 70, 0.7);
+  --st-critical: #ff2a1a; --st-critical-text: #ff5a46; --st-critical-tint: #2a0603; --st-critical-line: #6a140c;
+  --st-serious: #ff6a30;  --st-serious-text: #ff6a46;  --st-serious-tint: #200603;  --st-serious-line: #5a160c;
+  --st-caution: #ff8a5a;  --st-caution-text: #e9583f;  --st-caution-tint: #1a0503;  --st-caution-line: #4a140c;
+  --st-normal: #c8402e;   --st-normal-text: #c8402e;   --st-normal-tint: #140403;   --st-normal-line: #3a0f09;
+  --st-standby: #d94533;  --st-standby-text: #d94533;  --st-standby-tint: #140403;  --st-standby-line: #3a0f09;
   --st-off: #8a2a1e;
-  --red-dim: rgba(255, 48, 32, 0.2);
-  --amber-dim: rgba(255, 106, 48, 0.15);
-  --ok-dim: rgba(200, 64, 46, 0.14);
-  --info-dim: rgba(217, 69, 51, 0.14);
+  --data: #b33a2a;
   --friend: #e0503c;
   --hostile: #ff2a1a;
   --suspect: #ff6a30;
   --neutral: #b83a2a;
   --unknown-aff: #ff8a5a;
-  --data: #d94533;
   --captured: #ff5a46;
   --reconstructed: #d94533;
   --inferred: #b8402f;
   --prior: #a33224;
   --unknown: #5a1a12;
-  --shadow-1: none;
-  --shadow-2: 0 18px 48px rgba(0, 0, 0, 0.8);
-  --glow-accent: 0 0 0 3px rgba(255, 90, 70, 0.2);
+  --shadow-2: 0 0 0 1px rgba(255, 60, 40, 0.14), 0 18px 48px rgba(0, 0, 0, 0.8);
 }
 :root[data-theme='night'] canvas,
 :root[data-theme='night'] img,

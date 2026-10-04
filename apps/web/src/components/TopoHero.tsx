@@ -15,8 +15,8 @@ export function TopoHero() {
     let last = 0;
     const t0 = performance.now();
     const css = getComputedStyle(document.documentElement);
-    const accent = css.getPropertyValue('--accent-2').trim() || '#92cbff';
-    const line = 'rgba(127, 180, 230, ';
+    const accent = css.getPropertyValue('--text-0').trim() || '#edeef0';
+    const line = 'rgba(176, 180, 186, ';
 
     // Value noise with smooth interpolation (deterministic).
     const P = new Uint8Array(512);
@@ -108,7 +108,7 @@ export function TopoHero() {
       const cx = w * 0.62;
       const cy = h * 0.42;
       const R = Math.min(w, h) * 0.36;
-      ctx.strokeStyle = 'rgba(127, 180, 230, 0.16)';
+      ctx.strokeStyle = 'rgba(176, 180, 186, 0.16)';
       ctx.lineWidth = 1;
       for (let r = 1; r <= 4; r++) {
         ctx.beginPath();
@@ -124,9 +124,9 @@ export function TopoHero() {
       const ang = reduced ? -0.6 : (t * 0.6) % (Math.PI * 2);
       const g = ctx.createConicGradient ? ctx.createConicGradient(ang - 0.9, cx, cy) : null;
       if (g) {
-        g.addColorStop(0, 'rgba(127, 180, 230, 0)');
-        g.addColorStop(0.14, 'rgba(127, 180, 230, 0.16)');
-        g.addColorStop(0.145, 'rgba(127, 180, 230, 0)');
+        g.addColorStop(0, 'rgba(176, 180, 186, 0)');
+        g.addColorStop(0.14, 'rgba(176, 180, 186, 0.16)');
+        g.addColorStop(0.145, 'rgba(176, 180, 186, 0)');
         ctx.fillStyle = g;
         ctx.beginPath();
         ctx.arc(cx, cy, R, 0, Math.PI * 2);
@@ -152,11 +152,11 @@ export function TopoHero() {
         const since = (((ang - ba) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
         const alpha = Math.max(0, 1 - since / 3.5);
         if (alpha <= 0.02) continue;
-        ctx.fillStyle = `rgba(146, 203, 255, ${alpha})`;
+        ctx.fillStyle = `rgba(237, 238, 240, ${alpha})`;
         ctx.beginPath();
         ctx.arc(cx + bx * R, cy + by * R, 2.6, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = `rgba(146, 203, 255, ${alpha * 0.5})`;
+        ctx.strokeStyle = `rgba(237, 238, 240, ${alpha * 0.5})`;
         ctx.beginPath();
         ctx.arc(cx + bx * R, cy + by * R, 6 + (1 - alpha) * 10, 0, Math.PI * 2);
         ctx.stroke();

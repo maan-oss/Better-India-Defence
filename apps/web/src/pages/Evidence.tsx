@@ -8,6 +8,7 @@ import { useTime } from '../state/time';
 import { useWorld } from '../state/world';
 import { useNavigate } from 'react-router-dom';
 import { bytes, dateTime, dur, hms, pct } from '../lib/format';
+import { Segmented, Tabs } from '../components/ui';
 
 /** EVIDENCE — searchable repository of observations and media, plus the safe hand-off demonstration. */
 export function Evidence() {
@@ -19,19 +20,16 @@ export function Evidence() {
         <h1>Evidence</h1>
         <span className="sub">Original records remain accessible. Derived products always reference them.</span>
         <div className="spacer" />
-        <div className="seg">
-          <button className={tab === 'observations' ? 'on' : ''} onClick={() => setTab('observations')}>
-            OBSERVATIONS
-          </button>
-          <button className={tab === 'media' ? 'on' : ''} onClick={() => setTab('media')}>
-            MEDIA
-          </button>
-          {can('handoff.search') && (
-            <button className={tab === 'handoff' ? 'on' : ''} onClick={() => setTab('handoff')}>
-              IDENTITY HAND-OFF (TEST)
-            </button>
-          )}
-        </div>
+        <Tabs
+          label="Evidence views"
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: 'observations', label: 'Observations' },
+            { value: 'media', label: 'Media' },
+            ...(can('handoff.search') ? [{ value: 'handoff' as const, label: 'Identity hand-off (test)' }] : []),
+          ]}
+        />
       </div>
       <div className="scroll" style={{ flex: 1, minHeight: 0 }}>
         {tab === 'observations' && <ObservationSearch />}
@@ -125,13 +123,17 @@ function MediaList() {
   return (
     <div>
       <div className="row section">
-        <div className="seg">
-          {['imagery', 'pointcloud', 'reconstruction', 'frame'].map((k) => (
-            <button key={k} className={kind === k ? 'on' : ''} onClick={() => setKind(k)}>
-              {k.toUpperCase()}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          label="Media kind"
+          value={kind}
+          onChange={setKind}
+          options={[
+            { value: 'imagery', label: 'Imagery' },
+            { value: 'pointcloud', label: 'Point clouds' },
+            { value: 'reconstruction', label: 'Reconstructions' },
+            { value: 'frame', label: 'Frames' },
+          ]}
+        />
         <span className="muted">{kind === 'frame' ? 'Frames preserved as evidence (recorded frames otherwise remain in the VMS).' : kind === 'imagery' ? 'Satellite captures show their acquisition time — imagery is periodic, never live video.' : ''}</span>
       </div>
       {error && <ErrorNote error={error} />}

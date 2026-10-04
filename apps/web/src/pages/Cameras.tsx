@@ -14,6 +14,7 @@ import { useTime } from '../state/time';
 import { useWorld } from '../state/world';
 import { grid } from '../state/ops';
 import type { AlertRecord } from '@strata/domain';
+import { Segmented } from '../components/ui';
 import '../styles/forensics.css';
 import '../styles/cameras.css';
 
@@ -137,20 +138,18 @@ export function Cameras() {
         </span>
         <div className="spacer" />
         {data.data && !data.data.ffmpeg && <span className="err-inline">ffmpeg not installed — live streams unavailable</span>}
-        <div className="seg" aria-label="Filter">
-          {(['all', 'alerting', 'live', 'site'] as Filter[]).map((f) => (
-            <button key={f} className={filter === f ? 'on' : ''} onClick={() => (setFilter(f), setPage(0))}>
-              {f === 'live' ? 'LIVE STREAMS' : f === 'site' ? 'SITE CAMERAS' : f.toUpperCase()}
-            </button>
-          ))}
-        </div>
-        <div className="seg" aria-label="Layout">
-          {([1, 4, 9, 16] as Layout[]).map((l) => (
-            <button key={l} className={layout === l ? 'on' : ''} onClick={() => setL(l)} title={`${Math.sqrt(l)}×${Math.sqrt(l)}`}>
-              {Math.sqrt(l)}×{Math.sqrt(l)}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          label="Filter"
+          value={filter}
+          onChange={(f) => (setFilter(f), setPage(0))}
+          options={[
+            { value: 'all', label: 'All' },
+            { value: 'alerting', label: 'Alerting' },
+            { value: 'live', label: 'Live streams' },
+            { value: 'site', label: 'Site cameras' },
+          ]}
+        />
+        <Segmented label="Layout" value={layout} onChange={setL} options={([1, 4, 9, 16] as Layout[]).map((l) => ({ value: l, label: `${Math.sqrt(l)}×${Math.sqrt(l)}` }))} />
         <button className={`btn small ${tour ? 'on' : ''}`} onClick={() => setTour(!tour)} title="Cycle through pages every 12 s">
           {tour ? <span className="live-dot" /> : null} Guard tour
         </button>
@@ -416,14 +415,15 @@ function CameraForm({ initial, siteCameras, onClose, onSaved }: { initial: Sourc
     <Modal title={initial ? `Camera ${initial.id}` : 'Add camera'} onClose={onClose} wide>
       <div className="formgrid">
         <label>Binding</label>
-        <div className="seg">
-          <button className={f.binding === 'new' ? 'on' : ''} onClick={() => setF({ ...f, binding: 'new' })} disabled={Boolean(initial)}>
-            NEW CAMERA ON SITE
-          </button>
-          <button className={f.binding === 'site' ? 'on' : ''} onClick={() => setF({ ...f, binding: 'site' })} disabled={Boolean(initial)}>
-            DRIVE EXISTING SITE CAMERA
-          </button>
-        </div>
+        <Segmented
+          label="Camera binding"
+          value={f.binding}
+          onChange={(b) => setF({ ...f, binding: b })}
+          options={[
+            { value: 'new', label: 'New camera on site', disabled: Boolean(initial) },
+            { value: 'site', label: 'Drive existing site camera', disabled: Boolean(initial) },
+          ]}
+        />
         <label>Camera id</label>
         {f.binding === 'site' ? (
           <select className="input" value={f.id} disabled={Boolean(initial)} onChange={(e) => setF({ ...f, id: e.target.value, name: f.name || (siteCameras.find((c) => c.id === e.target.value)?.name ?? '') })}>

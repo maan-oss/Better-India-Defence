@@ -6,6 +6,7 @@ import { useTime } from '../../state/time';
 import { tracks as trackStore, type RenderTrack } from '../../state/tracks';
 import { symbolFor, symbolTexture } from '../../engine/symbols';
 import { alpha, LEVEL_COLOR, P as C } from '../../lib/palette';
+import { Segmented } from '../ui';
 
 
 /**
@@ -65,7 +66,7 @@ export function TacticalScope() {
       ctx.arc(cx, cy, rad, 0, Math.PI * 2);
       ctx.fill();
       const step = niceStep(R / 4);
-      ctx.font = '10px "IBM Plex Mono", monospace';
+      ctx.font = '10px "JetBrains Mono Variable", monospace';
       for (let r = step; r <= R + 1; r += step) {
         ctx.strokeStyle = alpha(C.grid, 0.14);
         ctx.lineWidth = 1;
@@ -141,7 +142,7 @@ export function TacticalScope() {
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.fillStyle = v.priority === 1 ? text1 : text2;
-        ctx.font = '9.5px "IBM Plex Sans", sans-serif';
+        ctx.font = '9.5px "Inter Variable", sans-serif';
         ctx.fillText(v.name.toUpperCase(), x + Math.max(4, v.radiusM * k) + 3, y + 3);
       }
       // Threat vectors.
@@ -201,7 +202,7 @@ export function TacticalScope() {
         ctx.globalAlpha = 1;
         if (!tr.cooperative) {
           ctx.fillStyle = alpha(C.text0, 0.8);
-          ctx.font = '9.5px "IBM Plex Mono", monospace';
+          ctx.font = '9.5px "JetBrains Mono Variable", monospace';
           ctx.fillText(tr.id, x + s / 2 + 2, y + 3);
         }
         hitList.push({ x, y, tr });
@@ -239,13 +240,13 @@ export function TacticalScope() {
       <div className="panel-h">
         <h3>Tactical scope</h3>
         <span className="spacer" />
-        <div className="seg">
-          {[max, Math.round(max / 2), Math.round(max / 4)].map((r, i) => (
-            <button key={r} className={(rangeM ?? max) === r ? 'on' : ''} onClick={() => setRangeM(i === 0 ? null : r)}>
-              {r >= 1000 ? `${(r / 1000).toFixed(1)} km` : `${r} m`}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          size="sm"
+          label="Scope range"
+          value={rangeM ?? max}
+          onChange={(r) => setRangeM(r === max ? null : r)}
+          options={[max, Math.round(max / 2), Math.round(max / 4)].map((r) => ({ value: r, label: r >= 1000 ? `${(r / 1000).toFixed(1)} km` : `${r} m` }))}
+        />
       </div>
       <div className="scope-wrap">
         <canvas

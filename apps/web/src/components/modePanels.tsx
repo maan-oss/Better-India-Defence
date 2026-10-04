@@ -11,6 +11,7 @@ import { dateTime, dur, hms, pct, titleCase } from '../lib/format';
 import { ErrorNote, Loading, Prio, StateChip, useAsync } from './common';
 import { VirtualList } from './VirtualList';
 import { tracks as trackStore, type RenderTrack } from '../state/tracks';
+import { Segmented, Tabs } from './ui';
 
 export function IncidentPanel({ id }: { id: string }) {
   const { data, error } = useAsync((s) => get<IncidentPackage>(`/api/incidents/${encodeURIComponent(id)}`, s), [id]);
@@ -165,14 +166,16 @@ export function DiffPanel() {
         </h2>
         <div className="muted">Δ {dur(Math.abs(diff.b - diff.a))}. Compares what the platform knew at A with what it knew at B — never simulator truth.</div>
         <div className="row" style={{ marginTop: 8 }}>
-          <div className="seg">
-            <button className={show === 'A' ? 'on' : ''} onClick={() => setShow('A')}>
-              SHOW A
-            </button>
-            <button className={show === 'B' ? 'on' : ''} onClick={() => setShow('B')}>
-              SHOW B
-            </button>
-          </div>
+          <Segmented
+            size="sm"
+            label="Side shown in the world"
+            value={show}
+            onChange={setShow}
+            options={[
+              { value: 'A', label: 'Show A' },
+              { value: 'B', label: 'Show B' },
+            ]}
+          />
           <span className="muted" style={{ fontSize: 11.5 }}>
             World reflects the selected side.
           </span>
@@ -409,29 +412,31 @@ export function Overview() {
   const shownAlerts = scope === 'active' ? [...openAlerts].sort((a, b) => Number(a.status !== 'open') - Number(b.status !== 'open') || PR[a.priority] - PR[b.priority] || b.t - a.t) : alerts;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div className="ctx-tabs" role="tablist">
-        <button role="tab" className={tab === 'alerts' ? 'on' : ''} onClick={() => setTab('alerts')}>
-          Alerts {openAlerts.length}
-        </button>
-        <button role="tab" className={tab === 'tracks' ? 'on' : ''} onClick={() => setTab('tracks')}>
-          Tracks {list.length}
-        </button>
-        <button role="tab" className={tab === 'changes' ? 'on' : ''} onClick={() => setTab('changes')}>
-          Changes
-        </button>
-      </div>
+      <Tabs
+        className="ctx-tabs"
+        label="Operational picture"
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: 'alerts', label: <>Alerts<span className="tab-count">{openAlerts.length}</span></> },
+          { value: 'tracks', label: <>Tracks<span className="tab-count">{list.length}</span></> },
+          { value: 'changes', label: 'Changes' },
+        ]}
+      />
       <div style={{ flex: 1, minHeight: 0 }}>
         {tab === 'alerts' && (
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <div className="row" style={{ padding: '8px 12px', borderBottom: '1px solid var(--line)' }}>
-            <div className="seg">
-              <button className={scope === 'active' ? 'on' : ''} onClick={() => setScope('active')}>
-                ACTIVE {openAlerts.length}
-              </button>
-              <button className={scope === 'all' ? 'on' : ''} onClick={() => setScope('all')}>
-                ALL {alerts.length}
-              </button>
-            </div>
+          <div className="row" style={{ padding: '10px 16px', borderBottom: '1px solid var(--line)' }}>
+            <Segmented
+              size="sm"
+              label="Alerts shown"
+              value={scope}
+              onChange={setScope}
+              options={[
+                { value: 'active', label: `Active ${openAlerts.length}` },
+                { value: 'all', label: `All ${alerts.length}` },
+              ]}
+            />
             <span className="spacer" />
             <span className="muted" style={{ fontSize: 11 }}>
               {openAlerts.filter((a) => a.status === 'open').length} awaiting acknowledgement

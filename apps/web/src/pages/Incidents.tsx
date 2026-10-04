@@ -9,6 +9,7 @@ import { useTime } from '../state/time';
 import { useSession } from '../state/session';
 import { ErrorNote, Loading, Prio, StateChip, useAsync } from '../components/common';
 import { dateTime, dur, hms } from '../lib/format';
+import { Segmented } from '../components/ui';
 
 /** INCIDENTS — investigation library and incident files. */
 export function Incidents() {
@@ -114,13 +115,16 @@ function IncidentFile({ id }: { id: string }) {
             Enter reconstruction environment
           </button>
           {can('incidents.edit') && (
-            <div className="seg">
-              {(['open', 'investigating', 'closed'] as const).map((s) => (
-                <button key={s} className={inc.status === s ? 'on' : ''} onClick={() => void setStatus(s)}>
-                  {s.toUpperCase()}
-                </button>
-              ))}
-            </div>
+            <Segmented
+              label="Incident status"
+              value={inc.status}
+              onChange={(s) => void setStatus(s)}
+              options={[
+                { value: 'open', label: 'Open' },
+                { value: 'investigating', label: 'Investigating' },
+                { value: 'closed', label: 'Closed' },
+              ]}
+            />
           )}
           {can('evidence.export') && (
             <button className="btn" onClick={() => void exportFile()}>

@@ -13,6 +13,7 @@ import { Spark } from '../components/charts';
 import { useVisionLive } from '../api/vision';
 import { useTime } from '../state/time';
 import { tracks as trackStore, type RenderTrack } from '../state/tracks';
+import { Segmented, Tabs } from '../components/ui';
 import '../styles/command.css';
 
 /**
@@ -30,13 +31,18 @@ export function Command() {
         <h1>Command</h1>
         <span className="sub">Readiness, threats, response and reporting. All times Zulu; grid references MGRS.</span>
         <div className="spacer" />
-        <div className="seg">
-          {(['OVERVIEW', 'DUTY LOG', 'HANDOVER', 'SITREP', 'ASSETS'] as Tab[]).map((t) => (
-            <button key={t} className={tab === t ? 'on' : ''} onClick={() => setParams({ tab: t })}>
-              {t}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          label="Command views"
+          value={tab}
+          onChange={(t) => setParams({ tab: t })}
+          options={[
+            { value: 'OVERVIEW', label: 'Overview' },
+            { value: 'DUTY LOG', label: 'Duty log' },
+            { value: 'HANDOVER', label: 'Handover' },
+            { value: 'SITREP', label: 'SITREP' },
+            { value: 'ASSETS', label: 'Assets' },
+          ]}
+        />
       </div>
       <div className="page-body" style={{ gridTemplateColumns: '1fr' }}>
         {tab === 'OVERVIEW' && <Overview />}
@@ -385,13 +391,7 @@ function DutyLog() {
         )}
         <div className="row">
           <span className="muted">Filter</span>
-          <div className="seg">
-            {['', 'manual', 'radio', 'readiness', 'dispatch', 'handover', 'report'].map((x) => (
-              <button key={x} className={kind === x ? 'on' : ''} onClick={() => setKind(x)}>
-                {x ? x.toUpperCase() : 'ALL'}
-              </button>
-            ))}
-          </div>
+          <Segmented size="sm" label="Entry kind" value={kind} onChange={setKind} options={['', 'manual', 'radio', 'readiness', 'dispatch', 'handover', 'report'].map((x) => ({ value: x, label: x ? x.charAt(0).toUpperCase() + x.slice(1) : 'All' }))} />
           <div className="spacer" />
           <span className="muted">Entries cannot be edited or deleted; add a correction instead.</span>
         </div>

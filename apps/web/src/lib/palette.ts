@@ -3,46 +3,46 @@
  * change both together. Night mode is applied to canvases by a CSS filter, so these stay as defined.
  */
 export const P = {
-  // Surfaces
-  bg0: '#0b131c',
-  bg1: '#101b27',
-  bg2: '#15222f',
-  bg3: '#1b2c3d',
+  // Surfaces (Radix Slate dark)
+  bg0: '#0c0d0e',
+  bg1: '#111113',
+  bg2: '#18191b',
+  bg3: '#212225',
   // Text
-  text0: '#eef3f8',
-  text1: '#c1ccd8',
-  text2: '#8796a8',
-  text3: '#5b6b7d',
-  // Interaction
-  accent: '#4dacff',
-  accent2: '#92cbff',
-  // Status scale (Astro UXDS)
-  critical: '#ff3838',
-  serious: '#ffb302',
-  caution: '#fce83a',
-  normal: '#56f000',
-  standby: '#2dccff',
-  off: '#a4abb6',
-  // Affiliation (APP-6)
-  friend: '#3fc6ff',
-  hostile: '#ff4747',
-  suspect: '#ff9a3d',
-  neutral: '#4cd964',
-  unknownAff: '#ffe14d',
+  text0: '#edeef0',
+  text1: '#b0b4ba',
+  text2: '#8b8f98',
+  text3: '#62666e',
+  // Interaction (neutral: selection is the brightest neutral)
+  accent: '#edeef0',
+  accent2: '#ffffff',
+  // Status (Radix red / orange / amber / grass / cyan 9)
+  critical: '#e5484d',
+  serious: '#f76b15',
+  caution: '#ffc53d',
+  normal: '#46a758',
+  standby: '#00a2c7',
+  off: '#696e77',
+  // Affiliation (APP-6; Radix step 11)
+  friend: '#70b8ff',
+  hostile: '#ff6369',
+  suspect: '#ffa057',
+  neutral: '#71d083',
+  unknownAff: '#f5e147',
   // Epistemic
-  captured: '#eef3f8',
-  reconstructed: '#5fd4c4',
-  inferred: '#b39dff',
-  prior: '#8796a8',
+  captured: '#edeef0',
+  reconstructed: '#0bd8b6',
+  inferred: '#baa7ff',
+  prior: '#8b8f98',
   // Static map context (neutral by design)
-  terrain: '#121d29',
-  road: '#26384a',
-  roadMark: '#7d8da0',
-  building: '#33465a',
-  buildingEdge: '#c1ccd8',
-  zone: '#a9bbcf',
-  fence: '#8fa2b8',
-  grid: '#7fb4e6',
+  terrain: '#161719',
+  road: '#26282b',
+  roadMark: '#777b84',
+  building: '#363a3f',
+  buildingEdge: '#b0b4ba',
+  zone: '#b0b4ba',
+  fence: '#8b8f98',
+  grid: '#9ba1aa',
 } as const;
 
 /** `rgba()` from a palette hex. */

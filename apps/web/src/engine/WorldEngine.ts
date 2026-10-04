@@ -77,7 +77,7 @@ export class WorldEngine {
     host.appendChild(this.renderer.domElement);
     this.scene.background = new THREE.Color(P.bg0);
     this.scene.fog = new THREE.FogExp2(P.bg0, 0.00009);
-    this.scene.add(new THREE.HemisphereLight('#c6d3e2', '#141d27', 1.1));
+    this.scene.add(new THREE.HemisphereLight('#d4d7dc', '#16171a', 1.1));
     const sun = new THREE.DirectionalLight('#f2f5f8', 1.5);
     sun.position.set(1400, -1800, 2200);
     this.scene.add(sun);

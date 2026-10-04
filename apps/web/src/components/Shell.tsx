@@ -7,6 +7,7 @@ import { useData } from '../state/data';
 import { useVisionLive } from '../api/vision';
 import { get } from '../api/client';
 import { Icon } from './Icons';
+import { Menu, MenuItem, MenuLabel, MenuSeparator, Tabs, Tip } from './ui';
 import { dateTime } from '../lib/format';
 import { EnuFrame, fromMgrs, terrainHeight } from '@strata/domain';
 import { useOps } from '../state/ops';
@@ -99,26 +100,30 @@ function Rail() {
               const I = Icon[n.icon] as () => ReactNode;
               const badge = n.to === '/identity' && pending > 0 ? pending : n.to === '/operations' && critical > 0 ? critical : 0;
               return (
-                <NavLink key={n.to} to={n.to} className={({ isActive }) => (isActive ? 'active' : '')} aria-label={n.label}>
-                  <I />
-                  <span className="lbl">{n.label}</span>
-                  {badge > 0 && <span className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`}>{badge > 99 ? '99+' : badge}</span>}
-                  <span className="tip">{n.label}</span>
-                </NavLink>
+                <Tip key={n.to} content={n.label} side="right" disabled={open}>
+                  <NavLink to={n.to} className={({ isActive }) => (isActive ? 'active' : '')} aria-label={n.label}>
+                    <I />
+                    <span className="lbl">{n.label}</span>
+                    {badge > 0 && <span className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`}>{badge > 99 ? '99+' : badge}</span>}
+                  </NavLink>
+                </Tip>
               );
             })}
           </div>
         );
       })}
-      <button className="rail-toggle" onClick={toggle} aria-label={open ? 'Collapse navigation' : 'Expand navigation'} title={open ? 'Collapse' : 'Expand'}>
-        <Icon.Chevron />
-        {open && <span className="lbl" style={{ fontSize: 12 }}>Collapse</span>}
-      </button>
+      <Tip content="Expand navigation" side="right" disabled={open}>
+        <button className="rail-toggle" onClick={toggle} aria-label={open ? 'Collapse navigation' : 'Expand navigation'}>
+          <Icon.Chevron />
+          {open && <span className="lbl">Collapse</span>}
+        </button>
+      </Tip>
     </nav>
   );
 }
 
 const TOAST_MS = { high: 9000, critical: 0 } as const;
+const ruleLabel = (r: string) => r.charAt(0) + r.slice(1).toLowerCase().replace(/_/g, ' ');
 
 /** New critical/high alerts as toasts: critical ones stay until dismissed or acknowledged. */
 function Toasts() {
@@ -166,7 +171,8 @@ function Toasts() {
         <div key={a.id} className={`toast ${a.priority} ${out ? 'out' : ''}`} role="alert">
           <div className="t-head">
             {a.priority === 'critical' ? <span className="live-dot red" /> : <Icon.Alert />}
-            {a.priority} · {a.rule.replace(/_/g, ' ')}
+            <span className="t-sev">{a.priority}</span>
+            <span className="ellipsis">{ruleLabel(a.rule)}</span>
             <span className="spacer" />
             <span className="mono">{new Date(a.t).toISOString().slice(11, 19)}Z</span>
             <button className="btn ghost small icon" aria-label="Dismiss" onClick={() => dismiss(a.id)} style={{ width: 20, height: 20 }}>
@@ -206,7 +212,7 @@ function ConnectionWatch() {
   if (!lost) return null;
   return (
     <div className="conn-lost" role="alert">
-      <span className="spinner" style={{ borderTopColor: '#fff', width: 12, height: 12 }} />
+      <span className="spinner" style={{ borderTopColor: '#fff', borderColor: 'rgba(255,255,255,0.35)', width: 12, height: 12 }} />
       Live connection lost — reconnecting. The picture is not updating.
     </div>
   );
@@ -228,7 +234,7 @@ function Clock() {
   return (
     <div className="clock" data-mode={mode}>
       <span className={`clock-mode ${mode}`}>
-        {mode === 'live' && <span className="live-dot" style={{ width: 6, height: 6 }} />}
+        {mode === 'live' && <span className="live-dot" />}
         {mode === 'live' ? 'LIVE' : playing ? `${direction < 0 ? '◀ ' : ''}×${rate}` : 'PAUSED'}
       </span>
       <span className="mono clock-t">
@@ -331,7 +337,7 @@ function SearchBox() {
       <input
         ref={ref}
         className="search-input"
-        placeholder="Search site, sensor, track, incident, or E,N / lat,lon"
+        placeholder="Search or jump to grid…"
         value={q}
         onChange={(e) => {
           setQ(e.target.value);
@@ -345,12 +351,12 @@ function SearchBox() {
         }}
         aria-label="Search"
       />
-      <span className="kbd">Ctrl K</span>
+      <span className="kbd">{/Mac/.test(navigator.platform) ? '⌘K' : 'Ctrl K'}</span>
       {open && res.length > 0 && (
         <div className="search-results reveal" role="listbox">
           {res.map((r) => (
             <div key={`${r.kind}:${r.id}`} className="list-row" role="option" aria-selected={false} onMouseDown={() => choose(r)}>
-              <span className="upper dim" style={{ width: 74 }}>
+              <span className="dim" style={{ width: 80, textTransform: 'capitalize' }}>
                 {r.kind}
               </span>
               <span className="grow ellipsis">{r.label}</span>
@@ -374,18 +380,27 @@ function StatusSummary() {
   const down = Object.values(sensors).filter((s) => s.status === 'silent' || s.status === 'offline' || s.status === 'fault').length;
   return (
     <div className="row status-sum">
-      <button className="btn ghost small" onClick={() => nav('/operations')} title="Open alerts">
-        <span className="prio critical" /> {crit}
-        <span className="prio high" style={{ marginLeft: 6 }} /> {high}
-        <span className="dim">open {open.length}</span>
-      </button>
-      <button className="btn ghost small" onClick={() => nav('/sensors')} title="Sensors not reporting">
-        <span className={`status-dot ${down ? 'silent' : 'ok'}`} /> {down ? `${down} sensor${down > 1 ? 's' : ''} down` : 'sensors nominal'}
-      </button>
-      <span className="row dim" title="Live data connection" style={{ fontSize: 11.5 }}>
-        <span className={`status-dot ${ws === 'open' ? 'ok' : ws === 'connecting' ? 'degraded' : 'silent'}`} />
-        {ws === 'open' ? 'live' : ws}
-      </span>
+      <Tip content={`${crit} critical and ${high} high-priority alerts open (${open.length} open in total)`} side="bottom">
+        <button className="btn ghost small sum-alerts" onClick={() => nav('/operations')} aria-label="Open alerts">
+          <span className={`sum-n ${crit ? 'crit' : ''}`}>
+            <span className="prio critical" /> {crit}
+          </span>
+          <span className={`sum-n ${high ? 'high' : ''}`}>
+            <span className="prio high" /> {high}
+          </span>
+        </button>
+      </Tip>
+      <Tip content="Sensors not reporting" side="bottom">
+        <button className="btn ghost small" onClick={() => nav('/sensors')}>
+          <span className={`status-dot ${down ? 'silent' : 'ok'}`} /> {down ? `${down} sensor${down > 1 ? 's' : ''} down` : 'Sensors nominal'}
+        </button>
+      </Tip>
+      {ws !== 'open' && (
+        <span className="row" style={{ fontSize: 12, color: 'var(--st-caution-text)' }}>
+          <span className={`status-dot ${ws === 'connecting' ? 'degraded' : 'silent'}`} />
+          {ws === 'connecting' ? 'Connecting' : 'Offline'}
+        </span>
+      )}
     </div>
   );
 }
@@ -411,24 +426,21 @@ function TopBar() {
         <Icon.Logo />
         <span className="wordmark">STRATA</span>
       </NavLink>
-      <div className="site">
-        <b>{facility?.name.split(' — ')[0] ?? 'Site'}</b>
-        <span>{facility?.name.split(' — ')[1] ?? ''}</span>
-      </div>
-      {readiness && (
-        <button className={`readiness r-${readiness.level.replace(' ', '-')}`} onClick={() => nav('/command')} title={`Readiness set ${new Date(readiness.t || Date.now()).toISOString().slice(0, 16)}Z by ${readiness.by}: ${readiness.reason}`}>
-          {readiness.level}
-        </button>
-      )}
-      {onWorld && (
-        <div className="seg modes" role="tablist" aria-label="Global mode">
-          {MODES.map((m) => (
-            <button key={m} role="tab" aria-selected={mode === m} className={mode === m ? 'on' : ''} onClick={() => pick(m)}>
-              {m}
-            </button>
-          ))}
+      <Tip content={facility?.name.split(' — ')[1] ?? ''} side="bottom">
+        <div className="site" tabIndex={0}>
+          <b>{facility?.name.split(' — ')[0] ?? 'Site'}</b>
         </div>
+      </Tip>
+      {readiness && (
+        <Tip content={`Readiness set ${new Date(readiness.t || Date.now()).toISOString().slice(0, 16)}Z by ${readiness.by}: ${readiness.reason}`} side="bottom">
+          <button className={`readiness r-${readiness.level.replace(' ', '-')}`} onClick={() => nav('/command')}>
+            {readiness.level}
+          </button>
+        </Tip>
       )}
+      <span className="tb-sep" />
+      {onWorld && <Tabs className="modes" label="Global mode" value={mode} onChange={pick} options={MODES.map((m) => ({ value: m, label: m.charAt(0) + m.slice(1).toLowerCase() }))} />}
+      {onWorld && <span className="tb-sep" />}
       <Clock />
       <SearchBox />
       <div className="spacer" />
@@ -445,14 +457,6 @@ function UserMenu() {
   const setSound = useOps((s) => s.setSound);
   const theme = useUi((s) => s.theme);
   const setTheme = useUi((s) => s.setTheme);
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
-    window.addEventListener('mousedown', close);
-    return () => window.removeEventListener('mousedown', close);
-  }, [open]);
   const initials = (user?.displayName ?? '?')
     .split(/\s+/)
     .map((w) => w[0])
@@ -460,44 +464,41 @@ function UserMenu() {
     .slice(0, 2)
     .toUpperCase();
   return (
-    <div className="row" style={{ gap: 6, flex: 'none' }}>
-      <button className={`btn ghost small icon ${sound ? '' : 'muted'}`} onClick={() => setSound(!sound)} title={sound ? 'Alarm sound on (critical/high alerts) — click to mute' : 'Alarm sound muted — click to enable'} aria-label={sound ? 'Mute alarm sound' : 'Enable alarm sound'} aria-pressed={sound}>
-        {sound ? <Icon.Bell /> : <Icon.BellOff />}
-      </button>
-      <div className="menu-anchor" ref={ref}>
-        <button className="btn ghost user-btn" onClick={() => setOpen(!open)} aria-haspopup="menu" aria-expanded={open}>
-          <span className="avatar">{initials}</span>
-          <span className="col user-meta" style={{ gap: 0, alignItems: 'flex-start' }}>
-            <span style={{ fontSize: 12 }}>{user?.displayName}</span>
-            <span className="upper dim" style={{ fontSize: 9.5 }}>
-              {user?.role}
-            </span>
-          </span>
+    <div className="row" style={{ gap: 4, flex: 'none' }}>
+      <Tip content={sound ? 'Alarm sound on for critical and high alerts' : 'Alarm sound muted'} side="bottom">
+        <button className={`btn ghost icon ${sound ? '' : 'muted'}`} onClick={() => setSound(!sound)} aria-label={sound ? 'Mute alarm sound' : 'Enable alarm sound'} aria-pressed={sound}>
+          {sound ? <Icon.Bell /> : <Icon.BellOff />}
         </button>
-        {open && (
-          <div className="menu" role="menu">
-            <div className="m-head">
-              <div style={{ fontWeight: 500 }}>{user?.displayName}</div>
-              <div className="muted mono" style={{ fontSize: 11 }}>
-                {user?.username} · {user?.role}
-              </div>
-            </div>
-            <button className="m-item" role="menuitem" onClick={() => (setTheme(theme === 'night' ? 'dark' : 'night'), setOpen(false))}>
-              {theme === 'night' ? <Icon.Sun /> : <Icon.Moon />}
-              <span className="grow">{theme === 'night' ? 'Standard display' : 'Night display (red light)'}</span>
-            </button>
-            <button className="m-item" role="menuitem" onClick={() => (setSound(!sound), setOpen(false))}>
-              {sound ? <Icon.BellOff /> : <Icon.Bell />}
-              <span className="grow">{sound ? 'Mute alarm sound' : 'Enable alarm sound'}</span>
-            </button>
-            <div className="m-sep" />
-            <button className="m-item" role="menuitem" onClick={() => void logout()}>
-              <Icon.SignOut />
-              <span className="grow">Sign out</span>
-            </button>
+      </Tip>
+      <Menu
+        label="Account"
+        trigger={
+          <button className="btn ghost user-btn" aria-label="Account menu">
+            <span className="avatar">{initials}</span>
+            <span className="user-meta">
+              <span>{user?.displayName}</span>
+              <span className="dim">{user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ''}</span>
+            </span>
+          </button>
+        }
+      >
+        <MenuLabel>
+          <div style={{ fontWeight: 600, color: 'var(--text-0)' }}>{user?.displayName}</div>
+          <div className="muted" style={{ fontSize: 12 }}>
+            {user?.username} · {user?.role}
           </div>
-        )}
-      </div>
+        </MenuLabel>
+        <MenuItem icon={theme === 'night' ? <Icon.Sun /> : <Icon.Moon />} onSelect={() => setTheme(theme === 'night' ? 'dark' : 'night')}>
+          {theme === 'night' ? 'Standard display' : 'Night display (red light)'}
+        </MenuItem>
+        <MenuItem icon={sound ? <Icon.BellOff /> : <Icon.Bell />} onSelect={() => setSound(!sound)}>
+          {sound ? 'Mute alarm sound' : 'Enable alarm sound'}
+        </MenuItem>
+        <MenuSeparator />
+        <MenuItem icon={<Icon.SignOut />} onSelect={() => void logout()}>
+          Sign out
+        </MenuItem>
+      </Menu>
     </div>
   );
 }

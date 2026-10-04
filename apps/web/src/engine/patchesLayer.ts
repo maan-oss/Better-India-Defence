@@ -60,11 +60,11 @@ export class PatchesLayer {
       } else if (mode === 'support') {
         const s = r[1];
         if (r[5] === 4 || r[5] === 3) {
-          c.set(r[5] === 4 ? '#2a3644' : '#4a5a6b');
+          c.set(r[5] === 4 ? '#2e3135' : '#4a4f56');
           alpha = 0.55;
         } else c.setRGB(...qualityRamp(s));
       } else {
-        c.set(r[5] === 0 ? P.captured : r[5] === 1 ? P.reconstructed : r[5] === 2 ? P.inferred : r[5] === 3 ? '#4a5a6b' : '#2a3644');
+        c.set(r[5] === 0 ? P.captured : r[5] === 1 ? P.reconstructed : r[5] === 2 ? P.inferred : r[5] === 3 ? '#4a4f56' : '#2e3135');
         alpha = r[5] === 0 ? 0.35 : 0.55;
       }
       if (p.id === selected) {
