@@ -533,3 +533,11 @@ button.list-row:focus-visible { box-shadow: inset var(--glow-accent); }
 .inc-create p { margin: 0; font-size: 13px; line-height: 20px; }
 .inc-create-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
 .site-tree { height: 100%; padding: 10px 8px; }
+
+/* Administration */
+.admin-users-h { gap: 10px; margin-bottom: 12px; align-items: center; }
+.admin-users { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: visible; }
+.admin-user { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); min-height: 56px; }
+.admin-user:last-child { border-bottom: 0; }
+.admin-user.off { opacity: 0.6; }
+.perm-cell { text-align: center; color: var(--text-0); }

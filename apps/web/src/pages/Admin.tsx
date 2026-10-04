@@ -2,9 +2,11 @@ import { useState } from 'react';
 import type { Role } from '@strata/domain';
 import { get, patch, post } from '../api/client';
 import type { UserRecord } from '../api/types';
-import { ErrorNote, Loading, useAsync } from '../components/common';
+import { ErrorNote, Loading, Modal, useAsync } from '../components/common';
+import { useOnWatch } from '../components/ops/OnWatch';
+import { Check, Copy, KeyRound, Settings2, UserCheck, UserCog } from 'lucide-react';
 import { useSession } from '../state/session';
-import { Alert, Button, Input, PasswordStrength, RadioCards } from '../components/kit';
+import { Alert, Avatar, AvatarGroup, Badge, Button, ConfirmMorph, DropdownMenu, Input, JsonViewer, PasswordStrength, RadioCards, SortableDataTable, useToastStack } from '../components/kit';
 
 interface ConfigResponse {
   stored: { key: string; value: unknown; updated_by: string; updated_at: number }[];
@@ -22,10 +24,25 @@ export function Admin() {
   const [err, setErr] = useState<string | null>(null);
   const [strength, setStrength] = useState(0);
   const allPerms = [...new Set((roles.data ?? []).flatMap((r) => r.permissions))];
+  const online = useOnWatch();
+  const onlineNames = new Set(online.map((o) => o.username));
+  const { toast } = useToastStack();
+  const [resetFor, setResetFor] = useState<UserRecord | null>(null);
+  const update = async (u: UserRecord, body: { role?: Role; disabled?: boolean; password?: string }, done: string) => {
+    try {
+      await patch(`/api/admin/users/${u.id}`, body);
+      toast({ type: 'success', title: done, description: 'Recorded in the audit log' });
+      users.reload();
+    } catch (e) {
+      toast({ type: 'error', title: 'Not changed', description: e instanceof Error ? e.message : String(e) });
+      throw e;
+    }
+  };
   const create = async () => {
     setErr(null);
     try {
       await post('/api/admin/users', form);
+      toast({ type: 'success', title: `${form.displayName} added`, description: `${form.username} · ${form.role}` });
       setForm({ username: '', displayName: '', role: 'viewer', password: '' });
       users.reload();
     } catch (e) {
@@ -41,43 +58,71 @@ export function Admin() {
       <div className="page-body split">
         <div className="scroll">
           <div className="section">
-            <h4>Users</h4>
+            <div className="row admin-users-h">
+              <h4 style={{ margin: 0 }}>Users</h4>
+              <span className="muted" style={{ fontSize: 12 }}>
+                {(users.data ?? []).filter((u) => !u.disabled).length} active · {online.length} signed in now
+              </span>
+              <span className="spacer" />
+              {online.length > 0 && <AvatarGroup size="sm" max={6} label="Signed in now" members={online.map((o) => ({ name: o.displayName, status: 'online' as const }))} />}
+            </div>
             {users.error && <ErrorNote error={users.error} />}
             {!users.data && <Loading />}
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Role</th>
-                  <th>State</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {(users.data ?? []).map((u) => (
-                  <tr key={u.id}>
-                    <td>
-                      {u.displayName} <span className="mono dim">{u.username}</span>
-                    </td>
-                    <td>
-                      <select className="input" value={u.role} disabled={u.id === me?.id} onChange={(e) => void patch(`/api/admin/users/${u.id}`, { role: e.target.value }).then(users.reload)}>
-                        {(['viewer', 'operator', 'analyst', 'administrator'] as Role[]).map((r) => (
-                          <option key={r}>{r}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td>{u.disabled ? 'disabled' : 'active'}</td>
-                    <td>
-                      {u.id !== me?.id && (
-                        <button className="btn small" onClick={() => void patch(`/api/admin/users/${u.id}`, { disabled: !u.disabled }).then(users.reload)}>
-                          {u.disabled ? 'Enable' : 'Disable'}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="admin-users">
+              {(users.data ?? []).map((u) => {
+                const isMe = u.id === me?.id;
+                const on = onlineNames.has(u.username);
+                return (
+                  <div key={u.id} className={`admin-user ${u.disabled ? 'off' : ''}`}>
+                    <Avatar name={u.displayName} size="md" status={u.disabled ? undefined : on ? 'online' : 'offline'} />
+                    <div className="grow" style={{ minWidth: 0 }}>
+                      <div className="ellipsis" style={{ fontWeight: 500 }}>
+                        {u.displayName} {isMe && <span className="muted">(you)</span>}
+                      </div>
+                      <div className="mono dim" style={{ fontSize: 11.5 }}>
+                        {u.username}
+                      </div>
+                    </div>
+                    <Badge tone={u.role === 'administrator' ? 'warning' : u.role === 'viewer' ? 'neutral' : 'info'} size="sm">
+                      {u.role}
+                    </Badge>
+                    {u.disabled && (
+                      <Badge tone="danger" size="sm">
+                        disabled
+                      </Badge>
+                    )}
+                    {!isMe && (
+                      <DropdownMenu
+                        label="Manage"
+                        icon={<Settings2 size={14} />}
+                        items={[
+                          ...(['viewer', 'operator', 'analyst', 'administrator'] as Role[]).map((r) => ({
+                            label: r === u.role ? `Role: ${r} (current)` : `Make ${r}`,
+                            disabled: r === u.role,
+                            icon: <UserCog size={14} />,
+                            onSelect: () => void update(u, { role: r }, `${u.displayName} is now ${r === 'viewer' ? 'a' : 'an'} ${r}`),
+                          })),
+                          { label: 'Reset password…', icon: <KeyRound size={14} />, separatorBefore: true, onSelect: () => setResetFor(u) },
+                          { label: 'Copy username', icon: <Copy size={14} />, onSelect: () => void navigator.clipboard.writeText(u.username).then(() => toast({ type: 'success', title: 'Username copied', description: u.username })) },
+                          ...(u.disabled ? [{ label: 'Enable account', icon: <UserCheck size={14} />, separatorBefore: true, onSelect: () => void update(u, { disabled: false }, `${u.displayName} can sign in again`) }] : []),
+                        ]}
+                      />
+                    )}
+                    {!isMe && !u.disabled && (
+                      <ConfirmMorph
+                        label="Disable"
+                        prompt={`Disable ${u.username}? They are signed out at once.`}
+                        confirmLabel="Disable"
+                        pendingLabel="Disabling"
+                        doneLabel="Disabled"
+                        tone="danger"
+                        onConfirm={() => update(u, { disabled: true }, `${u.displayName} can no longer sign in`)}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
           <div className="section col admin-create" style={{ maxWidth: 620, gap: 14 }}>
             <h4>Create user</h4>
@@ -125,7 +170,9 @@ export function Admin() {
                   <tr key={p}>
                     <td className="mono">{p}</td>
                     {(roles.data ?? []).map((r) => (
-                      <td key={r.role}>{r.permissions.includes(p) ? '●' : <span className="dim">·</span>}</td>
+                      <td key={r.role} className="perm-cell">
+                        {r.permissions.includes(p) ? <Check size={14} aria-label="granted" /> : <span className="dim" aria-label="not granted">·</span>}
+                      </td>
                     ))}
                   </tr>
                 ))}
@@ -137,31 +184,25 @@ export function Admin() {
           <div className="section">
             <h4>Effective configuration</h4>
             {config.error && <ErrorNote error={config.error} />}
-            <dl className="kv">
-              {Object.entries(config.data?.effective ?? {}).map(([k, v]) => (
-                <div key={k} style={{ display: 'contents' }}>
-                  <dt>{k}</dt>
-                  <dd className="mono">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</dd>
-                </div>
-              ))}
-            </dl>
+            {config.data && <JsonViewer data={config.data.effective} rootName="config" defaultExpandDepth={1} maxHeight={420} label="Effective configuration" />}
             <div className="muted" style={{ marginTop: 8, fontSize: 11.5 }}>
               Secrets (service token, session secret, API keys, storage key) are environment-only and never displayed.
             </div>
           </div>
           <div className="section">
             <h4>Integrations</h4>
-            <table className="table">
-              <tbody>
-                {(config.data?.integrations ?? []).map((i) => (
-                  <tr key={i.name}>
-                    <td>{i.name}</td>
-                    <td className="mono dim">{i.adapter}</td>
-                    <td className="muted">{i.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <SortableDataTable
+              caption="Integrations"
+              rowKey="name"
+              itemName={{ one: 'integration', other: 'integrations' }}
+              emptyMessage="No integrations configured"
+              rows={config.data?.integrations ?? []}
+              columns={[
+                { key: 'name', label: 'Integration', sortable: true },
+                { key: 'adapter', label: 'Adapter', sortable: true, render: (v) => <span className="mono dim">{String(v)}</span> },
+                { key: 'status', label: 'Status', sortable: true, render: (v) => <span className="muted" style={{ whiteSpace: 'normal', fontSize: 12.5 }}>{String(v)}</span> },
+              ]}
+            />
           </div>
           <div className="section">
             <h4>Accreditation status</h4>
@@ -169,6 +210,39 @@ export function Admin() {
           </div>
         </div>
       </div>
+      {resetFor && <ResetPassword user={resetFor} onClose={() => setResetFor(null)} onSave={(pw) => update(resetFor, { password: pw }, `Password reset for ${resetFor.displayName}`).then(() => setResetFor(null))} />}
     </div>
+  );
+}
+
+function ResetPassword({ user, onClose, onSave }: { user: UserRecord; onClose: () => void; onSave: (pw: string) => Promise<void> }) {
+  const [pw, setPw] = useState('');
+  const [level, setLevel] = useState(0);
+  const [busy, setBusy] = useState(false);
+  return (
+    <Modal title={`Reset password · ${user.username}`} onClose={onClose}>
+      <div className="col" style={{ gap: 14 }}>
+        <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+          Give the new password to {user.displayName} in person or by a separate channel. Their open sessions stay signed in until they expire.
+        </p>
+        <PasswordStrength label="New password" value={pw} onValueChange={(v, st) => (setPw(v), setLevel(st.level))} />
+        <div className="row">
+          <span className="spacer" />
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            loading={busy}
+            disabled={pw.length < 12 || level < 2}
+            onClick={() => {
+              setBusy(true);
+              void onSave(pw).catch(() => undefined).finally(() => setBusy(false));
+            }}
+          >
+            Set password
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 }
