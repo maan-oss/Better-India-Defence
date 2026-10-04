@@ -46,10 +46,22 @@ export interface ModelStatus extends Omit<ModelEntry, 'url'> {
 
 export class ModelUnavailable extends Error {}
 
+const shippedCandidates = () => [resolve('models'), resolve(import.meta.dirname, '../../models'), resolve(import.meta.dirname, '../../../../models'), resolve(import.meta.dirname, '../../../models')];
+
 export function findModelsDir(explicit?: string): string {
   if (explicit) return resolve(explicit);
-  const cands = [resolve('models'), resolve(import.meta.dirname, '../../../../models'), resolve(import.meta.dirname, '../../../models')];
+  const cands = shippedCandidates();
   return cands.find((c) => existsSync(join(c, 'manifest.json'))) ?? cands[0]!;
+}
+
+/**
+ * The manifest (with the pinned SHA-256 of every model) ships with the code. A models directory supplied at
+ * run time (STRATA_MODELS_DIR, e.g. a read-only mount on an air-gapped host) provides the files only, so a
+ * swapped model cannot be legitimised by also swapping a manifest next to it.
+ */
+function findManifest(dir: string): string | null {
+  for (const c of [...shippedCandidates(), dir]) if (existsSync(join(c, 'manifest.json'))) return join(c, 'manifest.json');
+  return null;
 }
 
 export interface FaceResult {
@@ -71,8 +83,8 @@ export class VisionEngine {
     readonly dir: string,
     private readonly threads = Math.max(1, availableParallelism() - 1),
   ) {
-    const mf = join(dir, 'manifest.json');
-    this.manifest = existsSync(mf) ? (JSON.parse(readFileSync(mf, 'utf8')) as { models: ModelEntry[] }).models : [];
+    const mf = findManifest(dir);
+    this.manifest = mf ? (JSON.parse(readFileSync(mf, 'utf8')) as { models: ModelEntry[] }).models : [];
   }
 
   status(): ModelStatus[] {

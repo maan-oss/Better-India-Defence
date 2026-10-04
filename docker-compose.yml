@@ -32,11 +32,29 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       STRATA_SIMULATOR: ${STRATA_SIMULATOR:-true}
       SEED_MINUTES: ${SEED_MINUTES:-120}
+      # Air-gapped hosts: mount verified model files read-only and point here (image built with FETCH_MODELS=false).
+      STRATA_MODELS_DIR: ${STRATA_MODELS_DIR:-}
     ports:
       # Bound to loopback; publish through a TLS-terminating reverse proxy for network access.
       - '127.0.0.1:4000:4000'
     volumes:
       - strata-data:/data
+    restart: unless-stopped
+
+  # Field adapters (NMEA / MAVLink / CoT). Enable with: docker compose --profile adapters up
+  # Host networking so UDP broadcast/multicast from radios, GCS and TAK reach the listeners.
+  adapters:
+    build: .
+    profiles: ['adapters']
+    depends_on:
+      - strata
+    network_mode: host
+    environment:
+      STRATA_INGEST_URL: http://127.0.0.1:4000
+      STRATA_SERVICE_TOKEN: ${STRATA_SERVICE_TOKEN:?set STRATA_SERVICE_TOKEN}
+    volumes:
+      - ./adapters.json:/config/adapters.json:ro
+    command: ['node', 'packages/adapters/dist/cli.js', '/config/adapters.json']
     restart: unless-stopped
 
 volumes:

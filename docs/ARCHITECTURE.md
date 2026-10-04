@@ -2,7 +2,9 @@
 
 Strata keeps a persistent, time-indexed model of one physical site, built only from sensor
 observations, and lets operators move through it in space and time with the evidence for everything
-they see. Read `REALITY_LIMITS.md` alongside this document.
+they see. On top of that model sit a local vision engine (detection, face recognition, forensic
+enhancement), live camera analysis, command-and-control decision support, and interop with other
+systems. Read `REALITY_LIMITS.md` alongside this document.
 
 ## Components
 
@@ -14,6 +16,8 @@ they see. Read `REALITY_LIMITS.md` alongside this document.
                 └───────────────┬──────────────────────────────────┬───────────────────┘
           strata.ingest/v1 over │ HTTPS + service token            │ frames (GET /vms/…)
                                 ▼                                  │
+  packages/adapters (strata-adapter): NMEA · MAVLink · CoT ──┐   IP cameras (RTSP/HTTP) ── ffmpeg ──┐
+          strata.ingest/v1 / CoT over HTTPS + service token  ▼                                     ▼
 ┌──────────────────────────── apps/server ─────────────────────────┴──────────────────────────────┐
 │ ingest pipeline: validate → registry → dedupe → time bounds → normalise (WGS84→ENU, camera     │
 │   geolocation) → persist observation (one transaction) → dead letters on any rejection         │
@@ -22,6 +26,10 @@ they see. Read `REALITY_LIMITS.md` alongside this document.
 │ coverage: patch visibility (cached by geometry hash) × observation history × decay             │
 │ reconstruction: worker-thread pool — DSM, LiDAR change, imagery change, multi-frame, coverage  │
 │ alerts · incidents · hand-off · copilot · audit · auth/RBAC · replay queries · metrics         │
+│ vision: worker-thread pools (interactive / bulk) running ONNX Runtime on CPU — YOLOX, YuNet,    │
+│   SFace, Real-ESRGAN; evidence library; identity registry + recognition rules; live cameras    │
+│ ops (C2): readiness, vital assets, threat board, SOP checklists, teams/tasks, duty log, SITREP │
+│ site configuration (applied at start-up) · interop (CoT out / in)                               │
 │ live hub (WebSocket): track deltas, alerts, sensor status, changes, clock                       │
 └───────────────┬──────────────────────────────────────────────────────────────────────────────────┘
                 │ REST + WebSocket (session cookie)
@@ -33,9 +41,10 @@ they see. Read `REALITY_LIMITS.md` alongside this document.
 │ Timeline (canvas) · inspectors · mode panels · copilot · virtualised lists                     │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-packages/domain — shared by all three: geodesy, facility definition, geometry/ray casting, zod schemas,
-fusion (Kalman, association, lifecycle), coverage model, imaging (registration, super-resolution,
-change detection), LiDAR, hand-off, diff, copilot intent parsing, RBAC, provenance types.
+packages/domain — shared by all: geodesy (incl. UTM/MGRS), facility and site definitions, geometry/ray
+casting, zod schemas, fusion (Kalman, association, lifecycle), coverage model, imaging (registration,
+super-resolution, change detection), vision pre/post-processing and classical restoration, LiDAR,
+hand-off, diff, threat evaluation, SOPs, CoT, copilot intent parsing, RBAC, provenance types.
 ```
 
 All three applications are TypeScript (strict, no `any`). `packages/domain` contains pure,
@@ -58,9 +67,69 @@ and the tests.
 `{ schema: 'strata.ingest/v1', id, sensorId, kind, observedAt, payload }` with a discriminated
 `kind`: `radar.track`, `rf.detection`, `camera.detections`, `drone.telemetry`, `gps.position`,
 `lidar.scan` (with a binary range image uploaded through `/api/ingest/media`), `imagery.capture`,
-`sensor.health`, `infrastructure.state`. Every rejection is written to `dead_letters` with its reason;
+`sensor.health`, `infrastructure.state`, `external.track` (another system's report, e.g. from CoT). Every rejection is written to `dead_letters` with its reason;
 duplicates (same id) are acknowledged and ignored. A real sensor adapter is anything that can produce
 these envelopes.
+
+## Vision engine
+
+- Models are listed in `models/manifest.json` with pinned SHA-256; `VisionEngine` verifies each file's
+  hash before creating its ONNX Runtime session and loads models lazily. Inference runs in worker
+  threads (`vision/worker.ts`, bundled as `visionWorker.js`): an *interactive* pool for operator
+  requests and a *bulk* pool for video analysis and live cameras, so a long video never blocks a
+  photo lookup. Pools drain in-flight jobs on shutdown (native sessions must not be torn down mid-run).
+- **Detection**: YOLOX-S, letterboxed BGR input, grid decode over strides 8/16/32, class-aware NMS.
+  Optional tiling (overlapping tiles + full frame) for small objects; detections cut by an interior tile
+  edge or larger than half a tile are discarded in favour of the full-frame result.
+- **Faces**: YuNet detection (5 landmarks) → similarity transform (Umeyama) onto the 112×112 ArcFace
+  template → SFace 128-d embedding, L2-normalised; cosine similarity against an in-memory gallery of
+  enrolled templates. A quality grade (inter-ocular pixels, yaw from landmarks, Laplacian sharpness,
+  detector score) gates enrolment and caps the decision.
+- **Restoration** (`packages/domain/src/vision/enhance.ts`, pure TypeScript): guided-filter denoise with
+  a robust noise estimate, CLAHE, dark-channel dehaze, LIME low-light, Richardson–Lucy deblur (Gaussian
+  or motion PSF), grey-world white balance, levels, gamma, separable bicubic resampling. Multi-frame
+  super-resolution from video uses NCC coarse alignment and iterative back-projection. Real-ESRGAN runs
+  tiled with feathered seams. Each product records its operations, parameters and input/output hashes,
+  and the weakest state of its steps (RESTORED < MULTI-OBSERVATION < AI-INFERRED).
+- **Evidence**: uploads are streamed into object storage (AES-256-GCM when a key is configured) while hashing; video is probed and
+  analysed in 10 s segments (2 fps default, 4 fps "thorough"), faces grouped into appearances.
+
+## Live cameras
+
+`cameras/cameraService.ts` runs one ffmpeg process per enabled source producing MJPEG on stdout,
+split on JPEG markers. The newest frame is kept for viewers (snapshot / MJPEG relay); at the analysis
+rate one frame at a time goes to the bulk vision pool (frames arriving meanwhile are dropped). A
+per-camera IoU tracker gives detections stable local ids; detections become ordinary
+`camera.detections` messages through the ingest pipeline (so geolocation, fusion, alerts and replay
+treat them like any sensor). Faces go to the identity service, de-duplicated per appearance. A live
+source bound to a site camera supersedes that camera's simulated feed. Grab loops reconnect with
+backoff and report state (connecting / live / error) and frame counters.
+
+## Command and control
+
+`ops/opsService.ts` evaluates the threat board every 2 s: for each non-cooperative, non-tentative
+track and each vital asset, `assess()` (`packages/domain/src/ops/threat.ts`) computes range to the
+protection boundary, time to boundary (ray–circle intersection on the current velocity), CPA/TCPA,
+closing speed, and a score = category × asset priority × confidence × (0.45 proximity + 0.35
+imminence + 0.2 approach), with a floor for any non-cooperative track inside a boundary and a separate
+factor for another system's reported affiliation. Readiness changes, teams, tasks (ETA from distance ×
+1.35 path factor at foot/vehicle speed; automatic ON SCENE within 35 m of the task from the team's
+tracker), alert checklists, handovers and SITREPs are tables in migration `005_ops.sql`; the duty log
+is append-only by trigger.
+
+## Sites and interop
+
+A stored site definition (`config` key `site.definition`, schema `SiteConfigSchema`) is applied right
+after migrations: it replaces the in-memory facility model in place (zones, buildings, fence derived
+from the perimeter, gates, data-feed sensors, flat terrain), in the server, in the analysis workers and
+(via `/api/facility`) in the browser. The demo simulator only runs for the demo site.
+
+`packages/adapters` turns field protocols into ingest envelopes; `routes/interop.ts` publishes the
+fused picture as CoT and accepts pushed CoT. External reports fuse as cooperative entities (friendly)
+or as positional measurements with `sensorKind: 'external'` carrying a `reported` identity that the
+engine keeps on the track and never lets merge into a known friendly entity. In live operation the
+fusion watermark also advances on the wall clock, so a sparse feed's last report is not held in the
+reorder buffer until its next one.
 
 ## Fusion
 
@@ -137,6 +206,10 @@ PostgreSQL schema in `apps/server/src/db/migrations` (forward-only, versioned, r
 | `alerts`, `incidents`, `test_subjects` | Operations |
 | `users`, `sessions`, `audit_events`, `config` | Security and administration (audit is append-only by trigger) |
 | `simulation_scenarios`, `system_state` | Simulator schedule and platform state |
+| `evidence_items`, `evidence_products`, `media_detections` | Evidence library (hash, provenance, capture time and its basis), enhancement products with their steps, detections in media |
+| `identities`, `identity_templates`, `face_events` | Personnel and watch-list registry, face templates (embedding + quality + source), every sighting with decision, similarity, zone and review |
+| `camera_sources` | Live camera configuration (stream URL encrypted), pose, zone, analysis rate |
+| `readiness_log`, `vital_assets`, `teams`, `tasks`, `log_entries`, `handovers`, `sitreps`, `alert_checklists` | Command and control (duty log append-only by trigger) |
 
 Spatial queries use the ENU columns with B-tree indexes on (x, y) and time; the optional PostGIS
 migration adds WGS84 geometry columns and GiST indexes for GIS interoperability. Without PostGIS (e.g.
@@ -150,8 +223,10 @@ interface.
 
 - **Development** — `npm run dev`: API (tsx), simulator (seeds history on first run, then live), Vite
   dev server with proxy. Embedded database under `data/`.
-- **Production** — `npm run build && npm start`: bundled API serving the built client, bundled
-  simulator. External PostgreSQL via `DATABASE_URL`, or Compose (`docker-compose.yml`).
+- **Production** — `npm run build && npm start`: bundled API serving the built client, bundled vision
+  and analysis workers, bundled simulator (demo site only). External PostgreSQL via `DATABASE_URL`, or
+  Compose (`docker-compose.yml`, with an optional `adapters` profile). Field adapters run as a separate
+  process near the equipment networks.
 
 ## Performance
 
@@ -168,8 +243,14 @@ interface.
 
 ## Testing
 
-- `npm test` — domain unit tests (geodesy, fusion, imaging, LiDAR/coverage, hand-off/intent) and
-  server integration tests (ingest → fusion → persistence → replay, robustness, RBAC, audit chain,
-  copilot) on an embedded database.
+- `npm test` — domain unit tests (geodesy incl. MGRS, fusion, imaging, restoration, vision decoding,
+  threat evaluation, LiDAR/coverage, hand-off/intent), adapter tests (NMEA reference sentences, MAVLink
+  frames generated by pymavlink, CoT) and server integration tests on an embedded database (ingest →
+  fusion → persistence → replay, robustness, RBAC, audit chain, copilot; real-model vision on synthetic
+  faces and a public-dataset scene; a recorded clip played as a live camera through recognition to an
+  alert; C2 workflows; a configured real site with CoT interop). Vision and camera tests are skipped
+  when the models or ffmpeg are absent.
+- `npm run vision:eval -w @strata/server -- --pairs <dir>` — face-verification ROC on labelled pairs
+  (accuracy, EER, FAR/FRR per threshold).
 - `npm run test:e2e` — builds, starts the production build with a fresh seeded database on isolated
   ports, and runs Playwright browser tests.
