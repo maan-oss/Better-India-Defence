@@ -38,3 +38,18 @@
 .fshare-st { font-size: 11.5px; color: var(--text-2); }
 .fshare-st.bad { color: var(--st-caution-text); }
 .field-assist { width: 100%; min-height: 52px; font-size: 15px; }
+
+/* Library components at field scale */
+.field-team { flex: 1; min-width: 0; }
+.field-team label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.field-slide { display: flex; justify-content: center; margin-top: 14px; }
+.field-slide > * { max-width: 100%; }
+.field-steps { margin-top: 16px; }
+.field-drills { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+.field-drills > div:last-child { background: var(--bg-0); border: 1px solid var(--line); }
+.field-swipe [role='listitem'] .fal, .field-swipe li .fal { margin-bottom: 0; border-radius: 0; border: 0; }
+.field-swipe { border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
+.salute .mono input, .salute input.mono { font-family: var(--font-mono); }
+/* No Tailwind preflight in this app: give the vendored checklist's buttons the reset it expects (zero specificity so its utilities win). */
+:where(.field-drills) button { background: transparent; border: 0; padding: 0; color: inherit; }
+.field-drills > div:last-child { width: 100%; }

@@ -18,6 +18,14 @@ export type InteractiveChecklistProps = {
   bounce?: number
   corner?: number
   boxSize?: number
+  /** Strata adaptation: upstream clears every box 3 s after the last is ticked. A field checklist must keep its state. @default true */
+  resetWhenDone?: boolean
+  /** Strata adaptation: show the "add" row. @default true */
+  allowAdd?: boolean
+  /** Strata adaptation: most items the add row allows. @default 5 */
+  maxItems?: number
+  /** Strata adaptation: wording of the add row. */
+  addLabel?: string
   className?: string
 }
 
@@ -34,6 +42,10 @@ export function InteractiveChecklist({
   bounce = 50,
   corner = 18,
   boxSize = 18,
+  resetWhenDone = true,
+  allowAdd = true,
+  maxItems = MAX_ITEMS,
+  addLabel = 'Add new task',
   className,
 }: InteractiveChecklistProps) {
   const [internalItems, setInternalItems] = React.useState<ChecklistItem[]>(defaultItems)
@@ -44,17 +56,17 @@ export function InteractiveChecklist({
   const items = isControlled ? controlledItems : internalItems
 
   const allDone = items.length > 0 && items.every((item) => item.done)
-  const canAddMore = items.length < MAX_ITEMS
+  const canAddMore = allowAdd && items.length < maxItems
 
   React.useEffect(() => {
-    if (!allDone) return
+    if (!allDone || !resetWhenDone) return
     const timer = window.setTimeout(() => {
       const reset = items.map((item) => ({ ...item, done: false }))
       if (!isControlled) setInternalItems(reset)
       onChange?.(reset)
     }, RESET_DELAY)
     return () => window.clearTimeout(timer)
-  }, [allDone, items, isControlled, onChange])
+  }, [allDone, resetWhenDone, items, isControlled, onChange])
 
   const toggleItem = (id: string) => {
     const next = items.map((item) => (item.id === id ? { ...item, done: !item.done } : item))
@@ -185,7 +197,7 @@ export function InteractiveChecklist({
               <input
                 autoFocus
                 value={newText}
-                placeholder="New task..."
+                placeholder={`${addLabel}…`}
                 maxLength={40}
                 onChange={(e) => setNewText(e.target.value)}
                 onKeyDown={(e) => {
@@ -204,7 +216,7 @@ export function InteractiveChecklist({
                 onClick={() => setIsAdding(true)}
                 className="text-[13px] text-muted-foreground/70 hover:text-foreground transition-colors cursor-pointer"
               >
-                Add new task
+                {addLabel}
               </button>
             )}
           </div>

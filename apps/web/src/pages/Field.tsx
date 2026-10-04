@@ -9,7 +9,10 @@ import { tracks as trackStore, type RenderTrack } from '../state/tracks';
 import { symbolFor, symbolTexture } from '../engine/symbols';
 import { ErrorNote, Modal, useAsync } from '../components/common';
 import type { Task, Team } from '../components/ops/OpsWidgets';
-import { HoldToConfirm, Switch } from '../components/kit';
+import { Bell, Radio, Siren } from 'lucide-react';
+import { Button, HoldToConfirm, Input, Select as ArcSelect, Stepper, SwipeActions, SwipeActionsRow, Switch, Textarea, useToastStack } from '../components/kit';
+import { SlideToConfirm } from '../components/vendor/spaceui/components/spaceui/slide-to-confirm';
+import { InteractiveChecklist, type ChecklistItem } from '../components/vendor/spaceui/components/spaceui/interactive-checklist';
 import { alpha, P as C } from '../lib/palette';
 import '../styles/field.css';
 import { Empty } from '../brand/Boot';
@@ -23,6 +26,39 @@ const NEXT: Record<string, { status: string; label: string } | undefined> = {
 
 const bearing = (a: { x: number; y: number }, b: { x: number; y: number }) => ((Math.atan2(b.x - a.x, b.y - a.y) * 180) / Math.PI + 360) % 360;
 const CARD = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+const STEPS = ['ISSUED', 'ACKNOWLEDGED', 'EN ROUTE', 'ON SCENE', 'COMPLETE'];
+const DRILLS = ['Confirm the grid on arrival', 'Observe, then send a SALUTE', 'Keep people back from the area', 'Update the control room'];
+
+/** Arrival drills for the current task, kept on this device per task (Space UI checklist, without its auto-reset). */
+function ArrivalDrills({ taskId }: { taskId: string }) {
+  const key = `strata.field.drills.${taskId}`;
+  const [items, setItems] = useState<ChecklistItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) return JSON.parse(saved) as ChecklistItem[];
+    } catch {
+      /* ignore */
+    }
+    return DRILLS.map((text, i) => ({ id: `d${i}`, text, done: false }));
+  });
+  const change = (next: ChecklistItem[]) => {
+    setItems(next);
+    try {
+      localStorage.setItem(key, JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  };
+  return (
+    <div className="field-drills">
+      <div className="row" style={{ justifyContent: 'space-between' }}>
+        <span className="upper dim">Arrival drills</span>
+        <span className="dim" style={{ fontSize: 11 }}>{items.filter((i) => i.done).length} of {items.length} · on this device</span>
+      </div>
+      <InteractiveChecklist className="w-full" items={items} onChange={change} resetWhenDone={false} maxItems={7} addLabel="Add a drill" />
+    </div>
+  );
+}
 
 /**
  * FIELD VIEW — for a QRT / patrol leader on a phone or tablet: my team, my task (orders, grid, distance and
@@ -42,7 +78,17 @@ export function Field() {
   const [teamId, setTeamId] = useState<string>(() => localStorage.getItem('strata.field.team') ?? '');
   const team = teams.data?.find((t) => t.id === teamId) ?? null;
   const task = tasks.data?.find((t) => t.teamId === teamId && t.status !== 'COMPLETE' && t.status !== 'CANCELLED') ?? null;
-  const [report, setReport] = useState(false);
+  const [report, setReport] = useState<boolean | string>(false);
+  // The slider takes a pixel width: fit it to its column so the end of the track is always reachable on a phone.
+  const [slideW, setSlideW] = useState(340);
+  const slideObs = useRef<ResizeObserver | null>(null);
+  const slideBox = (el: HTMLDivElement | null) => {
+    slideObs.current?.disconnect();
+    if (!el) return;
+    slideObs.current = new ResizeObserver(([e]) => setSlideW(Math.max(220, Math.min(380, Math.floor(e!.contentRect.width)))));
+    slideObs.current.observe(el);
+  };
+  const { toast } = useToastStack();
   const [err, setErr] = useState<string | null>(null);
   const [outcome, setOutcome] = useState('');
   const pick = (id: string) => {
@@ -72,20 +118,23 @@ export function Field() {
       setErr(e instanceof Error ? e.message : String(e));
     }
   };
+  const ack = async (a: AlertRecord) => {
+    try {
+      await post(`/api/alerts/${a.id}/ack`, {});
+      toast({ type: 'success', title: 'Alert acknowledged', description: a.title });
+    } catch (e) {
+      toast({ type: 'error', title: 'Not acknowledged', description: e instanceof Error ? e.message : String(e) });
+    }
+  };
   const dist = team?.position && task?.target ? Math.hypot(task.target.x - team.position.x, task.target.y - team.position.y) : null;
   const brg = team?.position && task?.target ? bearing(team.position, task.target) : null;
 
   return (
     <div className="field">
       <div className="field-top">
-        <select className="input field-team" value={teamId} onChange={(e) => pick(e.target.value)} aria-label="My team">
-          <option value="">Select your team…</option>
-          {teams.data?.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.callsign} · {t.kind}
-            </option>
-          ))}
-        </select>
+        <div className="field-team">
+          <ArcSelect label="My team" placeholder="Select your team" value={teamId || undefined} onValueChange={pick} options={(teams.data ?? []).map((t) => ({ value: t.id, label: `${t.callsign} · ${t.kind}` }))} />
+        </div>
         {team && <span className={`fstat s-${team.status.replace(' ', '-')}`}>{team.status}</span>}
       </div>
       {team && (
@@ -131,19 +180,20 @@ export function Field() {
               {task.locationText && task.mgrs && <div className="muted" style={{ fontSize: 12.5, marginTop: 6 }}>{task.locationText}</div>}
               {can('ops.dispatch') && NEXT[task.status] && (
                 <>
-                  {NEXT[task.status]!.status === 'COMPLETE' && <textarea className="input" rows={2} placeholder="Outcome (what you found, actions taken)" value={outcome} onChange={(e) => setOutcome(e.target.value)} style={{ width: '100%', marginTop: 10 }} />}
-                  <button className="btn primary field-big" onClick={() => void advance(NEXT[task.status]!.status)}>
-                    {NEXT[task.status]!.label}
-                  </button>
+                  {NEXT[task.status]!.status === 'COMPLETE' && (
+                    <div style={{ marginTop: 12 }}>
+                      <Textarea label="Outcome" rows={2} placeholder="What you found, actions taken" value={outcome} onChange={(e) => setOutcome(e.target.value)} />
+                    </div>
+                  )}
+                  <div className="field-slide" ref={slideBox}>
+                    <SlideToConfirm key={`${task.status}-${slideW}`} width={slideW} label={`Slide: ${NEXT[task.status]!.label.toLowerCase()}`} confirmedLabel="Sent to control room" resetDelay={60_000} onConfirm={() => void advance(NEXT[task.status]!.status)} />
+                  </div>
                 </>
               )}
-              <div className="fsteps">
-                {['ISSUED', 'ACKNOWLEDGED', 'EN ROUTE', 'ON SCENE', 'COMPLETE'].map((st, i, arr) => (
-                  <span key={st} className={arr.indexOf(task.status) >= i ? 'done' : ''}>
-                    {st}
-                  </span>
-                ))}
+              <div className="field-steps">
+                <Stepper label="Task progress" details="current" current={Math.max(0, STEPS.indexOf(task.status)) + 1} steps={STEPS.map((st) => ({ id: st, label: st.charAt(0) + st.slice(1).toLowerCase() }))} />
               </div>
+              {(task.status === 'ON SCENE' || task.status === 'EN ROUTE') && <ArrivalDrills taskId={task.id} />}
             </section>
           ) : (
             <section className="ftask idle">
@@ -155,27 +205,41 @@ export function Field() {
           )}
           {err && <ErrorNote error={err} />}
 
-          <LocalPicture centre={team.position} target={task?.target ?? null} />
+          <div id="field-picture">
+            <LocalPicture centre={team.position} target={task?.target ?? null} />
+          </div>
 
-          <section className="fsec">
+          <section className="fsec" id="field-alerts">
             <h4>Alerts near you</h4>
             {near.length === 0 && <div className="muted">None.</div>}
-            {near.map((a) => (
-              <NearAlert key={a.id} a={a} from={team.position} />
-            ))}
+            {near.length > 0 && (
+              <SwipeActions label="Alerts near you" className="field-swipe">
+                {near.map((a) => (
+                  <SwipeActionsRow
+                    key={a.id}
+                    label={a.title}
+                    leading={can('ops.log') ? [{ label: 'Report', icon: <Radio size={18} />, tone: 'accent', keepRow: true, onSelect: () => setReport(a.position ? grid(a.position) : true) }] : undefined}
+                    trailing={can('alerts.acknowledge') && a.status === 'open' ? [{ label: 'Acknowledge', icon: <Bell size={18} />, tone: 'neutral', keepRow: true, onSelect: () => void ack(a) }] : undefined}
+                  >
+                    <NearAlert a={a} from={team.position} />
+                  </SwipeActionsRow>
+                ))}
+              </SwipeActions>
+            )}
+            {near.length > 0 && <div className="dim" style={{ fontSize: 11.5, marginTop: 6 }}>Swipe right to report on an alert, left to acknowledge it.</div>}
           </section>
 
-          <div className="factions">
+          <div className="factions" id="field-report">
             {can('ops.log') && (
-              <button className="btn field-big" onClick={() => setReport(true)}>
+              <Button variant="secondary" size="lg" className="field-big" onClick={() => setReport(true)}>
                 Contact report (SALUTE)
-              </button>
+              </Button>
             )}
             {can('ops.log') && <AssistButton teamId={team.id} />}
           </div>
         </>
       )}
-      {report && <SaluteForm teamId={teamId || null} position={team?.position ?? null} onClose={() => setReport(false)} />}
+      {report && <SaluteForm teamId={teamId || null} position={team?.position ?? null} location={typeof report === 'string' ? report : null} onClose={() => setReport(false)} />}
     </div>
   );
 }
@@ -218,16 +282,17 @@ function AssistButton({ teamId }: { teamId: string }) {
   };
   return (
     <div className="col" style={{ gap: 4 }}>
-      <HoldToConfirm className="field-assist" label="Hold to request assistance" confirmedLabel="Assistance requested" tone="danger" duration={1500} onConfirm={send} confirmed={done} />
+      <HoldToConfirm className="field-assist" icon={<Siren size={18} />} label="Hold to request assistance" confirmedLabel="Assistance requested" tone="danger" duration={1500} onConfirm={send} confirmed={done} />
       {sent && <span className="mono" style={{ fontSize: 11.5, color: 'var(--st-critical-text)' }}>{sent}</span>}
     </div>
   );
 }
 
-function SaluteForm({ teamId, position, onClose }: { teamId: string | null; position: Vec3 | null; onClose: () => void }) {
-  const [f, setF] = useState({ size: '', activity: '', location: position ? grid(position) : '', unit: '', time: `${new Date().toISOString().slice(11, 16).replace(':', '')}Z`, equipment: '' });
+function SaluteForm({ teamId, position, location, onClose }: { teamId: string | null; position: Vec3 | null; location: string | null; onClose: () => void }) {
+  const [f, setF] = useState({ size: '', activity: '', location: location ?? (position ? grid(position) : ''), unit: '', time: `${new Date().toISOString().slice(11, 16).replace(':', '')}Z`, equipment: '' });
   const [err, setErr] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
+  const [sending, setSending] = useState(false);
   const fields: [keyof typeof f, string, string][] = [
     ['size', 'S — Size', 'how many: 2 persons, 1 vehicle'],
     ['activity', 'A — Activity', 'what they are doing'],
@@ -241,30 +306,31 @@ function SaluteForm({ teamId, position, onClose }: { teamId: string | null; posi
       {ok ? (
         <div className="col">
           <div className="note ok">Report sent to the control room and recorded in the duty log.</div>
-          <button className="btn" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose}>
             Close
-          </button>
+          </Button>
         </div>
       ) : (
-        <div className="col" style={{ gap: 10 }}>
+        <div className="col salute" style={{ gap: 12 }}>
           {fields.map(([k, label, ph]) => (
-            <label key={k} className="col" style={{ gap: 3 }}>
-              <span className="upper muted">{label}</span>
-              <input className="input" style={{ height: 36 }} value={f[k]} placeholder={ph} onChange={(e) => setF({ ...f, [k]: e.target.value })} />
-            </label>
+            <Input key={k} label={label} value={f[k]} placeholder={ph} className={k === 'location' || k === 'time' ? 'mono' : undefined} onChange={(e) => setF({ ...f, [k]: e.target.value })} />
           ))}
           {err && <ErrorNote error={err} />}
-          <button
-            className="btn primary field-big"
+          <Button
+            size="lg"
+            className="field-big"
+            loading={sending}
             disabled={!f.activity && !f.size}
-            onClick={() =>
+            onClick={() => {
+              setSending(true);
               void post('/api/ops/contact-report', { teamId, ...f, ...(position ? { position: { x: position.x, y: position.y } } : {}) })
                 .then(() => setOk(true))
                 .catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)))
-            }
+                .finally(() => setSending(false));
+            }}
           >
             Send report
-          </button>
+          </Button>
         </div>
       )}
     </Modal>

@@ -63,6 +63,11 @@ export function DitherGradient({
 
     const animate = () => {
       const { width, height } = canvas
+      // Strata adaptation: a hidden canvas (display: none on phones) measures 0 × 0, and createImageData throws on it.
+      if (!width || !height) {
+        animationRef.current = requestAnimationFrame(animate)
+        return
+      }
       const imageData = ctx.createImageData(width, height)
       const data = imageData.data
 

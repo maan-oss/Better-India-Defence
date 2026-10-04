@@ -1,3 +1,4 @@
+import { ShieldAlert } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { dtg, READINESS_LEVELS, terrainHeight, type ThreatAssessment } from '@strata/domain';
@@ -186,7 +187,7 @@ function ReadinessPanel() {
             <div className="row">
               <div className="spacer" />
               {severe ? (
-                <HoldToConfirm label={`Hold to set ${set}`} confirmedLabel={`${set} set`} tone="danger" duration={1500} disabled={reason.trim().length < 3} onConfirm={() => void raise(set)} />
+                <HoldToConfirm icon={<ShieldAlert size={16} />} label={`Hold to set ${set}`} confirmedLabel={`${set} set`} tone="danger" duration={1500} disabled={reason.trim().length < 3} onConfirm={() => void raise(set)} />
               ) : (
                 <Button variant="primary" disabled={reason.trim().length < 3} onClick={() => void raise(set)}>
                   Set {set}
