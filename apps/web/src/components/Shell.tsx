@@ -13,14 +13,12 @@ import { useUi } from '../state/ui';
 import { NAV, pageTitle } from '../lib/nav';
 import { Icon } from './Icons';
 import { Dialog, Tip } from './ui';
-import { AnnouncementBar, Breadcrumb, PopoverContent, ToastStack, ToastStackProvider, UserMenu } from './kit';
+import { AnnouncementBar, Breadcrumb, PopoverContent, ShortcutKeys, ShortcutList, ThemeSwitch, ToastStack, ToastStackProvider, UserMenu, type ShortcutListGroup } from './kit';
 import { CommandBar } from './patterns/CommandBar';
 import { StatusIsland } from './patterns/StatusIsland';
 import { MacKeyboard } from './vendor/componentry/mac-keyboard';
 import { Mark } from '../brand/Mark';
 
-const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
-const MOD = isMac ? '⌘' : 'Ctrl';
 
 /**
  * Console frame. The rail (56 px, icons with names on hover) runs the full height beside a 48 px top bar that
@@ -216,12 +214,14 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
         <Search size={15} strokeWidth={2} />
         <span className="cmd-trigger-text">Search or run a command</span>
         <span className="cmd-trigger-keys">
-          <kbd className="kbd">{MOD}</kbd>
-          <kbd className="kbd">K</kbd>
+          <ShortcutKeys shortcut="mod+k" size="sm" />
         </span>
       </button>
       <div className="tb-right">
         <StatusIsland />
+        <span className="tb-night">
+          <ThemeSwitch iconOnly variant="eclipse" theme={theme === 'night' ? 'dark' : 'light'} label={theme === 'night' ? 'Standard display' : 'Night display (red light)'} onThemeChange={(next) => setTheme(next === 'dark' ? 'night' : 'dark')} />
+        </span>
         {user && (
           <UserMenu
             className="user-btn"
@@ -299,54 +299,54 @@ function SiteCard({ onClose, canEdit }: { onClose: () => void; canEdit: boolean 
   );
 }
 
-const SHORTCUTS: { group: string; items: [string, string][] }[] = [
+const SHORTCUTS: ShortcutListGroup[] = [
   {
-    group: 'Anywhere',
+    label: 'Anywhere',
     items: [
-      [`${MOD} K`, 'Command bar: search, grid reference, go to, actions'],
-      ['?', 'Keyboard shortcuts'],
-      ['G O', 'Operational picture'],
-      ['G C', 'Command'],
-      ['G W', 'Camera wall'],
-      ['G I', 'Incidents'],
-      ['G F', 'Field view'],
-      ['G S', 'Sensors'],
+      { shortcut: 'mod+k', label: 'Command bar: search, grid reference, go to, actions', keywords: 'search find' },
+      { shortcut: '?', label: 'Keyboard shortcuts', keywords: 'help keys' },
     ],
   },
   {
-    group: 'Operational picture',
+    label: 'Operational picture',
     items: [
-      ['Space', 'Play or pause'],
-      ['← →', 'Step 1 s (Shift: 10 s)'],
-      ['L', 'Return to live'],
-      ['Esc', 'Clear selection'],
-      ['/', 'Ask the copilot'],
+      { shortcut: 'space', label: 'Play or pause', keywords: 'time replay' },
+      { shortcut: 'left', label: 'Step back 1 s', keywords: 'time' },
+      { shortcut: 'right', label: 'Step forward 1 s', keywords: 'time' },
+      { shortcut: 'shift+left', label: 'Step back 10 s', keywords: 'time' },
+      { shortcut: 'shift+right', label: 'Step forward 10 s', keywords: 'time' },
+      { shortcut: 'l', label: 'Return to live', keywords: 'now' },
+      { shortcut: 'escape', label: 'Clear selection' },
+      { shortcut: '/', label: 'Ask the copilot', keywords: 'question record' },
     ],
   },
+];
+const GOTO: [string, string][] = [
+  ['o', 'Operational picture'],
+  ['c', 'Command'],
+  ['w', 'Camera wall'],
+  ['i', 'Incidents'],
+  ['f', 'Field view'],
+  ['s', 'Sensors'],
 ];
 
 function ShortcutsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   if (!open) return null;
   return (
-    <Dialog onClose={() => onOpenChange(false)} title="Keyboard shortcuts" description="Press any key to see it on the keyboard." wide>
-      <div className="keys-grid">
-        {SHORTCUTS.map((g) => (
-          <section key={g.group}>
-            <h4>{g.group}</h4>
-            {g.items.map(([k, d]) => (
-              <div key={k} className="keys-row">
-                <span className="keys-k">
-                  {k.split(' ').map((x) => (
-                    <kbd key={x} className="kbd">
-                      {x}
-                    </kbd>
-                  ))}
-                </span>
-                <span className="muted">{d}</span>
-              </div>
-            ))}
-          </section>
-        ))}
+    <Dialog onClose={() => onOpenChange(false)} title="Keyboard shortcuts" description="Hold a key to light it up below and in the list." wide>
+      <div className="keys-layout">
+        <ShortcutList groups={SHORTCUTS} label="Keyboard shortcuts" searchPlaceholder="Find a shortcut" />
+        <section className="keys-goto" aria-label="Go to an area">
+          <h4>Go to an area: press G, then</h4>
+          {GOTO.map(([k, d]) => (
+            <div key={k} className="keys-row">
+              <span className="keys-k">
+                <ShortcutKeys shortcut="g" size="sm" /> <span className="dim">then</span> <ShortcutKeys shortcut={k} size="sm" />
+              </span>
+              <span className="muted">{d}</span>
+            </div>
+          ))}
+        </section>
       </div>
       <div className="keys-board">
         <MacKeyboard soundSrc="" />

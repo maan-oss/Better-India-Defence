@@ -129,9 +129,11 @@ h1, h2, h3, h4, h5 { text-wrap: balance; }
 
 /* ---------------------------------------------------------------- shortcuts dialog */
 .keys-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-6); }
+.keys-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--sp-6); align-items: start; }
+.keys-goto h4 { margin: 4px 0 var(--sp-2); font-size: 12px; font-weight: 600; color: var(--text-1); }
 .keys-grid h4 { margin: 0 0 var(--sp-2); font-size: 12px; font-weight: 600; color: var(--text-1); }
 .keys-row { display: flex; align-items: center; gap: var(--sp-3); height: 30px; border-bottom: 1px solid var(--line); font-size: 12.5px; }
-.keys-k { display: inline-flex; gap: 3px; min-width: 72px; }
+.keys-k { display: inline-flex; align-items: center; gap: 6px; min-width: 120px; font-size: 11.5px; }
 .keys-k .kbd { min-width: 20px; text-align: center; }
 .keys-board { margin-top: var(--sp-6); display: grid; place-items: center; overflow: hidden; border-radius: var(--radius-lg); background: var(--bg-0); padding: var(--sp-4); }
 .keys-board > * { zoom: 0.72; }
@@ -329,11 +331,11 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .hero-pillars b { display: block; color: var(--text-0); font-weight: 600; font-size: 13px; margin-bottom: 2px; }
 .hero-clock { position: absolute; top: 32px; left: 56px; right: 56px; display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; color: var(--text-2); }
 .hero-clock b { color: var(--text-0); font-weight: 500; }
-.login-side { display: grid; place-items: center; padding: var(--sp-8); overflow: auto; background: var(--bg-1); }
+.login-side { display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: var(--sp-8); overflow: auto; background: var(--bg-1); }
 .login-card { width: 360px; max-width: 100%; animation: reveal 600ms 120ms var(--ease) both; }
 .login-card h1 { font-weight: 600; font-size: 22px; margin: 0 0 var(--sp-1); letter-spacing: -0.02em; }
 .login-card > p { color: var(--text-2); margin: 0 0 var(--sp-6); }
-.login-card label { display: block; color: var(--text-1); font-size: 12px; font-weight: 500; margin: var(--sp-4) 0 6px; }
+.login-card > label { display: block; color: var(--text-1); font-size: 12px; font-weight: 500; margin: var(--sp-4) 0 6px; }
 .login-card .input { width: 100%; height: 36px; font-size: 14px; }
 .login-card .btn.primary { width: 100%; height: 36px; margin-top: var(--sp-5); font-size: 14px; }
 .consent { margin-top: var(--sp-6); padding: var(--sp-3) var(--sp-4); border: 1px solid var(--line-2); background: var(--bg-2); border-radius: var(--radius-lg); font-size: 12px; color: var(--text-2); line-height: 18px; }
@@ -440,7 +442,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
   .page-h .sub { display: none; }
   .toasts { left: 10px; right: 10px; width: auto; }
   .split, .page-body { grid-template-columns: 1fr !important; }
-  .keys-grid { grid-template-columns: 1fr; }
+  .keys-grid, .keys-layout { grid-template-columns: 1fr; }
   .keys-board { display: none; }
 }
 @media (max-width: 1180px) {
@@ -546,3 +548,8 @@ button.list-row:focus-visible { box-shadow: inset var(--glow-accent); }
 .perm-cell { text-align: center; color: var(--text-0); }
 .health-disk { margin: 4px 0 18px; }
 .health-tree { margin: 0 0 16px; }
+.login-fields { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+.tb-night { display: inline-flex; } .tb-night button { height: 30px; width: 30px; } @media (max-width: 900px) { .tb-night { display: none; } }
+@media (max-width: 520px) { .login-side { padding: 24px 16px; } }
+.login-mobile-mark { display: none; margin-bottom: 36px; }
+@media (max-width: 960px) { .login-mobile-mark { display: block; } }

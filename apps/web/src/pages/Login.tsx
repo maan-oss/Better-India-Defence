@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useSession } from '../state/session';
 import { StrataField } from '../brand/StrataField';
 import { get } from '../api/client';
-import { Alert } from '../components/kit';
+import { Alert, Input, PasswordField } from '../components/kit';
 import { DitherGradient } from '../components/vendor/componentry/dither-gradient';
 import { Lockup } from '../brand/Mark';
 
@@ -94,15 +94,18 @@ export function Login() {
         </section>
         <section className="login-side">
           <form className="login-card" onSubmit={submit} aria-label="Sign in">
+            <div className="login-mobile-mark" aria-hidden="true">
+              <Lockup size={30} />
+            </div>
             <h1>Sign in</h1>
             <p>
               {siteName}
               {siteSub ? ` · ${siteSub}` : ''}
             </p>
-            <label htmlFor="u">Username</label>
-            <input id="u" className="input" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" spellCheck={false} />
-            <label htmlFor="p">Password</label>
-            <input id="p" className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" autoFocus />
+            <div className="login-fields">
+              <Input id="u" label="Username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" spellCheck={false} autoCapitalize="none" />
+              <PasswordField id="p" label="Password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" autoFocus />
+            </div>
             {error && (
               <div style={{ marginTop: 12 }}>
                 <Alert tone="danger" title="Sign-in failed">
