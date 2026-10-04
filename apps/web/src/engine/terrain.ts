@@ -110,7 +110,6 @@ export function createTerrain(halfExtent: number, segments = 256): { mesh: THREE
       uFeedPos: { value: new THREE.Vector3() },
       uFeedRange: { value: 500 },
     },
-    extensions: { derivatives: true } as unknown as THREE.ShaderMaterial['extensions'],
   });
   const mesh = new THREE.Mesh(geom, material);
   mesh.userData = { pick: 'terrain' };

@@ -290,8 +290,12 @@ export function registerOperations(app: FastifyInstance, p: Platform): void {
     try {
       let bytes = await p.media.frame(q.sensorId, q.t);
       if (q.crop) {
-        const [x, y, w, h] = q.crop.split(',').map(Number) as [number, number, number, number];
         const img = jpeg.decode(Buffer.from(bytes), { useTArray: true });
+        // Detection boxes are in analytics pixels (camera main stream; drone gimbals 1920 px wide); the VMS
+        // serves the lower-resolution recording stream, so map the box into frame pixels.
+        const def = findSensor(q.sensorId);
+        const k = img.width / (def?.kind === 'camera' ? def.widthPx : 1920);
+        const [x, y, w, h] = q.crop.split(',').map((v) => Number(v) * k) as [number, number, number, number];
         const pad = Math.max(4, Math.round(h * 0.2));
         const x0 = Math.max(0, Math.floor(x - pad));
         const y0 = Math.max(0, Math.floor(y - pad));
@@ -299,6 +303,7 @@ export function registerOperations(app: FastifyInstance, p: Platform): void {
         const y1 = Math.min(img.height, Math.ceil(y + h + pad));
         const cw = x1 - x0;
         const ch = y1 - y0;
+        if (cw <= 0 || ch <= 0) return reply.code(422).send({ error: 'crop lies outside the frame' });
         const s = q.scale;
         const out = new Uint8Array(cw * s * ch * s * 4);
         for (let yy = 0; yy < ch * s; yy++)

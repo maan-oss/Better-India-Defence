@@ -91,7 +91,7 @@ export function Operations() {
         const p = new THREE.Vector3(b.center.x, b.center.y, terrainHeight(b.center.x, b.center.y) + b.height + 4);
         const d = p.distanceTo(cam);
         if (d > 1300 || b.kind === 'shelter' || b.kind === 'gatehouse') continue;
-        out.push({ id: `b:${b.id}`, position: p, text: `${b.label} · ${b.name}`, tone: 'building' as never, priority: 4 });
+        out.push({ id: `b:${b.id}`, position: p, text: `${b.label} · ${b.name}`, tone: 'building' as const, priority: 4 });
       }
       return out;
     };

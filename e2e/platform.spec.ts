@@ -86,3 +86,14 @@ test('audit: administrator verifies the hash chain', async ({ page }) => {
   await page.getByRole('button', { name: 'Verify chain' }).click();
   await expect(page.getByText(/Chain intact · \d+ records verified/)).toBeVisible();
 });
+
+test('identity hand-off demo returns scored segments with real frame crops and requires human review', async ({ page }) => {
+  await signIn(page, 'analyst');
+  await page.getByRole('link', { name: 'Evidence' }).click();
+  await page.getByRole('button', { name: /IDENTITY HAND-OFF/ }).click();
+  await page.getByRole('button', { name: /Search recorded observations/ }).click();
+  await expect(page.getByText(/HUMAN REVIEW/i).first()).toBeVisible({ timeout: 30_000 });
+  const thumb = page.locator('img[alt="candidate appearance"]').first();
+  await expect(thumb).toBeVisible();
+  await expect.poll(async () => thumb.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+});

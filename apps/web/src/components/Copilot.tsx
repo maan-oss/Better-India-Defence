@@ -57,8 +57,7 @@ export function Copilot() {
         useTime.getState().setPlaying(false);
         out.push(`time set to ${hms(act.t)}Z`);
       } else if (act.type === 'select') {
-        if (act.kind === 'patch') w.select({ kind: 'patch', id: act.id });
-        else w.select({ kind: act.kind, id: act.id } as never);
+        w.select({ kind: act.kind, id: act.id });
         out.push(`selected ${act.kind} ${act.id}`);
       } else if (act.type === 'diff') {
         w.setDiff({ a: act.a, b: act.b });
