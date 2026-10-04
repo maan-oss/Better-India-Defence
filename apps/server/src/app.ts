@@ -62,7 +62,7 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
       socket.close(4401, 'authentication required');
       return;
     }
-    p.hub.add(socket, { type: 'hello', serverTime: Date.now(), liveEdge: p.liveEdge() });
+    p.hub.add(socket, { type: 'hello', serverTime: Date.now(), liveEdge: p.liveEdge() }, { username: req.user.username, displayName: req.user.displayName, role: req.user.role });
   });
 
   if (cfg.WEB_DIST && existsSync(cfg.WEB_DIST)) {

@@ -94,3 +94,17 @@
 .tb-card:hover .tb-cancel, .tb-cancel:focus-visible { opacity: 1; }
 .tb-cancel:hover { color: var(--st-critical-text); background: var(--st-critical-tint); }
 .tb-err { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding: 6px 8px 6px 14px; font-size: 12.5px; color: var(--st-caution-text); background: var(--st-caution-tint); border-bottom: 1px solid var(--st-caution-line); }
+
+/* Watch activity (Arc heatmap + bar chart) */
+.cmd-activity { grid-column: 1 / -1; }
+.cmd-activity-body { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px; padding: 16px 20px 20px; align-items: start; }
+@media (max-width: 1200px) { .cmd-activity-body { grid-template-columns: 1fr; } }
+.ready-hist { padding: 8px 16px 12px; border-top: 1px solid var(--line); }
+.duty-new { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.duty-new-row { display: flex; gap: 12px; align-items: flex-start; }
+.sig-pad { border-radius: var(--radius-lg); overflow: hidden; }
+.sig-thumb { height: 28px; width: auto; border-radius: 4px; background: #f0eee6; padding: 2px 6px; }
+.link-btn { background: none; border: 0; padding: 0; color: var(--text-0); font-weight: 600; cursor: pointer; text-decoration: underline dotted var(--line-3); text-underline-offset: 3px; }
+.link-btn:hover { text-decoration-color: var(--text-1); }
+.handover-form { display: grid; grid-template-columns: minmax(260px, 0.9fr) 1.4fr; gap: 24px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); align-items: start; }
+@media (max-width: 900px) { .handover-form { grid-template-columns: 1fr; } }

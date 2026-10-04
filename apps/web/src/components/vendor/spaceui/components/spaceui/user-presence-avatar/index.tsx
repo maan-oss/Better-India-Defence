@@ -19,6 +19,8 @@ export interface UserPresenceAvatarProps {
   users: PresenceUser[]
   className?: string
   onChange?: (users: PresenceUser[]) => void
+  /** Adapted for STRATA: presence comes from the server, so clicking does not change it. */
+  readOnly?: boolean
 }
 
 const AVATAR_MOTION_TRANSITION = {
@@ -33,14 +35,17 @@ const GROUP_CONTAINER_TRANSITION = {
   damping: 22,
 } as const
 
-function UserPresenceAvatar({ users: initialUsers, className, onChange }: UserPresenceAvatarProps) {
+function UserPresenceAvatar({ users: initialUsers, className, onChange, readOnly = false }: UserPresenceAvatarProps) {
   const [users, setUsers] = React.useState<PresenceUser[]>(initialUsers)
+  // Adapted for STRATA: follow the live list instead of keeping the first one.
+  React.useEffect(() => setUsers(initialUsers), [initialUsers])
   const [togglingGroup, setTogglingGroup] = React.useState<'online' | 'offline' | null>(null)
 
   const online = users.filter((u) => u.online)
   const offline = users.filter((u) => !u.online)
 
   const toggleStatus = (id: number) => {
+    if (readOnly) return
     const user = users.find((u) => u.id === id)
     if (!user) return
 
@@ -77,18 +82,18 @@ function UserPresenceAvatar({ users: initialUsers, className, onChange }: UserPr
                         <motion.button
                           type="button"
                           layoutId={`avatar-${user.id}`}
-                          className="relative flex size-full cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="relative flex size-full rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           onClick={() => toggleStatus(user.id)}
                           animate={{
                             filter: 'grayscale(0)',
                             scale: 1,
                           }}
                           transition={AVATAR_MOTION_TRANSITION}
-                          aria-label={`${user.name} (Online - click to set offline)`}
+                          aria-label={readOnly ? `${user.name}, on watch` : `${user.name} (Online - click to set offline)`}
                           initial={false}
                         >
                           <AvatarExtended>
-                            <Avatar className="size-10">
+                            <Avatar className="size-7">
                               <AvatarImage src={user.src} alt={user.name} />
                               <AvatarFallback>{user.fallback}</AvatarFallback>
                             </Avatar>
@@ -120,18 +125,18 @@ function UserPresenceAvatar({ users: initialUsers, className, onChange }: UserPr
                         <motion.button
                           type="button"
                           layoutId={`avatar-${user.id}`}
-                          className="relative flex size-full cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="relative flex size-full rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           onClick={() => toggleStatus(user.id)}
                           animate={{
                             filter: 'grayscale(1)',
                             scale: 1,
                           }}
                           transition={AVATAR_MOTION_TRANSITION}
-                          aria-label={`${user.name} (Offline - click to set online)`}
+                          aria-label={readOnly ? `${user.name}, not connected` : `${user.name} (Offline - click to set online)`}
                           initial={false}
                         >
                           <AvatarExtended>
-                            <Avatar className="size-10">
+                            <Avatar className="size-7">
                               <AvatarImage src={user.src} alt={user.name} />
                               <AvatarFallback>{user.fallback}</AvatarFallback>
                               <AvatarRing className="ring-background" />

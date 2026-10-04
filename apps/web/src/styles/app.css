@@ -491,3 +491,5 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .wall-empty { margin: auto; padding: 72px 24px; max-width: 520px; }
 .login-hero .hero-strata { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--text-1); opacity: 0.85; mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 92%); }
 .login-hero h2 { font-size: 40px; line-height: 1.08; }
+.on-watch { display: flex; align-items: center; gap: 10px; flex: none; }
+.on-watch-k { font-size: 12px; color: var(--text-2); }

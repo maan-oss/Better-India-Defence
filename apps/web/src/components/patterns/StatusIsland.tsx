@@ -49,12 +49,11 @@ export function StatusIsland() {
   const open_ = useMemo(() => alerts.filter((a) => a.status === 'open'), [alerts]);
   const crit = open_.filter((a) => a.priority === 'critical').length;
   const high = open_.filter((a) => a.priority === 'high').length;
-  const configured = facility?.sensors.length ?? 0;
-  // A configured sensor counts as down until it has actually reported.
-  const ids = facility?.sensors.map((s) => s.id) ?? [];
-  const reporting = ids.filter((id) => sensors[id]?.status === 'ok' || sensors[id]?.status === 'degraded').length;
-  const down = configured - reporting;
-  const degraded = ids.filter((id) => sensors[id]?.status === 'degraded').length;
+  const configured = Object.keys(sensors).length || (facility?.sensors.length ?? 0);
+  // Health the server reports for each sensor; sensors with no health record yet are not counted either way.
+  const states = Object.values(sensors);
+  const down = states.filter((s) => s.status === 'silent' || s.status === 'offline' || s.status === 'fault').length;
+  const degraded = states.filter((s) => s.status === 'degraded').length;
   const level = readiness?.level ?? 'NORMAL';
 
   useEffect(() => {

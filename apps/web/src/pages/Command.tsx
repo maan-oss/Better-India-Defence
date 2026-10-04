@@ -14,7 +14,11 @@ import { Spark } from '../components/charts';
 import { useVisionLive } from '../api/vision';
 import { useTime } from '../state/time';
 import { tracks as trackStore, type RenderTrack } from '../state/tracks';
-import { Segmented, Tabs } from '../components/ui';
+import { Tabs } from '../components/ui';
+import { ActionButton, ActivityHeatmap, Alert, ConfirmMorph, CopyButton, BarChart, Button, ChipGroup, HoldToConfirm, HoverCard, HoverCardProfile, Select as ArcSelect, SignaturePad, SortableDataTable, Textarea, TextMorph, Timeline as ArcTimeline, signatureToPng, useToastStack, type InkStroke } from '../components/kit';
+import { OnWatch, useOnWatch } from '../components/ops/OnWatch';
+import { MemberSelector } from '../components/vendor/spaceui/components/spaceui/member-selector';
+import type { AlertRecord } from '@strata/domain';
 import '../styles/command.css';
 import { Empty } from '../brand/Boot';
 
@@ -33,6 +37,7 @@ export function Command() {
         <h1>Command</h1>
         <span className="sub">Readiness, threats, response and reporting. All times Zulu; grid references MGRS.</span>
         <div className="spacer" />
+        <OnWatch />
         <Tabs
           label="Command views"
           value={tab}
@@ -69,6 +74,7 @@ function Overview() {
         <ThreatBoard />
         <TacticalScope />
         <TeamsPanel version={version} />
+        <WatchActivity />
         <TasksPanel version={version} />
       </div>
     </div>
@@ -125,19 +131,32 @@ function ReadinessPanel() {
   const r = useOps((s) => s.readiness);
   const info = useOps((s) => s.readinessInfo);
   const can = useSession((s) => s.can);
+  const toast = useToastStack().toast;
   const [set, setSet] = useState<string | null>(null);
   const [reason, setReason] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const hist = useAsync((s) => get<{ t: number; level: string; reason: string; set_by: string }[]>('/api/ops/readiness/history', s), [r?.t]);
   if (!r) return <Loading />;
+  const raise = (level: string) =>
+    post('/api/ops/readiness', { level, reason })
+      .then(() => {
+        setSet(null);
+        toast({ type: level === 'NORMAL' ? 'success' : 'warning', title: `Readiness ${level}`, description: reason });
+      })
+      .catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)));
+  const severe = set === 'HIGH ALERT' || set === 'LOCKDOWN';
   return (
     <section className="panel cmd-ready">
       <div className="panel-h">
         <h3>Readiness</h3>
+        <div className="spacer" />
+        <span className={`readiness r-${r.level.replace(' ', '-')}`}>
+          <TextMorph>{r.level}</TextMorph>
+        </span>
       </div>
       <div className="ready-row">
         {READINESS_LEVELS.map((l) => (
-          <button key={l} className={`ready-step r-${l.replace(' ', '-')} ${r.level === l ? 'on' : ''}`} disabled={!can('ops.readiness') || r.level === l} onClick={() => (setSet(l), setReason(''))} title={info[l]}>
+          <button key={l} className={`ready-step r-${l.replace(' ', '-')} ${r.level === l ? 'on' : ''}`} disabled={!can('ops.readiness') || r.level === l} onClick={() => (setSet(l), setReason(''), setErr(null))} title={info[l]}>
             {l}
           </button>
         ))}
@@ -148,35 +167,86 @@ function ReadinessPanel() {
           Set {r.t ? dtg(r.t) : '—'} by {r.by}: {r.reason}
         </div>
       </div>
-      <div className="section" style={{ maxHeight: 140, overflow: 'auto' }}>
-        {(hist.data ?? []).slice(0, 8).map((h, i) => (
-          <div key={i} className="mono" style={{ fontSize: 11 }}>
-            {dtg(h.t)} <b>{h.level}</b> <span className="dim">{h.set_by} — {h.reason}</span>
-          </div>
-        ))}
+      <div className="ready-hist">
+        <ArcTimeline
+          label="Readiness history"
+          now={Date.now()}
+          maxHeight={220}
+          events={(hist.data ?? []).slice(0, 12).map((h, i) => ({ id: `${h.t}-${i}`, at: h.t, title: h.level, actor: h.set_by, meta: h.reason, tone: h.level === 'NORMAL' ? 'success' : h.level === 'LOCKDOWN' || h.level === 'HIGH ALERT' ? 'danger' : 'neutral' }))}
+        />
       </div>
       {set && (
         <Modal title={`Set readiness: ${set}`} onClose={() => setSet(null)}>
-          <div className="col">
-            <div className="note">{info[set]}</div>
-            <textarea className="input" rows={3} autoFocus value={reason} placeholder="Reason / authority (recorded in the duty log)" onChange={(e) => setReason(e.target.value)} />
+          <div className="col" style={{ gap: 14 }}>
+            <Alert tone={severe ? 'danger' : set === 'ALERT' ? 'warning' : 'info'} title={set}>
+              {info[set]}
+            </Alert>
+            <Textarea label="Reason and authority" description="Recorded in the duty log and the audit trail." rows={3} autoFocus value={reason} onChange={(e) => setReason(e.target.value)} />
             {err && <ErrorNote error={err} />}
             <div className="row">
               <div className="spacer" />
-              <button
-                className="btn primary"
-                disabled={reason.trim().length < 3}
-                onClick={() =>
-                  void post('/api/ops/readiness', { level: set, reason })
-                    .then(() => setSet(null))
-                    .catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)))
-                }
-              >
-                Confirm {set}
-              </button>
+              {severe ? (
+                <HoldToConfirm label={`Hold to set ${set}`} confirmedLabel={`${set} set`} tone="danger" duration={1500} disabled={reason.trim().length < 3} onConfirm={() => void raise(set)} />
+              ) : (
+                <Button variant="primary" disabled={reason.trim().length < 3} onClick={() => void raise(set)}>
+                  Set {set}
+                </Button>
+              )}
             </div>
           </div>
         </Modal>
+      )}
+    </section>
+  );
+}
+
+/** The watch over time: alerts per day (Arc activity heatmap) and what raised them (Arc bar chart). */
+function WatchActivity() {
+  const [day, setDay] = useState<string | null>(null);
+  const from = useMemo(() => Date.now() - 26 * 7 * 86_400_000, []);
+  const hist = useAsync((s) => get<AlertRecord[]>(`/api/alerts?from=${from}&limit=2000`, s), [from]);
+  const days = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const a of hist.data ?? []) {
+      const d = new Date(a.t).toISOString().slice(0, 10);
+      m.set(d, (m.get(d) ?? 0) + 1);
+    }
+    // Every day of the period, so quiet days show as empty cells rather than gaps.
+    const out: { date: string; count: number }[] = [];
+    for (let t = from; t <= Date.now(); t += 86_400_000) {
+      const d = new Date(t).toISOString().slice(0, 10);
+      out.push({ date: d, count: m.get(d) ?? 0 });
+    }
+    return out;
+  }, [hist.data, from]);
+  const rules = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const a of hist.data ?? []) if (!day || new Date(a.t).toISOString().slice(0, 10) === day) m.set(a.rule, (m.get(a.rule) ?? 0) + 1);
+    return [...m.entries()]
+      .sort((x, y) => y[1] - x[1])
+      .slice(0, 8)
+      .map(([k, v]) => {
+        const words = k.toLowerCase().split('_');
+        const tail = words.length > 1 ? words.slice(1).join(' ') : words[0]!;
+        return { key: k, label: k.charAt(0) + k.slice(1).toLowerCase().replace(/_/g, ' '), axisLabel: tail.charAt(0).toUpperCase() + tail.slice(1, 10), value: v };
+      });
+  }, [hist.data, day]);
+  if (!hist.data) return <section className="panel cmd-activity"><Loading what="alert history" /></section>;
+  return (
+    <section className="panel cmd-activity">
+      <div className="panel-h">
+        <h3>Watch activity</h3>
+        <span className="muted" style={{ fontSize: 12 }}>
+          {hist.data.length} alerts in 26 weeks
+        </span>
+      </div>
+      {hist.data.length === 0 ? (
+        <Empty compact art="sensors" title="No alerts recorded yet" description="Alerts raised by rules and reports appear here by day." />
+      ) : (
+        <div className="cmd-activity-body">
+          <ActivityHeatmap days={days} label="Alerts per day" period="Last 26 weeks" unit={{ one: 'alert', other: 'alerts' }} thresholds={[1, 4, 10]} weekStartsOn={1} selectedDate={day} onSelectDate={(d) => setDay(d === day ? null : d)} />
+          <BarChart data={rules} label="Alerts by rule" period={day ? `On ${day}` : 'Last 26 weeks'} unit="alerts" valueLabel="Alerts" categoryLabel="Rule" averageLabel="Average per rule" height={150} />
+        </div>
       )}
     </section>
   );
@@ -279,7 +349,24 @@ function TeamsPanel({ version }: { version: number }) {
           {(teams.data ?? []).map((t) => (
             <tr key={t.id}>
               <td>
-                <b className="mono">{t.callsign}</b>
+                <HoverCard
+                  side="right"
+                  content={
+                    <HoverCardProfile
+                      name={t.callsign}
+                      role={`${t.kind} · ${t.mode}`}
+                      bio={t.leader ? `Leader: ${t.leader}` : undefined}
+                      stats={[
+                        { label: 'Strength', value: t.strength },
+                        { label: 'Status', value: t.status },
+                        { label: 'Net', value: t.channel ?? '—' },
+                      ]}
+                      meta={t.mgrs ? `${t.mgrs}${t.positionAgeS !== null ? ` · fix ${t.positionAgeS}s ago` : ''}` : 'No position fix'}
+                    />
+                  }
+                >
+                  <button className="link-btn mono">{t.callsign}</button>
+                </HoverCard>
                 <div className="dim" style={{ fontSize: 11 }}>
                   {t.leader ?? ''} · {t.strength} pax · {t.mode}
                 </div>
@@ -320,55 +407,66 @@ function TasksPanel({ version }: { version: number }) {
 
 // -----------------------------------------------------------------------------------------------------------
 
+const LOG_KINDS = ['manual', 'radio', 'visitor', 'patrol', 'correction'];
+
 function DutyLog() {
   const can = useSession((s) => s.can);
   const version = useOps((s) => s.version);
-  const [kind, setKind] = useState('');
-  const log = useAsync((s) => get<{ id: number; t: number; kind: string; text: string; author: string; ref: string | null }[]>(`/api/ops/log?limit=500${kind ? `&kind=${kind}` : ''}`, s), [version, kind]);
+  const [kinds, setKinds] = useState<string[]>([]);
+  const log = useAsync((s) => get<{ id: number; t: number; kind: string; text: string; author: string; ref: string | null }[]>(`/api/ops/log?limit=500${kinds.length === 1 ? `&kind=${kinds[0]}` : ''}`, s), [version, kinds.join()]);
   const [text, setText] = useState('');
   const [k, setK] = useState('manual');
+  const toast = useToastStack().toast;
+  const add = () =>
+    post('/api/ops/log', { text, kind: k })
+      .then(() => {
+        setText('');
+        log.reload();
+        toast({ type: 'success', title: 'Entry recorded', description: `${k} · ${dtg(Date.now())}` });
+      })
+      .catch((e: unknown) => toast({ type: 'error', title: 'Not recorded', description: e instanceof Error ? e.message : String(e) }));
+  const rows = (log.data ?? []).filter((l) => !kinds.length || kinds.includes(l.kind));
   return (
-    <div className="scroll" style={{ padding: 16 }}>
-      <div className="col" style={{ maxWidth: 1100, gap: 12 }}>
+    <div className="scroll" style={{ padding: 20 }}>
+      <div className="col" style={{ maxWidth: 1000, gap: 16 }}>
         {can('ops.log') && (
-          <div className="row">
-            <select className="input" value={k} onChange={(e) => setK(e.target.value)}>
-              {['manual', 'radio', 'visitor', 'patrol', 'correction'].map((x) => (
-                <option key={x}>{x}</option>
-              ))}
-            </select>
-            <input className="input grow" value={text} placeholder="New occurrence-book entry (timestamped, append-only)" onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && text.trim().length > 1 && void post('/api/ops/log', { text, kind: k }).then(() => (setText(''), log.reload()))} />
-            <button className="btn primary" disabled={text.trim().length < 2} onClick={() => void post('/api/ops/log', { text, kind: k }).then(() => (setText(''), log.reload()))}>
-              Enter
-            </button>
-          </div>
+          <section className="panel duty-new">
+            <div className="duty-new-row">
+              <div style={{ width: 170 }}>
+                <ArcSelect label="Type" value={k} onValueChange={setK} options={LOG_KINDS.map((x) => ({ value: x, label: x.charAt(0).toUpperCase() + x.slice(1) }))} />
+              </div>
+              <div className="grow">
+                <Textarea
+                  label="New entry"
+                  description="Timestamped and append-only. Ctrl Enter to record."
+                  rows={2}
+                  value={text}
+                  placeholder="What happened, who, where (grid reference), what was done"
+                  onChange={(e) => setText(e.target.value)}
+                  onKeyDown={(e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter' && text.trim().length > 1 && void add()}
+                />
+              </div>
+            </div>
+            <div className="row">
+              <span className="spacer" />
+              <Button variant="primary" disabled={text.trim().length < 2} onClick={() => void add()}>
+                Record entry
+              </Button>
+            </div>
+          </section>
         )}
-        <div className="row">
-          <span className="muted">Filter</span>
-          <Segmented size="sm" label="Entry kind" value={kind} onChange={setKind} options={['', 'manual', 'radio', 'readiness', 'dispatch', 'handover', 'report'].map((x) => ({ value: x, label: x ? x.charAt(0).toUpperCase() + x.slice(1) : 'All' }))} />
+        <div className="row" style={{ flexWrap: 'wrap' }}>
+          <ChipGroup label="Entry types" value={kinds} onValueChange={setKinds} options={['manual', 'radio', 'readiness', 'dispatch', 'handover', 'report', 'patrol', 'visitor', 'correction'].map((x) => ({ value: x, label: x.charAt(0).toUpperCase() + x.slice(1) }))} />
           <div className="spacer" />
-          <span className="muted">Entries cannot be edited or deleted; add a correction instead.</span>
+          <span className="muted" style={{ fontSize: 12 }}>
+            Entries cannot be edited or deleted; add a correction instead.
+          </span>
         </div>
-        <table className="table">
-          <thead>
-            <tr>
-              <th style={{ width: 130 }}>DTG</th>
-              <th style={{ width: 90 }}>Type</th>
-              <th>Entry</th>
-              <th style={{ width: 110 }}>By</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(log.data ?? []).map((l) => (
-              <tr key={l.id}>
-                <td className="mono">{dtg(l.t)}</td>
-                <td className="upper dim">{l.kind}</td>
-                <td>{l.text}</td>
-                <td>{l.author}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {log.data && rows.length === 0 ? (
+          <Empty compact art="audit" title="No entries" description="Nothing has been recorded with these types yet." />
+        ) : (
+          <ArcTimeline label="Duty log" now={Date.now()} events={rows.map((l) => ({ id: String(l.id), at: l.t, title: l.text, actor: l.author, meta: `${l.kind.toUpperCase()} · ${dtg(l.t)}${l.ref ? ` · ${l.ref}` : ''}`, tone: l.kind === 'correction' ? 'danger' : l.kind === 'handover' ? 'success' : 'neutral' }))} />
+        )}
       </div>
     </div>
   );
@@ -431,8 +529,22 @@ function Handover() {
   const user = useSession((s) => s.user);
   const can = useSession((s) => s.can);
   const state = useAsync((s) => get<HandoverState>('/api/ops/handover/state', s), []);
-  const list = useAsync((s) => get<{ id: string; t: number; outgoing: string; incoming: string; summary: string; state: HandoverState; acknowledged_at: number | null }[]>('/api/ops/handovers', s), []);
-  const users = useAsync((s) => (can('admin.users') ? get<{ username: string }[]>('/api/admin/users', s) : Promise.resolve([] as { username: string }[])), []);
+  const list = useAsync((s) => get<{ id: string; t: number; outgoing: string; incoming: string; summary: string; state: HandoverState; acknowledged_at: number | null; signature: string | null }[]>('/api/ops/handovers', s), []);
+  const [signing, setSigning] = useState<string | null>(null);
+  const users = useAsync((s) => (can('admin.users') ? get<{ username: string; displayName: string; disabled: boolean }[]>('/api/admin/users', s) : Promise.resolve([] as { username: string; displayName: string; disabled: boolean }[])), []);
+  const online = useOnWatch();
+  const members = useMemo(() => {
+    const seen = new Set<string>();
+    const out: { id: string; name: string; email?: string }[] = [];
+    const add = (id: string, name: string, email: string) => {
+      if (seen.has(id)) return;
+      seen.add(id);
+      out.push({ id, name, email });
+    };
+    for (const o of online) add(o.username, o.displayName, `${o.role} · on watch`);
+    for (const u of users.data ?? []) if (!u.disabled) add(u.username, u.displayName, u.username);
+    return out;
+  }, [online, users.data]);
   const [incoming, setIncoming] = useState('');
   const [summary, setSummary] = useState('');
   const [err, setErr] = useState<string | null>(null);
@@ -445,20 +557,22 @@ function Handover() {
             Current state (captured into the handover)
           </h4>
           {state.data ? <HandoverView s={state.data} /> : <Loading />}
-          <div className="formgrid" style={{ marginTop: 12 }}>
-            <label>Incoming officer</label>
-            {users.data?.length ? (
-              <select className="input" value={incoming} onChange={(e) => setIncoming(e.target.value)}>
-                <option value="">— choose —</option>
-                {users.data.filter((u) => u.username !== user?.username).map((u) => (
-                  <option key={u.username}>{u.username}</option>
-                ))}
-              </select>
-            ) : (
-              <input className="input" value={incoming} placeholder="username" onChange={(e) => setIncoming(e.target.value)} />
-            )}
-            <label>Briefing</label>
-            <textarea className="input" rows={4} value={summary} placeholder="Situation, ongoing actions, instructions for the incoming watch" onChange={(e) => setSummary(e.target.value)} />
+          <div className="handover-form">
+            <div className="col" style={{ gap: 6 }}>
+              <span className="setup-label">Incoming officer</span>
+              <MemberSelector
+                label="Incoming officer"
+                max={1}
+                maxVisible={6}
+                members={members.filter((m) => m.id !== user?.username)}
+                selected={incoming ? [incoming] : []}
+                onChange={(sel: string[]) => setIncoming(sel[sel.length - 1] ?? '')}
+              />
+              <span className="muted" style={{ fontSize: 12 }}>
+                {incoming ? `${incoming} signs to accept the watch.` : 'Choose who takes over. Officers on watch are listed first.'}
+              </span>
+            </div>
+            <Textarea label="Briefing" description="Situation, ongoing actions, instructions for the incoming watch." rows={4} value={summary} onChange={(e) => setSummary(e.target.value)} />
           </div>
           {err && <ErrorNote error={err} />}
           <div className="row" style={{ marginTop: 8 }}>
@@ -476,6 +590,7 @@ function Handover() {
             </button>
           </div>
         </section>
+        {signing && <SignHandover id={signing} name={user?.displayName ?? ''} onClose={() => setSigning(null)} onDone={() => (setSigning(null), list.reload())} />}
         {(list.data ?? []).map((h) => (
           <section key={h.id} className="panel" style={{ padding: 14 }}>
             <div className="row">
@@ -485,11 +600,14 @@ function Handover() {
               <span className="mono dim">{dtg(h.t)}</span>
               <div className="spacer" />
               {h.acknowledged_at ? (
-                <span className="muted">accepted {dtg(h.acknowledged_at)}</span>
+                <span className="row muted" style={{ gap: 8 }}>
+                  {h.signature && <img className="sig-thumb" src={h.signature} alt={`Signature of ${h.incoming}`} />}
+                  accepted {dtg(h.acknowledged_at)}
+                </span>
               ) : h.incoming === user?.username ? (
-                <button className="btn small primary" onClick={() => void post(`/api/ops/handovers/${h.id}/accept`, {}).then(list.reload)}>
-                  Accept watch
-                </button>
+                <Button size="sm" variant="primary" onClick={() => setSigning(h.id)}>
+                  Accept and sign
+                </Button>
               ) : (
                 <span className="err-inline">awaiting {h.incoming}</span>
               )}
@@ -503,6 +621,50 @@ function Handover() {
         ))}
       </div>
     </div>
+  );
+}
+
+/** Taking over the watch: the incoming officer signs (Arc signature pad); the PNG and its hash are kept. */
+function SignHandover({ id, name, onClose, onDone }: { id: string; name: string; onClose: () => void; onDone: () => void }) {
+  const [strokes, setStrokes] = useState<InkStroke[]>([]);
+  const [err, setErr] = useState<string | null>(null);
+  const toast = useToastStack().toast;
+  const accept = async () => {
+    setErr(null);
+    try {
+      const blob = await signatureToPng(strokes, 2);
+      const signature = await new Promise<string>((res, rej) => {
+        const fr = new FileReader();
+        fr.onload = () => res(String(fr.result));
+        fr.onerror = () => rej(fr.error);
+        fr.readAsDataURL(blob);
+      });
+      await post(`/api/ops/handovers/${id}/accept`, { signature });
+      toast({ type: 'success', title: 'You have the watch', description: 'Handover signed and recorded.' });
+      onDone();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    }
+  };
+  return (
+    <Modal title="Take over the watch" onClose={onClose} wide>
+      <div className="col" style={{ gap: 12 }}>
+        <span className="muted">Sign to confirm you have read the briefing and the state captured at handover. The signature and its SHA-256 are stored with the handover and the audit record.</span>
+        <div className="sig-pad">
+          <SignaturePad signer={name} hint="Sign here" label="Handover signature" onChange={setStrokes} fileName="handover-signature" />
+        </div>
+        {err && <ErrorNote error={err} />}
+        <div className="row">
+          <span className="spacer" />
+          <Button variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button variant="primary" disabled={!strokes.length} onClick={() => void accept()}>
+            Accept the watch
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
@@ -605,21 +767,32 @@ function SitrepEditor({ s, site, onChanged }: { s: Sitrep; site: string; onChang
         <b>{title}</b>
         <span className={`chip`}>{s.status}</span>
         <div className="spacer" />
-        {editable && (
-          <button className="btn small" disabled={!dirty} onClick={() => void save().catch((e: unknown) => setErr(String(e)))}>
-            Save draft
-          </button>
-        )}
+        {editable && <ActionButton label="Save draft" pendingLabel="Saving" successLabel="Saved" disabled={!dirty} onAction={() => save().then(() => undefined)} onActionError={(e) => setErr(String(e))} />}
         {s.status === 'DRAFT' && can('ops.readiness') && (
-          <button className="btn small primary" onClick={() => void (dirty ? save() : Promise.resolve()).then(() => post<Sitrep>(`/api/ops/sitreps/${s.id}/issue`, {}).then(onChanged)).catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)))}>
-            Issue
-          </button>
+          <ConfirmMorph
+            label="Issue"
+            prompt={`Issue ${title}?`}
+            confirmLabel="Issue"
+            pendingLabel="Issuing"
+            doneLabel="Issued"
+            tone="neutral"
+            onConfirm={() =>
+              (dirty ? save() : Promise.resolve())
+                .then(() => post<Sitrep>(`/api/ops/sitreps/${s.id}/issue`, {}))
+                .then(onChanged)
+                .catch((e: unknown) => {
+                  setErr(e instanceof Error ? e.message : String(e));
+                  throw e;
+                })
+            }
+          />
         )}
         {s.status === 'ISSUED' && can('incidents.edit') && (
           <button className="btn small" onClick={() => void post<Sitrep>(`/api/ops/sitreps/${s.id}/amend`, {}).then(onChanged)}>
             Amend
           </button>
         )}
+        <CopyButton label="Copy text" value={[cls, `${title}${s.status === 'DRAFT' ? ' (DRAFT)' : ''}`, `DTG ${s.dtg}`, `FROM: ${site}`, `PERIOD: ${dtg(s.periodFrom)} - ${dtg(s.periodTo)}`, ...sections.flatMap((x, i) => [`${i + 1}. ${x.title.toUpperCase()}`, x.text]), cls].join('\n')} />
         <button className="btn small" onClick={() => window.print()}>
           Print
         </button>
@@ -679,39 +852,36 @@ function Assets() {
     <div className="scroll" style={{ padding: 16 }}>
       <div className="col" style={{ maxWidth: 1000, gap: 12 }}>
         <div className="note">Vital assets anchor the threat evaluation. Defaults were derived from restricted zones; survey each asset’s centre and protection radius.</div>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Asset</th>
-              <th>Type</th>
-              <th>Priority</th>
-              <th>Centre</th>
-              <th>Radius</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {(vas.data ?? []).map((v) => (
-              <tr key={v.id}>
-                <td>
-                  <b>{v.name}</b>
-                  <div className="mono dim">{v.id}</div>
-                </td>
-                <td>{v.kind}</td>
-                <td>P{v.priority}</td>
-                <td className="mono">{grid(v.centre)}</td>
-                <td className="mono">{v.radiusM} m</td>
-                <td>
-                  {can('ops.readiness') && (
+        {vas.data && vas.data.length === 0 ? (
+          <Empty compact art="site" title="No vital assets" description="Add the places the threat evaluation must protect: armoury, fuel point, ops room, substation." />
+        ) : (
+          <SortableDataTable
+            caption="Vital assets"
+            rowKey="id"
+            itemName={{ one: 'asset', other: 'assets' }}
+            defaultSort={{ key: 'priority', direction: 'asc' }}
+            rows={(vas.data ?? []).map((v) => ({ id: v.id, name: v.name, kind: v.kind, priority: v.priority, grid: grid(v.centre), radiusM: v.radiusM, raw: v }))}
+            columns={[
+              { key: 'name', label: 'Asset', sortable: true, render: (_v, r) => (<span><b>{String(r.name)}</b><span className="mono dim" style={{ display: 'block', fontSize: 11 }}>{String(r.id)}</span></span>) },
+              { key: 'kind', label: 'Type', sortable: true },
+              { key: 'priority', label: 'Priority', sortable: true, numeric: true, render: (v) => `P${String(v)}` },
+              { key: 'grid', label: 'Centre', render: (v) => <span className="mono">{String(v)}</span> },
+              { key: 'radiusM', label: 'Radius', sortable: true, numeric: true, render: (v) => `${String(v)} m` },
+              {
+                key: 'raw',
+                label: '',
+                render: (_v, r) => {
+                  const v = r.raw as { id: string; name: string; kind: string; priority: number; centre: { x: number; y: number }; radiusM: number };
+                  return can('ops.readiness') ? (
                     <button className="btn small ghost" onClick={() => setEdit({ id: v.id, name: v.name, kind: v.kind, priority: v.priority, x: v.centre.x, y: v.centre.y, radiusM: v.radiusM })}>
                       Edit
                     </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  ) : null;
+                },
+              },
+            ]}
+          />
+        )}
         {can('ops.readiness') && (
           <button className="btn small" style={{ alignSelf: 'flex-start' }} onClick={() => setEdit({ id: '', name: '', kind: 'other', priority: 2, x: 0, y: 0, radiusM: 100 })}>
             + Add asset

@@ -183,7 +183,7 @@ export function registerOps(app: FastifyInstance, p: Platform): void {
 
   // Duty log
   app.get('/api/ops/log', { preHandler: requirePerm('world.view') }, async (req, reply) => {
-    const q = parse(z.object({ from: z.coerce.number().int().optional(), to: z.coerce.number().int().optional(), kind: z.string().max(20).optional(), limit: z.coerce.number().int().min(1).max(1000).default(300) }), req.query, reply);
+    const q = parse(z.object({ from: z.coerce.number().int().optional(), to: z.coerce.number().int().optional(), kind: z.string().max(20).optional(), ref: z.string().max(60).optional(), limit: z.coerce.number().int().min(1).max(1000).default(300) }), req.query, reply);
     if (!q) return;
     return o.logEntries(q);
   });
@@ -221,6 +221,7 @@ export function registerOps(app: FastifyInstance, p: Platform): void {
   });
 
   // Handover
+  app.get('/api/presence', { preHandler: requirePerm('world.view') }, async () => p.hub.presence());
   app.get('/api/ops/handover/state', { preHandler: requirePerm('ops.log') }, async () => o.handoverState());
   app.get('/api/ops/handovers', { preHandler: requirePerm('ops.log') }, async () => o.handovers());
   app.post('/api/ops/handovers', { preHandler: requirePerm('ops.log') }, async (req, reply) => {
@@ -237,8 +238,11 @@ export function registerOps(app: FastifyInstance, p: Platform): void {
   app.post('/api/ops/handovers/:id/accept', { preHandler: requirePerm('ops.log') }, async (req, reply) => {
     const id = (req.params as { id: string }).id;
     try {
-      await o.acknowledgeHandover(id, req.user!.username);
-      await audit(p, req, 'handover_accepted', id, {});
+      const b = (req.body ?? {}) as { signature?: unknown };
+      const sig = typeof b.signature === 'string' ? b.signature : null;
+      if (sig && (!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(sig) || sig.length > 400_000)) return reply.code(400).send({ error: 'signature must be a PNG data URL under 300 kB' });
+      const sha = await o.acknowledgeHandover(id, req.user!.username, sig);
+      await audit(p, req, 'handover_accepted', id, sha ? { signatureSha256: sha } : {});
       return { ok: true };
     } catch (e) {
       return err(reply, e);

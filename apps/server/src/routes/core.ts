@@ -128,7 +128,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
         { name: 'Live hub', status: 'ok', detail: `${p.hub.size} WebSocket client(s)` },
       ],
       metrics: p.metrics.snapshot(),
-      storage: { engine: p.db.engine, counts, mediaBytes, encryptedAtRest: Boolean(cfg.STORAGE_ENCRYPTION_KEY) },
+      storage: { engine: p.db.engine, counts, mediaBytes, encryptedAtRest: Boolean(cfg.STORAGE_ENCRYPTION_KEY), disk: await diskOf(cfg.DATA_DIR) },
       jobs,
       clock: { dataClock: p.ingest.dataClock, liveEdge: p.liveEdge(), serverTime: Date.now() },
       sensors: p.sensors.all(),
@@ -263,4 +263,15 @@ async function integrations(p: Platform): Promise<{ name: string; adapter: strin
   if (!out.length) out.push({ name: 'Sensors', adapter: '—', status: 'none connected — add cameras on the camera wall and feeds in Site setup' });
   out.push(llm);
   return out;
+}
+
+/** Capacity of the volume holding the data directory (null where the platform cannot report it). */
+async function diskOf(dir: string): Promise<{ totalBytes: number; freeBytes: number } | null> {
+  try {
+    const { statfs } = await import('node:fs/promises');
+    const st = await statfs(dir);
+    return { totalBytes: st.blocks * st.bsize, freeBytes: st.bavail * st.bsize };
+  } catch {
+    return null;
+  }
 }

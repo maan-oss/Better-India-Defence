@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import {
   type AlertRecord,
@@ -245,12 +245,13 @@ export class OpsService {
     this.hub.publish({ type: 'ops', topic: 'log', payload: { kind, text } });
   }
 
-  async logEntries(o: { from?: number; to?: number; kind?: string; limit: number }): Promise<LogEntry[]> {
+  async logEntries(o: { from?: number; to?: number; kind?: string; ref?: string; limit: number }): Promise<LogEntry[]> {
     const where: string[] = [];
     const params: unknown[] = [];
     if (o.from) where.push(`t >= $${params.push(o.from)}::bigint`);
     if (o.to) where.push(`t <= $${params.push(o.to)}::bigint`);
     if (o.kind) where.push(`kind = $${params.push(o.kind)}`);
+    if (o.ref) where.push(`ref = $${params.push(o.ref)}`);
     params.push(o.limit);
     return (await this.db.query<{ id: number; t: number; kind: string; text: string; author: string; ref: string | null }>(`SELECT * FROM log_entries ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY t DESC, id DESC LIMIT $${params.length}`, params)).rows.map((r) => ({ ...r, id: Number(r.id) }));
   }
@@ -529,13 +530,15 @@ export class OpsService {
     return { id };
   }
 
-  async acknowledgeHandover(id: string, by: string): Promise<void> {
+  async acknowledgeHandover(id: string, by: string, signature: string | null = null): Promise<string | null> {
     const h = (await this.db.query<{ incoming: string; acknowledged_at: number | null; outgoing: string }>('SELECT incoming, acknowledged_at, outgoing FROM handovers WHERE id = $1', [id])).rows[0];
     if (!h) throw new OpsError('unknown handover');
     if (h.incoming !== by) throw new OpsError(`only ${h.incoming} can accept this handover`);
     if (h.acknowledged_at) throw new OpsError('already accepted');
-    await this.db.query('UPDATE handovers SET acknowledged_at = $2 WHERE id = $1', [id, Date.now()]);
-    await this.log('handover', `${by} took over the watch from ${h.outgoing}.`, by, id);
+    const sha = signature ? createHash('sha256').update(signature).digest('hex') : null;
+    await this.db.query('UPDATE handovers SET acknowledged_at = $2, signature = $3, signature_sha256 = $4 WHERE id = $1', [id, Date.now(), signature, sha]);
+    await this.log('handover', `${by} took over the watch from ${h.outgoing}${sha ? ' (signed)' : ''}.`, by, id);
+    return sha;
   }
 
   async handovers(limit = 30) {
