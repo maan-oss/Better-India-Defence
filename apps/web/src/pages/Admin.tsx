@@ -4,6 +4,7 @@ import { get, patch, post } from '../api/client';
 import type { UserRecord } from '../api/types';
 import { ErrorNote, Loading, useAsync } from '../components/common';
 import { useSession } from '../state/session';
+import { Alert, Button, Input, PasswordStrength, RadioCards } from '../components/kit';
 
 interface ConfigResponse {
   stored: { key: string; value: unknown; updated_by: string; updated_at: number }[];
@@ -19,6 +20,7 @@ export function Admin() {
   const config = useAsync((s) => get<ConfigResponse>('/api/admin/config', s), []);
   const [form, setForm] = useState({ username: '', displayName: '', role: 'viewer' as Role, password: '' });
   const [err, setErr] = useState<string | null>(null);
+  const [strength, setStrength] = useState(0);
   const allPerms = [...new Set((roles.data ?? []).flatMap((r) => r.permissions))];
   const create = async () => {
     setErr(null);
@@ -77,24 +79,35 @@ export function Admin() {
               </tbody>
             </table>
           </div>
-          <div className="section col" style={{ maxWidth: 520 }}>
+          <div className="section col admin-create" style={{ maxWidth: 620, gap: 14 }}>
             <h4>Create user</h4>
-            <div className="row">
-              <input className="input grow" placeholder="username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
-              <input className="input grow" placeholder="display name" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} />
+            <div className="admin-two">
+              <Input label="Username" placeholder="e.g. jkumar" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, '') })} />
+              <Input label="Full name and rank" placeholder="e.g. Capt J. Kumar" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} />
             </div>
+            <RadioCards
+              aria-label="Role"
+              layout="grid"
+              minColumnWidth={200}
+              value={form.role}
+              onValueChange={(v) => setForm({ ...form, role: v as Role })}
+              options={(roles.data ?? []).map((r) => ({ value: r.role, label: r.role.charAt(0).toUpperCase() + r.role.slice(1), description: r.description, meta: `${r.permissions.length} permissions` }))}
+            />
+            <PasswordStrength label="Initial password" value={form.password} onValueChange={(v, st) => (setForm({ ...form, password: v }), setStrength(st.level))} />
+            {err && (
+              <Alert tone="danger" title="Could not create the user">
+                {err}
+              </Alert>
+            )}
             <div className="row">
-              <select className="input" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })}>
-                {(['viewer', 'operator', 'analyst', 'administrator'] as Role[]).map((r) => (
-                  <option key={r}>{r}</option>
-                ))}
-              </select>
-              <input className="input grow" type="password" placeholder="password (min 12 chars)" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-              <button className="btn primary" onClick={() => void create()}>
-                Create
-              </button>
+              <span className="muted" style={{ fontSize: 12 }}>
+                At least 12 characters. The user should change it at first sign-in.
+              </span>
+              <span className="spacer" />
+              <Button variant="primary" disabled={form.username.length < 3 || form.displayName.trim().length < 2 || form.password.length < 12 || strength < 2} onClick={() => void create()}>
+                Create user
+              </Button>
             </div>
-            {err && <div className="note warn">{err}</div>}
           </div>
           <div className="section">
             <h4>Role capabilities</h4>

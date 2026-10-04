@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { get, patch, post } from '../api/client';
 import { STATE_HELP_PRODUCT, STATE_LABEL, uploadEvidence, useVisionLive, type Box, type EvidenceItem, type EvidenceProduct, type FaceEvent, type VisionStatus } from '../api/vision';
@@ -12,6 +12,7 @@ import { FaceCard } from '../components/identity/FaceCard';
 import { Icon } from '../components/Icons';
 import { Segmented, Tabs } from '../components/ui';
 import '../styles/forensics.css';
+import { FileDropzone } from '../components/kit';
 
 /**
  * MEDIA FORENSICS — evidence library and imaging workbench.
@@ -600,8 +601,6 @@ function UploadDialog({ onClose, onDone }: { onClose: () => void; onDone: (it: E
   const [mode, setMode] = useState<'standard' | 'thorough'>('standard');
   const [progress, setProgress] = useState<{ i: number; f: number } | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [over, setOver] = useState(false);
-  const input = useRef<HTMLInputElement>(null);
   const total = useMemo(() => files.reduce((a, f) => a + f.size, 0), [files]);
 
   const go = async () => {
@@ -635,27 +634,17 @@ function UploadDialog({ onClose, onDone }: { onClose: () => void; onDone: (it: E
 
   return (
     <Modal title="Add evidence" onClose={onClose}>
-      <div
-        className={`drop ${over ? 'over' : ''}`}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setOver(true);
-        }}
-        onDragLeave={() => setOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setOver(false);
-          setFiles([...e.dataTransfer.files]);
-        }}
-        onClick={() => input.current?.click()}
-      >
-        <Icon.Upload />
-        <div>{files.length ? `${files.length} file(s) · ${bytes(total)}` : 'Drop images or video here, or click to choose'}</div>
-        <div className="dim" style={{ fontSize: 11.5 }}>
-          JPEG, PNG, WebP, TIFF, MP4, MOV, MKV, AVI… up to 2 GB each. Files are hashed on receipt and stored unmodified{' '}
-        </div>
-        <input ref={input} type="file" multiple accept="image/*,video/*,.mkv,.avi,.ts,.dav" style={{ display: 'none' }} onChange={(e) => setFiles([...(e.target.files ?? [])])} />
-      </div>
+      <FileDropzone
+        accept="image/*,video/*,.mkv,.avi,.ts,.dav"
+        maxFiles={20}
+        maxSize={2 * 1024 * 1024 * 1024}
+        label="Evidence files"
+        description="Drop images or video here, or choose from this device"
+        note="JPEG, PNG, WebP, TIFF, MP4, MOV, MKV, AVI… up to 2 GB each. Hashed on receipt and stored unmodified."
+        dropLabel="Drop to add"
+        onFilesChange={setFiles}
+        compactAt={3}
+      />
       <div className="formgrid" style={{ marginTop: 12 }}>
         <label>Title</label>
         <input className="input" value={title} placeholder={files[0]?.name ?? 'e.g. Gate 2 CCTV export, night of 3 Oct'} onChange={(e) => setTitle(e.target.value)} />
@@ -695,7 +684,7 @@ function UploadDialog({ onClose, onDone }: { onClose: () => void; onDone: (it: E
         <div className="prog">
           <div style={{ width: `${((progress.i + progress.f) / files.length) * 100}%` }} />
           <span>
-            Uploading {progress.i + 1}/{files.length} · {Math.round(progress.f * 100)}%
+            Uploading {progress.i + 1}/{files.length} · {Math.round(progress.f * 100)}% · {bytes(total)}
           </span>
         </div>
       )}

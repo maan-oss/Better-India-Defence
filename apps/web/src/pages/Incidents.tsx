@@ -10,6 +10,7 @@ import { useSession } from '../state/session';
 import { ErrorNote, Loading, Prio, StateChip, useAsync } from '../components/common';
 import { dateTime, dur, hms } from '../lib/format';
 import { Segmented } from '../components/ui';
+import { Timeline as SuiTimeline, TimelineContent, TimelineDate, TimelineHeader, TimelineIndicator, TimelineItem, TimelineSeparator, TimelineTitle } from '../components/vendor/spaceui/components/spaceui/timeline';
 
 /** INCIDENTS — investigation library and incident files. */
 export function Incidents() {
@@ -148,6 +149,7 @@ function IncidentFile({ id }: { id: string }) {
           <div>{inc.summary || <span className="muted">No summary.</span>}</div>
         )}
       </div>
+      <Chronology data={data} />
       {data.stoppedBefore.length > 0 && (
         <div className="section">
           <h4>Sensors not reporting at incident start</h4>
@@ -281,6 +283,41 @@ function CreateIncident({ onDone }: { onDone: (id: string | null) => void }) {
           Cancel
         </button>
       </div>
+    </div>
+  );
+}
+
+/** Everything in the incident window in time order (Space UI timeline): sensor outages, alerts, tracks and pins. */
+function Chronology({ data }: { data: IncidentPackage }) {
+  const inc = data.incident;
+  type Ev = { t: number; tone: 'crit' | 'warn' | 'info' | 'mute'; title: string; detail: string };
+  const ev: Ev[] = (
+    [
+    { t: inc.tStart, tone: 'info' as const, title: 'Incident window opens', detail: inc.title },
+    ...data.stoppedBefore.map((s) => ({ t: s.t, tone: 'warn' as const, title: `${s.sensorId} ${s.status}`, detail: s.restoredAt ? `restored ${hms(s.restoredAt)}Z` : 'not restored in the window' })),
+    ...data.alerts.map((a) => ({ t: a.t, tone: a.priority === 'critical' || a.priority === 'high' ? ('crit' as const) : ('warn' as const), title: a.title, detail: `${a.priority} alert` })),
+    ...data.tracks.map((t) => ({ t: t.firstT, tone: 'mute' as const, title: `Track ${t.id} first seen`, detail: `${t.cooperative ? t.label : t.category} · closest ${t.minDistanceM} m` })),
+    { t: inc.tEnd, tone: 'info' as const, title: 'Incident window closes', detail: inc.status },
+    ] as Ev[]
+  ).sort((a, b) => a.t - b.t);
+  const shown = ev.slice(0, 40);
+  return (
+    <div className="section">
+      <h4>Chronology</h4>
+      <SuiTimeline value={shown.length} className="inc-chrono">
+        {shown.map((e, i) => (
+          <TimelineItem key={i} step={i + 1} className={`chr-${e.tone}`}>
+            <TimelineHeader>
+              <TimelineSeparator />
+              <TimelineDate className="mono">{hms(e.t)}Z</TimelineDate>
+              <TimelineTitle>{e.title}</TimelineTitle>
+              <TimelineIndicator />
+            </TimelineHeader>
+            <TimelineContent>{e.detail}</TimelineContent>
+          </TimelineItem>
+        ))}
+      </SuiTimeline>
+      {ev.length > shown.length && <div className="dim" style={{ fontSize: 12, marginTop: 8 }}>{ev.length - shown.length} more events in the tables below.</div>}
     </div>
   );
 }

@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { fromRgba, imageStats, suggestOperations, OP_DESCRIPTIONS } from '@strata/domain/vision';
 import { post, qs } from '../../api/client';
 import { STATE_HELP_PRODUCT, STATE_LABEL, type Box, type EnhanceOp, type EvidenceItem, type EvidenceProduct } from '../../api/vision';
 import { useSession } from '../../state/session';
 import { ErrorNote } from '../common';
 import { Segmented } from '../ui';
+import { ImageCompare } from '../kit';
 
 type OpKey = EnhanceOp['op'];
 
@@ -202,8 +203,6 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 export function ProductView({ product, item }: { product: EvidenceProduct; item: EvidenceItem }) {
   const can = useSession((s) => s.can);
   const [before, setBefore] = useState<string | null>(null);
-  const [split, setSplit] = useState(50);
-  const wrap = useRef<HTMLDivElement>(null);
   const roi = useMemo(() => {
     const crop = product.steps.find((s) => typeof s.op === 'object' && s.op.op === 'crop')?.op as { x: number; y: number; w: number; h: number } | undefined;
     return crop ?? product.steps.find((s) => s.roi)?.roi;
@@ -252,25 +251,13 @@ export function ProductView({ product, item }: { product: EvidenceProduct; item:
           {STATE_HELP_PRODUCT['AI-INFERRED']}
         </div>
       )}
-      <div
-        className="cmp"
-        ref={wrap}
-        style={{ aspectRatio: `${product.width} / ${product.height}` }}
-        onPointerMove={(e) => {
-          if (e.buttons !== 1) return;
-          const r = wrap.current!.getBoundingClientRect();
-          setSplit(Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)));
-        }}
-        onPointerDown={(e) => {
-          const r = wrap.current!.getBoundingClientRect();
-          setSplit(Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)));
-        }}
-      >
-        {before && <img src={before} alt="Before (original pixels)" className="cmp-a" />}
-        <img src={`/api/evidence/products/${product.id}/image?which=full`} alt="After" className="cmp-b" style={{ clipPath: `inset(0 0 0 ${split}%)` }} />
-        <div className="cmp-line" style={{ left: `${split}%` }} />
-        <span className="cmp-tag l">ORIGINAL</span>
-        <span className="cmp-tag r">{product.state}</span>
+      <div className="cmp-arc" style={{ aspectRatio: `${product.width} / ${product.height}` }}>
+        <ImageCompare
+          before={before ? <img src={before} alt="Original pixels" /> : <div className="cmp-wait" />}
+          after={<img src={`/api/evidence/products/${product.id}/image?which=full`} alt={`Product (${product.state})`} />}
+          labels={['Original', product.state]}
+          defaultPosition={50}
+        />
       </div>
       <ol className="chain">
         {product.steps.map((s, i) => (
