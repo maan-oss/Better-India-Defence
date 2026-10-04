@@ -10,7 +10,11 @@ What runs on real inputs today:
 
 - **Live cameras** (RTSP/HTTP/recorded files) analysed on site on CPU: people, vehicles, aircraft,
   boats; **face recognition** of enrolled personnel (zone authorisation) and watch-list subjects, with
-  measured error rates and human review.
+  measured error rates and human review; a camera wall for the whole estate.
+- **Tactical display**: APP-6 / MIL-STD-2525-style symbology, MGRS grid, compass, scale bar, cursor
+  grid reference; a plan-view tactical scope; a night (red-light) display mode.
+- **Field view** for responders on phones and tablets: task, bearing and distance, local picture,
+  SALUTE contact reports and an assistance request.
 - **Media forensics**: upload photos and video; detection, face grouping, classical restoration,
   multi-frame super-resolution and a clearly labelled AI enhancer, with hashed edit history and chain of
   custody.
@@ -57,41 +61,50 @@ How an installation uses each screen day to day: **[docs/OPERATIONS.md](docs/OPE
 
 ## What to try
 
-1. **Command** — readiness, the threat board (every non-cooperative track ranked against the vital
-   assets with each factor shown), alerts with SOP checklists, dispatch a QRT and watch its ETA, duty
-   log, handover, draft and issue a SITREP. Grid references are MGRS (search accepts them too).
-2. **Identity** — enrol a person from a photograph (the quality grade shows whether it is usable), set
-   their cleared zones; add a watch-list subject (a basis is required); review sightings.
-3. **Media Forensics** — upload a photo or video: detections, faces, enhancement (compare before/after,
-   every step hashed), multi-frame super-resolution from video, evidence report with chain of custody.
-4. **Live Cameras** (administrator adds sources) — point at an RTSP camera, or copy a video into
-   `data/import/` and add it as a looping file source: live detections, recognition and alerts.
-5. **Site setup** — define a real installation (anchor, orthophoto, zones, buildings, perimeter, gates,
+1. **Command** — KPI strip, readiness, the threat board (every non-cooperative track ranked against the
+   vital assets with each factor shown), the tactical scope (plan view with tactical symbols and threat
+   vectors), alerts with SOP checklists, dispatch a QRT and watch its ETA, duty log, handover, draft and
+   issue a SITREP. Grid references are MGRS (search accepts them too).
+2. **Camera wall** — every site camera plus analysed live streams in 1/4/9/16 layouts, guard tour, alert
+   flashing. The demo includes an *Operations Centre door* face-capture camera playing a generated
+   recording of two synthetic faces: watch it recognise the authorised sergeant and flag the watch-list
+   subject.
+3. **Identity** — review the demo sightings (pending verification), enrol a person from a photograph
+   (the quality grade shows whether it is usable), set cleared zones; add a watch-list subject (a basis is
+   required).
+4. **Media forensics** — two analysed sample images are preloaded; upload your own photo or video:
+   detections, faces, enhancement (compare before/after, every step hashed), multi-frame
+   super-resolution from video, evidence report with chain of custody.
+5. **Field view** (also on a phone: the navigation moves to the bottom) — pick a team, follow its task
+   (grid, distance, bearing, ETA, status), local picture, nearby alerts, SALUTE contact report, and
+   press-and-hold assistance request. Dispatch a team from Command first to see a task arrive.
+6. **Night display** — user menu → *Night display (red light)* for darkened operations rooms.
+7. **Site setup** — define a real installation (anchor, orthophoto, zones, buildings, perimeter, gates,
    data feeds); start from the demo layout to see the editor.
-6. **Operations** — the 4D world. Orbit (drag), pan (right-drag), zoom (wheel); switch to Fly or
+8. **Operational picture** — the 4D world with tactical symbols and the MGRS grid. Orbit (drag), pan (right-drag), zoom (wheel); switch to Fly or
    Walk (first person, eye height 1.7 m) in the left panel and move with `W A S D Q E` (`Shift` faster).
    Click a building, track or sensor for the inspector. Search (top bar) jumps to tracks, sensors,
    buildings, incidents or coordinates.
-7. **Timeline** (bottom) — click or drag to go back in time; play, reverse, step, ×0.25–×10; `LIVE`
+9. **Timeline** (bottom) — click or drag to go back in time; play, reverse, step, ×0.25–×10; `LIVE`
    (or `L`) returns to the live edge; `Space` plays/pauses, `←`/`→` step. The timeline shows observation density by sensor type, alerts, incidents, detected changes and sensor outages.
-8. **Modes** (top bar) — NOW, HISTORY, INCIDENT (replay an incident window in a loop), DIFF (compare
+10. **Modes** (top bar) — NOW, HISTORY, INCIDENT (replay an incident window in a loop), DIFF (compare
    two times; drag the A and B handles), EVIDENCE (what is captured vs reconstructed vs inferred),
    COVERAGE (how well and how recently each surface was observed).
-9. **Evidence Inspector** — select Hangar 1 and open a surface: which sensors observed it, when, with
+11. **Evidence Inspector** — select Hangar 1 and open a surface: which sensors observed it, when, with
    what confidence, and the raw observations.
-10. **Ask the record** (`/`) — e.g. "What changed around Building G during the last hour?" or "Which
+12. **Ask the record** (`/`) — e.g. "What changed around Building G during the last hour?" or "Which
    sensors stopped reporting before this incident?". Answers cite evidence or say there is not enough.
-11. **Incidents** — the recorded drone incursion and perimeter breach, with gathered evidence, the
+13. **Incidents** — the recorded drone incursion and perimeter breach, with gathered evidence, the
    sensors that were not reporting, replay and export.
-12. **Sensors** — live synthetic camera feeds with detections, radar/RF/LiDAR status and history.
-13. **Reconstructions** — LiDAR surface model, satellite change detection (the facility-damage
+14. **Sensors** — map of the sensor estate by status; per-sensor diagnostics, feeds and history.
+15. **Reconstructions** — LiDAR surface model, satellite change detection (the facility-damage
    scenario), multi-frame restoration with measured PSNR/SSIM.
-14. **Evidence** — observation search, media, and the multi-camera hand-off demo on the enrolled
+16. **Evidence** — observation search, media, and the multi-camera hand-off demo on the enrolled
    synthetic subject (analyst; always marked "human review required").
-15. **Simulation Lab** — trigger scenarios (unidentified drone, perimeter breach, sensor failure,
+17. **Simulation Lab** — trigger scenarios (unidentified drone, perimeter breach, sensor failure,
     network partition, multiple objects, false positive, facility damage…) and inject failures
     (administrator).
-16. **System Health** and **Audit** — pipeline metrics, dead letters, hash-chain verification.
+18. **System Health** and **Audit** — pipeline metrics, dead letters, hash-chain verification.
 
 ## Commands
 

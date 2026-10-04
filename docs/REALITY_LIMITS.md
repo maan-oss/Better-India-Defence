@@ -145,6 +145,15 @@ search the chance of a false match grows with gallery size. **Every site must me
 rates on its own cameras before acting on a match**, and the thresholds are settings for that reason.
 A STRONG match is a lead for a human, not an identification.
 
+### Demonstration content
+
+On first start of the demo site the platform seeds two register entries whose photographs are
+**synthetic faces of people who do not exist**, two analysed sample images (a public-dataset frame and a
+synthetic composite), and an *Operations Centre door* camera that plays a generated recording of those
+faces as a live stream. Recognition, sightings, review and the watch-list alert are therefore real
+inference on real (synthetic) images, not mock data. None of this is created on a configured site, and
+it can be disabled with `STRATA_DEMO_CONTENT=false`.
+
 ### Live cameras
 
 - RTSP / RTSPS / HTTP(S) MJPEG / recorded files (confined to an import directory) are pulled through
@@ -192,9 +201,9 @@ baseline. It is **not** JPDA, MHT, IMM or a learned tracker, and it is listed as
 ### Verified numbers (this repository, synthetic data, one developer machine)
 
 - Seeding 120 min of recorded history through the public ingestion API: ≈107 000 messages in ≈53 s.
-- Automated tests: 87 unit and integration tests in 14 files (domain, server, adapters — including
+- Automated tests: 88 unit and integration tests in 14 files (domain, server, adapters — including
   real-model vision tests, a recorded feed played as a live camera, C2 workflows, a configured real site
-  with CoT interop) and 12 browser end-to-end tests against the production build.
+  with CoT interop) and 15 browser end-to-end tests against the production build.
 
 ---
 

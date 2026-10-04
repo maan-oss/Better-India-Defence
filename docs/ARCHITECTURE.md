@@ -118,6 +118,16 @@ is only their last confirmed one. Readiness changes, teams, tasks (ETA from dist
 tracker), alert checklists, handovers and SITREPs are tables in migration `005_ops.sql`; the duty log
 is append-only by trigger.
 
+## Client
+
+React with zustand stores and a Three.js world engine. Design tokens (`styles/tokens.css`) define a dark
+operations palette and a night (red-light) theme switched by `data-theme` on the root element; imagery,
+canvases and the 3-D view are tinted by a CSS filter in night mode. Tactical symbols
+(`engine/symbols.ts`) are drawn once per frame/icon/state combination into canvas textures and used as
+screen-space sprites in 3-D, on the tactical scope (2-D canvas), in lists and in the field view. The map
+grid is computed in the terrain shader from a linear ENU→UTM map fitted at the site anchor. Below 760 px
+the navigation becomes a bottom bar and the top bar is condensed, so the field view works on phones.
+
 ## Sites and interop
 
 A stored site definition (`config` key `site.definition`, schema `SiteConfigSchema`) is applied right

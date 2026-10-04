@@ -73,9 +73,9 @@ test('copilot answers from the record and cites evidence or states insufficiency
 test('RBAC: a viewer cannot reach audit or administration', async ({ page }) => {
   await signIn(page, 'viewer');
   const nav = page.getByRole('navigation', { name: 'Application areas' });
-  await expect(nav.getByRole('link', { name: 'Operations' })).toBeVisible();
+  await expect(nav.getByRole('link', { name: 'Operational picture' })).toBeVisible();
   await expect(nav.getByRole('link', { name: 'Audit' })).toHaveCount(0);
-  await expect(nav.getByRole('link', { name: 'Administration' })).toHaveCount(0);
+  await expect(nav.getByRole('link', { name: 'Users & settings' })).toHaveCount(0);
   const res = await page.request.get('/api/audit');
   expect(res.status()).toBe(403);
 });
@@ -107,7 +107,7 @@ test('command: readiness, threat board, and a SITREP drafted from the record', a
   await page.getByRole('link', { name: 'Command' }).click();
   await expect(page.getByRole('heading', { name: 'Command' })).toBeVisible();
   await expect(page.getByText('Threat evaluation')).toBeVisible();
-  await expect(page.getByText('Response teams')).toBeVisible();
+  await expect(page.getByText('Response teams', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'SITREP', exact: true }).click();
   await page.getByRole('button', { name: 'Draft from record' }).click();
   const doc = page.locator('.sitrep-doc');
@@ -162,4 +162,39 @@ test('site setup: an administrator can start a site from the demo layout and see
   await expect(page.locator('.feed-row')).toHaveCount(3);
   await expect(page.locator('svg').first()).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test('field view: a team leader selects their team and sends a SALUTE contact report', async ({ page }) => {
+  const errors = await signIn(page, 'operator');
+  await page.goto('/field');
+  await page.getByLabel('My team').selectOption({ label: 'QRT-1 · QRT' });
+  await expect(page.locator('.ftask')).toBeVisible();
+  await expect(page.locator('.flocal')).toBeVisible();
+  await page.getByRole('button', { name: 'Contact report (SALUTE)' }).click();
+  await page.getByPlaceholder('how many: 2 persons, 1 vehicle').fill('2 persons');
+  await page.getByPlaceholder('what they are doing').fill('loitering near the east fence');
+  await page.getByRole('button', { name: 'Send report' }).click();
+  await expect(page.getByText(/Report sent to the control room/)).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('camera wall: site cameras render in a selectable grid layout', async ({ page }) => {
+  const errors = await signIn(page, 'operator');
+  await page.getByRole('link', { name: 'Camera wall' }).click();
+  await expect(page.locator('.wtile').first()).toBeVisible();
+  await page.getByRole('button', { name: '2×2' }).click();
+  await expect(page.locator('.wtile')).toHaveCount(4);
+  await page.locator('.wtile').first().click();
+  await expect(page.locator('.focus-panel')).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('night (red-light) display can be switched from the user menu', async ({ page }) => {
+  await signIn(page, 'viewer');
+  await page.locator('.user-btn').click();
+  await page.getByRole('menuitem', { name: /Night display/ }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'night');
+  await page.locator('.user-btn').click();
+  await page.getByRole('menuitem', { name: /Standard display/ }).click();
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'night');
 });

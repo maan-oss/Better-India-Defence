@@ -44,6 +44,8 @@ export const DEFAULT_SOPS: Record<string, string[]> = {
   INFRASTRUCTURE_ALARM: ['Confirm with the facility engineer', 'Check for deliberate interference (tamper, cut cable)', 'Switch to backup power / alternate route', 'Inform affected units'],
   STRUCTURE_CHANGE: ['Verify by patrol or camera', 'Assess damage and casualties', 'Cordon the area if unsafe', 'Report to engineers and higher HQ'],
   ROAD_OBSTRUCTION: ['Verify on camera', 'Dispatch patrol; treat unattended objects as suspect', 'Reroute traffic', 'Clear only after inspection'],
+  ASSISTANCE_REQUIRED: ['Contact the team on its radio net', 'Dispatch the nearest QRT / medical team to the team position', 'Inform guard commander and duty officer', 'Consider raising readiness state', 'Record the outcome'],
+  CONTACT_REPORT: ['Assess the report against sensors and cameras', 'Dispatch a patrol to confirm if required', 'Inform the duty officer', 'Record the outcome'],
   THREAT_IMMINENT: ['Confirm track and predicted asset', 'Consider raising readiness state', 'Warn personnel at the asset', 'Stand-to QRT at the asset', 'Inform higher HQ'],
 };
 

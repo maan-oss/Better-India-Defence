@@ -114,4 +114,20 @@ describe('operations', () => {
     const amend = (await app.inject({ method: 'POST', url: `/api/ops/sitreps/${s.id}/amend`, headers: as('analyst') })).json() as { version: number; status: string; supersedes: string };
     expect(amend).toMatchObject({ version: 2, status: 'DRAFT', supersedes: s.id });
   });
+
+  it('a field team can request assistance (critical alert, logged) and send a SALUTE contact report', async () => {
+    const teams = (await app.inject({ method: 'GET', url: '/api/ops/teams', headers: as('operator') })).json() as { id: string; callsign: string }[];
+    const patrol = teams.find((t) => t.callsign === 'PATROL-A')!;
+    expect((await app.inject({ method: 'POST', url: `/api/ops/teams/${patrol.id}/assistance`, headers: as('viewer'), payload: {} })).statusCode).toBe(403);
+    const a = (await app.inject({ method: 'POST', url: `/api/ops/teams/${patrol.id}/assistance`, headers: as('operator'), payload: { note: 'one casualty' } })).json() as { rule: string; priority: string; title: string };
+    expect(a).toMatchObject({ rule: 'ASSISTANCE_REQUIRED', priority: 'critical' });
+    expect(a.title).toContain('PATROL-A');
+    const r = (await app.inject({ method: 'POST', url: '/api/ops/contact-report', headers: as('operator'), payload: { teamId: patrol.id, size: '2 persons', activity: 'observing the fence line', location: 'east fence F-07', unit: 'civilian dress', time: '1105Z', equipment: 'binoculars' } })).json() as { rule: string; priority: string };
+    expect(r).toMatchObject({ rule: 'CONTACT_REPORT', priority: 'medium' });
+    const log = (await app.inject({ method: 'GET', url: '/api/ops/log?limit=20', headers: as('operator') })).json() as { kind: string; text: string }[];
+    expect(log.some((e) => e.kind === 'assistance' && e.text.includes('one casualty'))).toBe(true);
+    expect(log.some((e) => e.kind === 'contact_report' && e.text.includes('S: 2 persons') && e.text.includes('E: binoculars'))).toBe(true);
+    const sop = (await app.inject({ method: 'GET', url: '/api/ops/sops', headers: as('operator') })).json() as { defaults: Record<string, string[]> };
+    expect(sop.defaults.ASSISTANCE_REQUIRED!.length).toBeGreaterThan(2);
+  });
 });

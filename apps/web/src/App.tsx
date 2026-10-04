@@ -29,6 +29,7 @@ const Forensics = lazy(() => import('./pages/Forensics').then((m) => ({ default:
 const Command = lazy(() => import('./pages/Command').then((m) => ({ default: m.Command })));
 const SiteSetup = lazy(() => import('./pages/SiteSetup').then((m) => ({ default: m.SiteSetup })));
 const Cameras = lazy(() => import('./pages/Cameras').then((m) => ({ default: m.Cameras })));
+const Field = lazy(() => import('./pages/Field').then((m) => ({ default: m.Field })));
 const Identity = lazy(() => import('./pages/Identity').then((m) => ({ default: m.Identity })));
 
 /** Connects live data once signed in and loads the facility model. */
@@ -116,6 +117,7 @@ function Authenticated() {
             <Route path="/identity" element={<Identity />} />
             <Route path="/cameras" element={<Cameras />} />
             <Route path="/command" element={<Command />} />
+            <Route path="/field" element={<Field />} />
             <Route path="/site" element={<SiteSetup />} />
             <Route path="/simulation" element={<SimulationLab />} />
             <Route path="/system" element={<SystemHealth />} />

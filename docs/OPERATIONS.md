@@ -55,9 +55,28 @@ readiness changes, evidence exports) goes to an append-only, hash-chained audit 
 - **SITREP**: *Draft* fills a report from the record (DTG, MGRS grid references, alerts, incidents,
   teams, the top threats); edit, then *Issue*. Amendments are kept as versions.
 
+### Displays
+
+- **Symbology.** Tracks are drawn with APP-6 / MIL-STD-2525-style frames: friend (blue rectangle),
+  hostile (red diamond), unknown (yellow quatrefoil), neutral (green square); air tracks use the
+  open-bottom half frames. The icon inside gives the function (infantry, vehicle, UAV, aircraft). A
+  **dashed** frame means the object is not currently observed (coasting or lost): its position is the
+  last confirmed one. A non-cooperative track is *unknown* until identified — the platform never marks
+  anything hostile by itself; "hostile" only appears when another system reported it, and says so.
+- **Map furniture.** MGRS grid (100 m lines, 1 km index lines in brass), compass (click for north-up),
+  scale bar, and the grid reference and elevation under the cursor.
+- **Night display.** User menu → *Night display (red light)*: the whole console, imagery and 3-D view in
+  monochrome red to preserve dark adaptation.
+- **Alert toasts.** New critical and high alerts appear top-right with *Show on map* and *Acknowledge*;
+  critical ones stay until handled. If the live connection drops, a red banner says the picture is not
+  updating.
+
 ### Gate and perimeter (operator / guard commander)
 
-- **Live Cameras** shows each analysed stream with detections and recognised faces. A personnel member
+- **Camera wall** shows every camera: the site's cameras and the analysed live streams, in 1×1 to 4×4
+  layouts with a guard tour that cycles pages; cameras with an active alert flash and sort first. Click a
+  tile for its pose, stream health, recognised faces and actions.
+- Each analysed stream shows with detections and recognised faces. A personnel member
   seen in a zone they are not cleared for raises *Unauthorised zone access*; an unknown face in a
   restricted zone raises *Unknown person in restricted zone* (configurable); a watch-list match raises
   *Watch-list candidate* (critical when the subject is marked high-threat and the match is STRONG).
@@ -83,6 +102,19 @@ readiness changes, evidence exports) goes to an append-only, hash-chained audit 
   time window; replay it in the 4-D view; export the evidence package (analyst).
 - **Ask the record** (`/`) answers questions from the database with evidence links, or says there is
   not enough evidence.
+
+### Field teams (QRT / patrol leader, operator role)
+
+- Open **Field view** on a phone or tablet (the navigation moves to the bottom of the screen) and pick
+  your team; the choice is remembered on the device.
+- The current task shows the orders, grid reference, distance and bearing from your tracker's last fix,
+  ETA, and one large button for the next status (acknowledge → en route → on scene → complete, with an
+  outcome). Each step is logged; *on scene* is also set automatically within 35 m of the task.
+- **Local picture**: north-up plot of everything within 600 m, the task location and a bearing line.
+- **Contact report (SALUTE)**: Size, Activity, Location, Unit, Time, Equipment — goes to the duty log
+  and raises a medium alert in the control room.
+- **Request assistance**: press and hold for 1.5 s (so a stray tap cannot send it); raises a critical
+  alert at your last known position with its own standing orders.
 
 ## Working with other systems
 

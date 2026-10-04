@@ -315,6 +315,43 @@ export class OpsService {
     return (await this.teams()).find((x) => x.id === tid)!;
   }
 
+  /** A team in the field asks for help: critical alert at its last known position, logged. */
+  async requestAssistance(teamId: string, by: string, note: string): Promise<AlertRecord> {
+    const team = (await this.teams()).find((t) => t.id === teamId);
+    if (!team) throw new OpsError('unknown team');
+    const a = await this.alerts.raise({
+      rule: 'ASSISTANCE_REQUIRED',
+      dedupeKey: `assist:${teamId}`,
+      priority: 'critical',
+      title: `${team.callsign} requests assistance${note ? ` — ${note.slice(0, 120)}` : ''}`,
+      source: team.callsign,
+      position: team.position,
+      t: this.liveEdge() || Date.now(),
+      evidence: [],
+    });
+    await this.log('assistance', `${team.callsign} requested assistance${team.mgrs ? ` at ${team.mgrs}` : ''}: ${note || 'no details'} (sent by ${by})`, by, a.id);
+    return a;
+  }
+
+  /** SALUTE contact report from the field, as a duty-log entry and a medium alert for the control room. */
+  async contactReport(teamId: string | null, by: string, r: { size: string; activity: string; location: string; unit: string; time: string; equipment: string; position: Vec3 | null }): Promise<AlertRecord> {
+    const team = teamId ? (await this.teams()).find((t) => t.id === teamId) : undefined;
+    const who = team?.callsign ?? by;
+    const text = `SALUTE from ${who} — S: ${r.size || '—'} · A: ${r.activity || '—'} · L: ${r.location || '—'} · U: ${r.unit || '—'} · T: ${r.time || '—'} · E: ${r.equipment || '—'}`;
+    const a = await this.alerts.raise({
+      rule: 'CONTACT_REPORT',
+      dedupeKey: `salute:${who}:${Date.now()}`,
+      priority: 'medium',
+      title: `Contact report (${who}): ${r.activity || r.size || 'see report'}`.slice(0, 200),
+      source: who,
+      position: r.position ?? team?.position ?? null,
+      t: this.liveEdge() || Date.now(),
+      evidence: [],
+    });
+    await this.log('contact_report', text, by, a.id);
+    return a;
+  }
+
   async teams(): Promise<Team[]> {
     const rows = (await this.db.query<{ id: string; callsign: string; kind: string; strength: number; leader: string | null; channel: string | null; entity_id: string | null; mode: 'foot' | 'vehicle'; status: TeamStatus; notes: string | null; updated_at: number }>('SELECT * FROM teams ORDER BY kind, callsign')).rows;
     const active = (await this.db.query<{ id: string; team_id: string }>(`SELECT id, team_id FROM tasks WHERE status NOT IN ('COMPLETE','CANCELLED')`)).rows;

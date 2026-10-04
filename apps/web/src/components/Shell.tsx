@@ -231,7 +231,10 @@ function Clock() {
         {mode === 'live' && <span className="live-dot" style={{ width: 6, height: 6 }} />}
         {mode === 'live' ? 'LIVE' : playing ? `${direction < 0 ? '◀ ' : ''}×${rate}` : 'PAUSED'}
       </span>
-      <span className="mono clock-t">{dateTime(mode === 'live' ? edge : t)}</span>
+      <span className="mono clock-t">
+        <span className="clock-date">{dateTime(mode === 'live' ? edge : t).split(' ')[0]} </span>
+        {dateTime(mode === 'live' ? edge : t).split(' ').slice(1).join(' ')}
+      </span>
       <span className="mono clock-local" title={`Local time (${LOCAL_TZ})`}>
         {localTime(mode === 'live' ? edge : t)}
       </span>
@@ -479,11 +482,11 @@ function UserMenu() {
                 {user?.username} · {user?.role}
               </div>
             </div>
-            <button className="m-item" role="menuitem" onClick={() => setTheme(theme === 'night' ? 'dark' : 'night')}>
+            <button className="m-item" role="menuitem" onClick={() => (setTheme(theme === 'night' ? 'dark' : 'night'), setOpen(false))}>
               {theme === 'night' ? <Icon.Sun /> : <Icon.Moon />}
               <span className="grow">{theme === 'night' ? 'Standard display' : 'Night display (red light)'}</span>
             </button>
-            <button className="m-item" role="menuitem" onClick={() => setSound(!sound)}>
+            <button className="m-item" role="menuitem" onClick={() => (setSound(!sound), setOpen(false))}>
               {sound ? <Icon.BellOff /> : <Icon.Bell />}
               <span className="grow">{sound ? 'Mute alarm sound' : 'Enable alarm sound'}</span>
             </button>

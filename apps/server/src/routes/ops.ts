@@ -59,6 +59,29 @@ export function registerOps(app: FastifyInstance, p: Platform): void {
     await audit(p, req, 'team_saved', t.id, b);
     return t;
   });
+  app.post('/api/ops/teams/:id/assistance', { preHandler: requirePerm('ops.log') }, async (req, reply) => {
+    const b = parse(z.object({ note: z.string().max(300).default('') }), req.body ?? {}, reply);
+    if (!b) return;
+    try {
+      const a = await o.requestAssistance((req.params as { id: string }).id, req.user!.username, b.note);
+      await audit(p, req, 'assistance_requested', a.id, { team: (req.params as { id: string }).id, note: b.note });
+      return a;
+    } catch (e) {
+      return reply.code(400).send({ error: e instanceof Error ? e.message : String(e) });
+    }
+  });
+  app.post('/api/ops/contact-report', { preHandler: requirePerm('ops.log') }, async (req, reply) => {
+    const f = z.string().max(300).default('');
+    const b = parse(z.object({ teamId: z.string().max(40).nullish(), size: f, activity: f, location: f, unit: f, time: f, equipment: f, position: point.nullish() }), req.body, reply);
+    if (!b) return;
+    try {
+      const a = await o.contactReport(b.teamId ?? null, req.user!.username, { ...b, position: b.position ? { x: b.position.x, y: b.position.y, z: 0 } : null });
+      await audit(p, req, 'contact_report', a.id, b);
+      return a;
+    } catch (e) {
+      return reply.code(400).send({ error: e instanceof Error ? e.message : String(e) });
+    }
+  });
   app.get('/api/ops/tasks', { preHandler: requirePerm('world.view') }, async (req, reply) => {
     const q = parse(z.object({ active: z.enum(['0', '1']).optional(), limit: z.coerce.number().int().min(1).max(500).default(100) }), req.query, reply);
     if (!q) return;
