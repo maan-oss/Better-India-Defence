@@ -101,7 +101,7 @@ export function CommandBar({ open, onOpenChange, onShortcuts }: { open: boolean;
         run: () => openHit(h, nav),
       });
     const pages: Result[] = NAV.flatMap((g) => g.items)
-      .filter((i) => !i.perm || can(i.perm))
+      .filter((i) => (!i.perm || can(i.perm)) && (!i.simulated || useWorld.getState().simulated))
       .map((i) => {
         const I = Icon[i.icon] as () => ReactNode;
         return { id: `nav:${i.to}`, group: 'Go to', label: i.label, icon: <I />, keys: i.keys, run: () => nav(i.to) };

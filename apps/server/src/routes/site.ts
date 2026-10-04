@@ -16,7 +16,7 @@ export function registerSite(app: FastifyInstance, p: Platform): void {
       active: { id: FACILITY.id, name: FACILITY.name, origin: FACILITY.origin, simulated: p.site === null },
       stored: stored ? { config: stored.value, updatedBy: stored.updated_by, updatedAt: stored.updated_at } : null,
       template: demoAsSiteConfig(),
-      restartRequired: stored ? JSON.stringify(stored.value) !== JSON.stringify(p.site) : p.site !== null,
+      restartRequired: stored ? canon(stored.value) !== canon(p.site) : p.site !== null,
     };
   });
 
@@ -63,4 +63,9 @@ export function registerSite(app: FastifyInstance, p: Platform): void {
     if (!bytes) return reply.code(404).send({ error: 'no orthophoto' });
     return reply.header('content-type', 'image/jpeg').header('cache-control', 'private, max-age=86400').send(Buffer.from(bytes));
   });
+}
+
+/** JSON with object keys sorted, so a jsonb round trip (which reorders keys) compares equal. */
+function canon(v: unknown): string {
+  return JSON.stringify(v, (_k, x: unknown) => (x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.entries(x as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) : x));
 }

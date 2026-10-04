@@ -1,6 +1,7 @@
 import type { Icon } from '../components/Icons';
 
-export type NavItem = { to: string; label: string; icon: keyof typeof Icon; perm?: string; keys?: string };
+/** `simulated`: only shown while the synthetic simulator feeds this instance (demo mode). */
+export type NavItem = { to: string; label: string; icon: keyof typeof Icon; perm?: string; keys?: string; simulated?: boolean };
 /** Application areas, grouped as an operations centre uses them. */
 export const NAV: { group: string; items: NavItem[] }[] = [
   {
@@ -27,7 +28,7 @@ export const NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { to: '/sensors', label: 'Sensors', icon: 'Sensors', keys: 'G S' },
       { to: '/system', label: 'System health', icon: 'Health', perm: 'system.view' },
-      { to: '/simulation', label: 'Simulation lab', icon: 'Sim', perm: 'simulation.control' },
+      { to: '/simulation', label: 'Simulation lab', icon: 'Sim', perm: 'simulation.control', simulated: true },
       { to: '/audit', label: 'Audit', icon: 'Audit', perm: 'audit.view' },
     ],
   },

@@ -3,6 +3,9 @@ import { get, post } from '../api/client';
 import { useSession } from '../state/session';
 import { ErrorNote, Loading } from '../components/common';
 import { dateTime, hms } from '../lib/format';
+import { FlaskConical } from 'lucide-react';
+import { EmptyState } from '../components/kit';
+import { useWorld } from '../state/world';
 
 interface SimState {
   liveEdge: number;
@@ -18,6 +21,22 @@ interface SimState {
 
 /** SIMULATION LAB — scenario control and system testing. Scenarios emit traffic through the real ingestion API. */
 export function SimulationLab() {
+  const simulated = useWorld((w) => w.simulated);
+  if (!simulated)
+    return (
+      <div className="page">
+        <EmptyState
+          className="wall-empty"
+          icon={<FlaskConical size={28} strokeWidth={1.5} />}
+          title="No simulator on an operational site"
+          description="The simulation lab drives the synthetic demonstration site. This installation runs on real sensors only. To explore scenarios, start a separate demo instance with npm run demo."
+        />
+      </div>
+    );
+  return <SimulationLabLive />;
+}
+
+function SimulationLabLive() {
   const [state, setState] = useState<SimState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);

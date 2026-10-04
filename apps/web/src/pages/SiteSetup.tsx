@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { EnuFrame, fromMgrs, toMgrs, type SiteConfig } from '@strata/domain';
-import { api, get } from '../api/client';
+import { api, get, post } from '../api/client';
+import { useWorld } from '../state/world';
 import { ErrorNote, Loading } from '../components/common';
 import { Segmented } from '../components/ui';
 import '../styles/site.css';
@@ -23,6 +24,19 @@ interface SiteResponse {
 const blank = (origin = { lat: 28.6, lon: 77.2, alt: 0 }): SiteConfig => ({ id: 'my-site', name: 'New site', origin, halfExtentM: 2000, zones: [], buildings: [], perimeter: [], gates: [], feeds: [{ id: 'GPS1', kind: 'gps', name: 'Personnel and vehicle position gateway' }], orthophoto: null, basemap: null });
 
 export function SiteSetup() {
+  const runMode = useWorld((st) => st.runMode);
+  const [restarting, setRestarting] = useState(false);
+  // The API restarts under its supervisor (exit code 75) and comes back with the saved site.
+  const restart = async () => {
+    setRestarting(true);
+    await post('/api/system/restart').catch(() => undefined);
+    for (let i = 0; i < 90; i++) {
+      await new Promise((r) => setTimeout(r, 1000));
+      const ok = await fetch('/api/health').then((r) => r.ok).catch(() => false);
+      if (ok && i > 2) return location.reload();
+    }
+    setRestarting(false);
+  };
   const [resp, setResp] = useState<SiteResponse | null>(null);
   const [cfg, setCfg] = useState<SiteConfig | null>(null);
   const [tool, setTool] = useState<Tool>('select');
@@ -89,9 +103,14 @@ export function SiteSetup() {
           Running: {resp.active.name}. {resp.restartRequired ? 'A saved definition differs from the running one — restart to apply.' : ''}
         </span>
         <div className="spacer" />
-        {resp.stored && (
+        {resp.stored && runMode === 'demo' && (
           <button className="btn small ghost" onClick={() => void api('/api/site', { method: 'DELETE' }).then(() => setMsg('Site definition removed; the demo site will run after restart.'))}>
             Revert to demo after restart
+          </button>
+        )}
+        {resp.restartRequired && (
+          <button className="btn small" disabled={restarting} onClick={() => void restart()}>
+            {restarting ? 'Restarting…' : 'Restart to apply'}
           </button>
         )}
         <button className="btn primary" onClick={() => void save()}>

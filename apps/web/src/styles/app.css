@@ -488,3 +488,4 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .audit-pager { display: flex; justify-content: center; padding: var(--sp-4); }
 .audit-detail td { background: var(--bg-0); padding: var(--sp-3) var(--sp-5) !important; }
 .audit-form { align-items: flex-end; }
+.wall-empty { margin: auto; padding: 72px 24px; max-width: 520px; }

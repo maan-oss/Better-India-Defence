@@ -38,7 +38,8 @@ export function StatusIsland() {
   const root = useRef<HTMLDivElement>(null);
   const { mode, t, rate, direction, playing } = useTime.getState();
   const edge = useTime.getState().currentLiveEdge();
-  const now = mode === 'live' ? edge : t;
+  // Live: wall-clock Zulu (the data's own age is shown in the panel). Replay: the playhead.
+  const now = mode === 'live' ? Date.now() : t;
   const readiness = useOps((s) => s.readiness);
   const alerts = useData((s) => s.alerts);
   const sensors = useData((s) => s.sensors);
@@ -160,7 +161,7 @@ export function StatusIsland() {
                   <span className="muted">Local {localFmt.format(new Date(now))}</span>
                   {mode === 'live' ? (
                     <span className="dim" title="Age of the newest processed observation">
-                      Data +{(Math.max(0, Date.now() - edge) / 1000).toFixed(1)} s
+                      Newest data {ago(Math.max(0, Date.now() - edge))} old
                     </span>
                   ) : (
                     <button className="btn small" onClick={() => (useTime.getState().goLive(), setOpen(false))}>

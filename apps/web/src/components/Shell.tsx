@@ -88,6 +88,7 @@ function useGlobalKeys(openCommand: () => void, openShortcuts: () => void) {
 
 function Rail({ onShortcuts }: { onShortcuts: () => void }) {
   const can = useSession((s) => s.can);
+  const simulated = useWorld((s) => s.simulated);
   const pending = useVisionLive((s) => s.pendingReview);
   const alerts = useData((s) => s.alerts);
   const critical = useMemo(() => alerts.filter((a) => a.status === 'open' && a.priority === 'critical').length, [alerts]);
@@ -98,7 +99,7 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
       </Link>
       <div className="rail-items">
         {NAV.map((g, gi) => {
-          const items = g.items.filter((n) => !n.perm || can(n.perm));
+          const items = g.items.filter((n) => (!n.perm || can(n.perm)) && (!n.simulated || simulated));
           if (!items.length) return null;
           return (
             <div key={g.group} className="rail-group" role="group" aria-label={g.group}>

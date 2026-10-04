@@ -38,4 +38,3 @@
 .devcam-count { font-size: 12px; }
 .devcam-note { margin: 0; font-size: 12px; }
 @media (max-width: 760px) { .devcam-body { padding: var(--sp-3); } .devcam-view { aspect-ratio: 3 / 4; } }
-.wall-empty { margin: auto; padding: 72px 24px; max-width: 520px; }
