@@ -8,6 +8,8 @@ import { CameraFeed } from '../components/CameraFeed';
 import { useTime } from '../state/time';
 import { useSession } from '../state/session';
 import { ago, hms } from '../lib/format';
+import { Empty } from '../brand/Boot';
+import { BrushChart, Button, JsonViewer, MetricCard, SearchField, SortableDataTable, Timeline as ArcTimeline, WaffleChart } from '../components/kit';
 
 interface SensorDetail {
   definition: SensorListItem['definition'];
@@ -24,83 +26,107 @@ export function Sensors() {
   const nav = useNavigate();
   const [filter, setFilter] = useState('');
   const { data, error, reload } = useAsync((s) => get<SensorListItem[]>('/api/sensors', s), []);
-  const rows = useMemo(() => (data ?? []).filter((r) => !filter || `${r.definition.id} ${r.definition.name} ${r.definition.kind}`.toLowerCase().includes(filter.toLowerCase())), [data, filter]);
+  const rows = useMemo(
+    () =>
+      (data ?? [])
+        .filter((r) => !filter || `${r.definition.id} ${r.definition.name} ${r.definition.kind}`.toLowerCase().includes(filter.toLowerCase()))
+        .map((r) => ({ id: r.definition.id, name: r.definition.name, kind: r.definition.kind, status: r.status?.status ?? 'unreported', lastSeen: r.status?.lastSeen ?? 0, obs: r.observationsLast10Min })),
+    [data, filter],
+  );
   const counts = useMemo(() => {
-    const c = { ok: 0, degraded: 0, down: 0 };
+    const c = { ok: 0, degraded: 0, down: 0, unreported: 0 };
     for (const r of data ?? []) {
-      const s = r.status?.status ?? 'silent';
+      const s = r.status?.status;
       if (s === 'ok') c.ok++;
       else if (s === 'degraded') c.degraded++;
-      else if (r.definition.kind !== 'satellite') c.down++;
+      else if (s) c.down++;
+      else c.unreported++;
     }
     return c;
   }, [data]);
+  const total = data?.length ?? 0;
   return (
     <div className="page">
       <div className="page-h">
         <h1>Sensors</h1>
         <span className="sub">Status is derived from observed traffic, not only self-reported health.</span>
         <div className="spacer" />
-        <input className="input" placeholder="Filter" value={filter} onChange={(e) => setFilter(e.target.value)} />
-        <button className="btn" onClick={reload}>
+        <div className="sn-search">
+          <SearchField label="Find sensor" placeholder="ID, name or kind" value={filter} onValueChange={setFilter} />
+        </div>
+        <Button variant="secondary" onClick={reload}>
           Refresh
-        </button>
+        </Button>
       </div>
-      <div className="cards">
-        <div className="stat">
-          <div className="v">{data?.length ?? '—'}</div>
-          <div className="l">Registered sensors</div>
-        </div>
-        <div className="stat">
-          <div className="v">{counts.ok}</div>
-          <div className="l">Reporting normally</div>
-        </div>
-        <div className="stat">
-          <div className="v" style={{ color: counts.degraded ? 'var(--st-caution)' : undefined }}>
-            {counts.degraded}
+      {total > 0 && (
+        <div className="sn-summary metric-strip">
+          <MetricCard label="Registered" value={total} context="sensors in the site configuration" />
+          <MetricCard label="Reporting" value={counts.ok} context="traffic within expected cadence" />
+          <MetricCard label="Degraded" value={counts.degraded} context="late, sparse or self-reported fault" />
+          <MetricCard label="Silent" value={counts.down} context={counts.unreported ? `plus ${counts.unreported} never reported` : 'no traffic past the silence limit'} />
+          <div className="sn-waffle">
+            <WaffleChart
+              label="Sensor estate by status"
+              unit="sensors"
+              rows={4}
+              columns={20}
+              accentKey={null}
+              data={[
+                { key: 'ok', label: 'Reporting', value: counts.ok, color: 'var(--text-2)' },
+                { key: 'degraded', label: 'Degraded', value: counts.degraded, color: 'var(--st-caution)' },
+                { key: 'down', label: 'Silent', value: counts.down, color: 'var(--st-critical)' },
+                { key: 'unreported', label: 'Never reported', value: counts.unreported, color: 'var(--line-3)' },
+              ].filter((c) => c.value > 0)}
+            />
           </div>
-          <div className="l">Degraded</div>
         </div>
-        <div className="stat">
-          <div className="v" style={{ color: counts.down ? 'var(--red)' : undefined }}>
-            {counts.down}
-          </div>
-          <div className="l">Silent / offline</div>
-        </div>
-      </div>
+      )}
       <div className="page-body split">
         <div className="scroll">
           {error && <ErrorNote error={error} />}
           {!data && !error && <Loading />}
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Sensor</th>
-                <th>Kind</th>
-                <th>Status</th>
-                <th>Last traffic</th>
-                <th>Obs/10 min</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.definition.id} className="click" style={r.definition.id === id ? { background: 'var(--bg-3)' } : undefined} onClick={() => nav(`/sensors/${r.definition.id}`)}>
-                  <td>
-                    <span className="mono">{r.definition.id}</span> <span className="muted">{r.definition.name}</span>
-                  </td>
-                  <td className="muted">{r.definition.kind}</td>
-                  <td>
-                    <span className="row" style={{ gap: 6 }}>
-                      <span className={`status-dot ${r.status?.status ?? 'silent'}`} />
-                      {r.status?.status ?? '—'}
-                    </span>
-                  </td>
-                  <td className="mono muted">{r.status?.lastSeen ? hms(r.status.lastSeen) : '—'}</td>
-                  <td className="mono">{r.observationsLast10Min}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {data && total === 0 && <Empty art="sensors" title="No sensors registered" description="Add sensors in Site configuration. Each one appears here once its first message arrives." />}
+          {total > 0 && (
+            <div className="sn-table">
+              <SortableDataTable
+                caption="Sensors"
+                rowKey="id"
+                itemName={{ one: 'sensor', other: 'sensors' }}
+                emptyMessage="No sensor matches the search"
+                defaultSort={{ key: 'status', direction: 'asc' }}
+                rows={rows}
+                columns={[
+                  {
+                    key: 'id',
+                    label: 'Sensor',
+                    sortable: true,
+                    width: 84,
+                    render: (v) => (
+                      <button className="obs-link" aria-current={v === id ? 'true' : undefined} onClick={() => nav(`/sensors/${String(v)}`)}>
+                        {String(v)}
+                      </button>
+                    ),
+                  },
+                  { key: 'name', label: 'Name', sortable: true, render: (v) => <span className="muted">{String(v)}</span> },
+                  { key: 'kind', label: 'Kind', sortable: true, width: 90 },
+                  {
+                    key: 'status',
+                    label: 'Status',
+                    sortable: true,
+                    width: 128,
+                    render: (v) => (
+                      <span className="row" style={{ gap: 6 }}>
+                        <span className={`status-dot ${v === 'unreported' ? 'silent' : String(v)}`} />
+                        {v === 'unreported' ? 'never reported' : String(v)}
+                      </span>
+                    ),
+                  },
+                  { key: 'lastSeen', label: 'Last traffic', sortable: true, width: 110, render: (v) => <span className="mono muted">{v ? `${hms(Number(v))}Z` : '—'}</span> },
+                  { key: 'obs', label: 'Obs / 10 min', sortable: true, numeric: true, width: 104 },
+                ]}
+              />
+            </div>
+          )}
         </div>
         <div className="scroll">{id ? <SensorDetailView id={id} /> : <SensorMap rows={data ?? []} onPick={(sid) => nav(`/sensors/${sid}`)} />}</div>
       </div>
@@ -108,43 +134,43 @@ export function Sensors() {
   );
 }
 
+const hhmm = (d: Date) => `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}Z`;
+
 function SensorDetailView({ id }: { id: string }) {
   const { data, error } = useAsync((s) => get<SensorDetail>(`/api/sensors/${id}`, s), [id]);
   const [obs, setObs] = useState<string | null>(null);
   const can = useSession((s) => s.can);
   const t = useTime((s) => Math.floor((s.mode === 'live' ? s.currentLiveEdge() : s.t) / 2000) * 2000);
+  const traffic = useMemo(() => {
+    if (!data) return [];
+    const now = Math.floor(Date.now() / 60_000) * 60_000;
+    return Array.from({ length: 60 }, (_, i) => ({ date: now - (59 - i) * 60_000, value: data.perMinute.find((p) => p.b === i)?.n ?? 0 }));
+  }, [data]);
   if (error) return <ErrorNote error={error} />;
   if (!data) return <Loading />;
   const d = data.definition;
-  const max = Math.max(1, ...data.perMinute.map((p) => p.n));
+  const gaps = traffic.filter((p) => p.value === 0).length;
   return (
-    <div className="reveal">
+    <div className="reveal sn-detail">
       <div className="section">
         <div className="upper muted">
           {d.kind} · segment {d.segment}
         </div>
-        <h2 style={{ fontWeight: 500, fontSize: 17, margin: '4px 0' }}>
-          {d.id} — {d.name}
+        <h2 style={{ fontWeight: 600, fontSize: 18, margin: '4px 0', letterSpacing: '-0.01em' }}>
+          <span className="mono">{d.id}</span> <span className="muted">{d.name}</span>
         </h2>
         <div className="row">
-          <span className={`status-dot ${data.status?.status ?? 'silent'}`} /> {data.status?.status ?? 'unknown'} · last traffic {ago(data.status?.lastSeen, Date.now())}
+          <span className={`status-dot ${data.status?.status ?? 'silent'}`} /> {data.status?.status ?? 'never reported'} · last traffic {ago(data.status?.lastSeen, Date.now())}
           {data.status?.message && <span className="muted"> · {data.status.message}</span>}
         </div>
       </div>
       {(d.kind === 'camera' || d.kind === 'drone') && <CameraFeed sensorId={d.id} t={t} live={useTime.getState().mode === 'live'} />}
       <div className="section">
         <h4>Traffic, last 60 minutes</h4>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 1, height: 60 }}>
-          {Array.from({ length: 60 }, (_, i) => {
-            const v = data.perMinute.find((p) => p.b === i)?.n ?? 0;
-            return <div key={i} title={`${v}`} style={{ flex: 1, height: `${(v / max) * 100}%`, minHeight: v ? 2 : 0, background: v ? 'var(--text-2)' : 'transparent', borderBottom: v ? 'none' : '1px solid var(--red)' }} />;
-          })}
+        <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+          {gaps === 0 ? 'Messages arrived in every minute.' : gaps === 60 ? 'No messages in the last hour.' : `${gaps} of 60 minutes without a message.`} Drag the strip below to look closer.
         </div>
-        <div className="row dim mono" style={{ fontSize: 10.5 }}>
-          <span>−60 min</span>
-          <span className="spacer" />
-          <span>now</span>
-        </div>
+        <BrushChart data={traffic} label={`Messages per minute from ${d.id}`} unit="msg" minSpan={5 * 60_000} height={150} overviewHeight={36} formatDate={hhmm} emptyLabel="No traffic" />
       </div>
       {data.coveragePatches !== null && (
         <div className="section">
@@ -154,22 +180,25 @@ function SensorDetailView({ id }: { id: string }) {
       )}
       <div className="section">
         <h4>Status history</h4>
-        {data.events.length === 0 && <div className="muted">No transitions recorded.</div>}
-        {data.events.map((e, i) => (
-          <div key={i} className="row mono" style={{ fontSize: 12, padding: '2px 0' }}>
-            <span className="muted">{hms(e.t)}Z</span>
-            <span>
-              {e.previous ?? '—'} → {e.status}
-            </span>
-            <span className="muted">{e.message}</span>
-          </div>
-        ))}
+        {data.events.length === 0 ? (
+          <div className="muted">No transitions recorded.</div>
+        ) : (
+          <ArcTimeline
+            label={`Status history of ${d.id}`}
+            now={Date.now()}
+            maxHeight={260}
+            events={data.events.map((e, i) => ({ id: `${e.t}-${i}`, at: e.t, title: `${e.previous ?? 'unknown'} → ${e.status}`, meta: e.message ?? undefined, tone: e.status === 'ok' ? 'success' : e.status === 'degraded' ? 'neutral' : 'danger' }))}
+          />
+        )}
       </div>
       <div className="section">
         <h4>Recent observations</h4>
+        {data.recent.length === 0 && <div className="muted">None in the retention window.</div>}
         {data.recent.slice(0, 30).map((o) => (
-          <div key={o.id} className="row" style={{ fontSize: 12, padding: '2px 0', cursor: 'pointer' }} onClick={() => setObs(o.id)}>
-            <span className="mono muted">{hms(o.t)}</span>
+          <div key={o.id} className="row" style={{ fontSize: 12, padding: '3px 0' }}>
+            <button className="obs-link" onClick={() => setObs(o.id)}>
+              {hms(o.t)}Z
+            </button>
             <span className="mono">{o.source_kind}</span>
             <StateChip state={o.state} />
             <span className="muted mono">
@@ -183,9 +212,7 @@ function SensorDetailView({ id }: { id: string }) {
       </div>
       <div className="section">
         <h4>Configuration</h4>
-        <pre className="mono scroll" style={{ background: 'var(--bg-0)', padding: 10, border: '1px solid var(--line)', maxHeight: 260 }}>
-          {JSON.stringify(d, null, 2)}
-        </pre>
+        <JsonViewer data={d} rootName={d.id} defaultExpandDepth={1} maxHeight={300} label={`Configuration of ${d.id}`} />
       </div>
       {can('system.view') && <DeadLetters sensorId={d.id} />}
       {obs && <ObservationViewer id={obs} onClose={() => setObs(null)} />}
@@ -254,7 +281,7 @@ function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: stri
                 <circle r={s * 1.25} fill="var(--bg-1)" stroke={color(st)} strokeWidth={s / 4} />
                 <path d={KIND_GLYPH[d.kind] ?? 'M-3 0h6'} transform={`scale(${s / 7}, ${-s / 7})`} fill="none" stroke={color(st)} strokeWidth={1.4} />
                 {(sel || st !== 'ok') && (
-                  <text transform={`scale(1,-1)`} x={s * 1.8} y={s * 0.5} fontSize={s * 1.6} fill="var(--text-0)" fontFamily="JetBrains Mono Variable, monospace">
+                  <text transform={`scale(1,-1)`} x={s * 1.8} y={s * 0.5} fontSize={s * 1.6} fill="var(--text-0)" fontFamily="var(--font-mono)">
                     {d.id}
                   </text>
                 )}
