@@ -86,6 +86,7 @@ function Overview() {
 function Kpis({ version }: { version: number }) {
   const alerts = useData((s) => s.alerts);
   const sensors = useData((s) => s.sensors);
+  const facility = useWorld((s) => s.facility);
   const threats = useOps((s) => s.threats);
   const pending = useVisionLive((s) => s.pendingReview);
   const nav = useNavigate();
@@ -104,14 +105,18 @@ function Kpis({ version }: { version: number }) {
   const hi = threats.filter((t) => t.level === 'CRITICAL' || t.level === 'HIGH').length;
   const nonCoop = trk.filter((t) => !t.cooperative && !t.inferred).length;
   const down = Object.values(sensors).filter((s) => s.status === 'silent' || s.status === 'offline' || s.status === 'fault').length;
-  const total = Object.keys(sensors).length;
+  // Registered sensors: the same count the status island shows, so the two never disagree.
+  const total = facility?.sensors.length || Object.keys(sensors).length;
+  const reporting = Object.values(sensors).filter((s) => s.status === 'ok' || s.status === 'degraded').length;
+  // Until the first status arrives the count is unknown, so say so rather than report sensors as silent.
+  const statusKnown = Object.keys(sensors).length > 0;
   const avail = (teams.data ?? []).filter((t) => t.status === 'AVAILABLE').length;
   const k = [
     { v: open.length, l: 'Alerts awaiting action', sub: crit ? `${crit} critical` : 'none critical', cls: crit ? 'bad' : open.length ? 'warn' : 'good', go: '/operations', spark: buckets },
-    { v: hi, l: 'High / critical threats', sub: `${threats.length} contacts evaluated`, cls: hi ? 'bad' : 'good', go: '/command' },
+    { v: hi, l: 'High / critical threats', sub: `${threats.length} contacts evaluated`, cls: threats.some((t) => t.level === 'CRITICAL') ? 'bad' : hi ? 'warn' : 'good', go: '/command' },
     { v: nonCoop, l: 'Uncorrelated contacts', sub: `${trk.filter((t) => t.cooperative).length} friendly tracked`, cls: nonCoop > 20 ? 'warn' : '', go: '/operations' },
     { v: `${avail}/${teams.data?.length ?? 0}`, l: 'Response teams available', sub: `${(teams.data ?? []).filter((t) => t.status !== 'AVAILABLE' && t.status !== 'OFF DUTY').length} committed`, cls: avail === 0 && (teams.data?.length ?? 0) > 0 ? 'bad' : '', go: '/command' },
-    { v: `${total - down}/${total}`, l: 'Sensors reporting', sub: down ? `${down} not reporting` : 'all nominal', cls: down ? 'warn' : 'good', go: '/sensors' },
+    { v: statusKnown ? `${reporting}/${total}` : '—', l: 'Sensors reporting', sub: !statusKnown ? 'waiting for the first status' : total - reporting ? `${total - reporting} not reporting` : 'all reporting', cls: !statusKnown ? '' : down ? 'bad' : total - reporting ? 'warn' : 'good', go: '/sensors' },
     { v: pending, l: 'Identity reviews pending', sub: 'recognition candidates', cls: pending ? 'warn' : '', go: '/identity' },
   ];
   return (
@@ -164,7 +169,7 @@ function ReadinessPanel() {
       </div>
       <div className="section">
         <div>{info[r.level]}</div>
-        <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+        <div className="muted" style={{ fontSize: 'var(--fs-caption)', marginTop: 4 }}>
           Set {r.t ? dtg(r.t) : '—'} by {r.by}: {r.reason}
         </div>
       </div>
@@ -254,7 +259,7 @@ function WatchActivity() {
     <section className="panel cmd-activity">
       <div className="panel-h">
         <h3>Watch activity</h3>
-        <span className="muted" style={{ fontSize: 12 }}>
+        <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
           {hist.data.length} alerts in 26 weeks
         </span>
       </div>
@@ -292,7 +297,7 @@ function ThreatBoard() {
       <div className="panel-h">
         <h3>Threat evaluation</h3>
         <div className="spacer" />
-        <span className="muted" style={{ fontSize: 11 }}>
+        <span className="muted" style={{ fontSize: 'var(--fs-micro)' }}>
           ranked by proximity, imminence and approach to vital assets — decision support only
         </span>
       </div>
@@ -325,7 +330,7 @@ function ThreatBoard() {
                 <td className="mono">{t.inside ? '—' : fmtS(t.timeToBoundaryS)}</td>
                 <td className="mono">{t.closingMps > 0 ? `${t.closingMps} m/s` : 'opening'}</td>
                 <td className="mono">{t.tcpaS !== null ? `${t.cpaM} m in ${fmtS(t.tcpaS)}` : '—'}</td>
-                <td className="mono" style={{ fontSize: 11 }}>
+                <td className="mono" style={{ fontSize: 'var(--fs-micro)' }}>
                   {grid(t.position)}
                 </td>
               </tr>
@@ -390,7 +395,7 @@ function TeamsPanel({ version }: { version: number }) {
                 >
                   <button className="link-btn mono">{t.callsign}</button>
                 </HoverCard>
-                <div className="dim" style={{ fontSize: 11 }}>
+                <div className="dim" style={{ fontSize: 'var(--fs-micro)' }}>
                   {t.leader ?? ''} · {t.strength} pax · {t.mode}
                 </div>
               </td>
@@ -398,7 +403,7 @@ function TeamsPanel({ version }: { version: number }) {
               <td>
                 <span className={`tstat ${t.status.replace(' ', '-')}`}>{t.status}</span>
               </td>
-              <td className="mono" style={{ fontSize: 11 }}>
+              <td className="mono" style={{ fontSize: 'var(--fs-micro)' }}>
                 {t.mgrs ?? <span className="dim">no GPS</span>}
                 {t.positionAgeS !== null && t.positionAgeS > 60 && <span className="err-inline"> {t.positionAgeS}s old</span>}
               </td>
@@ -419,7 +424,7 @@ function TasksPanel({ version }: { version: number }) {
     <section className="panel tasks-panel">
       <div className="panel-h">
         <h3>Tasks</h3>
-        <span className="muted" style={{ fontSize: 12 }}>
+        <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
           {can('ops.dispatch') ? 'Drag a card to record its progress' : 'Read only'}
         </span>
       </div>
@@ -479,7 +484,7 @@ function DutyLog() {
                   submitOnEnter={false}
                   onSubmit={() => text.trim().length > 1 && void add()}
                 />
-                <span id="duty-entry-help" className="dim" style={{ fontSize: 12 }}>
+                <span id="duty-entry-help" className="dim" style={{ fontSize: 'var(--fs-caption)' }}>
                   Timestamped and append-only. Mentioning an incident files the entry in its notes.
                 </span>
               </div>
@@ -495,7 +500,7 @@ function DutyLog() {
         <div className="row" style={{ flexWrap: 'wrap' }}>
           <ChipGroup label="Entry types" value={kinds} onValueChange={setKinds} options={['manual', 'radio', 'readiness', 'dispatch', 'handover', 'report', 'patrol', 'visitor', 'correction'].map((x) => ({ value: x, label: x.charAt(0).toUpperCase() + x.slice(1) }))} />
           <div className="spacer" />
-          <span className="muted" style={{ fontSize: 12 }}>
+          <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
             Entries cannot be edited or deleted; add a correction instead.
           </span>
         </div>
@@ -605,7 +610,7 @@ function Handover() {
                 selected={incoming ? [incoming] : []}
                 onChange={(sel: string[]) => setIncoming(sel[sel.length - 1] ?? '')}
               />
-              <span className="muted" style={{ fontSize: 12 }}>
+              <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
                 {incoming ? `${incoming} signs to accept the watch.` : 'Choose who takes over. Officers on watch are listed first.'}
               </span>
             </div>
@@ -777,7 +782,7 @@ function Sitreps() {
                 SITREP {s.number}
                 {s.version > 1 ? ` AMDT ${s.version - 1}` : ''}
               </b>
-              <div className="mono dim" style={{ fontSize: 11 }}>
+              <div className="mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
                 {s.dtg} · {s.status} · {s.classification}
               </div>
             </div>
@@ -899,7 +904,7 @@ function Assets() {
             defaultSort={{ key: 'priority', direction: 'asc' }}
             rows={(vas.data ?? []).map((v) => ({ id: v.id, name: v.name, kind: v.kind, priority: v.priority, grid: grid(v.centre), radiusM: v.radiusM, raw: v }))}
             columns={[
-              { key: 'name', label: 'Asset', sortable: true, render: (_v, r) => (<span><b>{String(r.name)}</b><span className="mono dim" style={{ display: 'block', fontSize: 11 }}>{String(r.id)}</span></span>) },
+              { key: 'name', label: 'Asset', sortable: true, render: (_v, r) => (<span><b>{String(r.name)}</b><span className="mono dim" style={{ display: 'block', fontSize: 'var(--fs-micro)' }}>{String(r.id)}</span></span>) },
               { key: 'kind', label: 'Type', sortable: true },
               { key: 'priority', label: 'Priority', sortable: true, numeric: true, render: (v) => `P${String(v)}` },
               { key: 'grid', label: 'Centre', render: (v) => <span className="mono">{String(v)}</span> },

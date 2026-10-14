@@ -155,7 +155,7 @@ export function Workbench({ item, t, roi, onProduct }: { item: EvidenceItem; t: 
                     <span className="mono">{Number((o as unknown as Record<string, number>)[p.key]).toFixed(p.step < 1 ? 2 : 0)}</span>
                   </label>
                 ))}
-                <div className="dim" style={{ fontSize: 11 }}>
+                <div className="dim" style={{ fontSize: 'var(--fs-micro)' }}>
                   {OP_DESCRIPTIONS[o.op]}
                 </div>
               </li>
@@ -268,11 +268,11 @@ export function ProductView({ product, item }: { product: EvidenceProduct; item:
               <div className="spacer" />
               {s.ms !== undefined && <span className="mono dim">{s.ms} ms</span>}
             </div>
-            <div className="muted" style={{ fontSize: 11.5 }}>
+            <div className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
               {s.description}
             </div>
             {typeof s.op === 'object' && Object.keys(s.op).length > 1 && (
-              <div className="mono dim" style={{ fontSize: 11 }}>
+              <div className="mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
                 {Object.entries(s.op)
                   .filter(([k]) => k !== 'op')
                   .map(([k, v]) => `${k}=${typeof v === 'number' ? +v.toFixed(3) : String(v)}`)
@@ -285,7 +285,7 @@ export function ProductView({ product, item }: { product: EvidenceProduct; item:
         <li>
           <b>Stored product</b>
           <div className="mono dim hash">sha256 {product.sha256Out}</div>
-          <div className="muted" style={{ fontSize: 11.5 }}>
+          <div className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
             by {product.createdBy} · {new Date(product.createdAt).toISOString().replace('T', ' ').slice(0, 19)}Z{product.notes ? ` · ${product.notes}` : ''}
           </div>
         </li>

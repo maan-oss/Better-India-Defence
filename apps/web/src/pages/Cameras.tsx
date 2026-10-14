@@ -427,7 +427,8 @@ export function Cameras() {
               pinned: pins.includes(c.id),
             }))}
             onPinChange={(items) =>
-              setPins(items.filter((i) => i.pinned).map((i) => String(i.id)))
+              // Deferred: PinList reports from inside its own state update, and a parent update there warns.
+              queueMicrotask(() => setPins(items.filter((i) => i.pinned).map((i) => String(i.id))))
             }
           />
         </DrawerContent>
@@ -557,7 +558,7 @@ function FocusPanel({
         </Button>
       </div>
       <div className="section">
-        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 6 }}>
+        <div style={{ fontSize: 'var(--fs-body-lg)', fontWeight: 500, marginBottom: 6 }}>
           {c.name}
         </div>
         {alert && (
@@ -692,7 +693,7 @@ function FocusPanel({
       {s ? (
         <CameraFaces id={c.id} />
       ) : (
-        <div className="section muted" style={{ fontSize: 12 }}>
+        <div className="section muted" style={{ fontSize: 'var(--fs-caption)' }}>
           Face recognition runs on analysed live streams. Site cameras in the
           demo report analytics only.
         </div>
@@ -1089,7 +1090,7 @@ function CameraForm({
                 Use this device’s location
               </Button>
               {locating && (
-                <span className="muted" style={{ fontSize: 12 }}>
+                <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
                   {locating}
                 </span>
               )}

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { FaceEventSummary, LiveMessage } from '@strata/domain';
 import type { EnhanceOp, ImageStats, ProductState } from '@strata/domain/vision';
 import { get } from './client';
+import { useSession } from '../state/session';
 
 /** Client-side shapes of the vision / evidence / identity API (mirrors apps/server responses). */
 export type { EnhanceOp, ProductState };
@@ -262,6 +263,8 @@ export const useVisionLive = create<VisionLive>((set, getS) => ({
     }
   },
   async refreshCounts() {
+    // Only people who may review faces ask for the queue; other roles would be refused.
+    if (!useSession.getState().can('identity.view')) return;
     try {
       const pending = await get<FaceEvent[]>('/api/faces?review=PENDING&limit=500');
       set({ pendingReview: pending.length });

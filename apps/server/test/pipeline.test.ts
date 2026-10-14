@@ -18,7 +18,8 @@ let dir: string;
 let platform: Platform;
 let app: FastifyInstance;
 const TOKEN = 'test-service-token-0123456789';
-const t0 = Date.UTC(2026, 9, 4, 6, 0, 0);
+// Recent enough for the 7-day ingestion window, and in the past so the replay never runs into the future-message limit.
+const t0 = Math.floor((Date.now() - 30 * 60_000) / 60_000) * 60_000;
 let cookie = '';
 
 async function ingest(messages: unknown[]) {

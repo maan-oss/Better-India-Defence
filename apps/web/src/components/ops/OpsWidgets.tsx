@@ -61,7 +61,7 @@ export function Checklist({ alertId }: { alertId: string }) {
               <span>{i.text}</span>
             </label>
             {i.doneBy && (
-              <span className="mono dim" style={{ fontSize: 10.5 }}>
+              <span className="mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
                 {i.doneBy} {new Date(i.doneAt!).toISOString().slice(11, 19)}Z
               </span>
             )}
@@ -126,7 +126,7 @@ export function DispatchDialog({ alert, place, onClose }: { alert: AlertRecord |
                     <b className="mono">{t.callsign}</b> <span className="dim">{t.kind} · {t.strength}</span>
                   </td>
                   <td>{t.taskId ? 'tasked' : t.status}</td>
-                  <td className="mono" style={{ fontSize: 11 }}>
+                  <td className="mono" style={{ fontSize: 'var(--fs-micro)' }}>
                     {t.mgrs ?? 'no GPS'}
                     {t.positionAgeS !== null && t.positionAgeS > 60 ? <span className="err-inline"> ({t.positionAgeS}s old)</span> : null}
                   </td>

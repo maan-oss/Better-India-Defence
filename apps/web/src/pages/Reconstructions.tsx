@@ -73,7 +73,7 @@ export function Reconstructions() {
                       </button>
                     ),
                   },
-                  { key: 'status', label: 'Status', sortable: true, width: 110, render: (v) => <Badge size="sm" tone={v === 'failed' ? 'danger' : v === 'completed' ? 'success' : 'info'}>{String(v)}</Badge> },
+                  { key: 'status', label: 'Status', sortable: true, width: 110, render: (v) => <Badge size="sm" tone={v === 'failed' ? 'danger' : v === 'running' || v === 'queued' ? 'info' : 'neutral'}>{String(v)}</Badge> },
                   { key: 'created', label: 'Created', sortable: true, width: 96, render: (v) => <span className="mono muted">{hms(Number(v))}Z</span> },
                   { key: 'conf', label: 'Conf.', sortable: true, numeric: true, width: 76, render: (v) => (Number(v) >= 0 ? pct(Number(v)) : '—') },
                 ]}
@@ -134,7 +134,7 @@ function NewJob({ onCreated }: { onCreated: (id: string) => void }) {
           ) : (
             <ArcSelect label="Structure" value={building} onValueChange={setBuilding} options={FACILITY.buildings.map((b) => ({ value: b.id, label: `${b.label} · ${b.name}` }))} />
           )}
-          <div className="muted" style={{ fontSize: 12 }}>
+          <div className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
             {kind === 'multi_frame' ? `Uses the registered marking "${marking?.text}" on ${FACILITY.buildings.find((b) => b.markings?.length)?.name}. Best results from C12.` : 'Cells with no returns stay unknown; nothing is filled in.'}
           </div>
           {err && <div className="note warn">{err}</div>}
@@ -166,7 +166,7 @@ function JobDetail({ id }: { id: string }) {
         <div className="upper muted">
           {titleCase(data.kind)} · {data.status}
         </div>
-        <h2 style={{ fontWeight: 500, fontSize: 17, margin: '4px 0' }}>{data.title}</h2>
+        <h2 style={{ fontWeight: 500, fontSize: 'var(--fs-lead)', margin: '4px 0' }}>{data.title}</h2>
         <div className="mono muted">
           created {dateTime(data.created_at)}
           {data.finished_at && data.started_at ? ` · ran ${dur(data.finished_at - data.started_at)}` : ''}
@@ -188,7 +188,7 @@ function JobDetail({ id }: { id: string }) {
               .map(([k, v]) => (
                 <div key={k} style={{ display: 'contents' }}>
                   <dt>{titleCase(k.replace(/([A-Z])/g, '_$1').toLowerCase())}</dt>
-                  <dd className="mono">{typeof v === 'number' && v < 1 && v > 0 ? pct(v, 1) : String(v)}</dd>
+                  <dd className="mono">{typeof v === 'number' && v < 1 && v > 0 ? pct(v, 1) : typeof v === 'number' && v > 1e12 ? dateTime(v) : String(v)}</dd>
                 </div>
               ))}
           </dl>
@@ -199,7 +199,7 @@ function JobDetail({ id }: { id: string }) {
       <div className="section">
         <h4>Inputs ({data.inputs.length})</h4>
         {data.inputs.slice(0, 60).map((e, i) => (
-          <div key={i} className="row" style={{ fontSize: 12, padding: '2px 0' }}>
+          <div key={i} className="row" style={{ fontSize: 'var(--fs-caption)', padding: '2px 0' }}>
             <StateChip state={e.state} /> <span className="mono">{e.kind}</span> <span className="mono muted ellipsis">{e.id}</span> <span className="muted">{e.t ? hms(e.t) : ''}</span>
           </div>
         ))}
@@ -233,7 +233,7 @@ function MultiFrame({ result }: { result: Record<string, unknown> }) {
             />
           ))}
         </div>
-        <div className="muted" style={{ fontSize: 11.5, marginTop: 8 }}>
+        <div className="muted" style={{ fontSize: 'var(--fs-caption)', marginTop: 8 }}>
           {String(result.metricsNote ?? '')} Frames used: {String(result.usedFrames)} · rejected: {String(result.rejectedFrames)}.
         </div>
       </div>

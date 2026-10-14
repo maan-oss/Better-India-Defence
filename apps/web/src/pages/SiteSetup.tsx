@@ -189,7 +189,7 @@ function SitePanel({ cfg, set, sel, setSel }: { cfg: SiteConfig; set: (p: Partia
           <label>Half extent (m)</label>
           <input className="input" type="number" value={cfg.halfExtentM} onChange={(e) => set({ halfExtentM: Number(e.target.value) })} />
         </div>
-        <div className="dim" style={{ fontSize: 11, marginTop: 6 }}>
+        <div className="dim" style={{ fontSize: 'var(--fs-micro)', marginTop: 6 }}>
           The anchor should be a surveyed point (e.g. a geodetic marker). Every position on the plan is metres east/north of it.
         </div>
       </div>
@@ -231,7 +231,7 @@ function SitePanel({ cfg, set, sel, setSel }: { cfg: SiteConfig; set: (p: Partia
             </div>
           </div>
         )}
-        <div className="dim" style={{ fontSize: 11, marginTop: 6 }}>
+        <div className="dim" style={{ fontSize: 'var(--fs-micro)', marginTop: 6 }}>
           North-up image with the edge coordinates of its outer pixels (WGS84). The plan and the 3-D ground use it as a reference; it is not used for measurement.
         </div>
       </div>
@@ -308,7 +308,7 @@ function SitePanel({ cfg, set, sel, setSel }: { cfg: SiteConfig; set: (p: Partia
       <FeedsSection cfg={cfg} set={set} />
       <div className="section">
         <h4>Contents</h4>
-        <div className="muted" style={{ fontSize: 12 }}>
+        <div className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
           {cfg.zones.length} zones ({cfg.zones.filter((x) => x.restricted).length} restricted) · {cfg.buildings.length} buildings · perimeter {cfg.perimeter.length} vertices · {cfg.gates.length} gates · {(cfg.feeds ?? []).length} feeds
         </div>
       </div>
@@ -324,7 +324,7 @@ function FeedsSection({ cfg, set }: { cfg: SiteConfig; set: (p: Partial<SiteConf
   return (
     <div className="section">
       <h4>Data feeds</h4>
-      <div className="dim" style={{ fontSize: 11, marginBottom: 6 }}>
+      <div className="dim" style={{ fontSize: 'var(--fs-micro)', marginBottom: 6 }}>
         Each feed is a sensor id that an adapter posts as (see <span className="mono">packages/adapters</span>: <span className="mono">strata-adapter</span> with NMEA, MAVLink or CoT listeners).
         Cameras are added on the Cameras page.
       </div>
@@ -428,12 +428,12 @@ function PlanEditor({
     <div className="plan">
       <div className="plan-tools row">
         <Segmented label="Drawing tool" value={tool} onChange={(t) => (setTool(t), setDraft([]))} options={(['select', 'zone', 'building', 'perimeter', 'gate'] as Tool[]).map((t) => ({ value: t, label: t.charAt(0).toUpperCase() + t.slice(1) }))} />
-        <span className="muted" style={{ fontSize: 12 }}>
+        <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
           {tool === 'zone' || tool === 'perimeter' ? `Click to add vertices (${draft.length}); Enter or double-click to finish; Esc to cancel.` : tool === 'building' ? 'Drag a footprint; then set height and rotation.' : tool === 'gate' ? 'Click on the perimeter to place a gate.' : 'Click an item to edit. Drag to pan; wheel to zoom.'}
         </span>
         <div className="spacer" />
         {cursor && (
-          <span className="mono muted" style={{ fontSize: 11 }}>
+          <span className="mono muted" style={{ fontSize: 'var(--fs-micro)' }}>
             E {cursor.x.toFixed(0)} N {cursor.y.toFixed(0)} · {(() => {
               const g = frame.toGeodetic({ x: cursor.x, y: cursor.y, z: 0 });
               try {

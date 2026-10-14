@@ -51,8 +51,14 @@ export const useData = create<DataState>((set, getState) => ({
   timeline: null,
   wsStatus: 'closed',
   async loadInitial() {
-    const [alerts, incidents] = await Promise.all([get<AlertRecord[]>('/api/alerts?limit=500'), get<IncidentRecord[]>('/api/incidents')]);
-    set({ alerts, incidents });
+    const [alerts, incidents, sensorRows] = await Promise.all([
+      get<AlertRecord[]>('/api/alerts?limit=500'),
+      get<IncidentRecord[]>('/api/incidents'),
+      // Live messages only carry changes, so the first load needs every sensor's current status.
+      get<{ definition: { id: string }; status: SensorStatusRecord | null }[]>('/api/sensors'),
+    ]);
+    const sensors = Object.fromEntries(sensorRows.filter((r) => r.status).map((r) => [r.definition.id, r.status as SensorStatusRecord]));
+    set({ alerts, incidents, sensors: { ...getState().sensors, ...sensors } });
   },
   onLive(m) {
     switch (m.type) {

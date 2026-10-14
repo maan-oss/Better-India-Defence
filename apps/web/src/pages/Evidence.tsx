@@ -187,7 +187,7 @@ function MediaList() {
                 <div className="row">
                   <StateChip state="CAPTURED" /> <span className="mono">{hms(m.captured_at)}Z</span>
                 </div>
-                <div className="muted mono" style={{ fontSize: 11 }}>
+                <div className="muted mono" style={{ fontSize: 'var(--fs-micro)' }}>
                   acquired {dateTime(m.captured_at)} · {String(m.meta.gsdM ?? '')} m GSD · delivered {m.meta.deliveredAt ? hms(Number(m.meta.deliveredAt)) : '—'}
                 </div>
               </div>
@@ -321,10 +321,10 @@ function Handoff() {
               x.type === 'seg' ? (
                 <div key={i} className="row" style={{ padding: '10px 0', borderTop: '1px solid var(--line)', alignItems: 'flex-start' }}>
                   <div style={{ width: 120 }}>
-                    <div className="mono" style={{ fontSize: 15 }}>
+                    <div className="mono" style={{ fontSize: 'var(--fs-body-lg)' }}>
                       {x.seg.cameraId}
                     </div>
-                    <div className="muted mono" style={{ fontSize: 11 }}>
+                    <div className="muted mono" style={{ fontSize: 'var(--fs-micro)' }}>
                       {hms(x.seg.fromT)}–{hms(x.seg.toT)}Z
                     </div>
                     <StateChip state="CAPTURED" />

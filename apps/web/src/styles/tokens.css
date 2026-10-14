@@ -29,7 +29,7 @@
   --text-0: #f3f1ea;
   --text-1: #c9c6bd;
   --text-2: #9b988f;
-  --text-3: #6e6c66;
+  --text-3: #96938b;   /* tertiary: >=4.5:1 on --bg-1 and --bg-2 */
 
   /* Interaction — cream. The one primary action is a cream fill (Claude ivory); selection is a lighter grey. */
   --accent: #f0eee6;
@@ -81,6 +81,16 @@
   --cls-confidential: #0033a0;
   --cls-secret: #c8102e;
   --cls-topsecret: #ff8c00;
+
+  /* Type scale: six sizes, one line height each. Every font-size in the app is one of these. */
+  --fs-micro: 11px;    --lh-micro: 16px;   /* labels, chips, banners, dense mono timestamps (minimum for operators) */
+  --fs-caption: 12px;  --lh-caption: 16px; /* secondary text, table meta */
+  --fs-body: 13px;     --lh-body: 20px;    /* default UI, tables, controls */
+  --fs-body-lg: 14px;  --lh-body-lg: 22px; /* forms, reading text */
+  --fs-lead: 16px;     --lh-lead: 24px;    /* section and card titles */
+  --fs-title: 20px;    --lh-title: 28px;   /* page titles */
+  --fs-display: 28px;  --lh-display: 32px; /* metric values */
+  --fs-hero: 40px;     --lh-hero: 44px;    /* sign-in and brand pages only */
 
   --font-sans: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;

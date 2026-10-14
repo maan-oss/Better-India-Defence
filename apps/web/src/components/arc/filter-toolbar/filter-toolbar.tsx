@@ -337,7 +337,8 @@ export function FilterMenu({ fields, onSelect, active = [], label = "Add filter"
   }
   function chooseValue(row: Row, keyboard: boolean) {
     if (!field) return;
-    onSelect({ id: field.id, label: field.label, value: row.label }, field);
+    // Strata fix: the chip carries the option's value (its key), not its display label, so a filter queries the right thing.
+    onSelect({ id: field.id, label: field.label, value: row.key }, field);
     closeMenu(keyboard ? "keyboard" : "pointer");
   }
 

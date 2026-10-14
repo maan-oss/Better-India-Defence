@@ -61,7 +61,7 @@ export function Admin() {
           <div className="section">
             <div className="row admin-users-h">
               <h4 style={{ margin: 0 }}>Users</h4>
-              <span className="muted" style={{ fontSize: 12 }}>
+              <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
                 {(users.data ?? []).filter((u) => !u.disabled).length} active · {online.length} signed in now
               </span>
               <span className="spacer" />
@@ -80,7 +80,7 @@ export function Admin() {
                       <div className="ellipsis" style={{ fontWeight: 500 }}>
                         {u.displayName} {isMe && <span className="muted">(you)</span>}
                       </div>
-                      <div className="mono dim" style={{ fontSize: 11.5 }}>
+                      <div className="mono dim" style={{ fontSize: 'var(--fs-caption)' }}>
                         {u.username}
                       </div>
                     </div>
@@ -116,7 +116,7 @@ export function Admin() {
                         confirmLabel="Disable"
                         pendingLabel="Disabling"
                         doneLabel="Disabled"
-                        tone="danger"
+                        tone="neutral"
                         onConfirm={() => update(u, { disabled: true }, `${u.displayName} can no longer sign in`)}
                       />
                     )}
@@ -146,7 +146,7 @@ export function Admin() {
               </Alert>
             )}
             <div className="row">
-              <span className="muted" style={{ fontSize: 12 }}>
+              <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
                 At least 12 characters. The user should change it at first sign-in.
               </span>
               <span className="spacer" />
@@ -186,7 +186,7 @@ export function Admin() {
             <h4>Effective configuration</h4>
             {config.error && <ErrorNote error={config.error} />}
             {config.data && <JsonViewer data={config.data.effective} rootName="config" defaultExpandDepth={1} maxHeight={420} label="Effective configuration" />}
-            <div className="muted" style={{ marginTop: 8, fontSize: 11.5 }}>
+            <div className="muted" style={{ marginTop: 8, fontSize: 'var(--fs-caption)' }}>
               Secrets (service token, session secret, API keys, storage key) are environment-only and never displayed.
             </div>
           </div>
@@ -201,13 +201,13 @@ export function Admin() {
               columns={[
                 { key: 'name', label: 'Integration', sortable: true },
                 { key: 'adapter', label: 'Adapter', sortable: true, render: (v) => <span className="mono dim">{String(v)}</span> },
-                { key: 'status', label: 'Status', sortable: true, render: (v) => <span className="muted" style={{ whiteSpace: 'normal', fontSize: 12.5 }}>{String(v)}</span> },
+                { key: 'status', label: 'Status', sortable: true, render: (v) => <span className="muted" style={{ whiteSpace: 'normal', fontSize: 'var(--fs-body)' }}>{String(v)}</span> },
               ]}
             />
           </div>
           <div className="section">
             <h4>Connect equipment</h4>
-            <p className="muted" style={{ fontSize: 12.5, margin: '0 0 10px' }}>
+            <p className="muted" style={{ fontSize: 'var(--fs-body)', margin: '0 0 10px' }}>
               Anything that can send HTTPS can be a sensor: register it in Site configuration, then post <span className="mono">strata.ingest/v1</span> envelopes with the service token. Re-sent message ids are de-duplicated, so retries are safe. Formats and adapters: docs/INTEROP.md.
             </p>
             <CodeBlock filename="health-report.sh" language="bash" code={ingestExample(window.location.origin, FACILITY.sensors[0]?.id ?? 'C01')} />
@@ -250,7 +250,7 @@ function ResetPassword({ user, onClose, onSave }: { user: UserRecord; onClose: (
   return (
     <Modal title={`Reset password · ${user.username}`} onClose={onClose}>
       <div className="col" style={{ gap: 14 }}>
-        <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+        <p className="muted" style={{ margin: 0, fontSize: 'var(--fs-body)' }}>
           Give the new password to {user.displayName} in person or by a separate channel. Their open sessions stay signed in until they expire.
         </p>
         <PasswordStrength label="New password" value={pw} onValueChange={(v, st) => (setPw(v), setLevel(st.level))} />

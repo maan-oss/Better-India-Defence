@@ -4,6 +4,12 @@ import type { LiveHub } from '../live/hub.ts';
 
 type Status = SensorStatusRecord['status'];
 
+/** Longest silence a sensor may have before it reads as SILENT, in ms. */
+function silenceLimitMs(def: SensorDef): number {
+  const s = def.kind === 'external' && def.silenceS !== undefined ? def.silenceS : SILENCE_S[def.kind];
+  return Number.isFinite(s) ? s * 1000 : Infinity;
+}
+
 /** Expected maximum silence per sensor kind before the platform declares it SILENT. */
 const SILENCE_S: Record<SensorDef['kind'], number> = {
   camera: 40,
@@ -60,6 +66,18 @@ export class SensorMonitor {
     return s;
   }
 
+  /**
+   * Status as of wall-clock `now`. The stored status only changes when the pipeline advances, so when the whole feed stops
+   * it would keep saying 'ok' for hours. A sensor whose last traffic is older than its silence limit reads as silent here.
+   */
+  effective(sensorId: string, now = Date.now()): SensorStatusRecord | null {
+    const s = this.state.get(sensorId);
+    const def = FACILITY.sensors.find((d) => d.id === sensorId);
+    if (!s || !def) return s ? { ...s } : null;
+    if (s.lastSeen === null || s.status === 'silent' || now - s.lastSeen <= silenceLimitMs(def)) return { ...s };
+    return { ...s, status: 'silent', message: `no traffic for ${Math.round((now - s.lastSeen) / 1000)} s` };
+  }
+
   all(): SensorStatusRecord[] {
     return [...this.state.values()];
   }
@@ -96,7 +114,7 @@ export class SensorMonitor {
     const out: StatusTransition[] = [];
     for (const def of FACILITY.sensors) {
       const s = this.ensure(def.id);
-      const limit = (def.kind === 'external' && def.silenceS !== undefined ? def.silenceS : SILENCE_S[def.kind]) * 1000;
+      const limit = silenceLimitMs(def);
       if (!Number.isFinite(limit) || s.lastSeen === null) continue;
       if (s.status !== 'silent' && now - s.lastSeen > limit) {
         out.push({ sensorId: def.id, t: s.lastSeen + limit, from: s.status, to: 'silent', message: `no traffic for ${Math.round((now - s.lastSeen) / 1000)} s` });

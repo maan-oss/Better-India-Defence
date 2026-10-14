@@ -114,7 +114,7 @@ export function MediaViewer({
                 <g key={i}>
                   <rect x={d.box.x} y={d.box.y} width={d.box.w} height={d.box.h} fill="none" stroke={c} strokeWidth={sw} strokeDasharray={d.kind === 'face' && d.quality?.grade === 'UNUSABLE' ? `${sw * 3} ${sw * 2}` : undefined} />
                   {(d.box.w > W / 40 || d.kind === 'face') && (
-                    <text x={d.box.x} y={Math.max(10, d.box.y - sw * 2)} fill={c} fontSize={Math.max(11, W / 110)} fontFamily="JetBrains Mono Variable, monospace">
+                    <text x={d.box.x} y={Math.max(10, d.box.y - sw * 2)} fill={c} fontSize={Math.max(11, W / 110)} fontFamily="Geist Mono Variable, monospace">
                       {d.kind === 'face' ? `face ${d.quality?.grade ?? ''}` : `${d.label} ${Math.round(d.score * 100)}`}
                     </text>
                   )}

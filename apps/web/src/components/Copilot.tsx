@@ -117,7 +117,7 @@ export function Copilot() {
     <section className="copilot glass" aria-label="Copilot">
       <div className="panel-h">
         <h3>Copilot</h3>
-        <span className="dim" style={{ fontSize: 11 }}>
+        <span className="dim" style={{ fontSize: 'var(--fs-micro)' }}>
           {status ? (status.configured ? `routing: ${status.model} · facts: database` : 'deterministic · no LLM configured') : ''}
         </span>
         <div className="spacer" />
@@ -128,7 +128,7 @@ export function Copilot() {
       <div className="copilot-log" ref={logRef}>
         {turns.length === 0 && (
           <div className="col">
-            <div className="muted" style={{ fontSize: 12 }}>
+            <div className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
               Answers come only from recorded observations, tracks, changes and alerts — with evidence. If the record cannot support an answer, it says so.
             </div>
             <div className="cp-suggest">
@@ -154,7 +154,7 @@ export function Copilot() {
               <div className={`cp-a ${t.a.insufficient ? 'insufficient' : ''}`}>
                 <div style={{ whiteSpace: 'pre-wrap' }}>{t.a.answer}</div>
                 {t.a.insufficient && (
-                  <div className="muted" style={{ marginTop: 4, fontSize: 11.5 }}>
+                  <div className="muted" style={{ marginTop: 4, fontSize: 'var(--fs-caption)' }}>
                     Insufficient evidence: {t.a.insufficient}
                   </div>
                 )}
@@ -187,11 +187,11 @@ export function Copilot() {
                   </div>
                 )}
                 {t.applied.length > 0 && (
-                  <div className="dim" style={{ fontSize: 11, marginTop: 6 }}>
+                  <div className="dim" style={{ fontSize: 'var(--fs-micro)', marginTop: 6 }}>
                     Applied: {t.applied.join(' · ')}
                   </div>
                 )}
-                <div className="row dim" style={{ fontSize: 10.5, marginTop: 6 }}>
+                <div className="row dim" style={{ fontSize: 'var(--fs-micro)', marginTop: 6 }}>
                   <StateChip state="RECONSTRUCTED" label={`intent ${t.a.intent}`} /> <span>routed by {t.a.routedBy}</span>
                 </div>
               </div>

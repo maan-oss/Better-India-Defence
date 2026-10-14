@@ -53,7 +53,7 @@ function ArrivalDrills({ taskId }: { taskId: string }) {
     <div className="field-drills">
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <span className="upper dim">Arrival drills</span>
-        <span className="dim" style={{ fontSize: 11 }}>{items.filter((i) => i.done).length} of {items.length} · on this device</span>
+        <span className="dim" style={{ fontSize: 'var(--fs-micro)' }}>{items.filter((i) => i.done).length} of {items.length} · on this device</span>
       </div>
       <InteractiveChecklist className="w-full" items={items} onChange={change} resetWhenDone={false} maxItems={7} addLabel="Add a drill" />
     </div>
@@ -177,7 +177,7 @@ export function Field() {
                   <b className="mono">{task.etaS !== null ? `${Math.max(1, Math.round(task.etaS / 60))} min` : '—'}</b>
                 </div>
               </div>
-              {task.locationText && task.mgrs && <div className="muted" style={{ fontSize: 12.5, marginTop: 6 }}>{task.locationText}</div>}
+              {task.locationText && task.mgrs && <div className="muted" style={{ fontSize: 'var(--fs-body)', marginTop: 6 }}>{task.locationText}</div>}
               {can('ops.dispatch') && NEXT[task.status] && (
                 <>
                   {NEXT[task.status]!.status === 'COMPLETE' && (
@@ -222,11 +222,23 @@ export function Field() {
                     trailing={can('alerts.acknowledge') && a.status === 'open' ? [{ label: 'Acknowledge', icon: <Bell size={18} />, tone: 'neutral', keepRow: true, onSelect: () => void ack(a) }] : undefined}
                   >
                     <NearAlert a={a} from={team.position} />
+                    <div className="fal-actions">
+                      {can('ops.log') && (
+                        <Button size="sm" variant="secondary" onClick={() => setReport(a.position ? grid(a.position) : true)}>
+                          Report
+                        </Button>
+                      )}
+                      {can('alerts.acknowledge') && a.status === 'open' && (
+                        <Button size="sm" variant="secondary" onClick={() => void ack(a)}>
+                          Acknowledge
+                        </Button>
+                      )}
+                    </div>
                   </SwipeActionsRow>
                 ))}
               </SwipeActions>
             )}
-            {near.length > 0 && <div className="dim" style={{ fontSize: 11.5, marginTop: 6 }}>Swipe right to report on an alert, left to acknowledge it.</div>}
+            {near.length > 0 && <div className="dim" style={{ fontSize: 'var(--fs-caption)', marginTop: 6 }}>Or swipe right to report on an alert, left to acknowledge it.</div>}
           </section>
 
           <div className="factions" id="field-report">
@@ -252,7 +264,7 @@ function NearAlert({ a, from }: { a: AlertRecord; from: Vec3 | null }) {
       <span className={`prio ${a.priority}`} />
       <div className="grow" style={{ minWidth: 0 }}>
         <div className="ellipsis">{a.title}</div>
-        <div className="mono dim" style={{ fontSize: 11 }}>
+        <div className="mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
           {new Date(a.t).toISOString().slice(11, 16)}Z{d !== null ? ` · ${Math.round(d)} m ${CARD[Math.round(b! / 45) % 8]}` : ''}
           {a.position ? ` · ${grid(a.position)}` : ''}
         </div>
@@ -283,7 +295,7 @@ function AssistButton({ teamId }: { teamId: string }) {
   return (
     <div className="col" style={{ gap: 4 }}>
       <HoldToConfirm className="field-assist" icon={<Siren size={18} />} label="Hold to request assistance" confirmedLabel="Assistance requested" tone="danger" duration={1500} onConfirm={send} confirmed={done} />
-      {sent && <span className="mono" style={{ fontSize: 11.5, color: 'var(--st-critical-text)' }}>{sent}</span>}
+      {sent && <span className="mono" style={{ fontSize: 'var(--fs-caption)', color: 'var(--st-critical-text)' }}>{sent}</span>}
     </div>
   );
 }
@@ -373,7 +385,7 @@ function LocalPicture({ centre, target }: { centre: Vec3 | null; target: { x: nu
         ctx.stroke();
       }
       ctx.fillStyle = C.text2;
-      ctx.font = '10px "JetBrains Mono Variable", monospace';
+      ctx.font = '10px "Geist Mono Variable", monospace';
       ctx.fillText('300 m', w / 2 + 3, h / 2 - 300 * k + 11);
       ctx.fillText('N', w / 2 - 3, 12);
       for (const v of vas) {

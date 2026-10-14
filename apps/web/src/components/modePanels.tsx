@@ -97,7 +97,7 @@ export function IncidentPanel({ id }: { id: string }) {
         <h2>
           {inc.code} — {inc.title}
         </h2>
-        <div className="muted mono" style={{ fontSize: 11.5 }}>
+        <div className="muted mono" style={{ fontSize: 'var(--fs-caption)' }}>
           {dateTime(inc.tStart)} → {hms(inc.tEnd)}Z · radius {Math.round(inc.radiusM)} m
         </div>
         <div className="row" style={{ marginTop: 8, flexWrap: 'wrap' }}>
@@ -222,7 +222,7 @@ export function DiffPanel() {
               { value: 'B', label: 'Show B' },
             ]}
           />
-          <span className="muted" style={{ fontSize: 11.5 }}>
+          <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
             World reflects the selected side.
           </span>
         </div>
@@ -299,12 +299,12 @@ function ImageryCompare({ before, after }: { before: { id: string; t: number; me
         <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${k}%`, width: 1, background: 'var(--text-0)' }} />
         <input type="range" min={0} max={100} value={k} onChange={(e) => setK(Number(e.target.value))} aria-label="Before/after split" />
       </div>
-      <div className="row muted mono" style={{ fontSize: 11 }}>
+      <div className="row muted mono" style={{ fontSize: 'var(--fs-micro)' }}>
         <span>◀ earlier {hms(before.t)}Z</span>
         <span className="spacer" />
         <span>later {hms(after.t)}Z ▶</span>
       </div>
-      <div className="dim" style={{ fontSize: 11 }}>
+      <div className="dim" style={{ fontSize: 'var(--fs-micro)' }}>
         Acquisition times shown. Double-click toggles 4× zoom. 4 m GSD — people are not resolvable.
       </div>
     </div>
@@ -336,7 +336,7 @@ export function CoveragePanel() {
       <div className="ledger">
         <div className="legend" style={{ padding: 0 }}>
           <div className="ramp" />
-          <div className="row mono dim" style={{ fontSize: 10.5 }}>
+          <div className="row mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
             <span>0%</span>
             <span className="spacer" />
             <span>support</span>
@@ -486,7 +486,7 @@ export function Overview() {
               ]}
             />
             <span className="spacer" />
-            <span className="muted" style={{ fontSize: 11 }}>
+            <span className="muted" style={{ fontSize: 'var(--fs-micro)' }}>
               {openAlerts.filter((a) => a.status === 'open').length} awaiting acknowledgement
             </span>
           </div>
@@ -500,7 +500,7 @@ export function Overview() {
                 <Prio p={a.priority} />
                 <div className="grow" style={{ minWidth: 0 }}>
                   <div className="ellipsis">{a.title}</div>
-                  <div className="muted mono" style={{ fontSize: 10.5 }}>
+                  <div className="muted mono" style={{ fontSize: 'var(--fs-micro)' }}>
                     {hms(a.t)}Z · {ago(a.t)} · {a.rule.replace(/_/g, ' ').toLowerCase()}
                     {a.status !== 'open' && <span className={`al-status ${a.status}`}>{a.status}</span>}
                   </div>
@@ -550,7 +550,7 @@ export function Overview() {
               <div className="list-row" style={{ height: 48 }} onClick={() => (select({ kind: 'change', id: c.id }), flyTo({ x: c.x, y: c.y, z: c.z }, Math.max(150, c.extent_m * 6)))}>
                 <div className="grow" style={{ minWidth: 0 }}>
                   <div className="ellipsis">{c.title}</div>
-                  <div className="muted mono" style={{ fontSize: 11 }}>
+                  <div className="muted mono" style={{ fontSize: 'var(--fs-micro)' }}>
                     {hms(c.t)}Z · {c.detector}
                   </div>
                 </div>

@@ -109,8 +109,10 @@ readiness changes, evidence exports) goes to an append-only, hash-chained audit 
   scale bar, and the grid reference and elevation under the cursor.
 - **Night display.** The sun / moon switch in the top bar, or user menu → *Night display (red light)*:
   the whole console, imagery and 3-D view in monochrome red to preserve dark adaptation.
-- **Demonstration mode** is stated in a bar under the top bar on every screen (dismissible per browser)
-  and by the *Demo* chip, which stays.
+- **Simulated data**: while the server runs in demo mode, a *Simulated data* marker sits beside the page
+  title on every screen. Hover it for what that means.
+- **Sensor status** is derived at read time: a sensor whose last traffic is older than its silence limit reads
+  as silent, whatever it reported last, so a stopped feed can never look healthy.
 - **Alert toasts.** New critical and high alerts appear top-right with *Show on map* and *Acknowledge*;
   critical ones stay until handled. If the live connection drops, a red banner says the picture is not
   updating.

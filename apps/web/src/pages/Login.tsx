@@ -48,7 +48,7 @@ export function Login() {
     try {
       await login(username, password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'sign-in failed');
+      setError(err instanceof Error ? err.message : "sign-in failed");
     } finally {
       setBusy(false);
     }
@@ -109,7 +109,7 @@ export function Login() {
             {error && (
               <div style={{ marginTop: 12 }}>
                 <Alert tone="danger" title="Sign-in failed">
-                  {error}
+                  {error.charAt(0).toUpperCase() + error.slice(1)}
                 </Alert>
               </div>
             )}
@@ -122,7 +122,7 @@ export function Login() {
               {banner?.notice ?? 'This system is for authorised use only. Activity is monitored and recorded.'} By signing in you acknowledge this notice.
             </div>
             {demo?.password && (
-              <div className="note" style={{ marginTop: 14, fontSize: 11.5 }}>
+              <div className="note" style={{ marginTop: 14, fontSize: 'var(--fs-caption)' }}>
                 Demonstration build — accounts <span className="mono">{demo.users.join(' · ')}</span>, password <span className="mono">{demo.password}</span>.
               </div>
             )}

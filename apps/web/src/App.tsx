@@ -17,6 +17,7 @@ import { Shell } from './components/Shell';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Mark } from './brand/Mark';
 import { BootMark, BootScreen, Empty, NotFound } from './brand/Boot';
+import { Gate } from './components/Gate';
 
 const Operations = lazy(() => import('./pages/Operations').then((m) => ({ default: m.Operations })));
 const Incidents = lazy(() => import('./pages/Incidents').then((m) => ({ default: m.Incidents })));
@@ -123,11 +124,11 @@ function Authenticated() {
             <Route path="/cameras/:id/stream" element={<DeviceCamera />} />
             <Route path="/command" element={<Command />} />
             <Route path="/field" element={<Field />} />
-            <Route path="/site" element={<SiteSetup />} />
+            <Route path="/site" element={<Gate need="admin.config"><SiteSetup /></Gate>} />
             <Route path="/simulation" element={<SimulationLab />} />
             <Route path="/system" element={<SystemHealth />} />
-            <Route path="/audit" element={<Audit />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/audit" element={<Gate need="audit.view"><Audit /></Gate>} />
+            <Route path="/admin" element={<Gate need="admin.users"><Admin /></Gate>} />
             <Route path="/brand" element={<Brand />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

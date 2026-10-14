@@ -69,15 +69,15 @@ export function Incidents() {
               <div className={`inc-sev s-${i.status}`} />
               <div className="grow" style={{ minWidth: 0 }}>
                 <div className="row" style={{ gap: 8 }}>
-                  <span className="mono" style={{ color: 'var(--accent-2)', fontSize: 11.5 }}>
+                  <span className="mono" style={{ color: 'var(--accent-2)', fontSize: 'var(--fs-caption)' }}>
                     {i.code}
                   </span>
-                  <span className={`chip ${i.status === 'open' ? 'red' : i.status === 'closed' ? '' : 'amber'}`}>{i.status}</span>
+                  <span className={`chip ${i.status === 'open' ? 'amber' : ''}`}>{i.status}</span>
                 </div>
-                <div className="ellipsis" style={{ fontSize: 13.5, margin: '3px 0 2px' }}>
+                <div className="ellipsis" style={{ fontSize: 'var(--fs-body-lg)', margin: '3px 0 2px' }}>
                   {i.title}
                 </div>
-                <div className="muted mono" style={{ fontSize: 10.5 }}>
+                <div className="muted mono" style={{ fontSize: 'var(--fs-micro)' }}>
                   {dateTime(i.tStart)} · {dur(i.tEnd - i.tStart)} · {i.alertIds.length} alert(s)
                 </div>
               </div>
@@ -149,7 +149,7 @@ function IncidentFile({ id }: { id: string }) {
         ) : (
           <h2 className="inc-title">{inc.title}</h2>
         )}
-        <div className="mono muted" style={{ fontSize: 12 }}>
+        <div className="mono muted" style={{ fontSize: 'var(--fs-caption)' }}>
           {dateTime(inc.tStart)} → {hms(inc.tEnd)}Z · centre E {inc.center.x.toFixed(0)} N {inc.center.y.toFixed(0)} · radius {Math.round(inc.radiusM)} m
         </div>
         <div className="inc-actions">
@@ -261,7 +261,7 @@ function IncidentFile({ id }: { id: string }) {
         </TabsContent>
         <TabsContent value="notes">
           <div className="section">
-            <p className="muted" style={{ margin: '0 0 12px', fontSize: 12.5 }}>
+            <p className="muted" style={{ margin: '0 0 12px', fontSize: 'var(--fs-body)' }}>
               Notes are entries in the duty log, referenced to {inc.code}. Like the log, they cannot be edited or deleted; record a correction instead.
             </p>
             {notes.error && <ErrorNote error={notes.error} />}
@@ -273,7 +273,11 @@ function IncidentFile({ id }: { id: string }) {
               placeholder={can('ops.log') ? 'Add a note to the record' : 'Operator rights are needed to add notes'}
               labels={{ empty: 'No notes yet.', send: 'Record', commentCount: (n) => `${n} note${n === 1 ? '' : 's'}` }}
               onCommentsChange={(_, ev) => {
-                if (ev.type === 'reply' && can('ops.log')) void notes.add(ev.comment.body).catch((e: unknown) => toast({ type: 'error', title: 'Note not recorded', description: e instanceof Error ? e.message : 'failed' }));
+                if (ev.type === 'reply' && can('ops.log'))
+                  void notes
+                    .add(ev.comment.body)
+                    .then(() => toast({ type: 'success', title: 'Note recorded', description: `${inc.code} · append-only` }))
+                    .catch((e: unknown) => toast({ type: 'error', title: 'Note not recorded', description: e instanceof Error ? e.message : 'failed' }));
               }}
             />
           </div>
@@ -360,7 +364,7 @@ function CreateIncident({ onDone }: { onDone: (id: string | null) => void }) {
         <NumberField label="North" value={y} onValueChange={setY} min={-5000} max={5000} step={10} largeStep={100} suffix=" m" />
         <NumberField label="Radius" value={r} onValueChange={setR} min={20} max={3000} step={10} largeStep={100} suffix=" m" />
       </div>
-      <div className="muted" style={{ fontSize: 12 }}>
+      <div className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
         Faster from the map: in Operations, right-click a location and choose “Open incident here”.
       </div>
       {err && <div className="note warn">{err}</div>}
@@ -406,7 +410,7 @@ function Chronology({ data }: { data: IncidentPackage }) {
           </TimelineItem>
         ))}
       </SuiTimeline>
-      {ev.length > shown.length && <div className="dim" style={{ fontSize: 12, marginTop: 8 }}>{ev.length - shown.length} more events in the tables below.</div>}
+      {ev.length > shown.length && <div className="dim" style={{ fontSize: 'var(--fs-caption)', marginTop: 8 }}>{ev.length - shown.length} more events in the tables below.</div>}
     </div>
   );
 }

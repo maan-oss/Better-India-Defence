@@ -66,7 +66,7 @@ export function TacticalScope() {
       ctx.arc(cx, cy, rad, 0, Math.PI * 2);
       ctx.fill();
       const step = niceStep(R / 4);
-      ctx.font = '10px "JetBrains Mono Variable", monospace';
+      ctx.font = '10px "Geist Mono Variable", monospace';
       for (let r = step; r <= R + 1; r += step) {
         ctx.strokeStyle = alpha(C.grid, 0.14);
         ctx.lineWidth = 1;
@@ -142,7 +142,7 @@ export function TacticalScope() {
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.fillStyle = v.priority === 1 ? text1 : text2;
-        ctx.font = '9.5px "Inter Variable", sans-serif';
+        ctx.font = '9.5px "Geist Variable", sans-serif';
         ctx.fillText(v.name.toUpperCase(), x + Math.max(4, v.radiusM * k) + 3, y + 3);
       }
       // Threat vectors.
@@ -202,7 +202,7 @@ export function TacticalScope() {
         ctx.globalAlpha = 1;
         if (!tr.cooperative) {
           ctx.fillStyle = alpha(C.text0, 0.8);
-          ctx.font = '9.5px "JetBrains Mono Variable", monospace';
+          ctx.font = '9.5px "Geist Mono Variable", monospace';
           ctx.fillText(tr.id, x + s / 2 + 2, y + 3);
         }
         hitList.push({ x, y, tr });

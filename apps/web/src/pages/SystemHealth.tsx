@@ -68,8 +68,8 @@ export function SystemHealth() {
         <Stat v={m.ingestLatencyMs.p95} unit=" ms" l="Ingest latency p95 (sent → received)" />
       </div>
       <div className="health-gauges">
-        <Gauge label="API memory" value={Math.min(100, (m.memoryMb / 4096) * 100)} detail={`${m.memoryMb} MB of 4 GB`} thresholds={[{ from: 0, tone: 'success', label: 'Normal' }, { from: 50, tone: 'warning', label: 'High' }, { from: 85, tone: 'danger', label: 'Critical' }]} />
-        <Gauge label="Sensors reporting" value={h.sensors.length ? (h.sensors.filter((x) => x.status === 'ok' || x.status === 'degraded').length / h.sensors.length) * 100 : 0} detail={h.sensors.length ? `${h.sensors.filter((x) => x.status === 'ok' || x.status === 'degraded').length} of ${h.sensors.length}` : 'none configured'} thresholds={[{ from: 0, tone: 'danger', label: 'Blind' }, { from: 50, tone: 'warning', label: 'Partial' }, { from: 90, tone: 'success', label: 'Covered' }]} />
+        <Gauge label="API memory" value={Math.min(100, (m.memoryMb / 4096) * 100)} detail={`${m.memoryMb} MB of 4 GB`} thresholds={[{ from: 0, tone: 'accent', label: 'Normal' }, { from: 50, tone: 'warning', label: 'High' }, { from: 85, tone: 'danger', label: 'Critical' }]} />
+        <Gauge label="Sensors reporting" value={h.sensors.length ? (h.sensors.filter((x) => x.status === 'ok' || x.status === 'degraded').length / h.sensors.length) * 100 : 0} detail={h.sensors.length ? `${h.sensors.filter((x) => x.status === 'ok' || x.status === 'degraded').length} of ${h.sensors.length}` : 'none configured'} thresholds={[{ from: 0, tone: 'danger', label: 'Blind' }, { from: 50, tone: 'warning', label: 'Partial' }, { from: 90, tone: 'accent', label: 'Covered' }]} />
         <div className="health-mini">
           <Stat v={m.eventLoopLagMs.p99} unit=" ms" l="Event-loop lag p99" spark={hist.lag} warn={m.eventLoopLagMs.p99 > 200} />
           <Stat v={m.rejectsPerSecond} unit="/s" l="Rejected messages" warn={m.rejectsPerSecond > 0} />
@@ -109,7 +109,7 @@ export function SystemHealth() {
                 data={hist.ingest.map((v, i) => ({ key: String(i), label: i === hist.ingest.length - 1 ? 'now' : `−${(hist.ingest.length - 1 - i) * 3} s`, values: { ingest: v, rejects: hist.rejects[i] ?? 0 } }))}
               />
             ) : (
-              <div className="muted" style={{ fontSize: 12 }}>
+              <div className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
                 Collecting…
               </div>
             )}
@@ -143,7 +143,7 @@ export function SystemHealth() {
                     { id: 'other', label: 'Everything else on the volume', value: Math.max(0, h.storage.disk.totalBytes - h.storage.disk.freeBytes - h.storage.mediaBytes) / 1e9 },
                   ]}
                 />
-                <div className="dim" style={{ fontSize: 11.5, marginTop: 6 }}>
+                <div className="dim" style={{ fontSize: 'var(--fs-caption)', marginTop: 6 }}>
                   {h.storage.disk.freeBytes / h.storage.disk.totalBytes < 0.15 ? 'Under 15 % free: recording continues, but plan retention or add storage now.' : 'Measured on the volume that holds the data directory.'}
                 </div>
               </div>
@@ -207,7 +207,7 @@ export function SystemHealth() {
             <h4>Sensor ingestion state</h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(92px, 1fr))', gap: 4 }}>
               {h.sensors.map((s) => (
-                <div key={s.sensorId} className="row mono" style={{ fontSize: 11.5 }} title={`${s.status} · ${s.lastSeen ? hms(s.lastSeen) : 'never'}`}>
+                <div key={s.sensorId} className="row mono" style={{ fontSize: 'var(--fs-caption)' }} title={`${s.status} · ${s.lastSeen ? hms(s.lastSeen) : 'never'}`}>
                   <span className={`status-dot ${s.status}`} /> {s.sensorId}
                 </div>
               ))}

@@ -10,7 +10,7 @@ import { useTime } from '../state/time';
 import { useSession } from '../state/session';
 import { ago, hms } from '../lib/format';
 import { Empty } from '../brand/Boot';
-import { ButtonGroup, BrushChart, Button, JsonViewer, MetricCard, SearchField, SortableDataTable, Timeline as ArcTimeline, WaffleChart } from '../components/kit';
+import { ButtonGroup, BrushChart, Button, JsonViewer, MetricCard, SearchField, SortableDataTable, Timeline as ArcTimeline } from '../components/kit';
 
 interface SensorDetail {
   definition: SensorListItem['definition'];
@@ -62,23 +62,35 @@ export function Sensors() {
       {total > 0 && (
         <div className="sn-summary metric-strip">
           <MetricCard label="Registered" value={total} context="sensors in the site configuration" />
-          <MetricCard label="Reporting" value={counts.ok} context="traffic within expected cadence" />
           <MetricCard label="Degraded" value={counts.degraded} context="late, sparse or self-reported fault" />
           <MetricCard label="Silent" value={counts.down} context={counts.unreported ? `plus ${counts.unreported} never reported` : 'no traffic past the silence limit'} />
-          <div className="sn-waffle">
-            <WaffleChart
-              label="Sensor estate by status"
-              unit="sensors"
-              rows={4}
-              columns={20}
-              accentKey={null}
-              data={[
-                { key: 'ok', label: 'Reporting', value: counts.ok, color: 'var(--text-2)' },
-                { key: 'degraded', label: 'Degraded', value: counts.degraded, color: 'var(--st-caution)' },
-                { key: 'down', label: 'Silent', value: counts.down, color: 'var(--st-critical)' },
-                { key: 'unreported', label: 'Never reported', value: counts.unreported, color: 'var(--line-3)' },
-              ].filter((c) => c.value > 0)}
-            />
+          <div className="sn-states" role="img" aria-label={`Sensor estate: ${counts.ok} reporting, ${counts.degraded} degraded, ${counts.down} silent, ${counts.unreported} never reported`}>
+            <div className="sn-bar">
+              {[
+                { key: 'ok', label: 'Reporting', value: counts.ok, cls: 'ok' },
+                { key: 'degraded', label: 'Degraded', value: counts.degraded, cls: 'degraded' },
+                { key: 'down', label: 'Silent', value: counts.down, cls: 'down' },
+                { key: 'unreported', label: 'Never reported', value: counts.unreported, cls: 'unreported' },
+              ]
+                .filter((c) => c.value > 0)
+                .map((c) => (
+                  <span key={c.key} className={`sn-seg ${c.cls}`} style={{ flexGrow: c.value }} />
+                ))}
+            </div>
+            <ul className="sn-legend">
+              {[
+                { key: 'ok', label: 'Reporting', value: counts.ok, cls: 'ok' },
+                { key: 'degraded', label: 'Degraded', value: counts.degraded, cls: 'degraded' },
+                { key: 'down', label: 'Silent', value: counts.down, cls: 'down' },
+                { key: 'unreported', label: 'Never reported', value: counts.unreported, cls: 'unreported' },
+              ].map((c) => (
+                <li key={c.key}>
+                  <span className={`sn-key ${c.cls}`} aria-hidden="true" />
+                  <span className="sn-label">{c.label}</span>
+                  <span className="sn-count mono">{c.value}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}
@@ -114,7 +126,7 @@ export function Sensors() {
                     key: 'status',
                     label: 'Status',
                     sortable: true,
-                    width: 128,
+                    width: 112,
                     render: (v) => (
                       <span className="row" style={{ gap: 6 }}>
                         <span className={`status-dot ${v === 'unreported' ? 'silent' : String(v)}`} />
@@ -122,8 +134,8 @@ export function Sensors() {
                       </span>
                     ),
                   },
-                  { key: 'lastSeen', label: 'Last traffic', sortable: true, width: 110, render: (v) => <span className="mono muted">{v ? `${hms(Number(v))}Z` : '—'}</span> },
-                  { key: 'obs', label: 'Obs / 10 min', sortable: true, numeric: true, width: 104 },
+                  { key: 'lastSeen', label: 'Last traffic', sortable: true, width: 100, render: (v) => <span className="mono muted" style={{ whiteSpace: 'nowrap' }}>{v ? `${hms(Number(v))}Z` : '—'}</span> },
+                  { key: 'obs', label: 'Obs / 10 min', sortable: true, numeric: true, width: 84 },
                 ]}
               />
             </div>
@@ -158,7 +170,7 @@ function SensorDetailView({ id }: { id: string }) {
         <div className="upper muted">
           {d.kind} · segment {d.segment}
         </div>
-        <h2 style={{ fontWeight: 600, fontSize: 18, margin: '4px 0', letterSpacing: '-0.01em' }}>
+        <h2 style={{ fontWeight: 600, fontSize: 'var(--fs-title)', margin: '4px 0', letterSpacing: '-0.01em' }}>
           <span className="mono">{d.id}</span> <span className="muted">{d.name}</span>
         </h2>
         <div className="row">
@@ -180,7 +192,7 @@ function SensorDetailView({ id }: { id: string }) {
       {(d.kind === 'camera' || d.kind === 'drone') && <CameraFeed sensorId={d.id} t={t} live={useTime.getState().mode === 'live'} />}
       <div className="section">
         <h4>Traffic, last 60 minutes</h4>
-        <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+        <div className="muted" style={{ fontSize: 'var(--fs-caption)', marginBottom: 8 }}>
           {gaps === 0 ? 'Messages arrived in every minute.' : gaps === 60 ? 'No messages in the last hour.' : `${gaps} of 60 minutes without a message.`} Drag the strip below to look closer.
         </div>
         <BrushChart data={traffic} label={`Messages per minute from ${d.id}`} unit="msg" minSpan={5 * 60_000} height={150} overviewHeight={36} formatDate={hhmm} emptyLabel="No traffic" />
@@ -208,7 +220,7 @@ function SensorDetailView({ id }: { id: string }) {
         <h4>Recent observations</h4>
         {data.recent.length === 0 && <div className="muted">None in the retention window.</div>}
         {data.recent.slice(0, 30).map((o) => (
-          <div key={o.id} className="row" style={{ fontSize: 12, padding: '3px 0' }}>
+          <div key={o.id} className="row" style={{ fontSize: 'var(--fs-caption)', padding: '3px 0' }}>
             <button className="obs-link" onClick={() => setObs(o.id)}>
               {hms(o.t)}Z
             </button>
@@ -265,7 +277,7 @@ function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: stri
     <div className="sensor-map reveal">
       <div className="section">
         <h4>Sensor estate</h4>
-        <div className="muted" style={{ fontSize: 12 }}>
+        <div className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
           {placed.length} positioned sensors. Select one for diagnostics; feeds without a fixed position (GPS gateways, interop, satellite) are listed on the left.
         </div>
       </div>

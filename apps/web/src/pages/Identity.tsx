@@ -85,7 +85,7 @@ function Review({ faceId }: { faceId: string | null }) {
                 <div className="ellipsis">
                   {ev.candidates[0]?.name ?? '—'} <span className="mono muted">{ev.bestScore?.toFixed(2)}</span>
                 </div>
-                <div className="mono dim" style={{ fontSize: 10.5 }}>
+                <div className="mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
                   {ev.sourceId} · {dateTime(ev.t)}
                 </div>
               </div>
@@ -147,7 +147,7 @@ function ReviewDetail({ id, onDone }: { id: string; onDone: () => void }) {
             <b>Sighting</b> — as captured
             <br />
             <QualityLine q={e.quality} />
-            {e.quality.reasons.length > 0 && <div className="muted" style={{ fontSize: 11 }}>{e.quality.reasons.join('; ')}</div>}
+            {e.quality.reasons.length > 0 && <div className="muted" style={{ fontSize: 'var(--fs-micro)' }}>{e.quality.reasons.join('; ')}</div>}
           </figcaption>
         </figure>
         <figure>
@@ -160,7 +160,7 @@ function ReviewDetail({ id, onDone }: { id: string; onDone: () => void }) {
             <figcaption>
               <span className={`lchip ${c.list}`}>{c.list}</span> <b>{c.name}</b>
               <ScoreBar score={c.score} strong={st.data!.strong} possible={st.data!.possible} />
-              <Link to={`/identity?tab=REGISTER&id=${c.identityId}`} className="muted" style={{ fontSize: 11 }}>
+              <Link to={`/identity?tab=REGISTER&id=${c.identityId}`} className="muted" style={{ fontSize: 'var(--fs-micro)' }}>
                 open register entry
               </Link>
             </figcaption>
@@ -212,7 +212,7 @@ function ScoreBar({ score, strong, possible }: { score: number; strong: number; 
         <b style={{ left: `${possible * 100}%`, opacity: 0.5 }} />
         <b style={{ left: `${strong * 100}%` }} />
       </div>
-      <span className="mono" style={{ fontSize: 11 }}>
+      <span className="mono" style={{ fontSize: 'var(--fs-micro)' }}>
         {score.toFixed(3)}
       </span>
     </div>
@@ -299,7 +299,7 @@ function Register({ selected, onSelect }: { selected: string | null; onSelect: (
                   {i.rank ? `${i.rank} ` : ''}
                   <b>{i.name}</b>
                 </div>
-                <div className="mono dim ellipsis" style={{ fontSize: 10.5 }}>
+                <div className="mono dim ellipsis" style={{ fontSize: 'var(--fs-micro)' }}>
                   {[i.serviceNo, i.unit ?? i.organisation, i.category].filter(Boolean).join(' · ')}
                 </div>
               </div>
@@ -592,7 +592,7 @@ function EnrolPhoto({ identityId, onDone }: { identityId: string; onDone: () => 
       <h4 className="upper muted" style={{ margin: '0 0 8px' }}>
         Enrol photo
       </h4>
-      <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+      <div className="muted" style={{ fontSize: 'var(--fs-caption)', marginBottom: 8 }}>
         Use a recent, frontal, well-lit photo (ID-card or gate-pass quality). Several photos (different days, with/without spectacles) improve recognition. Faces below FAIR quality are
         refused.
       </div>
@@ -604,7 +604,7 @@ function EnrolPhoto({ identityId, onDone }: { identityId: string; onDone: () => 
             <button key={f.index} disabled={!f.usable || f.quality.grade === 'POOR'} onClick={() => void enrol(f.index)} title={f.quality.reasons.join('; ')}>
               <img src={`data:image/jpeg;base64,${f.crop}`} alt={`Face ${f.index + 1}`} />
               <QualityLine q={f.quality} />
-              {f.matches[0] && f.matches[0].score > 0.32 && <span className="muted" style={{ fontSize: 11 }}>resembles {f.matches[0].name} ({f.matches[0].score.toFixed(2)})</span>}
+              {f.matches[0] && f.matches[0].score > 0.32 && <span className="muted" style={{ fontSize: 'var(--fs-micro)' }}>resembles {f.matches[0].name} ({f.matches[0].score.toFixed(2)})</span>}
             </button>
           ))}
         </div>
@@ -665,7 +665,7 @@ function Search({ faceId, identityId }: { faceId: string | null; identityId: str
               <div>
                 {ident.data?.photoTemplateId && <img src={`/api/identities/templates/${ident.data.photoTemplateId}/image`} alt="" style={{ width: 160, height: 160, objectFit: 'cover' }} />}
                 <div>{ident.data?.name ?? probe.id}</div>
-                <div className="muted" style={{ fontSize: 11 }}>
+                <div className="muted" style={{ fontSize: 'var(--fs-micro)' }}>
                   all enrolled photos
                 </div>
               </div>
@@ -711,7 +711,7 @@ function Search({ faceId, identityId }: { faceId: string | null; identityId: str
             <div className="fgrid">
               {res.results.map((ev) => (
                 <div key={ev.id} className="col" style={{ gap: 2 }}>
-                  <span className="mono" style={{ fontSize: 11, color: (ev.score ?? 0) >= res.strong ? 'var(--text-0)' : 'var(--text-2)' }}>
+                  <span className="mono" style={{ fontSize: 'var(--fs-micro)', color: (ev.score ?? 0) >= res.strong ? 'var(--text-0)' : 'var(--text-2)' }}>
                     similarity {ev.score?.toFixed(3)} {(ev.score ?? 0) >= res.strong ? '· strong' : '· resemblance'}
                   </span>
                   <FaceCard ev={ev} />
@@ -751,7 +751,7 @@ function Settings() {
         <div className="panel id-settings">
           <div className="panel-h">
             <h3>Decision thresholds</h3>
-            <span className="muted" style={{ fontSize: 12 }}>
+            <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
               cosine similarity
             </span>
           </div>
@@ -809,13 +809,13 @@ function Settings() {
                 <tr key={m.key}>
                   <td>
                     {m.name}
-                    <div className="row mono dim" style={{ fontSize: 10, gap: 4 }}>
+                    <div className="row mono dim" style={{ fontSize: 'var(--fs-micro)', gap: 4 }}>
                       {m.sha256.slice(0, 16)}…
                       <CopyButton value={m.sha256} label="Copy SHA-256" iconOnly variant="plain" />
                     </div>
                   </td>
-                  <td style={{ fontSize: 12 }}>{m.purpose}</td>
-                  <td style={{ fontSize: 12 }}>{m.licence}</td>
+                  <td style={{ fontSize: 'var(--fs-caption)' }}>{m.purpose}</td>
+                  <td style={{ fontSize: 'var(--fs-caption)' }}>{m.licence}</td>
                   <td>{m.installed ? (m.verified ? 'verified · loaded' : 'installed') : <span className="err-inline">{m.error}</span>}</td>
                 </tr>
               ))}

@@ -103,7 +103,7 @@ export function registerOperations(app: FastifyInstance, p: Platform): void {
 
   app.get('/api/sensors', { preHandler: requirePerm('world.view') }, async () => {
     const rates = (await p.db.query<{ sensor_id: string; n: number }>(`SELECT sensor_id, count(*)::int AS n FROM observations WHERE t > $1 GROUP BY sensor_id`, [p.liveEdge() - 600_000])).rows;
-    return FACILITY.sensors.map((s) => ({ definition: s, status: p.sensors.get(s.id) ?? null, observationsLast10Min: rates.find((r) => r.sensor_id === s.id)?.n ?? 0, cameraCoverage: s.kind === 'camera' ? (p.coverage.visibility[s.id]?.length ?? 0) : null }));
+    return FACILITY.sensors.map((s) => ({ definition: s, status: p.sensors.effective(s.id) ?? null, observationsLast10Min: rates.find((r) => r.sensor_id === s.id)?.n ?? 0, cameraCoverage: s.kind === 'camera' ? (p.coverage.visibility[s.id]?.length ?? 0) : null }));
   });
 
   app.get('/api/sensors/:id', { preHandler: requirePerm('world.view') }, async (req, reply) => {
@@ -113,7 +113,7 @@ export function registerOperations(app: FastifyInstance, p: Platform): void {
     const events = (await p.db.query('SELECT t, status, previous, message FROM sensor_status_events WHERE sensor_id = $1 ORDER BY t DESC LIMIT 100', [id])).rows;
     const recent = (await p.db.query('SELECT id, t, kind, source_kind, state, quality FROM observations WHERE sensor_id = $1 ORDER BY t DESC LIMIT 50', [id])).rows;
     const hist = (await p.db.query<{ b: number; n: number }>(`SELECT floor((t - $2::bigint) / 60000)::int AS b, count(*)::int AS n FROM observations WHERE sensor_id = $1 AND t > $2::bigint GROUP BY b ORDER BY b`, [id, p.liveEdge() - 3600_000])).rows;
-    return { definition: def, status: p.sensors.get(id) ?? null, events, recent, perMinute: hist, coveragePatches: def.kind === 'camera' ? (p.coverage.visibility[id]?.length ?? 0) : null };
+    return { definition: def, status: p.sensors.effective(id) ?? null, events, recent, perMinute: hist, coveragePatches: def.kind === 'camera' ? (p.coverage.visibility[id]?.length ?? 0) : null };
   });
 
   app.get('/api/world/changes', { preHandler: requirePerm('world.view') }, async (req, reply) => {

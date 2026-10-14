@@ -105,6 +105,25 @@ Each colour family has one job.
 Keeping the interface to grey and cream is what lets blue mean *friendly*, red mean *act now* and violet mean
 *inferred* without ambiguity.
 
+## Type scale
+
+Six sizes, each with one line height, defined in `styles/tokens.css` (`--fs-*`, `--lh-*`). Every font size in
+the console is one of them; do not add a new size to fit one screen.
+
+| Token | Size / line | Use |
+|---|---|---|
+| `--fs-micro` | 11 / 16 | Labels, chips, banners, dense timestamps. The smallest size an operator reads. |
+| `--fs-caption` | 12 / 16 | Secondary text, table metadata |
+| `--fs-body` | 13 / 20 | Default UI, tables, controls |
+| `--fs-body-lg` | 14 / 22 | Forms and reading text |
+| `--fs-lead` | 16 / 24 | Section and card titles |
+| `--fs-title` | 20 / 28 | Page titles |
+| `--fs-display` | 28 / 32 | Metric values |
+| `--fs-hero` | 40 / 44 | Sign-in and brand pages only |
+
+Tertiary text (`--text-3`) is at least 4.5:1 on the surfaces it sits on. Colour carries state only: normal
+state is neutral grey, and red, orange and amber are reserved for alarm priorities.
+
 ## Rules
 
 1. **Red only means "act now".** Critical alerts, a cut fence, a sensor silent during an incident, the

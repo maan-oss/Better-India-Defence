@@ -102,10 +102,10 @@ function ItemRow({ it, sel, live, onClick }: { it: EvidenceItem; sel: boolean; l
         <div className="ellipsis">
           <b>{it.title}</b>
         </div>
-        <div className="mono dim ellipsis" style={{ fontSize: 11 }}>
+        <div className="mono dim ellipsis" style={{ fontSize: 'var(--fs-micro)' }}>
           {it.kind === 'video' ? `video ${(it.durationS ?? 0).toFixed(0)} s` : 'image'} · {bytes(it.bytes)} · {it.sha256.slice(0, 10)}…
         </div>
-        <div className="row" style={{ gap: 6, fontSize: 11.5 }}>
+        <div className="row" style={{ gap: 6, fontSize: 'var(--fs-caption)' }}>
           <span className={`astat ${st.split(' ')[0]}`}>{st}</span>
           {a.maxPersonsInFrame !== undefined && <span className="muted">{a.maxPersonsInFrame} ppl</span>}
           {a.faceAppearances !== undefined && <span className="muted">{a.faceAppearances} faces</span>}
@@ -167,7 +167,7 @@ function Workspace({ id, version }: { id: string; version: number }) {
             <span className={`cls ${it.classification}`}>{it.classification}</span>
             <h2 className="ellipsis">{it.title}</h2>
           </div>
-          <div className="mono dim ellipsis" style={{ fontSize: 11 }} title="SHA-256 of the original as received">
+          <div className="mono dim ellipsis" style={{ fontSize: 'var(--fs-micro)' }} title="SHA-256 of the original as received">
             {it.id} · SHA-256 {it.sha256}
           </div>
         </div>
@@ -274,12 +274,12 @@ function AnalysisSummaryView({ it }: { it: EvidenceItem }) {
           <div className="l">authorised persons recognised</div>
         </div>
       </div>
-      <div className="muted" style={{ fontSize: 12 }}>
+      <div className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
         Detected classes: {counts.map(([k, v]) => `${k} ${v}`).join(' · ') || 'none'} · mode {a.mode}
         {a.sampleFps ? ` · ${a.sampleFps} frames/s sampled` : ''}. Detector: YOLOX-S (COCO). Small or distant objects may be missed in standard mode; use thorough re-analysis.
       </div>
       {a.stats && (
-        <div className="mono dim" style={{ fontSize: 11 }}>
+        <div className="mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
           noise σ {a.stats.noiseSigma} · sharpness {a.stats.sharpness} · mean luma {a.stats.meanLuma} · contrast {a.stats.contrast}
         </div>
       )}
@@ -396,7 +396,7 @@ function Products({ item, version }: { item: EvidenceItem; version: number }) {
               <div className="spacer" />
               <span className="mono dim">{p.frameT !== null ? `${p.frameT.toFixed(2)} s` : ''}</span>
             </div>
-            <div className="mono dim ellipsis" style={{ fontSize: 10.5 }}>
+            <div className="mono dim ellipsis" style={{ fontSize: 'var(--fs-micro)' }}>
               {p.sha256Out.slice(0, 24)}… · {p.createdBy}
             </div>
           </div>
@@ -547,11 +547,11 @@ function Custody({ id, item, onSaved }: { id: string; item: EvidenceItem; onSave
               <td>
                 <span className={`pstate small ${p.state}`}>{p.state}</span>
               </td>
-              <td style={{ fontSize: 11.5 }}>{p.steps.map((s) => (typeof s.op === 'string' ? s.op : s.op.op)).join(' → ')}</td>
-              <td className="mono" style={{ fontSize: 10.5, wordBreak: 'break-all' }}>
+              <td style={{ fontSize: 'var(--fs-caption)' }}>{p.steps.map((s) => (typeof s.op === 'string' ? s.op : s.op.op)).join(' → ')}</td>
+              <td className="mono" style={{ fontSize: 'var(--fs-micro)', wordBreak: 'break-all' }}>
                 {p.sha256Out}
               </td>
-              <td style={{ fontSize: 11.5 }}>
+              <td style={{ fontSize: 'var(--fs-caption)' }}>
                 {p.createdBy}
                 <br />
                 {dateTime(p.createdAt)}
@@ -578,14 +578,14 @@ function Custody({ id, item, onSaved }: { id: string; item: EvidenceItem; onSave
                 {c.actor} <span className="dim">({c.role})</span>
               </td>
               <td>{c.action.replace(/_/g, ' ')}</td>
-              <td className="mono" style={{ fontSize: 10.5, wordBreak: 'break-all' }}>
+              <td className="mono" style={{ fontSize: 'var(--fs-micro)', wordBreak: 'break-all' }}>
                 {JSON.stringify(c.detail)}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <p className="muted" style={{ fontSize: 11.5 }}>
+      <p className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
         Trail entries are taken from the append-only, hash-chained audit log (verify under Audit). Product hashes allow any copy to be checked against this record.
       </p>
     </div>

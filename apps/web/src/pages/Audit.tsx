@@ -27,6 +27,7 @@ export function Audit() {
   const [range, setRange] = useState<DateRange | null>(null);
   const [verify, setVerify] = useState<{ ok: boolean; checked: number; brokenAt: number | null } | null>(null);
   const [verifying, setVerifying] = useState(false);
+  const [verifyErr, setVerifyErr] = useState<string | null>(null);
   useEffect(() => {
     const h = setTimeout(() => setDebounced(q.trim()), 300);
     return () => clearTimeout(h);
@@ -54,14 +55,23 @@ export function Audit() {
           loading={verifying}
           onClick={() => {
             setVerifying(true);
+            setVerifyErr(null);
             void get<typeof verify>('/api/audit/verify')
               .then(setVerify)
+              .catch((e: unknown) => setVerifyErr(e instanceof Error ? e.message : 'Verification failed'))
               .finally(() => setVerifying(false));
           }}
         >
           Verify chain
         </Button>
       </div>
+      {verifyErr && (
+        <div className="audit-verify">
+          <Alert tone="danger" title="Chain not verified">
+            {verifyErr}
+          </Alert>
+        </div>
+      )}
       {verify && (
         <div className="audit-verify">
           <Alert tone={verify.ok ? 'success' : 'danger'} title={verify.ok ? 'Chain intact' : 'Chain broken'}>
@@ -90,7 +100,7 @@ export function Audit() {
             />
           </FilterToolbar>
         </div>
-        <span className="muted" style={{ fontSize: 12, marginLeft: 'auto', paddingBottom: 8 }}>
+        <span className="muted" style={{ fontSize: 'var(--fs-caption)', marginLeft: 'auto', paddingBottom: 8 }}>
           {loading ? 'Loading…' : `${rows.length}${rows.length === 500 ? '+' : ''} record${rows.length === 1 ? '' : 's'}`}
         </span>
       </div>
@@ -104,7 +114,7 @@ export function Audit() {
             itemName={{ one: 'record', other: 'records' }}
             emptyMessage="No record matches. Widen the dates or remove a filter."
             defaultSort={{ key: 'seq', direction: 'desc' }}
-            rows={shown.map((r) => ({ seq: r.seq, t: r.t, actor: r.actor, role: r.role, action: r.action, target: r.target ?? '', detail: JSON.stringify(r.detail), hash: r.hash }))}
+            rows={shown.map((r) => ({ seq: r.seq, t: r.t, actor: r.actor, role: r.role, action: r.action, target: r.target ?? '', detail: Object.keys(r.detail ?? {}).length ? JSON.stringify(r.detail) : "—", hash: r.hash }))}
             columns={[
               { key: 'seq', label: '#', sortable: true, width: 70, render: (v) => <button className="obs-link" onClick={() => setOpen(rows.find((x) => x.seq === Number(v)) ?? null)}>{String(v)}</button> },
               { key: 't', label: 'Time', sortable: true, width: 170, render: (v) => <span className="mono">{dateTime(Number(v))}</span> },
@@ -137,7 +147,7 @@ export function Audit() {
                 <dd className="mono">{open.ip ?? 'local'}</dd>
               </dl>
               <JsonViewer data={open.detail} rootName="detail" defaultExpandDepth={3} maxHeight={480} label="Record detail" />
-              <p className="dim" style={{ fontSize: 12, margin: 0 }}>
+              <p className="dim" style={{ fontSize: 'var(--fs-caption)', margin: 0 }}>
                 The hash covers this record and the previous record's hash, so changing any earlier record breaks every hash after it. Use Verify chain to check the whole log.
               </p>
             </div>

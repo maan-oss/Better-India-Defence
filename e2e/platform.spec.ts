@@ -57,7 +57,8 @@ test('incidents: the recorded drone incursion produced an incident with gathered
   await expect(rows.first()).toBeVisible();
   await rows.first().click();
   await expect(page).toHaveURL(/\/incidents\/.+/);
-  await expect(page.getByText(/evidence/i).first()).toBeVisible();
+  // The incident file keeps evidence behind its own tab; assert on that tab, not on any text that happens to match.
+  await expect(page.getByRole('tab', { name: /Evidence/ })).toBeVisible();
 });
 
 test('copilot answers from the record and cites evidence or states insufficiency', async ({ page }) => {

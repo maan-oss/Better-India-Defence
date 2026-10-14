@@ -53,7 +53,7 @@ export function FaceCard({ ev, onChanged, compact }: { ev: FaceEvent; onChanged?
         )}
         <QualityLine q={ev.quality} />
         {!compact && (
-          <div className="mono dim" style={{ fontSize: 11 }}>
+          <div className="mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
             {ev.sourceKind === 'evidence' ? (
               <Link to={`/forensics/${ev.sourceId}${ev.tMedia !== null ? `?t=${ev.tMedia}` : ''}`}>
                 {ev.sourceId}

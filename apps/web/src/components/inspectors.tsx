@@ -120,7 +120,7 @@ export function EvidenceInspector({ patchId }: { patchId: string }) {
             </>
           )}
         </dl>
-        <div className="muted" style={{ marginTop: 8, fontSize: 11.5 }}>
+        <div className="muted" style={{ marginTop: 8, fontSize: 'var(--fs-caption)' }}>
           {support.stateDetail}
         </div>
       </div>

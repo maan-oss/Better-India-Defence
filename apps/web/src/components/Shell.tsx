@@ -13,7 +13,7 @@ import { useUi } from '../state/ui';
 import { NAV, pageTitle } from '../lib/nav';
 import { Icon } from './Icons';
 import { Dialog, Tip } from './ui';
-import { AnnouncementBar, Breadcrumb, PopoverContent, ShortcutKeys, ShortcutList, ThemeSwitch, ToastStack, ToastStackProvider, UserMenu, type ShortcutListGroup } from './kit';
+import { Breadcrumb, PopoverContent, ShortcutKeys, ShortcutList, ThemeSwitch, ToastStack, ToastStackProvider, UserMenu, type ShortcutListGroup } from './kit';
 import { CommandBar } from './patterns/CommandBar';
 import { StatusIsland } from './patterns/StatusIsland';
 import { MacKeyboard } from './vendor/componentry/mac-keyboard';
@@ -41,7 +41,6 @@ export function Shell({ children }: { children: ReactNode }) {
         <Rail onShortcuts={() => setKeys(true)} />
         <TopBar onCommand={() => setCmd(true)} onShortcuts={() => setKeys(true)} />
         <main className="main">
-          <DemoNotice />
           <div className="route" key={area}>
             {children}
           </div>
@@ -54,35 +53,6 @@ export function Shell({ children }: { children: ReactNode }) {
         <ShortcutsDialog open={keys} onOpenChange={setKeys} />
       </div>
     </ToastStackProvider>
-  );
-}
-
-/**
- * Demonstration mode is said plainly on every screen until the operator dismisses it for this browser
- * (Arc announcement bar); the "Demo" chip in the top bar stays regardless.
- */
-function DemoNotice() {
-  const runMode = useWorld((s) => s.runMode);
-  if (runMode !== 'demo') return null;
-  return (
-    <div className="demo-notice">
-      <AnnouncementBar
-        id="strata-demo-notice-v1"
-        label="Demonstration mode"
-        tone="neutral"
-        autoPlay={false}
-        messages={[
-          {
-            id: 'demo',
-            message: (
-              <>
-                Demonstration site: sensors, tracks, people and faces are simulated, and nothing here is a real observation. Operational use starts the server with <code>STRATA_MODE=operational</code>.
-              </>
-            ),
-          },
-        ]}
-      />
-    </div>
   );
 }
 
@@ -147,8 +117,9 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
                       </span>
                     }
                   >
-                    <NavLink to={n.to} className={({ isActive }) => `rail-item ${isActive ? 'active' : ''}`} aria-label={n.label}>
+                    <NavLink to={n.to} className="rail-item" aria-label={n.label}>
                       <I />
+                      <span className="rail-label">{n.label}</span>
                       {badge > 0 && <span className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`}>{badge > 99 ? '99+' : badge}</span>}
                     </NavLink>
                   </Tip>
@@ -185,10 +156,18 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
   const title = pageTitle(loc.pathname);
   const area = NAV.flatMap((g) => g.items).find((i) => loc.pathname.startsWith(i.to));
   const rest = area ? loc.pathname.slice(area.to.length).split('/').filter(Boolean) : [];
+  const incidents = useData((s) => s.incidents);
+  // Show an incident by its code (INC-2026-001), not its internal id.
+  const restLabel = rest
+    .map((x) => {
+      const v = decodeURIComponent(x);
+      return area?.to === '/incidents' ? (incidents.find((i) => i.id === v)?.code ?? v) : v;
+    })
+    .join(' · ');
   const crumbs = [
     { label: siteName, onClick: () => setSiteOpen((o) => !o) },
     rest.length && area ? { label: title, href: area.to } : { label: title },
-    ...(rest.length ? [{ label: rest.map((x) => decodeURIComponent(x)).join(' · ') }] : []),
+    ...(rest.length ? [{ label: restLabel }] : []),
   ];
   const role = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '';
   useEffect(() => {
@@ -208,7 +187,12 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
             <SiteCard onClose={() => setSiteOpen(false)} canEdit={can('admin.config')} />
           </PopoverContent>
         </P.Root>
-        {runMode === 'demo' && <span className="tb-demo">Demo</span>}
+        {runMode === 'demo' && (
+          <span className="tb-demo" title="Demonstration site: sensors, tracks, people and faces are simulated. Nothing shown here is a real observation. Operational use starts the server with STRATA_MODE=operational.">
+            <span className="tb-demo-long">Simulated data</span>
+            <span className="tb-demo-short">Sim</span>
+          </span>
+        )}
       </div>
       <button className="cmd-trigger" onClick={onCommand} aria-label="Open command bar">
         <Search size={15} strokeWidth={2} />
