@@ -31,6 +31,13 @@ export interface MemberSelectorProps {
   className?: string
 }
 
+/** Strata: first name plus surname initial, so "Demo Operator" and "Demo Viewer" stay distinct in a chip. */
+export function shortName(name: string): string {
+  const [first, ...rest] = name.trim().split(/\s+/);
+  const last = rest[rest.length - 1];
+  return last ? `${first} ${last[0]}.` : (first ?? '');
+}
+
 export function getInitials(name: string): string {
   return name
     .split(' ')
@@ -119,7 +126,7 @@ function MemberBubble({ member, isSelected, onClick }: MemberBubbleProps) {
           isSelected ? 'text-foreground' : 'text-muted-foreground',
         )}
       >
-        {member.name.split(' ')[0]}
+        {shortName(member.name)}
       </span>
     </motion.button>
   )

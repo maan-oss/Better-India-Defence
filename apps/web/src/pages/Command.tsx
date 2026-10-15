@@ -570,8 +570,9 @@ function HandoverView({ s }: { s: HandoverState }) {
 function Handover() {
   const user = useSession((s) => s.user);
   const can = useSession((s) => s.can);
-  const state = useAsync((s) => get<HandoverState>('/api/ops/handover/state', s), []);
-  const list = useAsync((s) => get<{ id: string; t: number; outgoing: string; incoming: string; summary: string; state: HandoverState; acknowledged_at: number | null; signature: string | null }[]>('/api/ops/handovers', s), []);
+  // Viewers have no handover rights: don't request these (they would 403 before the rights message shows).
+  const state = useAsync((s) => (can('ops.log') ? get<HandoverState>('/api/ops/handover/state', s) : Promise.resolve(null)), []);
+  const list = useAsync((s) => (can('ops.log') ? get<{ id: string; t: number; outgoing: string; incoming: string; summary: string; state: HandoverState; acknowledged_at: number | null; signature: string | null }[]>('/api/ops/handovers', s) : Promise.resolve([])), []);
   const [signing, setSigning] = useState<string | null>(null);
   const users = useAsync((s) => (can('admin.users') ? get<{ username: string; displayName: string; disabled: boolean }[]>('/api/admin/users', s) : Promise.resolve([] as { username: string; displayName: string; disabled: boolean }[])), []);
   const online = useOnWatch();

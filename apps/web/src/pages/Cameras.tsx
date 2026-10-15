@@ -480,12 +480,15 @@ function WallTile({
           <img src={`/api/cameras/${c.id}/mjpeg`} alt={`Live: ${c.name}`} />
         ) : (
           <div className={`camtile-off ${st?.state ?? ""}`}>
-            <span className={st?.state === "error" ? "" : "spinner"} />
+            {/* The body follows the stream state, so it can never contradict the STOPPED badge. */}
+            <span className={c.source?.enabled && (!st || st.state === "connecting") ? "spinner" : ""} />
             {st?.state === "error"
               ? (st.lastError ?? "stream error")
-              : c.source?.enabled
-                ? "connecting…"
-                : "disabled"}
+              : !c.source?.enabled
+                ? "disabled"
+                : !st || st.state === "connecting"
+                  ? "connecting…"
+                  : "not streaming"}
           </div>
         )}
       </div>

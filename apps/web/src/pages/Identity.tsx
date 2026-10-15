@@ -83,7 +83,7 @@ function Review({ faceId }: { faceId: string | null }) {
               <div className="grow" style={{ minWidth: 0 }}>
                 <DecisionChip ev={ev} />
                 <div className="ellipsis">
-                  {ev.candidates[0]?.name ?? '—'} <span className="mono muted">{ev.bestScore?.toFixed(2)}</span>
+                  {ev.candidates[0]?.name ?? '—'} <span className="mono muted">{ev.bestScore?.toFixed(3)}</span>
                 </div>
                 <div className="mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
                   {ev.sourceId} · {dateTime(ev.t)}
@@ -580,7 +580,7 @@ function EnrolPhoto({ identityId, onDone }: { identityId: string; onDone: () => 
     setErr(null);
     try {
       const res = await post<{ id: string; duplicateOf: { name: string; score: number } | null }>(`/api/identities/${identityId}/templates`, { token: r!.token, faceIndex: index });
-      setMsg(res.duplicateOf ? `Enrolled. Warning: this face also strongly matches ${res.duplicateOf.name} (${res.duplicateOf.score.toFixed(2)}) — possible duplicate entry.` : 'Enrolled.');
+      setMsg(res.duplicateOf ? `Enrolled. Warning: this face also strongly matches ${res.duplicateOf.name} (${res.duplicateOf.score.toFixed(3)}) — possible duplicate entry.` : 'Enrolled.');
       setR(null);
       onDone();
     } catch (e) {
@@ -604,7 +604,7 @@ function EnrolPhoto({ identityId, onDone }: { identityId: string; onDone: () => 
             <button key={f.index} disabled={!f.usable || f.quality.grade === 'POOR'} onClick={() => void enrol(f.index)} title={f.quality.reasons.join('; ')}>
               <img src={`data:image/jpeg;base64,${f.crop}`} alt={`Face ${f.index + 1}`} />
               <QualityLine q={f.quality} />
-              {f.matches[0] && f.matches[0].score > 0.32 && <span className="muted" style={{ fontSize: 'var(--fs-micro)' }}>resembles {f.matches[0].name} ({f.matches[0].score.toFixed(2)})</span>}
+              {f.matches[0] && f.matches[0].score > 0.32 && <span className="muted" style={{ fontSize: 'var(--fs-micro)' }}>resembles {f.matches[0].name} ({f.matches[0].score.toFixed(3)})</span>}
             </button>
           ))}
         </div>

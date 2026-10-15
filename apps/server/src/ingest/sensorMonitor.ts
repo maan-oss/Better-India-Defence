@@ -4,6 +4,17 @@ import type { LiveHub } from '../live/hub.ts';
 
 type Status = SensorStatusRecord['status'];
 
+/** Operator-readable silence: "45 s", "12 min", "3 h 5 min" (not "1256 s"). */
+function silentFor(ms: number): string {
+  const s = Math.round(ms / 1000);
+  if (s < 90) return `${s} s`;
+  const m = Math.round(s / 60);
+  if (m < 90) return `${m} min`;
+  const h = Math.floor(m / 60);
+  const rem = m % 60;
+  return rem ? `${h} h ${rem} min` : `${h} h`;
+}
+
 /** Longest silence a sensor may have before it reads as SILENT, in ms. */
 function silenceLimitMs(def: SensorDef): number {
   const s = def.kind === 'external' && def.silenceS !== undefined ? def.silenceS : SILENCE_S[def.kind];
@@ -75,7 +86,7 @@ export class SensorMonitor {
     const def = FACILITY.sensors.find((d) => d.id === sensorId);
     if (!s || !def) return s ? { ...s } : null;
     if (s.lastSeen === null || s.status === 'silent' || now - s.lastSeen <= silenceLimitMs(def)) return { ...s };
-    return { ...s, status: 'silent', message: `no traffic for ${Math.round((now - s.lastSeen) / 1000)} s` };
+    return { ...s, status: 'silent', message: `no traffic for ${silentFor(now - s.lastSeen)}` };
   }
 
   all(): SensorStatusRecord[] {
@@ -117,7 +128,7 @@ export class SensorMonitor {
       const limit = silenceLimitMs(def);
       if (!Number.isFinite(limit) || s.lastSeen === null) continue;
       if (s.status !== 'silent' && now - s.lastSeen > limit) {
-        out.push({ sensorId: def.id, t: s.lastSeen + limit, from: s.status, to: 'silent', message: `no traffic for ${Math.round((now - s.lastSeen) / 1000)} s` });
+        out.push({ sensorId: def.id, t: s.lastSeen + limit, from: s.status, to: 'silent', message: `no traffic for ${silentFor(now - s.lastSeen)}` });
         s.status = 'silent';
         s.message = 'no traffic received';
         s.updatedAt = now;
