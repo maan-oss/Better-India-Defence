@@ -31,9 +31,12 @@ export type PageKey = keyof typeof pageLoaders;
 const loaded = new Map<PageKey, ComponentType<object>>();
 const requested = new Map<PageKey, Promise<void>>();
 
+const RELOAD_KEY = 'strata.chunkReload';
+
 /**
- * Load a page's code once. A failed load (a dropped connection, a deploy during the visit) is not cached: the
- * next render retries after a short pause, so the page recovers without a reload.
+ * Load a page's code once. A failed load is not cached: the next render retries after a short pause. A tab left
+ * open across a deploy asks for code files that no longer exist, so the first failure reloads the page once to pick
+ * up the new build (a second failure in the same session retries without reloading, so there is no reload loop).
  */
 function load(key: PageKey): Promise<void> {
   let p = requested.get(key);
@@ -41,11 +44,25 @@ function load(key: PageKey): Promise<void> {
     p = pageLoaders[key]().then(
       (m) => {
         loaded.set(key, m.default as ComponentType<object>);
+        try {
+          sessionStorage.removeItem(RELOAD_KEY);
+        } catch {
+          /* storage unavailable */
+        }
       },
-      () =>
-        new Promise<void>((resolve) => setTimeout(resolve, 1500)).then(() => {
+      () => {
+        try {
+          if (!sessionStorage.getItem(RELOAD_KEY)) {
+            sessionStorage.setItem(RELOAD_KEY, '1');
+            window.location.reload();
+          }
+        } catch {
+          /* storage unavailable: retry without reloading */
+        }
+        return new Promise<void>((resolve) => setTimeout(resolve, 1500)).then(() => {
           requested.delete(key);
-        }),
+        });
+      },
     );
     requested.set(key, p);
   }

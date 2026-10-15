@@ -12,6 +12,27 @@ export interface Overlay {
 /** Categorical (not status) colours for detection classes on imagery. */
 const CAT_COLOR: Record<string, string> = { person: '#0bd8b6', vehicle: '#baa7ff', face: '#f3f1ea', aircraft: '#70b8ff', boat: '#70b8ff', animal: 'var(--text-2)', object: 'var(--text-2)' };
 
+const detLabel = (d: MediaDetection) => (d.kind === 'face' ? `face ${d.quality?.grade ?? ''}` : `${d.label} ${Math.round(d.score * 100)}`);
+
+/**
+ * Label placement for detection boxes. A label sits above its box, moves below it if that collides with a label
+ * already placed, and is left off when neither spot is clear, so a crowded frame stays legible.
+ */
+function placeLabels(items: { x: number; y: number; w: number; h: number; text: string }[], size: number): ({ x: number; y: number } | null)[] {
+  const placed: { x0: number; y0: number; x1: number; y1: number }[] = [];
+  return items.map((it) => {
+    const width = it.text.length * size * 0.62 + 4;
+    for (const base of [Math.max(size, it.y - 2), it.y + it.h + size]) {
+      const r = { x0: it.x, y0: base - size, x1: it.x + width, y1: base + 2 };
+      if (!placed.some((p) => r.x0 < p.x1 && r.x1 > p.x0 && r.y0 < p.y1 && r.y1 > p.y0)) {
+        placed.push(r);
+        return { x: it.x, y: base };
+      }
+    }
+    return null;
+  });
+}
+
 /**
  * Frame-accurate viewer for an evidence item. Frames are decoded server-side from the immutable original
  * (no browser transcoding), so what is shown is exactly what is analysed. Boxes are drawn in original-pixel
@@ -76,6 +97,14 @@ export function MediaViewer({
   };
 
   const shown = dets.filter((d) => (d.kind === 'face' ? overlay.faces : d.category === 'person' ? overlay.persons : d.category === 'vehicle' ? overlay.vehicles : overlay.other));
+  // Labels for boxes large enough to read, strongest detections first, so the most confident text wins a collision.
+  const labelSize = Math.max(11, W / 110);
+  const labelled = shown
+    .map((d, i) => ({ i, d }))
+    .filter(({ d }) => d.box.w > W / 40 || d.kind === 'face')
+    .sort((a, b) => b.d.score - a.d.score);
+  const placed = placeLabels(labelled.map(({ d }) => ({ x: d.box.x, y: d.box.y, w: d.box.w, h: d.box.h, text: detLabel(d) })), labelSize);
+  const labelAt = new Map(labelled.map(({ i }, k) => [i, placed[k] ?? null]));
   const frameStep = 1 / (item.fps || 25);
 
   return (
@@ -113,9 +142,9 @@ export function MediaViewer({
               return (
                 <g key={i}>
                   <rect x={d.box.x} y={d.box.y} width={d.box.w} height={d.box.h} fill="none" stroke={c} strokeWidth={sw} strokeDasharray={d.kind === 'face' && d.quality?.grade === 'UNUSABLE' ? `${sw * 3} ${sw * 2}` : undefined} />
-                  {(d.box.w > W / 40 || d.kind === 'face') && (
-                    <text x={d.box.x} y={Math.max(10, d.box.y - sw * 2)} fill={c} fontSize={Math.max(11, W / 110)} fontFamily="Geist Mono Variable, monospace">
-                      {d.kind === 'face' ? `face ${d.quality?.grade ?? ''}` : `${d.label} ${Math.round(d.score * 100)}`}
+                  {labelAt.get(i) && (
+                    <text x={labelAt.get(i)!.x} y={labelAt.get(i)!.y} fill={c} fontSize={labelSize} fontFamily="Geist Mono Variable, monospace" stroke="rgba(10, 10, 10, 0.85)" strokeWidth={labelSize / 4} paintOrder="stroke">
+                      {detLabel(d)}
                     </text>
                   )}
                 </g>

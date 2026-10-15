@@ -70,6 +70,8 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
     await app.register(fastifyStatic, { root: cfg.WEB_DIST, prefix: '/', wildcard: false });
     app.setNotFoundHandler((req, reply) => {
       if (req.url.startsWith('/api') || req.url.startsWith('/ws')) return reply.code(404).send({ error: 'not found' });
+      // A missing build file is a 404, not the app shell: the browser would otherwise try to run HTML as code.
+      if (req.url.startsWith('/assets/')) return reply.code(404).send({ error: 'not found' });
       return reply.sendFile('index.html');
     });
   }
