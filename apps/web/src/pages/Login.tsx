@@ -2,7 +2,9 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useSession } from '../state/session';
 import { StrataField } from '../brand/StrataField';
 import { get } from '../api/client';
-import { Alert, Input, PasswordField } from '../components/kit';
+import { Alert } from '../components/arc/alert/alert';
+import { Input } from '../components/arc/input/input';
+import { PasswordField } from '../components/arc/password-field/password-field';
 import { DitherGradient } from '../components/vendor/componentry/dither-gradient';
 import { Lockup } from '../brand/Mark';
 

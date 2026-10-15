@@ -7,7 +7,20 @@ import { useOnWatch } from '../components/ops/OnWatch';
 import { Check, Copy, KeyRound, Settings2, UserCheck, UserCog } from 'lucide-react';
 import { useSession } from '../state/session';
 import { FACILITY } from '@strata/domain';
-import { CodeBlock, Alert, Avatar, AvatarGroup, Badge, Button, ConfirmMorph, DropdownMenu, Input, JsonViewer, PasswordStrength, RadioCards, SortableDataTable, useToastStack } from '../components/kit';
+import { CodeBlock } from '../components/arc/code-block/code-block';
+import { Alert } from '../components/arc/alert/alert';
+import { Avatar } from '../components/arc/avatar/avatar';
+import { AvatarGroup } from '../components/arc/avatar-group/avatar-group';
+import { Badge } from '../components/arc/badge/badge';
+import { Button } from '../components/arc/button/button';
+import { ConfirmMorph } from '../components/arc/confirm-morph/confirm-morph';
+import { DropdownMenu } from '../components/arc/dropdown-menu/dropdown-menu';
+import { Input } from '../components/arc/input/input';
+import { JsonViewer } from '../components/arc/json-viewer/json-viewer';
+import { PasswordStrength } from '../components/arc/password-strength/password-strength';
+import { RadioCards } from '../components/arc/radio-cards/radio-cards';
+import { SortableDataTable } from '../components/arc/sortable-data-table/sortable-data-table';
+import { useToastStack } from '../components/arc/toast-stack/toast-stack';
 
 interface ConfigResponse {
   stored: { key: string; value: unknown; updated_by: string; updated_at: number }[];

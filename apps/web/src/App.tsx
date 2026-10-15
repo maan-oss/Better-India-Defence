@@ -12,7 +12,7 @@ import { get, setUnauthorizedHandler } from './api/client';
 import type { FacilityResponse } from './api/types';
 import { FACILITY, setTerrainMode, type SurfacePatch } from '@strata/domain';
 import { Login } from './pages/Login';
-import { Setup, type SetupStatus } from './pages/Setup';
+import { type SetupStatus } from './pages/Setup';
 import { Shell } from './components/Shell';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Mark } from './brand/Mark';
@@ -33,6 +33,16 @@ const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin
 const Forensics = lazy(() => import('./pages/Forensics').then((m) => ({ default: m.Forensics })));
 const Command = lazy(() => import('./pages/Command').then((m) => ({ default: m.Command })));
 const SiteSetup = lazy(() => import('./pages/SiteSetup').then((m) => ({ default: m.SiteSetup })));
+const Setup = lazy(() => import('./pages/Setup').then((m) => ({ default: m.Setup })));
+
+/** First-run wizard in its own chunk: signed-in users on a configured site never download it. */
+function SetupRoute({ status }: { status: SetupStatus }) {
+  return (
+    <Suspense fallback={<div className="route-loading"><BootMark size={36} /></div>}>
+      <Setup status={status} />
+    </Suspense>
+  );
+}
 const Cameras = lazy(() => import('./pages/Cameras').then((m) => ({ default: m.Cameras })));
 const Field = lazy(() => import('./pages/Field').then((m) => ({ default: m.Field })));
 const Identity = lazy(() => import('./pages/Identity').then((m) => ({ default: m.Identity })));
@@ -156,9 +166,9 @@ export function App() {
   if (setupError) return <Boot label={`Cannot reach the Strata service: ${setupError}`} />;
   if (status === 'unknown' || !setup) return <Boot label="Connecting" />;
   // First run of an operational install: the wizard creates the administrator, then the site.
-  if (setup.needsAdmin) return <Setup status={setup} />;
+  if (setup.needsAdmin) return <SetupRoute status={setup} />;
   if (setup.needsSite && status === 'authenticated') {
-    if (role === 'administrator') return <Setup status={setup} />;
+    if (role === 'administrator') return <SetupRoute status={setup} />;
     return (
       <div className="waiting-setup">
         <Empty

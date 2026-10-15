@@ -3,7 +3,8 @@ import { Mark, Wordmark, Lockup } from '../brand/Mark';
 import { StrataField } from '../brand/StrataField';
 import { Illustration, type ArtName } from '../brand/Illustration';
 import '../brand/brand.css';
-import { InViewTitle, TextReveal } from '../components/kit';
+import { InViewTitle } from '../components/arc/in-view-title/in-view-title';
+import { TextReveal } from '../components/arc/text-reveal/text-reveal';
 
 const ART: ArtName[] = ['empty', 'site', 'cameras', 'incidents', 'evidence', 'identity', 'tasks', 'sensors', 'search', 'offline', 'audit', 'reconstructions'];
 const SWATCHES = [

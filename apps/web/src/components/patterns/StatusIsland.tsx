@@ -14,7 +14,7 @@ import { useWorld } from '../../state/world';
 import { SplitFlapDisplay } from '../vendor/componentry/split-flap-display';
 import { NotificationList, type NotificationItem } from '../vendor/spaceui/components/spaceui/notification-list';
 import { StatusBadge } from '../vendor/spaceui/components/spaceui/status-badge';
-import { SlotText } from '../kit';
+import { SlotText } from '../arc/slot-text/slot-text';
 import './patterns.css';
 
 const zulu = (t: number) => new Date(t).toISOString().slice(11, 19);

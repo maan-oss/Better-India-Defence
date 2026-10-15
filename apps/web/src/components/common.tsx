@@ -4,7 +4,11 @@ import { get } from '../api/client';
 import { hms, dateTime } from '../lib/format';
 import { useWorld } from '../state/world';
 import { Dialog } from './ui';
-import { Alert, CopyButton, JsonViewer, Skeleton, TextShimmer } from './kit';
+import { Alert } from './arc/alert/alert';
+import { CopyButton } from './arc/copy-button/copy-button';
+import { JsonViewer } from './arc/json-viewer/json-viewer';
+import { Skeleton } from './arc/skeleton/skeleton';
+import { TextShimmer } from './arc/text-shimmer/text-shimmer';
 
 export function StateChip({ state, label }: { state: EpistemicState | string; label?: string }) {
   return (

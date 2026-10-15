@@ -2,21 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Cctv, Pin, Smartphone } from "lucide-react";
 import { PinList } from "../components/vendor/spaceui/components/spaceui/pin-list";
-import {
-  Drawer,
-  DrawerContent,
-  ExpandingSearch,
-  Button,
-  ConfirmMorph,
-  Input,
-  NumberField,
-  Pagination,
-  RadioCards,
-  Select as ArcSelect,
-  SplitButton,
-  Switch,
-  useToastStack,
-} from "../components/kit";
+import { Drawer, DrawerContent } from "../components/arc/drawer/drawer";
+import { ExpandingSearch } from "../components/arc/expanding-search/expanding-search";
+import { Button } from "../components/arc/button/button";
+import { ConfirmMorph } from "../components/arc/confirm-morph/confirm-morph";
+import { Input } from "../components/arc/input/input";
+import { NumberField } from "../components/arc/number-field/number-field";
+import { Pagination } from "../components/arc/pagination/pagination";
+import { RadioCards } from "../components/arc/radio-cards/radio-cards";
+import { Select as ArcSelect } from "../components/arc/select/select";
+import { SplitButton } from "../components/arc/split-button/split-button";
+import { Switch } from "../components/arc/switch/switch";
+import { useToastStack } from "../components/arc/toast-stack/toast-stack";
 import { TickSlider } from "../components/vendor/spaceui/components/spaceui/tick-slider";
 import { Empty } from "../brand/Boot";
 import { FACILITY } from "@strata/domain";

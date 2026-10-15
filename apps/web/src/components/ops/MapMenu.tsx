@@ -9,7 +9,8 @@ import { useSession } from '../../state/session';
 import { useTime } from '../../state/time';
 import { useData } from '../../state/data';
 import { grid } from '../../state/ops';
-import { ContextMenu, useToastStack, type ContextMenuItem } from '../kit';
+import { ContextMenu, type ContextMenuItem } from '../arc/context-menu/context-menu';
+import { useToastStack } from '../arc/toast-stack/toast-stack';
 import { DispatchDialog } from './OpsWidgets';
 
 const KIND: Record<string, string> = { track: 'track', sensor: 'sensor', change: 'change', alert: 'alert', object: 'object', incident: 'incident', building: 'building', patch: 'surface' };

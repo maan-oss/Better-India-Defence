@@ -7,7 +7,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Camera, CameraOff, RefreshCw, SwitchCamera } from 'lucide-react';
 import { get } from '../api/client';
-import { Alert, Badge, Button } from '../components/kit';
+import { Alert } from '../components/arc/alert/alert';
+import { Badge } from '../components/arc/badge/badge';
+import { Button } from '../components/arc/button/button';
 import '../styles/cameras.css';
 
 interface SourceInfo {

@@ -9,7 +9,7 @@ import { Check, ChevronRight, X } from 'lucide-react';
 import { useWorld } from '../../state/world';
 import { useData } from '../../state/data';
 import { useSession } from '../../state/session';
-import { Progress } from '../kit';
+import { Progress } from '../arc/progress/progress';
 
 const KEY = 'strata.getstarted.hidden';
 

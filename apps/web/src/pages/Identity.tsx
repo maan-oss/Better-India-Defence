@@ -10,7 +10,23 @@ import { DECISION_TEXT, DecisionChip, FaceCard, QualityLine } from '../component
 import { Segmented, Tabs } from '../components/ui';
 import '../styles/forensics.css';
 import { Empty } from '../brand/Boot';
-import { ActionButton, Avatar, Button, Carousel, CopyButton, DatePicker, Input, MetricCard, MultiSelect, NumberField, RadioCards, SearchField, SegmentedControl, Select as ArcSelect, Slider, Switch, Textarea } from '../components/kit';
+import { ActionButton } from '../components/arc/action-button/action-button';
+import { Avatar } from '../components/arc/avatar/avatar';
+import { Button } from '../components/arc/button/button';
+import { Carousel } from '../components/arc/carousel/carousel';
+import { CopyButton } from '../components/arc/copy-button/copy-button';
+import { DatePicker } from '../components/arc/date-picker/date-picker';
+import { Input } from '../components/arc/input/input';
+import { MetricCard } from '../components/arc/metric-card/metric-card';
+import { MultiSelect } from '../components/arc/multi-select/multi-select';
+import { NumberField } from '../components/arc/number-field/number-field';
+import { RadioCards } from '../components/arc/radio-cards/radio-cards';
+import { SearchField } from '../components/arc/search-field/search-field';
+import SegmentedControl from '../components/arc/segmented-control/segmented-control';
+import { Select as ArcSelect } from '../components/arc/select/select';
+import { Slider } from '../components/arc/slider/slider';
+import { Switch } from '../components/arc/switch/switch';
+import { Textarea } from '../components/arc/textarea/textarea';
 
 /**
  * IDENTITY — authorised-personnel register, watchlist, recognition review and archive search.

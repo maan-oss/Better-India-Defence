@@ -7,7 +7,8 @@ import { useTime } from '../state/time';
 import { Icon } from './Icons';
 import { ObservationViewer, StateChip } from './common';
 import { hms } from '../lib/format';
-import { ChatComposer, TextShimmer, type ChatComposerHandle } from './kit';
+import { ChatComposer, type ChatComposerHandle } from './arc/chat-thread/chat-thread';
+import { TextShimmer } from './arc/text-shimmer/text-shimmer';
 import { LoadingOrb } from './vendor/spaceui/components/orb/loading';
 
 interface Turn {

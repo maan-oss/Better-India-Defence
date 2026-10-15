@@ -7,14 +7,14 @@ import { symbolDataUrl, symbolFor } from '../engine/symbols';
 import { useTime } from '../state/time';
 import { useData } from '../state/data';
 import { useSession } from '../state/session';
-import { dateTime, dur, hms, pct, titleCase } from '../lib/format';
+import { agoSeconds, dateTime, dur, hms, pct, titleCase } from '../lib/format';
 import { ErrorNote, Loading, Prio, StateChip, useAsync } from './common';
 import { VirtualList } from './VirtualList';
 import { tracks as trackStore, type RenderTrack } from '../state/tracks';
 import { Segmented, Tabs } from './ui';
 import { Building2, Cctv, Fence, Radar, Radio, ShieldAlert, SquareDashed } from 'lucide-react';
 import { terrainHeight, type Vec3 } from '@strata/domain';
-import { TreeView, type TreeNode } from './kit';
+import { TreeView, type TreeNode } from './arc/tree-view/tree-view';
 
 /** The site as a hierarchy (Arc tree view): zones, buildings and sensors by kind. Choosing one flies the view to it. */
 function SiteTree() {
@@ -431,10 +431,7 @@ export function EvidenceModePanel() {
 
 /** Default context: alerts, active tracks, recent changes. */
 function ago(t: number): string {
-  const s = Math.max(0, (useTime.getState().currentLiveEdge() - t) / 1000);
-  if (s < 60) return `${Math.round(s)} s ago`;
-  if (s < 3600) return `${Math.round(s / 60)} min ago`;
-  return `${(s / 3600).toFixed(1)} h ago`;
+  return agoSeconds(Math.max(0, (useTime.getState().currentLiveEdge() - t) / 1000));
 }
 
 export function Overview() {

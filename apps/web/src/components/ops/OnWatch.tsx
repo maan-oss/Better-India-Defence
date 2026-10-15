@@ -43,15 +43,17 @@ export function useOnWatch() {
 export function OnWatch({ className }: { className?: string }) {
   const online = useOnWatch();
   const can = useSession((s) => s.can);
+  // The signed-in officer is already in the top-right menu; listing them here too read as a duplicate.
+  const me = useSession((s) => s.user?.username);
   const [all, setAll] = useState<{ username: string; displayName: string; disabled: boolean }[]>([]);
   useEffect(() => {
     if (can('admin.users')) void get<typeof all>('/api/admin/users').then(setAll).catch(() => undefined);
   }, [can]);
   const users = useMemo<PresenceUser[]>(() => {
     const on = new Set(online.map((o) => o.username));
-    const list = [...online.map((o) => ({ username: o.username, displayName: o.displayName, online: true })), ...all.filter((u) => !u.disabled && !on.has(u.username)).map((u) => ({ username: u.username, displayName: u.displayName, online: false }))];
+    const list = [...online.filter((o) => o.username !== me).map((o) => ({ username: o.username, displayName: o.displayName, online: true })), ...all.filter((u) => !u.disabled && !on.has(u.username)).map((u) => ({ username: u.username, displayName: u.displayName, online: false }))];
     return list.slice(0, 12).map((u, i) => ({ id: i + 1, name: `${u.displayName} (${u.username})`, src: monogram(u.displayName), fallback: initials(u.displayName), online: u.online }));
-  }, [online, all]);
+  }, [online, all, me]);
   if (!users.length) return null;
   return (
     <div className={`on-watch ${className ?? ''}`} aria-label={`${online.length} on watch`}>

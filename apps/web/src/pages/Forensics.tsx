@@ -12,7 +12,7 @@ import { FaceCard } from '../components/identity/FaceCard';
 import { Icon } from '../components/Icons';
 import { Segmented, Tabs } from '../components/ui';
 import '../styles/forensics.css';
-import { FileDropzone } from '../components/kit';
+import { FileDropzone } from '../components/arc/file-dropzone/file-dropzone';
 import { Empty } from '../brand/Boot';
 import { Illustration } from '../brand/Illustration';
 

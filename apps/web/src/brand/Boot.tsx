@@ -5,7 +5,7 @@
 import type { ReactNode } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { EmptyState } from '../components/kit';
+import { EmptyState } from '../components/arc/empty-state/empty-state';
 import { Illustration, type ArtName } from './Illustration';
 import { StrataField } from './StrataField';
 

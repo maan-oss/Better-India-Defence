@@ -10,7 +10,14 @@ import { useTime } from '../state/time';
 import { useSession } from '../state/session';
 import { ago, hms } from '../lib/format';
 import { Empty } from '../brand/Boot';
-import { ButtonGroup, BrushChart, Button, JsonViewer, MetricCard, SearchField, SortableDataTable, Timeline as ArcTimeline } from '../components/kit';
+import { ButtonGroup } from '../components/arc/button-group/button-group';
+import { BrushChart } from '../components/arc/brush-chart/brush-chart';
+import { Button } from '../components/arc/button/button';
+import { JsonViewer } from '../components/arc/json-viewer/json-viewer';
+import { MetricCard } from '../components/arc/metric-card/metric-card';
+import { SearchField } from '../components/arc/search-field/search-field';
+import { SortableDataTable } from '../components/arc/sortable-data-table/sortable-data-table';
+import { Timeline as ArcTimeline } from '../components/arc/timeline/timeline';
 
 interface SensorDetail {
   definition: SensorListItem['definition'];

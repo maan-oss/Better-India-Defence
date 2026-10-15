@@ -9,7 +9,11 @@ import { Layers, Move3d, Maximize, PanelRight, PanelRightClose, Orbit, Plane, Fo
 import { useWorld, MODES, LAYERS, type GlobalMode, type LayerKey } from '../../state/world';
 import { useTime } from '../../state/time';
 import { useData } from '../../state/data';
-import { Accordion, FloatingButtonGroup, PopoverContent, SegmentedControl, Switch } from '../kit';
+import { Accordion } from '../arc/accordion/accordion';
+import { FloatingButtonGroup } from '../arc/floating-button-group/floating-button-group';
+import { PopoverContent } from '../arc/popover/popover';
+import SegmentedControl from '../arc/segmented-control/segmented-control';
+import { Switch } from '../arc/switch/switch';
 import './ops.css';
 
 const MODE_LABEL: Record<GlobalMode, string> = { NOW: 'Now', HISTORY: 'History', INCIDENT: 'Incident', DIFF: 'Diff', EVIDENCE: 'Evidence', COVERAGE: 'Coverage' };

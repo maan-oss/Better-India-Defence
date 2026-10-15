@@ -19,11 +19,8 @@ import { ErrorBoundary } from "../components/ErrorBoundary";
 import { StateChip } from "../components/common";
 import { hms } from "../lib/format";
 import { buildBasemap } from "../lib/basemap";
-import {
-  BottomSheet,
-  ResizablePanel,
-  ResizablePanels,
-} from "../components/kit";
+import { BottomSheet } from "../components/arc/bottom-sheet/bottom-sheet";
+import { ResizablePanel, ResizablePanels } from "../components/arc/resizable-panels/resizable-panels";
 import { ModeControl, ToolDock } from "../components/ops/MapControls";
 import { GetStarted } from "../components/ops/GetStarted";
 

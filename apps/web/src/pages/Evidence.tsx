@@ -9,7 +9,13 @@ import { useWorld } from '../state/world';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { bytes, dateTime, dur, hms, pct } from '../lib/format';
 import { Segmented, Tabs } from '../components/ui';
-import { DateRangePicker, FilterToolbar, Pagination, SearchField, Ridgeline, SortableDataTable, Streamgraph, type DateRange, type FilterChip } from '../components/kit';
+import { DateRangePicker, type DateRange } from '../components/arc/date-range-picker/date-range-picker';
+import { FilterToolbar, type FilterChip } from '../components/arc/filter-toolbar/filter-toolbar';
+import { Pagination } from '../components/arc/pagination/pagination';
+import { SearchField } from '../components/arc/search-field/search-field';
+import { Ridgeline } from '../components/arc/ridgeline/ridgeline';
+import { SortableDataTable } from '../components/arc/sortable-data-table/sortable-data-table';
+import { Streamgraph } from '../components/arc/streamgraph/streamgraph';
 import { Empty } from '../brand/Boot';
 
 /** EVIDENCE — searchable repository of observations and media, plus the safe hand-off demonstration. */

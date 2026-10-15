@@ -16,7 +16,25 @@ import { useVisionLive } from '../api/vision';
 import { useTime } from '../state/time';
 import { tracks as trackStore, type RenderTrack } from '../state/tracks';
 import { Tabs } from '../components/ui';
-import { MentionInput, type MentionValue, SlopeChart, ActionButton, ActivityHeatmap, Alert, ConfirmMorph, CopyButton, BarChart, Button, ChipGroup, HoldToConfirm, HoverCard, HoverCardProfile, Select as ArcSelect, SignaturePad, SortableDataTable, Textarea, TextMorph, Timeline as ArcTimeline, signatureToPng, useToastStack, type InkStroke } from '../components/kit';
+import { MentionInput, type MentionValue } from '../components/arc/mention-input/mention-input';
+import { SlopeChart } from '../components/arc/slope-chart/slope-chart';
+import { ActionButton } from '../components/arc/action-button/action-button';
+import { ActivityHeatmap } from '../components/arc/activity-heatmap/activity-heatmap';
+import { Alert } from '../components/arc/alert/alert';
+import { ConfirmMorph } from '../components/arc/confirm-morph/confirm-morph';
+import { CopyButton } from '../components/arc/copy-button/copy-button';
+import { BarChart } from '../components/arc/bar-chart/bar-chart';
+import { Button } from '../components/arc/button/button';
+import { ChipGroup } from '../components/arc/chip-group/chip-group';
+import { HoldToConfirm } from '../components/arc/hold-to-confirm/hold-to-confirm';
+import { HoverCard, HoverCardProfile } from '../components/arc/hover-card/hover-card';
+import { Select as ArcSelect } from '../components/arc/select/select';
+import { SignaturePad, signatureToPng, type InkStroke } from '../components/arc/signature-pad/signature-pad';
+import { SortableDataTable } from '../components/arc/sortable-data-table/sortable-data-table';
+import { Textarea } from '../components/arc/textarea/textarea';
+import { TextMorph } from '../components/arc/text-morph/text-morph';
+import { Timeline as ArcTimeline } from '../components/arc/timeline/timeline';
+import { useToastStack } from '../components/arc/toast-stack/toast-stack';
 import { OnWatch, useOnWatch } from '../components/ops/OnWatch';
 import { MemberSelector } from '../components/vendor/spaceui/components/spaceui/member-selector';
 import type { AlertRecord } from '@strata/domain';
@@ -584,10 +602,10 @@ function Handover() {
       seen.add(id);
       out.push({ id, name, email });
     };
-    for (const o of online) add(o.username, o.displayName, `${o.role} · on watch`);
+    for (const o of online) if (o.username !== user?.username) add(o.username, o.displayName, `${o.role} · on watch`);
     for (const u of users.data ?? []) if (!u.disabled) add(u.username, u.displayName, u.username);
     return out;
-  }, [online, users.data]);
+  }, [online, users.data, user?.username]);
   const [incoming, setIncoming] = useState('');
   const [summary, setSummary] = useState('');
   const [err, setErr] = useState<string | null>(null);
@@ -602,7 +620,6 @@ function Handover() {
           {state.data ? <HandoverView s={state.data} /> : <Loading />}
           <div className="handover-form">
             <div className="col" style={{ gap: 6 }}>
-              <span className="setup-label">Incoming officer</span>
               <MemberSelector
                 label="Incoming officer"
                 max={1}

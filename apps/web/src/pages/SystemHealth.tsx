@@ -2,7 +2,13 @@ import { useEffect, useState } from 'react';
 import { get } from '../api/client';
 import { ErrorNote, Loading } from '../components/common';
 import { bytes, hms } from '../lib/format';
-import { AnimatedCounter, DonutChart, Gauge, LineChart, Sparkline, Treemap, UsageMeter } from '../components/kit';
+import { AnimatedCounter } from '../components/arc/animated-counter/animated-counter';
+import { DonutChart } from '../components/arc/donut-chart/donut-chart';
+import { Gauge } from '../components/arc/gauge/gauge';
+import { LineChart } from '../components/arc/line-chart/line-chart';
+import { Sparkline } from '../components/arc/sparkline/sparkline';
+import { Treemap } from '../components/arc/treemap/treemap';
+import { UsageMeter } from '../components/arc/usage-meter/usage-meter';
 
 interface Health {
   services: { name: string; status: string; detail: string }[];

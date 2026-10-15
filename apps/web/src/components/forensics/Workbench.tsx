@@ -5,7 +5,7 @@ import { STATE_HELP_PRODUCT, STATE_LABEL, type Box, type EnhanceOp, type Evidenc
 import { useSession } from '../../state/session';
 import { ErrorNote } from '../common';
 import { Segmented } from '../ui';
-import { ImageCompare } from '../kit';
+import { ImageCompare } from '../arc/image-compare/image-compare';
 
 type OpKey = EnhanceOp['op'];
 
