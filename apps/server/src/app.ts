@@ -20,7 +20,8 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
   const app = Fastify({ loggerInstance: p.log.child({ component: 'http' }), logController: new LogController({ disableRequestLogging: true }), bodyLimit: 2 * 1024 * 1024, trustProxy: false, ...https }) as unknown as FastifyInstance;
 
   app.addContentTypeParser(['application/octet-stream', 'application/x-strata-rangescan', 'image/png', 'image/jpeg', 'image/webp'], { parseAs: 'buffer', bodyLimit: 40 * 1024 * 1024 }, (_req, body, done) => done(null, body));
-  await app.register(rateLimit, { max: 600, timeWindow: '1 minute', allowList: (req) => req.url.startsWith('/api/ingest') });
+  // Limit the API only. Static files (page code, images, fonts) are public and a single page load fetches many of them.
+  await app.register(rateLimit, { max: 600, timeWindow: '1 minute', allowList: (req) => !req.url.startsWith('/api/') || req.url.startsWith('/api/ingest') });
   await app.register(websocket, { options: { maxPayload: 64 * 1024 } });
 
   app.decorateRequest('user', null);

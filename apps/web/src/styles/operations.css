@@ -1,4 +1,4 @@
-.boot { height: 100%; display: grid; place-items: center; color: var(--text-2); background: radial-gradient(700px 420px at 50% 45%, #2a2a2a, var(--bg-chrome) 70%); }
+.boot { height: 100%; display: grid; place-items: center; color: var(--text-2); background: var(--bg-chrome); }
 .boot-card { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); animation: reveal 500ms var(--ease) both; font-size: var(--fs-body); max-width: 520px; text-align: center; }
 .boot-card b { font-size: var(--fs-body-lg); letter-spacing: 0.3em; color: var(--text-0); font-weight: 600; margin-right: -0.3em; }
 .boot-logo { color: var(--text-0); animation: pulse 2s ease-in-out infinite; }
@@ -28,9 +28,9 @@
 .wlabel[data-tone='building'] b { color: var(--text-1); font-family: var(--font-sans); letter-spacing: 0.04em; }
 
 .world-hud { position: absolute; left: 12px; top: 12px; display: flex; gap: 8px; align-items: center; z-index: 5; }
-.world-hud .seg { background: rgba(23, 23, 23, 0.88); backdrop-filter: blur(8px); }
+.world-hud .seg { background: var(--bg-1); }
 .world-hud-r { position: absolute; right: 12px; top: 12px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; z-index: 5; }
-.glass { background: rgba(23, 23, 23, 0.84); border: 1px solid var(--line-2); backdrop-filter: blur(10px) saturate(140%); border-radius: var(--radius-lg); }
+.glass { background: var(--bg-1); border: 1px solid var(--line-2); border-radius: var(--radius-lg); }
 .perf { position: absolute; left: 12px; top: 10px; font-family: var(--font-mono); font-size: var(--fs-micro); color: var(--text-3); z-index: 5; pointer-events: none; }
 .mode-banner { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); padding: 6px 12px; font-size: var(--fs-body); z-index: 5; display: flex; gap: 10px; align-items: center; animation: reveal var(--t-med) var(--ease) both; }
 .legend { padding: 10px 12px; font-size: var(--fs-caption); display: flex; flex-direction: column; gap: 4px; min-width: 190px; }
@@ -119,7 +119,7 @@
 .cursor-ref.on { opacity: 1; }
 .cursor-ref b { color: var(--text-0); font-weight: 500; }
 
-.alert-row.p-critical.s-open { background: linear-gradient(90deg, rgba(229, 72, 77, 0.1), transparent 70%); }
+.alert-row.p-critical.s-open { box-shadow: inset 2px 0 0 var(--st-critical); }
 .alert-row.p-critical.s-open::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--st-critical); }
 .alert-row.p-high.s-open::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--st-serious); }
 .alert-row.s-resolved, .alert-row.s-dismissed { opacity: 0.5; }

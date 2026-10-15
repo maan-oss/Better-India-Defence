@@ -57,7 +57,7 @@
 /* Not found */
 .notfound { position: relative; overflow: hidden; display: grid; place-items: center; }
 .nf-art { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--text-2); opacity: 0.5; }
-.nf-copy { position: relative; max-width: 520px; display: flex; flex-direction: column; gap: 14px; padding: 32px; background: radial-gradient(closest-side, var(--bg-1), transparent); }
+.nf-copy { position: relative; max-width: 520px; display: flex; flex-direction: column; gap: 14px; padding: 32px; }
 .nf-copy h1 { margin: 0; font-size: var(--fs-hero); letter-spacing: -0.03em; font-weight: 600; line-height: 1.1; }
 .nf-copy p { margin: 0; line-height: 21px; }
 .ws-art { margin: 0 auto 20px; color: var(--text-1); }

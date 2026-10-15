@@ -124,6 +124,23 @@ the console is one of them; do not add a new size to fit one screen.
 Tertiary text (`--text-3`) is at least 4.5:1 on the surfaces it sits on. Colour carries state only: normal
 state is neutral grey, and red, orange and amber are reserved for alarm priorities.
 
+## Not in this interface
+
+Generated-UI habits that were removed, and are not to be reintroduced:
+
+- **Gradients and blur on surfaces or text**: no gradient KPI tiles, no glass panels, no gradient text, no
+  radial "spotlight" backgrounds. Surfaces are flat `--bg-*` tokens with hairline borders.
+- **Glow**: no coloured halos and no glowing alerts. The alert cue is a colour border or a 2 px status rule.
+  Elevation (`--shadow-2`) is kept only for floating layers: menus, toasts and popovers.
+- **Marketing layouts** on the sign-in screen: no three-up feature columns, no slogan. The screen names the
+  site, asks for credentials and states the classification.
+- **Decorative loops**: no animation that runs without a purpose. Shimmer is a pulse on a flat block.
+- **Shaders as backgrounds**: they cost CPU on the first screen and carry no information.
+
+Speed rules that go with it: pages load their code on rail hover and focus, and the core pages are loaded once
+the shell is idle. Navigation renders at once when that code is in memory (`apps/web/src/routes.ts`); the
+router does not run navigation as a transition, which would hold back the reveal for about 300 ms.
+
 ## Rules
 
 1. **Red only means "act now".** Critical alerts, a cut fence, a sensor silent during an incident, the

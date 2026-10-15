@@ -39,11 +39,12 @@
   --neutral-8: var(--text-1); --neutral-9: #dcd9d0; --neutral-10: var(--text-0); --neutral-11: var(--accent-2);
   --arc-gradient-from: var(--bg-3);
   --arc-gradient-to: var(--bg-4);
-  --arc-gradient: linear-gradient(100deg, var(--bg-3), var(--bg-4));
+  /* Strata: flat surfaces and ink. Gradients on controls and text read as generated UI, not as a console. */
+  --arc-gradient: var(--bg-3);
   --arc-gradient-foreground: var(--text-0);
-  --arc-gradient-soft: linear-gradient(135deg, var(--bg-2), var(--bg-3));
-  --arc-gradient-line: linear-gradient(100deg, var(--line-3), var(--line-2));
-  --arc-gradient-ink: linear-gradient(100deg, var(--text-0), var(--text-1));
+  --arc-gradient-soft: var(--bg-2);
+  --arc-gradient-line: var(--line-2);
+  --arc-gradient-ink: var(--text-0);
 
   --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem;
   --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;

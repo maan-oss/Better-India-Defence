@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { prefetchRoute } from '../routes';
 import { Popover as P } from 'radix-ui';
 import { Keyboard, Moon, Sun, Bell, BellOff, Search, Settings2 } from 'lucide-react';
 import { toMgrs, type AlertRecord } from '@strata/domain';
@@ -122,7 +123,7 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
                       </span>
                     }
                   >
-                    <NavLink to={n.to} className="rail-item" aria-label={n.label}>
+                    <NavLink to={n.to} className="rail-item" aria-label={n.label} onPointerEnter={() => prefetchRoute(n.to)} onFocus={() => prefetchRoute(n.to)}>
                       <I />
                       <span className="rail-label">{n.label}</span>
                       {badge > 0 && <span className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`}>{badge > 99 ? '99+' : badge}</span>}

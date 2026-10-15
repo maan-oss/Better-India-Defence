@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useSession } from './state/session';
 import { useWorld } from './state/world';
@@ -18,22 +18,23 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Mark } from './brand/Mark';
 import { BootMark, BootScreen, Empty, NotFound } from './brand/Boot';
 import { Gate } from './components/Gate';
+import { lazyPage, warmCorePages } from './routes';
 
-const Operations = lazy(() => import('./pages/Operations').then((m) => ({ default: m.Operations })));
-const Incidents = lazy(() => import('./pages/Incidents').then((m) => ({ default: m.Incidents })));
-const Sensors = lazy(() => import('./pages/Sensors').then((m) => ({ default: m.Sensors })));
-const Reconstructions = lazy(() => import('./pages/Reconstructions').then((m) => ({ default: m.Reconstructions })));
-const Evidence = lazy(() => import('./pages/Evidence').then((m) => ({ default: m.Evidence })));
-const SimulationLab = lazy(() => import('./pages/SimulationLab').then((m) => ({ default: m.SimulationLab })));
-const SystemHealth = lazy(() => import('./pages/SystemHealth').then((m) => ({ default: m.SystemHealth })));
-const Audit = lazy(() => import('./pages/Audit').then((m) => ({ default: m.Audit })));
-const DeviceCamera = lazy(() => import('./pages/DeviceCamera').then((m) => ({ default: m.DeviceCamera })));
-const Brand = lazy(() => import('./pages/Brand').then((m) => ({ default: m.Brand })));
-const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
-const Forensics = lazy(() => import('./pages/Forensics').then((m) => ({ default: m.Forensics })));
-const Command = lazy(() => import('./pages/Command').then((m) => ({ default: m.Command })));
-const SiteSetup = lazy(() => import('./pages/SiteSetup').then((m) => ({ default: m.SiteSetup })));
-const Setup = lazy(() => import('./pages/Setup').then((m) => ({ default: m.Setup })));
+const Operations = lazyPage('operations');
+const Incidents = lazyPage('incidents');
+const Sensors = lazyPage('sensors');
+const Reconstructions = lazyPage('reconstructions');
+const Evidence = lazyPage('evidence');
+const SimulationLab = lazyPage('simulationLab');
+const SystemHealth = lazyPage('systemHealth');
+const Audit = lazyPage('audit');
+const DeviceCamera = lazyPage('deviceCamera');
+const Brand = lazyPage('brand');
+const Admin = lazyPage('admin');
+const Forensics = lazyPage('forensics');
+const Command = lazyPage('command');
+const SiteSetup = lazyPage('siteSetup');
+const Setup = lazyPage<{ status: SetupStatus }>('setup');
 
 /** First-run wizard in its own chunk: signed-in users on a configured site never download it. */
 function SetupRoute({ status }: { status: SetupStatus }) {
@@ -43,9 +44,9 @@ function SetupRoute({ status }: { status: SetupStatus }) {
     </Suspense>
   );
 }
-const Cameras = lazy(() => import('./pages/Cameras').then((m) => ({ default: m.Cameras })));
-const Field = lazy(() => import('./pages/Field').then((m) => ({ default: m.Field })));
-const Identity = lazy(() => import('./pages/Identity').then((m) => ({ default: m.Identity })));
+const Cameras = lazyPage('cameras');
+const Field = lazyPage('field');
+const Identity = lazyPage('identity');
 
 /** Connects live data once signed in and loads the facility model. */
 function useBootstrap(enabled: boolean): { ready: boolean; error: string | null } {
@@ -157,6 +158,12 @@ export function App() {
   const [setup, setSetup] = useState<SetupStatus | null>(null);
   const [setupError, setSetupError] = useState<string | null>(null);
   useEffect(() => {
+    // Warm the core pages' code once the browser is idle, so the first navigation has nothing to wait for.
+    if (status !== 'authenticated') return;
+    const id = window.requestIdleCallback(warmCorePages, { timeout: 2000 });
+    return () => window.cancelIdleCallback(id);
+  }, [status]);
+  useEffect(() => {
     void refresh();
     setUnauthorizedHandler(() => void refresh());
     get<SetupStatus>('/api/setup/status')
@@ -184,8 +191,9 @@ export function App() {
       </div>
     );
   }
+  // Navigation is a plain update, not a transition: React holds back a transition's Suspense reveal for ~300 ms.
   return (
-    <BrowserRouter>
+    <BrowserRouter useTransitions={false}>
       <ErrorBoundary area="Strata">{status === 'authenticated' ? <Authenticated /> : <Login />}</ErrorBoundary>
     </BrowserRouter>
   );

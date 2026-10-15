@@ -5,7 +5,7 @@
 @media (min-width: 1280px) { .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
 .kpis .stat { cursor: pointer; color: inherit; font: inherit; transition: background var(--t-fast); }
 .kpis .stat:hover { background: var(--bg-hover); }
-.kpis .stat.bad:hover { background: linear-gradient(180deg, rgba(229, 72, 77, 0.13), var(--bg-hover) 80%); }
+.kpis .stat.bad:hover { background: var(--bg-hover); }
 .kpi-sub { font-size: var(--fs-caption); color: var(--text-3); margin-top: 2px; }
 .scope-wrap { position: relative; height: 520px; }
 .scope-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }

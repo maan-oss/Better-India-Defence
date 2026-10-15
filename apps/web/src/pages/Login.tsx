@@ -5,7 +5,6 @@ import { get } from '../api/client';
 import { Alert } from '../components/arc/alert/alert';
 import { Input } from '../components/arc/input/input';
 import { PasswordField } from '../components/arc/password-field/password-field';
-import { DitherGradient } from '../components/vendor/componentry/dither-gradient';
 import { Lockup } from '../brand/Mark';
 
 interface Banner {
@@ -65,7 +64,6 @@ export function Login() {
       <div className="cls-banner">{clsText}</div>
       <div className="login-main">
         <section className="login-hero" aria-hidden="true">
-          <DitherGradient className="hero-dither" colorFrom="#141414" colorMid="#1d1d1c" colorTo="#2c2b28" intensity={0.18} speed={0.8} angle={160} />
           <StrataField className="hero-strata" width={1400} height={1000} lines={38} seed={7} relief={0.7} animate observations={3} />
           <div className="hero-clock">
             <span>
@@ -78,20 +76,9 @@ export function Login() {
               <Lockup size={36} />
             </div>
             <h2>
-              The installation, layer by layer. <em>What is happening now — and the record under every layer.</em>
+              What is happening now, <em>and the record under it.</em>
             </h2>
-            <p>Cameras, trackers, UAS, radar and allied feeds fused into a single operational picture with threat evaluation, recognition and response coordination.</p>
-            <div className="hero-pillars">
-              <div>
-                <b>Sense</b>Live cameras, trackers, UAS and C2 feeds
-              </div>
-              <div>
-                <b>Decide</b>Threat evaluation, alerts and standing procedures
-              </div>
-              <div>
-                <b>Respond</b>Dispatch, duty log, SITREPs and evidence
-              </div>
-            </div>
+            <p>Sensors, cameras and allied feeds on one picture. Every alert, decision and handover is kept on the record.</p>
           </div>
         </section>
         <section className="login-side">
