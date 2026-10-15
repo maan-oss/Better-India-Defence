@@ -102,7 +102,7 @@ test('identity hand-off demo returns scored segments with real frame crops and r
 
 // ---------------------------------------------------------------------------------------------- new areas
 
-const fixtures = 'apps/server/test/fixtures';
+const fixtures = 'apps/server/demo-assets';
 
 test('command: readiness, threat board, and a SITREP drafted from the record', async ({ page }) => {
   const errors = await signIn(page, 'analyst');

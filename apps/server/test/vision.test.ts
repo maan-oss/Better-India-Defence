@@ -13,9 +13,9 @@ import { findModelsDir } from '../src/vision/engine.ts';
 /**
  * Vision end-to-end through the HTTP API with the real models: evidence intake, object/face analysis,
  * enrolment, watchlist rules, review, retrospective search, enhancement provenance, video analysis.
- * Faces are synthetic (people who do not exist) — see test/fixtures/README.md.
+ * Faces are synthetic (people who do not exist) — see demo-assets/README.md.
  */
-const fx = (n: string) => readFileSync(resolve(import.meta.dirname, 'fixtures', n));
+const fx = (n: string) => readFileSync(resolve(import.meta.dirname, '../demo-assets', n));
 const modelsReady = ['object_detection_yolox_2022nov.onnx', 'face_detection_yunet_2023mar.onnx', 'face_recognition_sface_2021dec.onnx', 'esrgan_general_x4v3.onnx'].every((f) => existsSync(join(findModelsDir(), f)));
 const ffmpeg = spawnSync('ffmpeg', ['-version']).status === 0;
 
@@ -164,7 +164,7 @@ describe.skipIf(!modelsReady)('vision (requires models: npm run models:fetch)', 
 
   it.skipIf(!ffmpeg)('analyses video: one face appearance per person, multi-frame reconstruction from real frames', async () => {
     const out = join(dir, 'clip.mp4');
-    const fixtures = resolve(import.meta.dirname, 'fixtures');
+    const fixtures = resolve(import.meta.dirname, '../demo-assets');
     // 4 s clip: the CCTV composite with a slow pan (sub-pixel motion between frames) and sensor noise.
     const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-loop', '1', '-i', join(fixtures, 'subject-a-cctv.jpg'), '-t', '4', '-vf', "crop=1200:680:x='20+t*6':y='20+t*3',noise=alls=8:allf=t,fps=12", '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '24', out]);
     expect(r.status).toBe(0);

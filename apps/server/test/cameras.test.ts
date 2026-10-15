@@ -16,7 +16,7 @@ import { findModelsDir } from '../src/vision/engine.ts';
  * vision worker → camera.detections through the ingest pipeline → tracks; faces → recognition with zone
  * authorisation → alerts; live frame capture into the evidence library.
  */
-const fixtures = resolve(import.meta.dirname, 'fixtures');
+const fixtures = resolve(import.meta.dirname, '../demo-assets');
 const ready = spawnSync('ffmpeg', ['-version']).status === 0 && ['face_detection_yunet_2023mar.onnx', 'face_recognition_sface_2021dec.onnx', 'object_detection_yolox_2022nov.onnx'].every((f) => existsSync(join(findModelsDir(), f)));
 
 let dir: string;
