@@ -57,7 +57,6 @@
 .island:not(.island-ghost) { position: absolute; top: 0; right: 0; }
 .island-row { display: flex; align-items: center; height: 100%; }
 .isl-seg { display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; height: 100%; position: relative; }
-.isl-seg + .isl-seg::before { content: ''; position: absolute; left: 0; top: 9px; bottom: 9px; width: 1px; background: var(--line-2); }
 .isl-time .mono { color: var(--text-0); font-size: var(--fs-caption); }
 .isl-time.replay { color: var(--st-caution-text); }
 .isl-time.replay .mono { color: var(--st-caution-text); }

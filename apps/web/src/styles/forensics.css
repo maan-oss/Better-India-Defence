@@ -13,7 +13,7 @@
 .astat.failed { color: var(--st-critical-text); }
 .astat.complete { color: var(--text-2); }
 .wl-flag { color: var(--st-serious-text); background: var(--st-serious-tint); border: 1px solid var(--st-serious-line); padding: 0 5px; border-radius: 3px; font-size: var(--fs-micro); font-weight: 500; }
-.cls { font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.04em; padding: 1px 6px; border: 1px solid var(--line-3); color: var(--text-1); border-radius: var(--radius-sm); flex: none; }
+.cls { font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.04em; padding: 1px 7px; border: 1px solid var(--line-3); color: var(--text-1); border-radius: 999px; flex: none; }
 .cls.SECRET { border-color: var(--st-critical-line); color: var(--st-critical-text); background: var(--st-critical-tint); }
 .cls.CONFIDENTIAL { border-color: #205d9e; color: #70b8ff; }
 .err-inline { color: var(--st-critical-text); }
@@ -108,14 +108,15 @@
 .fgroup-more:hover { color: var(--text-0); background: var(--bg-hover); }
 .fcard-img img { width: 96px; height: 96px; object-fit: cover; background: var(--bg-0); border-radius: var(--radius); display: block; }
 .fcard-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
-.dchip { font-size: var(--fs-micro); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; color: var(--text-2); }
+.dchip { font-size: var(--fs-caption); font-weight: 500; color: var(--text-2); }
+.face-thumb { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex: none; background: var(--bg-0); }
 .dchip.STRONG { color: var(--text-0); }
 .dchip.POSSIBLE { color: var(--text-1); }
 .dchip.wl { color: var(--st-serious-text); }
-.dchip.STRONG.wl { color: var(--st-serious-text); background: var(--st-serious-tint); border: 1px solid var(--st-serious-line); border-radius: 3px; padding: 0 5px; align-self: flex-start; }
+.dchip.STRONG.wl { color: var(--st-serious-text); font-weight: 600; align-self: flex-start; }
 .qline { font-size: var(--fs-caption); color: var(--text-2); font-variant-numeric: tabular-nums; }
 .qline.POOR, .qline.UNUSABLE { color: var(--st-critical-text); }
-.lchip { font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.04em; padding: 0 5px; border: 1px solid var(--line-3); border-radius: var(--radius-sm); color: var(--text-1); }
+.lchip { font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.04em; padding: 0 6px; border: 1px solid var(--line-3); border-radius: 999px; color: var(--text-1); }
 .lchip.WATCHLIST { border-color: var(--st-serious-line); color: var(--st-serious-text); background: var(--st-serious-tint); }
 
 /* identity */

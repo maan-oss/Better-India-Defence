@@ -129,7 +129,7 @@ test('identity: enrol a person from a photograph (synthetic face) with a quality
   await page.locator('.panel', { hasText: 'Enrol photo' }).locator('input[type=file]').setInputFiles(`${fixtures}/subject-b.jpg`);
   const face = page.locator('.chooser button').first();
   await expect(face).toBeEnabled({ timeout: 60_000 });
-  await expect(face).toContainText(/GOOD|FAIR/);
+  await expect(face).toContainText(/Good|Fair/);
   await face.click();
   await expect(page.getByText(/Enrolled\./)).toBeVisible();
   await expect(page.getByText(/Enrolled photos \(1\)/)).toBeVisible();

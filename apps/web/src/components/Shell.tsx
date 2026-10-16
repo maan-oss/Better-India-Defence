@@ -232,7 +232,7 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
         </P.Root>
         {runMode === 'demo' && (
           <span className="tb-demo" title="Demonstration site: sensors, tracks, people and faces are simulated. Nothing shown here is a real observation. Operational use starts the server with STRATA_MODE=operational.">
-            <span className="tb-demo-long">Simulated data</span>
+            <span className="tb-demo-long">Demo</span>
             <span className="tb-demo-short">Sim</span>
           </span>
         )}

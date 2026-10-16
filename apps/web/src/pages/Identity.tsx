@@ -6,7 +6,7 @@ import { analysePhoto, useVisionLive, type FaceEvent, type FaceSettings, type Id
 import { useSession } from '../state/session';
 import { dateTime } from '../lib/format';
 import { ErrorNote, Loading, useAsync } from '../components/common';
-import { DECISION_TEXT, DecisionChip, FaceCard, QualityLine } from '../components/identity/FaceCard';
+import { DecisionChip, FaceCard, QualityLine, displayName } from '../components/identity/FaceCard';
 import { Segmented, Tabs } from '../components/ui';
 import '../styles/forensics.css';
 import { Empty } from '../brand/Boot';
@@ -45,7 +45,6 @@ export function Identity() {
     <div className="page">
       <div className="page-h">
         <h1>Identity</h1>
-        <span className="sub">Recognition proposes candidates; trained personnel decide. Results are not identifications until confirmed.</span>
         <div className="spacer" />
         <Tabs
           label="Identity views"
@@ -140,14 +139,12 @@ function Review({ faceId }: { faceId: string | null }) {
 function ReviewRow({ ev, active, onSelect }: { ev: FaceEvent; active: boolean; onSelect: () => void }) {
   return (
     <div className={`list-row ${active ? 'sel' : ''}`} onClick={onSelect}>
-      <img src={`/api/faces/${ev.id}/image?which=aligned`} alt="" style={{ width: 40, height: 40 }} />
+      <img className="face-thumb" src={`/api/faces/${ev.id}/image?which=aligned`} alt="" />
       <div className="grow" style={{ minWidth: 0 }}>
         <DecisionChip ev={ev} />
-        <div className="ellipsis">
-          {ev.candidates[0]?.name ?? '—'} <span className="mono muted">{ev.bestScore?.toFixed(3)}</span>
-        </div>
+        <div className="ellipsis">{displayName(ev.candidates[0]?.name)}</div>
         <div className="mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
-          {ev.sourceId} · {dateTime(ev.t)}
+          {ev.sourceId} · {new Date(ev.t).toISOString().slice(11, 16)}Z
         </div>
       </div>
     </div>
@@ -179,15 +176,12 @@ function ReviewDetail({ id, onDone }: { id: string; onDone: () => void }) {
     <div className="col" style={{ gap: 14, maxWidth: 1100 }}>
       <div className="row">
         <DecisionChip ev={e} />
-        <span className="mono muted">{e.id}</span>
-        <div className="spacer" />
-        {e.alertId && <span className="muted">alert {e.alertId}</span>}
       </div>
       <div className="cmp-faces">
         <figure>
           <img src={`/api/faces/${e.id}/image`} alt="Sighting (context)" />
           <figcaption>
-            <b>Sighting</b> — as captured
+            <b>Captured</b>
             <br />
             <QualityLine q={e.quality} />
             {e.quality.reasons.length > 0 && <div className="muted" style={{ fontSize: 'var(--fs-micro)' }}>{e.quality.reasons.join('; ')}</div>}
@@ -195,16 +189,16 @@ function ReviewDetail({ id, onDone }: { id: string; onDone: () => void }) {
         </figure>
         <figure>
           <img src={`/api/faces/${e.id}/image?which=aligned`} alt="Sighting (aligned)" style={{ imageRendering: 'pixelated' }} />
-          <figcaption>Aligned crop used for comparison (112×112)</figcaption>
+          <figcaption>Compared crop</figcaption>
         </figure>
         {e.candidates.map((c) => (
           <figure key={c.identityId}>
             <img src={`/api/identities/templates/${c.templateId}/image`} alt={`Enrolled photo of ${c.name}`} />
             <figcaption>
-              <span className={`lchip ${c.list}`}>{c.list}</span> <b>{c.name}</b>
+              <span className={`lchip ${c.list}`}>{c.list === 'WATCHLIST' ? 'Watchlist' : 'Authorised'}</span> <b>{displayName(c.name)}</b>
               <ScoreBar score={c.score} strong={st.data!.strong} possible={st.data!.possible} />
               <Link to={`/identity?tab=REGISTER&id=${c.identityId}`} className="muted" style={{ fontSize: 'var(--fs-micro)' }}>
-                open register entry
+                Open in register
               </Link>
             </figcaption>
           </figure>
@@ -220,7 +214,7 @@ function ReviewDetail({ id, onDone }: { id: string; onDone: () => void }) {
         <dd className="mono">{dateTime(e.t)}</dd>
         <dt>Decision rule</dt>
         <dd>
-          Strong ≥ {st.data.strong.toFixed(2)}, possible ≥ {st.data.possible.toFixed(2)} (cosine similarity, SFace). A POOR-quality face can never be a strong match. {DECISION_TEXT[e.decision]}.
+          Strong from {st.data.strong.toFixed(2)} similarity, possible from {st.data.possible.toFixed(2)}. A poor-quality face is never a strong match.
         </dd>
       </dl>
       <div className="note warn">

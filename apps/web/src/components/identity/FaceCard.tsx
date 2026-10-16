@@ -13,21 +13,25 @@ export const DECISION_TEXT: Record<FaceEvent['decision'], string> = {
   NOT_COMPARABLE: 'Not comparable',
 };
 
+/** An enrolled name without the synthetic-data suffix; the demo marker is shown once, in the top bar. */
+export const displayName = (name: string | undefined): string => (name ?? '—').replace(/\s*\(demo, synthetic face\)/, '');
+
 export function DecisionChip({ ev }: { ev: Pick<FaceEvent, 'decision' | 'candidates' | 'reviewStatus'> }) {
   const wl = ev.candidates[0]?.list === 'WATCHLIST' && (ev.decision === 'STRONG' || ev.decision === 'POSSIBLE');
+  // "Pending" needs no word: the review queue already says it. Only a decision is worth stating.
+  const decided = ev.reviewStatus === 'CONFIRMED' ? ' · confirmed' : ev.reviewStatus === 'REJECTED' ? ' · rejected' : '';
   return (
     <span className={`dchip ${ev.decision} ${wl ? 'wl' : ''}`} title={ev.decision === 'NOT_COMPARABLE' ? 'Face quality below the minimum for comparison' : ''}>
-      {DECISION_TEXT[ev.decision]}
-      {wl ? ' · WATCHLIST' : ''}
-      {ev.reviewStatus !== 'NOT_REQUIRED' ? ` · ${ev.reviewStatus}` : ''}
+      {wl ? (ev.decision === 'STRONG' ? 'Watchlist match' : 'Possible watchlist match') : DECISION_TEXT[ev.decision]}
+      {decided}
     </span>
   );
 }
 
 export function QualityLine({ q }: { q: FaceEvent['quality'] }) {
   return (
-    <span className={`qline ${q.grade}`} title={q.reasons.join('; ') || 'No quality issues'}>
-      {q.grade} · {q.interOcularPx.toFixed(0)} px IOD · yaw {q.yawDeg}°
+    <span className={`qline ${q.grade}`} title={`${q.interOcularPx.toFixed(0)} px between the eyes, yaw ${q.yawDeg}°. ${q.reasons.join('; ') || 'No quality issues'}`}>
+      {String(q.grade).charAt(0) + String(q.grade).slice(1).toLowerCase()} quality
     </span>
   );
 }
@@ -46,10 +50,10 @@ export function FaceCard({ ev, onChanged, compact }: { ev: FaceEvent; onChanged?
         <DecisionChip ev={ev} />
         {top && ev.decision !== 'NO_MATCH' && ev.decision !== 'NOT_COMPARABLE' ? (
           <div className="ellipsis">
-            <b>{top.name}</b> <span className="mono muted">{top.score.toFixed(2)}</span>
+            <b>{displayName(top.name)}</b>
           </div>
         ) : (
-          <div className="muted ellipsis">{top ? `closest: ${top.name} ${top.score.toFixed(2)}` : 'register empty'}</div>
+          <div className="muted ellipsis">{top ? `Closest: ${displayName(top.name)}` : 'Register empty'}</div>
         )}
         <QualityLine q={ev.quality} />
         {!compact && (

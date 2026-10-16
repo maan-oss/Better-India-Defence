@@ -14,7 +14,6 @@ import { useWorld } from '../../state/world';
 import { SplitFlapDisplay } from '../vendor/componentry/split-flap-display';
 import { NotificationList, type NotificationItem } from '../vendor/spaceui/components/spaceui/notification-list';
 import { StatusBadge } from '../vendor/spaceui/components/spaceui/status-badge';
-import { SlotText } from '../arc/slot-text/slot-text';
 import './patterns.css';
 
 const zulu = (t: number) => new Date(t).toISOString().slice(11, 19);
@@ -95,11 +94,19 @@ export function StatusIsland() {
 
   const pill = (
     <>
-      <span className={`isl-seg isl-time ${mode}`}>
-        {mode === 'live' ? <span className="live-dot" /> : <RotateCcw size={13} strokeWidth={2} />}
-        <span className="isl-mode">{timeLabel}</span>
-        <span className="mono">{zulu(now)}Z</span>
-      </span>
+      {/* Live needs no clock: the picture is live. Replay and pause show the playhead, which is what needs saying. */}
+      {mode === 'live' ? (
+        <span className="isl-seg isl-time">
+          <span className="status-dot ok" />
+          <span className="isl-mode">Live</span>
+        </span>
+      ) : (
+        <span className="isl-seg isl-time">
+          <RotateCcw size={13} strokeWidth={2} />
+          <span className="isl-mode">{timeLabel}</span>
+          <span className="mono">{zulu(now)}Z</span>
+        </span>
+      )}
       <span className={`isl-seg isl-ready r-${level.replace(' ', '-')}`} title={`Readiness ${level}`}>
         <i />
         {level}
@@ -112,13 +119,13 @@ export function StatusIsland() {
             {crit > 0 && (
               <span className="isl-n crit">
                 <span className="prio critical" />
-                <SlotText value={crit} duration={0.5} spins={0} announce />
+                {crit}
               </span>
             )}
             {high > 0 && (
               <span className="isl-n">
                 <span className="prio high" />
-                <SlotText value={high} duration={0.5} spins={0} announce />
+                {high}
               </span>
             )}
           </>
@@ -126,8 +133,7 @@ export function StatusIsland() {
       </span>
       <span className="isl-seg isl-sensors" title={configured ? `${configured - down} of ${configured} sensors reporting` : 'No sensors configured'}>
         <span className={`status-dot ${down ? 'silent' : degraded ? 'degraded' : configured ? 'ok' : 'offline'}`} style={configured ? undefined : { background: 'var(--st-off)', boxShadow: 'none' }} />
-        {configured ? (down ? `${down} down` : `${configured}`) : '0'}
-        <span className="dim isl-unit">{!down && configured === 1 ? 'sensor' : 'sensors'}</span>
+        {configured ? (down ? `${down} down` : 'Sensors ok') : 'No sensors'}
       </span>
       {ws !== 'open' && (
         <span className="isl-seg isl-link" title="Live connection">

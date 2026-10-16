@@ -143,6 +143,15 @@ Generated-UI habits that were removed, and are not to be reintroduced:
   site and asks for credentials.
 - **Decorative loops**: no animation that runs without a purpose. Shimmer is a pulse on a flat block.
 - **Shaders as backgrounds**: they cost CPU on the first screen and carry no information.
+- **Lines as selection marks**: no white bar beside the selected rail item or list row, no underline under a
+  selected tab, no line above a selected tab-bar item. Selection is a filled shape: a grey circle behind an
+  icon, a filled pill for a tab, a filled row.
+- **Ticking numbers**: the status pill shows state, not a running clock. Digits that change every second
+  (split-flap clocks, counters that roll) are not used in the chrome.
+
+**Shape language.** Icon-only controls, avatars, count badges, status dots and face thumbnails are circles.
+Text buttons, chips, tabs and segmented controls are pills. Panels and cards use one radius (12 px). Nothing
+mixes these in one control group.
 
 Speed rules that go with it: pages load their code on rail hover and focus, and the core pages are loaded once
 the shell is idle. Navigation renders at once when that code is in memory (`apps/web/src/routes.ts`); the
