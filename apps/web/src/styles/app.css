@@ -603,7 +603,7 @@ button.list-row:focus-visible { box-shadow: inset var(--glow-accent); }
 .rc-kind label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .rc-table { padding: 0 8px; }
 button.rc-job { all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 2px; max-width: 360px; min-width: 0; }
-button.rc-job > span:first-child { font-size: var(--fs-body); }
+button.rc-job > span:first-child { font-size: var(--fs-body); min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 button.rc-job > span:last-child { font-size: var(--fs-micro); }
 button.rc-job[aria-current] > span:first-child { text-decoration: underline; text-underline-offset: 3px; }
 button.rc-job:focus-visible { box-shadow: var(--glow-accent); border-radius: 3px; }
