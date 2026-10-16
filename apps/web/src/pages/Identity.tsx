@@ -243,7 +243,7 @@ function Sightings() {
   const list = useAsync((s) => get<FaceEvent[]>(`/api/faces?limit=300${decision ? `&decision=${decision}` : ''}`, s), [fv, decision]);
   return (
     <div className="scroll" style={{ padding: 16 }}>
-      <div className="row" style={{ marginBottom: 12 }}>
+      <div className="row" style={{ marginBottom: 12, flexWrap: 'wrap' }}>
         <span className="muted">Filter</span>
         <Segmented
           label="Decision"

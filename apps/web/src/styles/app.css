@@ -444,7 +444,10 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
   .page-h { padding: 0 var(--sp-4); }
   .page-h .sub { display: none; }
   .toasts { left: 10px; right: 10px; width: auto; }
-  .split, .page-body { grid-template-columns: 1fr !important; }
+  /* minmax(0, …): a plain 1fr grows to fit its widest child and pushes the page past the phone edge. */
+  .split, .page-body { grid-template-columns: minmax(0, 1fr) !important; }
+  /* A filter wider than the phone scrolls inside its own row instead of being clipped. */
+  .seg, .arc-seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
   .keys-grid, .keys-layout { grid-template-columns: 1fr; }
   .keys-board { display: none; }
 }
@@ -546,7 +549,8 @@ button.list-row { all: unset; box-sizing: border-box; display: flex; width: 100%
 button.list-row:focus-visible { box-shadow: inset var(--glow-accent); }
 .inc-filters { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; background: var(--bg-1); }
 .inc-filters label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.inc-title { font-size: var(--fs-title) !important; font-weight: 600 !important; letter-spacing: -0.015em; margin: 6px 0 6px !important; line-height: 1.25; }
+/* Block margins only: the InlineEdit root keeps its own negative inline margin, so the title lines up with the meta line. */
+.inc-title { font-size: var(--fs-title) !important; font-weight: 600 !important; letter-spacing: -0.015em; margin-block: 6px !important; line-height: 1.25; }
 .inc-actions { display: flex; align-items: center; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 .inc-tabs { padding: 0 20px; }
 .inc-tabs [role='tabpanel'] .section { padding-left: 0; padding-right: 0; }
@@ -559,7 +563,9 @@ button.list-row:focus-visible { box-shadow: inset var(--glow-accent); }
 /* Administration */
 .admin-users-h { gap: 10px; margin-bottom: 12px; align-items: center; }
 .admin-users { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: visible; }
-.admin-user { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); min-height: 56px; }
+.admin-user { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); min-height: 56px; }
+/* The name keeps at least 180px, so on a phone the role and actions wrap to their own line instead of covering it. */
+.admin-user > .grow { flex: 1 1 180px; }
 .admin-user:last-child { border-bottom: 0; }
 .admin-user.off { opacity: 0.6; }
 .perm-cell { text-align: center; color: var(--text-0); }

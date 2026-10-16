@@ -24,8 +24,9 @@
 }
 @media (max-width: 600px) { .ready-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .ready-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; padding: 2px; margin: var(--sp-4); border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--bg-0); }
-.ready-step { height: 36px; border: 0; background: transparent; color: var(--text-2); font-size: var(--fs-caption); letter-spacing: 0.06em; font-weight: 600; cursor: pointer; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; transition: background var(--t-fast), color var(--t-fast); }
+.ready-step { height: 36px; border: 0; background: transparent; color: var(--text-2); font-size: var(--fs-caption); letter-spacing: 0.06em; font-weight: 600; cursor: pointer; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; transition: background var(--t-fast), color var(--t-fast); }
 .ready-step:hover:not(:disabled) { color: var(--text-0); background: var(--bg-3); }
+@media (max-width: 520px) { .ready-step { font-size: 11px; letter-spacing: 0.02em; padding: 0 2px; } }
 .ready-step:disabled { cursor: default; }
 .ready-step.on::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .ready-step.on.r-NORMAL { color: var(--text-0); background: var(--bg-4); box-shadow: 0 0 0 1px var(--line-2); }

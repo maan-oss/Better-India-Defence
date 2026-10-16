@@ -18,15 +18,17 @@ const detLabel = (d: MediaDetection) => (d.kind === 'face' ? `face ${d.quality?.
  * Label placement for detection boxes. A label sits above its box, moves below it if that collides with a label
  * already placed, and is left off when neither spot is clear, so a crowded frame stays legible.
  */
-function placeLabels(items: { x: number; y: number; w: number; h: number; text: string }[], size: number): ({ x: number; y: number } | null)[] {
+function placeLabels(items: { x: number; y: number; w: number; h: number; text: string }[], size: number, frameW: number): ({ x: number; y: number } | null)[] {
   const placed: { x0: number; y0: number; x1: number; y1: number }[] = [];
   return items.map((it) => {
     const width = it.text.length * size * 0.62 + 4;
+    // A box at the right edge still gets its whole label: the label slides left instead of running off the frame.
+    const x = Math.max(0, Math.min(it.x, frameW - width));
     for (const base of [Math.max(size, it.y - 2), it.y + it.h + size]) {
-      const r = { x0: it.x, y0: base - size, x1: it.x + width, y1: base + 2 };
+      const r = { x0: x, y0: base - size, x1: x + width, y1: base + 2 };
       if (!placed.some((p) => r.x0 < p.x1 && r.x1 > p.x0 && r.y0 < p.y1 && r.y1 > p.y0)) {
         placed.push(r);
-        return { x: it.x, y: base };
+        return { x, y: base };
       }
     }
     return null;
@@ -113,7 +115,7 @@ export function MediaViewer({
     .map((d, i) => ({ i, d }))
     .filter(({ d }) => d.box.w > W / 40 || d.kind === 'face')
     .sort((a, b) => b.d.score - a.d.score);
-  const placed = placeLabels(labelled.map(({ d }) => ({ x: d.box.x, y: d.box.y, w: d.box.w, h: d.box.h, text: detLabel(d) })), labelSize);
+  const placed = placeLabels(labelled.map(({ d }) => ({ x: d.box.x, y: d.box.y, w: d.box.w, h: d.box.h, text: detLabel(d) })), labelSize, W);
   const labelAt = new Map(labelled.map(({ i }, k) => [i, placed[k] ?? null]));
   const frameStep = 1 / (item.fps || 25);
 

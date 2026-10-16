@@ -273,12 +273,17 @@ async function integrations(p: Platform): Promise<{ name: string; adapter: strin
   return out;
 }
 
-/** Capacity of the volume holding the data directory (null where the platform cannot report it). */
-async function diskOf(dir: string): Promise<{ totalBytes: number; freeBytes: number } | null> {
+/**
+ * Usable capacity of the volume holding the data directory (null where the platform cannot report it). The total is
+ * what is used plus what this process can still write, the same basis `df` uses; blocks reserved for root or lost to
+ * the filesystem are not part of it, so they cannot show up as "used" or push the volume into "almost full".
+ */
+export async function diskOf(dir: string): Promise<{ totalBytes: number; freeBytes: number } | null> {
   try {
     const { statfs } = await import('node:fs/promises');
     const st = await statfs(dir);
-    return { totalBytes: st.blocks * st.bsize, freeBytes: st.bavail * st.bsize };
+    const freeBytes = st.bavail * st.bsize;
+    return { totalBytes: (st.blocks - st.bfree) * st.bsize + freeBytes, freeBytes };
   } catch {
     return null;
   }
