@@ -443,6 +443,9 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
   .rail-item.active::before { left: 14px; right: 14px; top: -6px; bottom: auto; width: auto; height: 3px; border-radius: 0 0 3px 3px; }
   .page-h { padding: 0 var(--sp-4); }
   .page-h .sub { display: none; }
+  /* Title and action share the first row; a full-width search drops to a row of its own below them. */
+  .page-h { row-gap: var(--sp-2); }
+  .page-h .sn-search { order: 3; }
   .toasts { left: 10px; right: 10px; width: auto; }
   /* minmax(0, …): a plain 1fr grows to fit its widest child and pushes the page past the phone edge. */
   .split, .page-body { grid-template-columns: minmax(0, 1fr) !important; }
