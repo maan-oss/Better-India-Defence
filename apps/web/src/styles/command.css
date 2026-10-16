@@ -28,9 +28,7 @@
 .ready-step:hover:not(:disabled) { color: var(--text-0); background: var(--bg-3); }
 @media (max-width: 520px) { .ready-step { font-size: 11px; letter-spacing: 0.02em; padding: 0 2px; } }
 .ready-step:disabled { cursor: default; }
-.ready-step.on::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.ready-step.on.r-NORMAL { color: var(--text-0); background: var(--bg-4); box-shadow: 0 0 0 1px var(--line-2); }
-.ready-step.on.r-NORMAL::before { background: var(--st-normal); }
+.ready-step.on.r-NORMAL { color: var(--text-0); background: var(--bg-4); }
 .ready-step.on.r-ALERT { color: var(--st-caution-text); background: var(--st-caution-tint); box-shadow: 0 0 0 1px var(--st-caution-line); }
 .ready-step.on.r-HIGH-ALERT { color: #1a0a00; background: var(--st-serious); }
 .ready-step.on.r-LOCKDOWN { color: #fff; background: var(--st-critical); }
@@ -64,7 +62,6 @@
   .sitrep-layout > .scroll:first-child { display: none !important; }
   .sitrep-doc { border: 0; margin: 0; padding: 0; max-width: none; background: #fff !important; color: #000 !important; }
   .sitrep-doc * { color: #000 !important; }
-  .cls-banner { display: none !important; }
 }
 
 .cmd-grid .table td { white-space: nowrap; }

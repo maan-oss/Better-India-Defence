@@ -1,13 +1,13 @@
 import type { Icon } from '../components/Icons';
 
 /** `simulated`: only shown while the synthetic simulator feeds this instance (demo mode). */
-export type NavItem = { to: string; label: string; icon: keyof typeof Icon; perm?: string; keys?: string; simulated?: boolean };
+export type NavItem = { to: string; label: string; icon: keyof typeof Icon; perm?: string; keys?: string; simulated?: boolean; /** Shorter name for the phone tab bar. */ short?: string };
 /** Application areas, grouped as an operations centre uses them. */
 export const NAV: { group: string; items: NavItem[] }[] = [
   {
     group: 'Operate',
     items: [
-      { to: '/operations', label: 'Operational picture', icon: 'Ops', keys: 'G O' },
+      { to: '/operations', label: 'Operational picture', icon: 'Ops', keys: 'G O', short: 'Map' },
       { to: '/command', label: 'Command', icon: 'Command', keys: 'G C' },
       { to: '/cameras', label: 'Camera wall', icon: 'Camera', perm: 'media.view', keys: 'G W' },
       { to: '/incidents', label: 'Incidents', icon: 'Incidents', keys: 'G I' },

@@ -50,7 +50,10 @@ export class LabelLayer {
         el.dataset.html = html;
       }
       el.dataset.tone = s.tone ?? 'default';
-      el.style.transform = `translate(${Math.round(x + 8)}px, ${Math.round(y - 9)}px)`;
+      // Stay on screen: beside the anchor, or to its left when the label would run off the right edge.
+      const extent = box.x1 - x - 6;
+      const left = x + 8 + extent > w - 8 ? Math.max(8, x - 8 - extent) : x + 8;
+      el.style.transform = `translate(${Math.round(left)}px, ${Math.round(y - 9)}px)`;
       shown.add(s.id);
     }
     for (const [id, el] of this.els)

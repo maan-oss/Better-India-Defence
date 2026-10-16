@@ -69,7 +69,7 @@ export function CameraFeed({ sensorId, t, width = 1920, height = 1080, live, com
             // The reason is the same on every tile of an unreachable system; it stays on hover, not on every tile.
             <span title={error}>No recording</span>
           ) : (
-            'Retrieving recorded frame…'
+            'Loading'
           )}
         </div>
       )}

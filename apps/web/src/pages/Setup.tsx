@@ -209,7 +209,6 @@ export function Setup({ status }: { status: SetupStatus }) {
 
   return (
     <div className="setup">
-      <div className="cls-banner">{level}</div>
       <div className="setup-art" aria-hidden="true">
         <TopoHero />
       </div>
@@ -409,7 +408,6 @@ export function Setup({ status }: { status: SetupStatus }) {
         </div>
         <footer className="setup-foot">Operational mode · no demonstration data · every step is recorded in the audit log</footer>
       </main>
-      <div className="cls-banner">{level}</div>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useId } from 'react';
 
 /** Tiny inline trend line (SVG). */
 /** `stretch` fills its container's width (no end marker, since the aspect is not preserved). */
-export function Spark({ values, width = 90, height = 26, color = 'var(--data)', fill = true, stretch = false }: { values: number[]; width?: number; height?: number; color?: string; fill?: boolean; stretch?: boolean }) {
+export function Spark({ values, width = 90, height = 26, color = 'var(--data)', fill = false, stretch = false }: { values: number[]; width?: number; height?: number; color?: string; fill?: boolean; stretch?: boolean }) {
   const id = useId();
   if (values.length < 2) return <svg className="spark" width={stretch ? '100%' : width} height={height} />;
   const max = Math.max(...values, 1e-9);

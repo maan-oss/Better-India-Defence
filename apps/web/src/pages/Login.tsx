@@ -55,13 +55,10 @@ export function Login() {
     }
   };
 
-  const cls = banner?.classification ?? { level: 'RESTRICTED', caveat: '' };
-  const clsText = `${cls.level}${cls.caveat ? ` // ${cls.caveat}` : ''}`;
   const [siteName, siteSub] = (banner?.site ?? 'Strata').split(' — ');
 
   return (
-    <div className={`login cls-${cls.level}`}>
-      <div className="cls-banner">{clsText}</div>
+    <div className="login">
       <div className="login-main">
         <section className="login-hero" aria-hidden="true">
           <StrataField className="hero-strata" width={1400} height={1000} lines={38} seed={7} relief={0.7} animate observations={3} />
@@ -117,12 +114,10 @@ export function Login() {
             )}
             <div className="login-foot">
               <span>{banner?.simulated ? 'Demonstration site — synthetic data' : 'Live installation'}</span>
-              <span className="mono">{clsText}</span>
             </div>
           </form>
         </section>
       </div>
-      <div className="cls-banner">{clsText}</div>
     </div>
   );
 }

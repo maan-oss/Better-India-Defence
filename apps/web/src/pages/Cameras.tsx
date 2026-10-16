@@ -496,7 +496,7 @@ function WallTile({
           )}
           {c.kind === "live"
             ? st?.state === "live"
-              ? "LIVE · ANALYSED"
+              ? "LIVE"
               : (st?.state ?? "off").toUpperCase()
             : "SITE"}
         </span>
@@ -513,7 +513,7 @@ function WallTile({
         {c.restricted && <span className="wt-zone">{c.zoneName}</span>}
         {st?.state === "live" && (
           <span className="dim">
-            {st.analysisMs ? `${st.analysisMs} ms` : ""}
+            {st.analysisMs ? `analysed · ${st.analysisMs} ms` : ""}
           </span>
         )}
       </div>

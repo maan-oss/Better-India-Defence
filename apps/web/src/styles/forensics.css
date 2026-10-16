@@ -100,7 +100,12 @@
 /* faces */
 .fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--sp-3); }
 .fcard { display: flex; gap: var(--sp-3); border: 1px solid var(--line-2); background: var(--bg-2); border-radius: var(--radius-lg); padding: var(--sp-2); }
-.fcard.pending { border-color: var(--st-serious-line); }
+.fcard.pending { border-color: var(--line-3); }
+.fgroup { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.rv-sub .list-row { padding-left: 28px; }
+.rv-more { margin-left: 52px; }
+.fgroup-more { align-self: flex-start; height: 28px; padding: 0 10px; border: 0; border-radius: var(--radius); background: transparent; color: var(--text-2); font-size: var(--fs-caption); cursor: pointer; }
+.fgroup-more:hover { color: var(--text-0); background: var(--bg-hover); }
 .fcard-img img { width: 96px; height: 96px; object-fit: cover; background: var(--bg-0); border-radius: var(--radius); display: block; }
 .fcard-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
 .dchip { font-size: var(--fs-micro); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; color: var(--text-2); }

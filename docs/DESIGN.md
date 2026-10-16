@@ -11,7 +11,8 @@ component and colour libraries rather than hand-picked values.
 - **Anduril Lattice** and **Palantir Gotham**, operational C2 consoles: monochrome chrome, with colour
   carried by the tactical picture (affiliation, status) and not by the interface.
 - **Astro UXDS** (US Space Force): the status vocabulary (critical → serious → caution → normal →
-  standby → off), always paired with shape or text, and classification banners.
+  standby → off), always paired with shape or text, and the classification marking (recorded, not drawn on
+  every screen).
 - **Linear / Vercel** for interface craft: hairline separation, one type family, sentence case, a 4 px
   spacing scale and restrained motion.
 
@@ -66,7 +67,7 @@ fits the map.
 ## Layout
 
 ```
-┌──────────────────────── classification banner (16 px) ────────────────────────┐
+┌────────────────────────────────────────────────────────────────────────────────┐
 │ logo │ Site › Page            [ Search or run a command  ⌘K ]   (status island) (user) │  48 px
 │ rail │                                                                                │
 │ 56px │  content: pages, or the full-bleed operational picture                         │
@@ -75,11 +76,14 @@ fits the map.
 │ names│  └──────┘                                                          ║ collapsible)│
 │ on   │  ═════════ timeline (folds to its 40 px transport bar) ═════════   ║            │
 │ hover│                                                                                │
-└──────────────────────── classification banner (16 px) ────────────────────────┘
+└────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 - **Rail** — 56 px, icons only, names and shortcuts in tooltips, groups split by hairlines, badges only
-  for work (identity reviews) or for critical alerts (red). On phones it becomes the bottom tab bar.
+  for work (identity reviews) or for critical alerts (red). On phones it becomes a floating tab bar with
+  four areas (Map, Command, Camera wall, Incidents) and More, which opens every area in a sheet. Five
+  destinations at most, labels on one line, icons on a shared baseline, the active area marked by a thin
+  top line. Nothing on screen names a classification; the marking is recorded with the site and exports.
 - **Top bar** — where you are (site › page; the site opens its details), one way to find anything (the
   command bar), the state of the watch (the status island), and the account menu. Nothing else: picture
   modes live on the map, page actions in the page header.
@@ -100,7 +104,7 @@ Each colour family has one job.
 | Provenance | Captured white, reconstructed teal `#0bd8b6`, inferred violet `#baa7ff` (dashed) | How a piece of the picture is known | Status |
 | Data | `#9ba1aa`; coverage quality uses a viridis ramp | Charts, sparklines, coverage | Status |
 | Static context | Grey `#b0b4ba` / `#8b8f98` | Zones, fence, buildings, vital-asset rings, grid | Anything that changes |
-| Classification | Marking colours (RESTRICTED purple, as for CUI) | Top and bottom banners | Anything else |
+| Classification | Marking colours (RESTRICTED purple, as for CUI) | Printed and exported markings, not on-screen banners | Anything else |
 
 Keeping the interface to grey and cream is what lets blue mean *friendly*, red mean *act now* and violet mean
 *inferred* without ambiguity.
@@ -128,12 +132,15 @@ state is neutral grey, and red, orange and amber are reserved for alarm prioriti
 
 Generated-UI habits that were removed, and are not to be reintroduced:
 
-- **Gradients and blur on surfaces or text**: no gradient KPI tiles, no glass panels, no gradient text, no
-  radial "spotlight" backgrounds. Surfaces are flat `--bg-*` tokens with hairline borders.
-- **Glow**: no coloured halos and no glowing alerts. The alert cue is a colour border or a 2 px status rule.
-  Elevation (`--shadow-2`) is kept only for floating layers: menus, toasts and popovers.
+- **Gradients and blur on surfaces or text**: no gradient KPI tiles, no gradient text, no radial "spotlight"
+  backgrounds, no filled gradient under a sparkline. Surfaces are flat `--bg-*` tokens with hairline borders.
+  The one glass surface is the phone tab bar: frosted, hairline-edged, and floating over the page, because
+  glass belongs on the navigation layer and content stays opaque (Apple's guidance for its tab bars).
+- **Glow**: no coloured halos, no pulsing or flashing borders, no glowing alerts. The alert cue is a solid
+  colour border on the tile or card and a coloured label. Sparklines are lines. Elevation (`--shadow-2`) is
+  kept only for floating layers: menus, toasts and popovers.
 - **Marketing layouts** on the sign-in screen: no three-up feature columns, no slogan. The screen names the
-  site, asks for credentials and states the classification.
+  site and asks for credentials.
 - **Decorative loops**: no animation that runs without a purpose. Shimmer is a pulse on a flat block.
 - **Shaders as backgrounds**: they cost CPU on the first screen and carry no information.
 

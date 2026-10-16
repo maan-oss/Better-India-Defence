@@ -24,7 +24,7 @@ readiness changes, evidence exports) goes to an append-only, hash-chained audit 
 0. **First run** — start the service (`npm start`). It prints a one-time setup code (also in
    `<DATA_DIR>/setup-code.txt`, mode 600). Open the console in a browser and follow the wizard:
    enter the code, create your administrator account, place the site (this device's location, lat/lon or
-   MGRS), choose the classification banner and the ground imagery, review. The service restarts with the
+   MGRS), choose the classification marking and the ground imagery, review. The service restarts with the
    site and opens the operational picture; the code stops working once the administrator exists. Until
    the site is placed, other users who sign in see a waiting screen.
 1. **Site setup** — set the surveyed anchor (lat/lon or MGRS), load an orthophoto (survey cell, drone

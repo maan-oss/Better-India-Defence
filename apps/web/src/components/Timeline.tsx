@@ -112,6 +112,7 @@ export function Timeline() {
         }
       }
       // incident spans
+      let labelEnd = -Infinity;
       if (data)
         for (const inc of data.incidents) {
           const x0 = xOf(inc.tStart, W, v);
@@ -120,8 +121,13 @@ export function Timeline() {
           g.fillRect(x0, 0, Math.max(2, x1 - x0), H - 16);
           g.fillStyle = alpha(P.serious, 0.85);
           g.font = '10px "Geist Mono Variable"';
-          g.fillText(inc.code, x0 + 3, H - 20);
-          hits.current.push({ x: x0 + 20, y: H - 24, hit: { kind: 'incident', id: inc.id, t: inc.tStart, label: `${inc.code} — ${inc.title}` } });
+          // Top of the span: the density bars grow from the bottom and would cross a label placed there. A code that
+          // would run into the one before it is left off; its span and hit area stay.
+          if (x0 + 3 >= labelEnd) {
+            g.fillText(inc.code, x0 + 3, 11);
+            labelEnd = x0 + 3 + g.measureText(inc.code).width + 10;
+          }
+          hits.current.push({ x: x0 + 20, y: 6, hit: { kind: 'incident', id: inc.id, t: inc.tStart, label: `${inc.code} — ${inc.title}` } });
         }
       // density histogram (stacked)
       if (data) {

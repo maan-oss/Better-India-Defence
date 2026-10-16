@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { prefetchRoute } from '../routes';
 import { Popover as P } from 'radix-ui';
-import { Keyboard, Moon, Sun, Bell, BellOff, Search, Settings2 } from 'lucide-react';
+import { Ellipsis, Keyboard, Moon, Sun, Bell, BellOff, Search, Settings2 } from 'lucide-react';
 import { toMgrs, type AlertRecord } from '@strata/domain/client';
 import { useSession } from '../state/session';
 import { useWorld } from '../state/world';
@@ -16,6 +16,7 @@ import { Icon } from './Icons';
 import { Dialog, Tip } from './ui';
 import { Breadcrumb } from './arc/breadcrumb/breadcrumb';
 import { PopoverContent } from './arc/popover/popover';
+import { Drawer, DrawerContent } from './arc/drawer/drawer';
 import { ShortcutKeys, ShortcutList, type ShortcutListGroup } from './arc/shortcut-recorder/shortcut-recorder';
 import { ThemeSwitch } from './arc/theme-switch/theme-switch';
 import { ToastStack, ToastStackProvider } from './arc/toast-stack/toast-stack';
@@ -31,19 +32,14 @@ import { Mark } from '../brand/Mark';
  * carries where you are (site › page), the command bar, and the status island. Content gets everything else.
  */
 export function Shell({ children }: { children: ReactNode }) {
-  const cls = useOps((s) => s.classification);
   const loc = useLocation();
   const [cmd, setCmd] = useState(false);
   const [keys, setKeys] = useState(false);
-  const banner = `${cls.level}${cls.caveat ? ` // ${cls.caveat}` : ''}`;
   const area = loc.pathname.split('/')[1] ?? '';
   useGlobalKeys(() => setCmd(true), () => setKeys(true));
   return (
     <ToastStackProvider>
-      <div className={`shell cls-${cls.level.replace(' ', '-')}`}>
-        <div className="cls-banner top" role="note" aria-label={`Classification ${banner}`}>
-          {banner}
-        </div>
+      <div className="shell">
         <Rail onShortcuts={() => setKeys(true)} />
         <TopBar onCommand={() => setCmd(true)} onShortcuts={() => setKeys(true)} />
         <main className="main">
@@ -51,7 +47,6 @@ export function Shell({ children }: { children: ReactNode }) {
             {children}
           </div>
         </main>
-        <div className="cls-banner bottom">{banner}</div>
         <AlertToasts />
         <ToastStack position="bottom-right" label="Console notifications" />
         <ConnectionWatch />
@@ -91,27 +86,32 @@ function useGlobalKeys(openCommand: () => void, openShortcuts: () => void) {
   }, [nav, openCommand, openShortcuts]);
 }
 
+/** What the phone tab bar shows directly; every other area is one tap away under More. */
+const PHONE_PRIMARY = ['/operations', '/command', '/cameras', '/incidents'];
+
 function Rail({ onShortcuts }: { onShortcuts: () => void }) {
   const can = useSession((s) => s.can);
   const simulated = useWorld((s) => s.simulated);
   const pending = useVisionLive((s) => s.pendingReview);
   const alerts = useData((s) => s.alerts);
   const critical = useMemo(() => alerts.filter((a) => a.status === 'open' && a.priority === 'critical').length, [alerts]);
+  const [more, setMore] = useState(false);
+  const visible = NAV.map((g) => ({ group: g.group, items: g.items.filter((n) => (!n.perm || can(n.perm)) && (!n.simulated || simulated)) })).filter((g) => g.items.length);
+  const badgeOf = (to: string) => (to === '/identity' && pending > 0 ? pending : to === '/operations' && critical > 0 ? critical : 0);
+  const moreDot = visible.some((g) => g.items.some((n) => !PHONE_PRIMARY.includes(n.to) && badgeOf(n.to) > 0));
   return (
-    <nav className="rail" aria-label="Application areas">
-      <Link to="/operations" className="rail-logo" aria-label="Strata home">
-        <Mark size={28} />
-      </Link>
-      <div className="rail-items">
-        {NAV.map((g, gi) => {
-          const items = g.items.filter((n) => (!n.perm || can(n.perm)) && (!n.simulated || simulated));
-          if (!items.length) return null;
-          return (
+    <>
+      <nav className="rail" aria-label="Application areas">
+        <Link to="/operations" className="rail-logo" aria-label="Strata home">
+          <Mark size={28} />
+        </Link>
+        <div className="rail-items">
+          {visible.map((g, gi) => (
             <div key={g.group} className="rail-group" role="group" aria-label={g.group}>
               {gi > 0 && <span className="rail-sep" aria-hidden="true" />}
-              {items.map((n) => {
+              {g.items.map((n) => {
                 const I = Icon[n.icon] as () => ReactNode;
-                const badge = n.to === '/identity' && pending > 0 ? pending : n.to === '/operations' && critical > 0 ? critical : 0;
+                const badge = badgeOf(n.to);
                 return (
                   <Tip
                     key={n.to}
@@ -123,24 +123,61 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
                       </span>
                     }
                   >
-                    <NavLink to={n.to} className="rail-item" aria-label={n.label} onPointerEnter={() => prefetchRoute(n.to)} onFocus={() => prefetchRoute(n.to)}>
+                    <NavLink
+                      to={n.to}
+                      className={`rail-item${PHONE_PRIMARY.includes(n.to) ? '' : ' rail-secondary'}`}
+                      aria-label={n.label}
+                      onPointerEnter={() => prefetchRoute(n.to)}
+                      onFocus={() => prefetchRoute(n.to)}
+                    >
                       <I />
-                      <span className="rail-label">{n.label}</span>
+                      <span className="rail-label">{n.short ?? n.label}</span>
                       {badge > 0 && <span className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`}>{badge > 99 ? '99+' : badge}</span>}
                     </NavLink>
                   </Tip>
                 );
               })}
             </div>
-          );
-        })}
-      </div>
-      <Tip content={<span className="tip-nav">Keyboard shortcuts<span className="tip-keys"><kbd>?</kbd></span></span>} side="right">
-        <button className="rail-item rail-foot" onClick={onShortcuts} aria-label="Keyboard shortcuts">
-          <Keyboard size={18} strokeWidth={1.75} />
-        </button>
-      </Tip>
-    </nav>
+          ))}
+          <button type="button" className="rail-item rail-more" onClick={() => setMore(true)} aria-label="More areas">
+            <Ellipsis />
+            <span className="rail-label">More</span>
+            {moreDot && <span className="rail-dot" aria-hidden="true" />}
+          </button>
+        </div>
+        <Tip content={<span className="tip-nav">Keyboard shortcuts<span className="tip-keys"><kbd>?</kbd></span></span>} side="right">
+          <button className="rail-item rail-foot" onClick={onShortcuts} aria-label="Keyboard shortcuts">
+            <Keyboard size={18} strokeWidth={1.75} />
+          </button>
+        </Tip>
+      </nav>
+      <Drawer open={more} onOpenChange={setMore}>
+        <DrawerContent side="bottom" title="All areas" description="Every area of the console. The tab bar keeps the four you use most.">
+          <div className="more-groups">
+            {visible.map((g) => (
+              <section key={g.group} className="more-group" aria-label={g.group}>
+                <h3 className="more-title">{g.group}</h3>
+                <ul className="more-list">
+                  {g.items.map((n) => {
+                    const I = Icon[n.icon] as () => ReactNode;
+                    const badge = badgeOf(n.to);
+                    return (
+                      <li key={n.to}>
+                        <NavLink to={n.to} onClick={() => setMore(false)}>
+                          <I />
+                          <span>{n.label}</span>
+                          {badge > 0 && <span className="more-count">{badge > 99 ? '99+' : badge}</span>}
+                        </NavLink>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 }
 

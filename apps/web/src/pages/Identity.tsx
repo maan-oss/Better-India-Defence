@@ -80,6 +80,7 @@ function Review({ faceId }: { faceId: string | null }) {
   const refresh = useVisionLive((s) => s.refreshCounts);
   const list = useAsync((s) => get<FaceEvent[]>('/api/faces?review=PENDING&limit=200', s), [fv]);
   const [sel, setSel] = useState<string | null>(faceId);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
   useEffect(() => {
     if (!sel && list.data?.length) setSel(list.data[0]!.id);
   }, [list.data, sel]);
@@ -93,20 +94,29 @@ function Review({ faceId }: { faceId: string | null }) {
         </div>
         <div className="scroll">
           {list.data?.length === 0 && <Empty compact art="identity" title="Nothing to review" description="Recognition candidates appear here for human verification." />}
-          {list.data?.map((ev) => (
-            <div key={ev.id} className={`list-row ${sel === ev.id ? 'sel' : ''}`} onClick={() => setSel(ev.id)}>
-              <img src={`/api/faces/${ev.id}/image?which=aligned`} alt="" style={{ width: 40, height: 40 }} />
-              <div className="grow" style={{ minWidth: 0 }}>
-                <DecisionChip ev={ev} />
-                <div className="ellipsis">
-                  {ev.candidates[0]?.name ?? '—'} <span className="mono muted">{ev.bestScore?.toFixed(3)}</span>
-                </div>
-                <div className="mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
-                  {ev.sourceId} · {dateTime(ev.t)}
-                </div>
+          {/* One row per person: repeat sightings of the same match fold under the newest, and open on request. */}
+          {groupSightings(list.data ?? []).map((g) => {
+            const [head, ...earlier] = g;
+            const key = head!.bestIdentityId ?? head!.id;
+            const open = openGroup === key;
+            return (
+              <div key={key} className="rv-group">
+                <ReviewRow ev={head!} active={sel === head!.id} onSelect={() => setSel(head!.id)} />
+                {earlier.length > 0 && (
+                  <button type="button" className="fgroup-more rv-more" aria-expanded={open} onClick={() => setOpenGroup(open ? null : key)}>
+                    {open ? 'Hide earlier sightings' : `Show ${earlier.length} earlier sighting${earlier.length === 1 ? '' : 's'}`}
+                  </button>
+                )}
+                {open && (
+                  <div className="rv-sub">
+                    {earlier.map((ev) => (
+                      <ReviewRow key={ev.id} ev={ev} active={sel === ev.id} onSelect={() => setSel(ev.id)} />
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <div className="rv-detail">
@@ -122,6 +132,23 @@ function Review({ faceId }: { faceId: string | null }) {
         ) : (
           <Empty art="identity" title="Select a sighting" description="Compare the capture with the enrolled photos, check the quality grade, then confirm or reject. Nothing is an identification until a person confirms it." />
         )}
+      </div>
+    </div>
+  );
+}
+
+function ReviewRow({ ev, active, onSelect }: { ev: FaceEvent; active: boolean; onSelect: () => void }) {
+  return (
+    <div className={`list-row ${active ? 'sel' : ''}`} onClick={onSelect}>
+      <img src={`/api/faces/${ev.id}/image?which=aligned`} alt="" style={{ width: 40, height: 40 }} />
+      <div className="grow" style={{ minWidth: 0 }}>
+        <DecisionChip ev={ev} />
+        <div className="ellipsis">
+          {ev.candidates[0]?.name ?? '—'} <span className="mono muted">{ev.bestScore?.toFixed(3)}</span>
+        </div>
+        <div className="mono dim" style={{ fontSize: 'var(--fs-micro)' }}>
+          {ev.sourceId} · {dateTime(ev.t)}
+        </div>
       </div>
     </div>
   );
@@ -264,8 +291,8 @@ function Sightings() {
       {!list.data && <Loading />}
       {list.data?.length === 0 && <Empty compact art="cameras" title="No face sightings recorded" description="Cameras with face recognition enabled add sightings here." />}
       <div className="fgrid">
-        {list.data?.map((ev) => (
-          <FaceCard key={ev.id} ev={ev} onChanged={list.reload} />
+        {groupSightings(list.data ?? []).map((g) => (
+          <SightingGroup key={g[0]!.id} events={g} onChanged={list.reload} />
         ))}
       </div>
     </div>
@@ -273,6 +300,32 @@ function Sightings() {
 }
 
 // -----------------------------------------------------------------------------------------------------------
+
+/** One person, many sightings: the newest sighting shows and earlier ones fold under it. Unmatched sightings stand alone. */
+function groupSightings(events: FaceEvent[]): FaceEvent[][] {
+  const byPerson = new Map<string, FaceEvent[]>();
+  for (const ev of events) {
+    const key = ev.bestIdentityId ?? `sighting:${ev.id}`;
+    byPerson.set(key, [...(byPerson.get(key) ?? []), ev]);
+  }
+  return [...byPerson.values()];
+}
+
+function SightingGroup({ events, onChanged }: { events: FaceEvent[]; onChanged: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [head, ...earlier] = events;
+  return (
+    <div className="fgroup">
+      <FaceCard ev={head!} onChanged={onChanged} />
+      {earlier.length > 0 && (
+        <button type="button" className="fgroup-more" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+          {open ? 'Hide earlier sightings' : `Show ${earlier.length} earlier sighting${earlier.length === 1 ? '' : 's'}`}
+        </button>
+      )}
+      {open && earlier.map((ev) => <FaceCard key={ev.id} ev={ev} onChanged={onChanged} />)}
+    </div>
+  );
+}
 
 const ZONES = FACILITY.zones;
 
