@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { fromMgrs, toMgrs } from '@strata/domain';
+import { fromMgrs, toMgrs } from '@strata/domain/client';
 import { api, post } from '../api/client';
 import { useSession } from '../state/session';
 import { Icon } from '../components/Icons';

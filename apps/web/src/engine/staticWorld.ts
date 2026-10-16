@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { boxFootprint, buildingBoxes, terrainHeight, type FacilityDef, type RoadDef } from '@strata/domain';
+import { boxFootprint, buildingBoxes, terrainHeight, type FacilityDef, type RoadDef } from '@strata/domain/client';
 import type { DsmGeometry, StructureState, WorldObjectState } from '../api/types';
 import { P } from '../lib/palette';
 

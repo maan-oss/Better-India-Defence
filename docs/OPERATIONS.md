@@ -192,3 +192,14 @@ readiness changes, evidence exports) goes to an append-only, hash-chained audit 
 - The server runs fully offline (embedded or on-premises PostgreSQL, local models, no map tiles or
   cloud services). Adapters queue messages while the server is unreachable and send them, in order,
   when it returns; beyond the queue bound the oldest are dropped and counted.
+
+## Updating the software
+
+1. Build the new release (`npm run build`), then restart the service (`npm start`, or your supervisor).
+   The restart is required: the running server keeps the list of built files it had at start, so a web client
+   built after the restart is not served until the process restarts.
+2. Operators with a console open need no action. Their tab keeps working until it next opens a page whose code
+   changed; that load fails once, and the console reloads itself to the new release.
+3. Check **System health** after an update: the services list shows the API, the database and each adapter.
+4. To roll back, check out the previous commit, run `npm run build` and restart the service. The build output
+   (`apps/web/dist`, `apps/server/dist`) is replaced in place, so a rollback is a rebuild, not a file swap.

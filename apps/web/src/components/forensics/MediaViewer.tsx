@@ -67,6 +67,15 @@ export function MediaViewer({
   const drag = useRef<{ x0: number; y0: number } | null>(null);
   const [draft, setDraft] = useState<Box | null>(null);
   const [playing, setPlaying] = useState(false);
+  // The overlay is drawn in image pixels; this is the width it is shown at, so labels can stay a fixed size on screen.
+  const [shownW, setShownW] = useState(0);
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setShownW(entry!.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const ctl = new AbortController();
@@ -98,7 +107,8 @@ export function MediaViewer({
 
   const shown = dets.filter((d) => (d.kind === 'face' ? overlay.faces : d.category === 'person' ? overlay.persons : d.category === 'vehicle' ? overlay.vehicles : overlay.other));
   // Labels for boxes large enough to read, strongest detections first, so the most confident text wins a collision.
-  const labelSize = Math.max(11, W / 110);
+  // About 12 screen pixels; falls back to a size that scales with the image until the overlay has been measured.
+  const labelSize = shownW > 0 ? (12 * W) / shownW : Math.max(11, W / 110);
   const labelled = shown
     .map((d, i) => ({ i, d }))
     .filter(({ d }) => d.box.w > W / 40 || d.kind === 'face')

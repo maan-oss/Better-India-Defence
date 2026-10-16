@@ -1,7 +1,7 @@
 import { useState, type ReactNode, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Copy, Crosshair, FileWarning, Layers, Navigation, ScanSearch, Send } from 'lucide-react';
-import { EnuFrame, FACILITY, formatGeodetic } from '@strata/domain';
+import { EnuFrame, FACILITY, formatGeodetic } from '@strata/domain/client';
 import type { WorldEngine } from '../../engine/WorldEngine';
 import { post } from '../../api/client';
 import { useWorld, type Selection } from '../../state/world';

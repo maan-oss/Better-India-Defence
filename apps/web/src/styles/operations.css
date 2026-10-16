@@ -57,7 +57,7 @@
 .feed { position: relative; background: #000; aspect-ratio: 16 / 9; border-bottom: 1px solid var(--line); }
 .feed img { width: 100%; height: 100%; object-fit: cover; display: block; image-rendering: auto; }
 .feed .feed-meta { position: absolute; left: 0; right: 0; bottom: 0; padding: 4px 8px; font-size: var(--fs-micro); display: flex; gap: 8px; background: linear-gradient(transparent, rgba(0,0,0,0.75)); }
-.feed .feed-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-2); font-size: var(--fs-caption); text-align: center; padding: 16px; background: repeating-linear-gradient(45deg, #1a1a1a 0 6px, #202020 6px 12px); }
+.feed .feed-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-2); font-size: var(--fs-caption); text-align: center; padding: 16px; background: var(--bg-1); }
 .bbox { position: absolute; border: 1.5px solid #0bd8b6; border-radius: 2px; pointer-events: none; }
 .bbox span { position: absolute; top: -15px; left: -1.5px; font-size: var(--fs-micro); font-weight: 600; background: #0bd8b6; color: #00201a; padding: 0 4px; border-radius: 2px 2px 2px 0; white-space: nowrap; }
 
@@ -96,7 +96,7 @@
 .sr-cell { border: 1px solid var(--line); background: #000; }
 .sr-cell img { width: 100%; display: block; image-rendering: pixelated; }
 .sr-cell .cap { padding: 6px var(--sp-2); display: flex; gap: var(--sp-2); align-items: center; background: var(--bg-2); font-size: var(--fs-caption); }
-.sr-cell.empty { min-height: 80px; display: grid; place-items: center; color: var(--text-2); font-size: var(--fs-caption); padding: 12px; background: repeating-linear-gradient(45deg, #1a1a1a 0 6px, #202020 6px 12px); }
+.sr-cell.empty { min-height: 80px; display: grid; place-items: center; color: var(--text-2); font-size: var(--fs-caption); padding: 12px; background: var(--bg-1); }
 .compare { position: relative; overflow: hidden; background: #000; }
 .compare img { display: block; width: 100%; image-rendering: pixelated; }
 .compare .after { position: absolute; inset: 0; overflow: hidden; border-right: 1px solid var(--text-0); }

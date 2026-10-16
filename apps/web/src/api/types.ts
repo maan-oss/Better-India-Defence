@@ -12,7 +12,7 @@ import type {
   Vec3,
   EpistemicState,
   HandoffResult,
-} from '@strata/domain';
+} from '@strata/domain/client';
 
 export type { AlertRecord, EvidenceRef, FacilityDef, IncidentRecord, SensorDef, SensorStatusRecord, SurfacePatch, TrackSnapshot, UserRecord, Vec3, EpistemicState };
 

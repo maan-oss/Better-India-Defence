@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { EnuFrame, fromMgrs, toMgrs, type SiteConfig } from '@strata/domain';
+import { EnuFrame, fromMgrs, toMgrs, type SiteConfig } from '@strata/domain/client';
 import { api, get, post } from '../api/client';
 import { useWorld } from '../state/world';
 import { ErrorNote, Loading } from '../components/common';

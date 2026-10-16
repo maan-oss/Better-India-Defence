@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { directionFromHeadingPitch, frustumFootprint, terrainHeight, type CameraDef, type FacilityDef, type SensorDef } from '@strata/domain';
+import { directionFromHeadingPitch, frustumFootprint, terrainHeight, type CameraDef, type FacilityDef, type SensorDef } from '@strata/domain/client';
 import { P } from '../lib/palette';
 
 const STATUS_COLOR: Record<string, string> = { ok: P.text2, degraded: P.caution, silent: P.serious, offline: P.critical, fault: P.critical };

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AlertRecord, IncidentRecord, LiveMessage, SensorStatusRecord, WorldChange } from '@strata/domain';
+import type { AlertRecord, IncidentRecord, LiveMessage, SensorStatusRecord, WorldChange } from '@strata/domain/client';
 import { get, qs } from '../api/client';
 import type { Coverage, ReplayState, TimelineData, WorldChangeRow } from '../api/types';
 

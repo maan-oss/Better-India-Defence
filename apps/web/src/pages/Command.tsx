@@ -1,7 +1,7 @@
 import { ShieldAlert } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { dtg, READINESS_LEVELS, terrainHeight, type ThreatAssessment } from '@strata/domain';
+import { dtg, READINESS_LEVELS, terrainHeight, type ThreatAssessment } from '@strata/domain/client';
 import { get, post, put } from '../api/client';
 import { useOps, grid } from '../state/ops';
 import { useSession } from '../state/session';
@@ -37,7 +37,7 @@ import { Timeline as ArcTimeline } from '../components/arc/timeline/timeline';
 import { useToastStack } from '../components/arc/toast-stack/toast-stack';
 import { OnWatch, useOnWatch } from '../components/ops/OnWatch';
 import { MemberSelector } from '../components/vendor/spaceui/components/spaceui/member-selector';
-import type { AlertRecord } from '@strata/domain';
+import type { AlertRecord } from '@strata/domain/client';
 import '../styles/command.css';
 import { Empty } from '../brand/Boot';
 
@@ -191,14 +191,18 @@ function ReadinessPanel() {
           Set {r.t ? dtg(r.t) : '—'} by {r.by}: {r.reason}
         </div>
       </div>
-      <div className="ready-hist">
-        <ArcTimeline
-          label="Readiness history"
-          now={Date.now()}
-          maxHeight={220}
-          events={(hist.data ?? []).slice(0, 12).map((h, i) => ({ id: `${h.t}-${i}`, at: h.t, title: h.level, actor: h.set_by, meta: h.reason, tone: h.level === 'NORMAL' ? 'success' : h.level === 'LOCKDOWN' || h.level === 'HIGH ALERT' ? 'danger' : 'neutral' }))}
-        />
-      </div>
+      {hist.data && hist.data.length === 0 ? (
+        <div className="ready-hist muted">No readiness changes recorded yet.</div>
+      ) : (
+        <div className="ready-hist">
+          <ArcTimeline
+            label="Readiness history"
+            now={Date.now()}
+            maxHeight={220}
+            events={(hist.data ?? []).slice(0, 12).map((h, i) => ({ id: `${h.t}-${i}`, at: h.t, title: h.level, actor: h.set_by, meta: h.reason, tone: h.level === 'NORMAL' ? 'success' : h.level === 'LOCKDOWN' || h.level === 'HIGH ALERT' ? 'danger' : 'neutral' }))}
+          />
+        </div>
+      )}
       {set && (
         <Modal title={`Set readiness: ${set}`} onClose={() => setSet(null)}>
           <div className="col" style={{ gap: 14 }}>

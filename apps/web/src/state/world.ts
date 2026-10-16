@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { FacilityDef, SurfacePatch, Vec3 } from '@strata/domain';
+import type { FacilityDef, SurfacePatch, Vec3 } from '@strata/domain/client';
 
 export const LAYERS = {
   terrain: 'Terrain',

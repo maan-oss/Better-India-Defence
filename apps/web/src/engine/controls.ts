@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { terrainHeight, type Vec3 } from '@strata/domain';
+import { terrainHeight, type Vec3 } from '@strata/domain/client';
 
 const DEG = Math.PI / 180;
 const ease = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);

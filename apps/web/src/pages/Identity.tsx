@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { FACILITY } from '@strata/domain';
+import { FACILITY } from '@strata/domain/client';
 import { get, patch, post, put } from '../api/client';
 import { analysePhoto, useVisionLive, type FaceEvent, type FaceSettings, type Identity as IdentityT, type PhotoFaces, type Template, type VisionStatus } from '../api/vision';
 import { useSession } from '../state/session';

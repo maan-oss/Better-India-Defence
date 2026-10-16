@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { P } from '../lib/palette';
-import { terrainHeight } from '@strata/domain';
+import { terrainHeight } from '@strata/domain/client';
 
 /**
  * Terrain with a restrained topographic shader: hillshade, 2 m contours (10 m index contours), optional

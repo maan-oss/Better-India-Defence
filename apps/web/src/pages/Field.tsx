@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { AlertRecord, Vec3 } from '@strata/domain';
+import type { AlertRecord, Vec3 } from '@strata/domain/client';
 import { get, post } from '../api/client';
 import { useData } from '../state/data';
 import { useOps, grid } from '../state/ops';

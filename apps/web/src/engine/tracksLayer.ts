@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { terrainHeight } from '@strata/domain';
+import { terrainHeight } from '@strata/domain/client';
 import type { RenderTrack } from '../state/tracks';
 import { AFF_COLOR, pixelScale, symbolFor, symbolTexture } from './symbols';
 import { P } from '../lib/palette';

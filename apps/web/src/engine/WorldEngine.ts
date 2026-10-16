@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { directionFromHeadingPitch, EnuFrame, terrainHeight, toUtm, type AlertRecord, type CameraDef, type FacilityDef, type IncidentRecord, type SurfacePatch, type Vec3 } from '@strata/domain';
+import { directionFromHeadingPitch, EnuFrame, terrainHeight, toUtm, type AlertRecord, type CameraDef, type FacilityDef, type IncidentRecord, type SurfacePatch, type Vec3 } from '@strata/domain/client';
 import { CameraController, type NavMode } from './controls';
 import { createTerrain } from './terrain';
 import { buildBuildings, buildFence, buildObjects, buildRoads, buildZones } from './staticWorld';

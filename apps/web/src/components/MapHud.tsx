@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
-import { EnuFrame, toMgrs, type FacilityDef } from '@strata/domain';
+import { EnuFrame, toMgrs, type FacilityDef } from '@strata/domain/client';
 import type { WorldEngine } from '../engine/WorldEngine';
 
 const NICE = [5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000];
@@ -76,19 +76,16 @@ export function MapHud({ engineRef, hostRef, facility }: { engineRef: RefObject<
         </div>
         <span className="mono">{metres >= 1000 ? `${metres / 1000} km` : `${metres} m`}</span>
       </div>
-      <div className={`cursor-ref glass mono ${cursor ? 'on' : ''}`} aria-live="off">
-        {cursor ? (
-          <>
-            <b>{cursor.mgrs}</b>
-            <span>elev {cursor.elev.toFixed(0)} m</span>
-            <span className="dim">
-              E{cursor.e.toFixed(0)} N{cursor.n.toFixed(0)}
-            </span>
-          </>
-        ) : (
-          <span className="dim">grid reference under cursor</span>
-        )}
-      </div>
+      {/* Shown only while the pointer is over the map; an always-on hint competes with the picture it describes. */}
+      {cursor && (
+        <div className="cursor-ref glass mono on" aria-live="off">
+          <b>{cursor.mgrs}</b>
+          <span>elev {cursor.elev.toFixed(0)} m</span>
+          <span className="dim">
+            E{cursor.e.toFixed(0)} N{cursor.n.toFixed(0)}
+          </span>
+        </div>
+      )}
     </>
   );
 }

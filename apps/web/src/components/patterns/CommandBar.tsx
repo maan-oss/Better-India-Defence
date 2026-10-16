@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog } from 'radix-ui';
 import { AnimatePresence, motion } from 'motion/react';
-import { EnuFrame, fromMgrs, terrainHeight } from '@strata/domain';
+import { EnuFrame, fromMgrs, terrainHeight } from '@strata/domain/client';
 import { get } from '../../api/client';
 import { useWorld } from '../../state/world';
 import { useTime } from '../../state/time';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { AlertRecord } from '@strata/domain';
+import type { AlertRecord } from '@strata/domain/client';
 import { get, post } from '../../api/client';
 import { useSession } from '../../state/session';
 import { useOps, grid as gridRef } from '../../state/ops';

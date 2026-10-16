@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import type { EpistemicState, EvidenceRef } from '@strata/domain';
+import type { EpistemicState, EvidenceRef } from '@strata/domain/client';
 import { get } from '../api/client';
 import { hms, dateTime } from '../lib/format';
 import { useWorld } from '../state/world';

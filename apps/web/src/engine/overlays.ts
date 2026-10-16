@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { terrainHeight, type AlertRecord, type IncidentRecord } from '@strata/domain';
+import { terrainHeight, type AlertRecord, type IncidentRecord } from '@strata/domain/client';
 import type { WorldChangeRow } from '../api/types';
 import { LEVEL_COLOR, P, PRIORITY_COLOR } from '../lib/palette';
 

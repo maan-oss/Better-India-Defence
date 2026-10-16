@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { SurfacePatch } from '@strata/domain';
+import type { SurfacePatch } from '@strata/domain/client';
 import type { Coverage } from '../api/types';
 import { P, qualityRamp } from '../lib/palette';
 

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { EnuFrame, toMgrs, type AlertRecord, type LiveMessage, type ThreatAssessment, type VitalAsset } from '@strata/domain';
+import { EnuFrame, toMgrs, type AlertRecord, type LiveMessage, type ThreatAssessment, type VitalAsset } from '@strata/domain/client';
 import { get } from '../api/client';
 import { useWorld } from './world';
 

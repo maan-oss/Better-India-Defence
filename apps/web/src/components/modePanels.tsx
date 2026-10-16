@@ -13,7 +13,7 @@ import { VirtualList } from './VirtualList';
 import { tracks as trackStore, type RenderTrack } from '../state/tracks';
 import { Segmented, Tabs } from './ui';
 import { Building2, Cctv, Fence, Radar, Radio, ShieldAlert, SquareDashed } from 'lucide-react';
-import { terrainHeight, type Vec3 } from '@strata/domain';
+import { terrainHeight, type Vec3 } from '@strata/domain/client';
 import { TreeView, type TreeNode } from './arc/tree-view/tree-view';
 
 /** The site as a hierarchy (Arc tree view): zones, buildings and sensors by kind. Choosing one flies the view to it. */

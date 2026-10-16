@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FACILITY, getCameras } from '@strata/domain';
+import { FACILITY, getCameras } from '@strata/domain/client';
 import { get, post } from '../api/client';
 import type { ReconstructionRow } from '../api/types';
 import { ErrorNote, Loading, StateChip, useAsync } from '../components/common';

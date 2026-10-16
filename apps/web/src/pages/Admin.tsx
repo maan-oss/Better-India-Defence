@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import type { Role } from '@strata/domain';
+import type { Role } from '@strata/domain/client';
 import { get, patch, post } from '../api/client';
 import type { UserRecord } from '../api/types';
 import { ErrorNote, Loading, Modal, useAsync } from '../components/common';
 import { useOnWatch } from '../components/ops/OnWatch';
 import { Check, Copy, KeyRound, Settings2, UserCheck, UserCog } from 'lucide-react';
 import { useSession } from '../state/session';
-import { FACILITY } from '@strata/domain';
+import { FACILITY } from '@strata/domain/client';
 import { CodeBlock } from '../components/arc/code-block/code-block';
 import { Alert } from '../components/arc/alert/alert';
 import { Avatar } from '../components/arc/avatar/avatar';

@@ -21,7 +21,7 @@
 .wt-zone { color: #f3f1ea; border: 1px solid rgba(243, 241, 234, 0.35); padding: 0 5px; border-radius: 3px; font-size: var(--fs-micro); }
 .wtile-alert { position: absolute; left: 8px; right: 8px; bottom: 28px; display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(229, 72, 77, 0.88); color: #fff; font-size: var(--fs-caption); font-weight: 600; border-radius: var(--radius); pointer-events: none; animation: popIn 300ms var(--ease-out) both; }
 .wtile.alerting.p-high .wtile-alert, .wtile.alerting.p-medium .wtile-alert { background: var(--st-serious); color: #1a0a00; }
-.wtile .camtile-off { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; color: var(--text-2); font-size: var(--fs-caption); padding: 12px; text-align: center; background: repeating-linear-gradient(45deg, #1a1a1a 0 8px, #202020 8px 16px); }
+.wtile .camtile-off { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; color: var(--text-2); font-size: var(--fs-caption); padding: 12px; text-align: center; background: var(--bg-1); }
 .wtile .camtile-off.error { color: var(--st-critical-text); }
 .wall-pager { display: flex; justify-content: center; align-items: center; gap: 6px; }
 .wall-pager .dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--line-3); background: transparent; padding: 0; cursor: pointer; transition: background var(--t-fast), transform var(--t-fast); }

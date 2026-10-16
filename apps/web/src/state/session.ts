@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { UserRecord } from '@strata/domain';
+import type { UserRecord } from '@strata/domain/client';
 import { get, post } from '../api/client';
 import type { Me } from '../api/types';
 

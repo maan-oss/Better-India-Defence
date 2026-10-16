@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { FaceEventSummary, LiveMessage } from '@strata/domain';
+import type { FaceEventSummary, LiveMessage } from '@strata/domain/client';
 import type { EnhanceOp, ImageStats, ProductState } from '@strata/domain/vision';
 import { get } from './client';
 import { useSession } from '../state/session';

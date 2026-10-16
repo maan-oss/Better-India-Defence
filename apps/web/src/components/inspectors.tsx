@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FACILITY, findSensor, formatGeodetic, EnuFrame, type AlertRecord, type EvidenceRef, type Contribution } from '@strata/domain';
+import { FACILITY, findSensor, formatGeodetic, EnuFrame, type AlertRecord, type EvidenceRef, type Contribution } from '@strata/domain/client';
 import { get, post, qs } from '../api/client';
 import type { PatchDetail, TrackDetail, WorldChangeRow } from '../api/types';
 import { useWorld } from '../state/world';

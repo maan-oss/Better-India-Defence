@@ -213,9 +213,8 @@ export const MemberSelector = React.forwardRef<HTMLDivElement, MemberSelectorPro
 
     return (
       <div ref={ref} className={cn('relative', className)}>
-        {label && (
-          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">{label}</div>
-        )}
+        {/* Strata: sentence case, like every other field label in the console. */}
+        {label && <div className="text-xs font-semibold text-muted-foreground mb-3">{label}</div>}
         <div className="flex items-start gap-4 flex-wrap">
           <AnimatePresence mode="popLayout" initial={false}>
             {visibleMembers.map((member) => (

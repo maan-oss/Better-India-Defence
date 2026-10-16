@@ -1,4 +1,4 @@
-import type { LiveMessage } from '@strata/domain';
+import type { LiveMessage } from '@strata/domain/client';
 
 type Listener = (m: LiveMessage) => void;
 

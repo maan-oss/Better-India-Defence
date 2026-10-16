@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { FACILITY } from '@strata/domain';
+import { FACILITY } from '@strata/domain/client';
 import { get, post, qs } from '../api/client';
 import type { HandoffResponse } from '../api/types';
 import { ErrorNote, Loading, ObservationViewer, StateChip, useAsync } from '../components/common';

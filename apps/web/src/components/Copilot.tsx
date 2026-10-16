@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { COPILOT_EXAMPLES } from '@strata/domain';
+import { COPILOT_EXAMPLES } from '@strata/domain/client';
 import { get, post } from '../api/client';
 import type { CopilotAnswer } from '../api/types';
 import { useWorld, type LayerKey } from '../state/world';

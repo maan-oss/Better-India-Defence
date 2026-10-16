@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { IncidentRecord } from '@strata/domain';
+import type { IncidentRecord } from '@strata/domain/client';
 import { get, patch, post } from '../api/client';
 import type { IncidentPackage } from '../api/types';
 import { useData } from '../state/data';
@@ -9,7 +9,7 @@ import { useTime } from '../state/time';
 import { useSession } from '../state/session';
 import { ErrorNote, Loading, Prio, StateChip, useAsync } from '../components/common';
 import { dateTime, dur, hms } from '../lib/format';
-import { dtg } from '@strata/domain';
+import { dtg } from '@strata/domain/client';
 import { Button } from '../components/arc/button/button';
 import { ChipGroup } from '../components/arc/chip-group/chip-group';
 import { CommentThread, type ThreadComment } from '../components/arc/comment-thread/comment-thread';

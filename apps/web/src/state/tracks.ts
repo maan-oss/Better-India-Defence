@@ -1,4 +1,4 @@
-import type { TrackSnapshot, Vec3 } from '@strata/domain';
+import type { TrackSnapshot, Vec3 } from '@strata/domain/client';
 import { get, qs } from '../api/client';
 import type { TrackWindow } from '../api/types';
 

@@ -10,7 +10,7 @@ import { useVisionLive } from './api/vision';
 import { useOps } from './state/ops';
 import { get, setUnauthorizedHandler } from './api/client';
 import type { FacilityResponse } from './api/types';
-import { FACILITY, setTerrainMode, type SurfacePatch } from '@strata/domain';
+import { FACILITY, setTerrainMode, type SurfacePatch } from '@strata/domain/client';
 import { Login } from './pages/Login';
 import { type SetupStatus } from './pages/Setup';
 import { Shell } from './components/Shell';

@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { prefetchRoute } from '../routes';
 import { Popover as P } from 'radix-ui';
 import { Keyboard, Moon, Sun, Bell, BellOff, Search, Settings2 } from 'lucide-react';
-import { toMgrs, type AlertRecord } from '@strata/domain';
+import { toMgrs, type AlertRecord } from '@strata/domain/client';
 import { useSession } from '../state/session';
 import { useWorld } from '../state/world';
 import { useData } from '../state/data';
