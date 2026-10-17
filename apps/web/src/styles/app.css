@@ -53,8 +53,6 @@ h1, h2, h3, h4, h5 { text-wrap: balance; }
   grid-column: 2; grid-row: 1;
   display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--sp-4);
   padding: 0 var(--sp-3) 0 var(--sp-4);
-  border-bottom: 1px solid var(--line);
-  background: var(--bg-chrome);
   z-index: 20; min-width: 0;
 }
 .tb-left { display: flex; align-items: center; gap: var(--sp-2); min-width: 0; }
@@ -66,7 +64,7 @@ h1, h2, h3, h4, h5 { text-wrap: balance; }
 .tb-demo { height: 20px; padding: 0 7px; border-radius: var(--radius-sm); font-size: var(--fs-micro); font-weight: 600; color: var(--st-caution-text); background: var(--st-caution-tint); border: 1px solid var(--st-caution-line); display: inline-flex; align-items: center; flex: none; }
 
 .cmd-trigger {
-  width: clamp(220px, 28vw, 380px); height: 32px; display: flex; align-items: center; gap: var(--sp-2); padding: 0 6px 0 10px;
+  width: clamp(220px, 28vw, 380px); height: var(--tb-ctl); display: flex; align-items: center; gap: var(--sp-2); padding: 0 6px 0 10px;
   border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--bg-1); color: var(--text-2); cursor: pointer;
   transition: border-color var(--t-fast), background var(--t-fast), color var(--t-fast);
 }
@@ -462,7 +460,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 }
 @media (max-width: 1180px) {
   /* Icon-only search is a circle, like every other icon control; on phones it is the only search entry point. */
-  .cmd-trigger { width: 36px; height: 36px; padding: 0; justify-content: center; border-radius: 50%; }
+  .cmd-trigger { width: var(--tb-ctl); height: var(--tb-ctl); padding: 0; justify-content: center; border-radius: 50%; }
   .cmd-trigger-text, .cmd-trigger-keys { display: none; }
 }
 
@@ -578,7 +576,7 @@ button.list-row { all: unset; box-sizing: border-box; display: flex; width: 100%
 .health-disk { margin: 4px 0 18px; }
 .health-tree { margin: 0 0 16px; }
 .login-fields { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
-.tb-night { display: inline-flex; } .tb-night button { height: 30px; width: 30px; border-radius: 50%; } @media (max-width: 900px) { .tb-night { display: none; } }
+.tb-night { display: inline-flex; } .tb-night button { height: var(--tb-ctl); width: var(--tb-ctl); border-radius: 50%; } @media (max-width: 900px) { .tb-night { display: none; } }
 @media (max-width: 520px) { .login-side { padding: 24px 16px; } }
 .login-mobile-mark { display: none; margin-bottom: 36px; }
 @media (max-width: 960px) { .login-mobile-mark { display: block; } }

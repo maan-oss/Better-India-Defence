@@ -153,6 +153,7 @@
   --left-w: 272px;
   --right-w: 384px;
   --top-h: 48px;
+  --tb-ctl: 36px;   /* one height for every control in the top bar; icon-only controls are circles of this size */
   --timeline-h: 128px;
 }
 

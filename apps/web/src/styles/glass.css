@@ -10,7 +10,7 @@
 /* ---------------------------------------------------------------- material */
 /* Every glass surface gets the same three things: a translucent fill, a backdrop blur, and a lit edge. The lit edge is
    the ::after rim, a 1 px gradient brightest at the top-left, which is what makes the glass read as an object. */
-.btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .topbar, .rail,
+.btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .rail,
 .inbox-pop, .site-pop, .island-panel, .cmd, .toast, .glass, .map-modes, .map-dock, .compass, .scalebar {
   position: relative;
   background: var(--glass-fill);
@@ -20,7 +20,7 @@
   box-shadow: var(--glass-rim), var(--glass-shadow);
 }
 .btn::after, .chip::after, .seg::after, .cmd-trigger::after, .island::after, .tb-bell::after, .tb-night button::after,
-.user-btn::after, .topbar::after, .rail::after, .inbox-pop::after, .site-pop::after, .island-panel::after, .cmd::after,
+.user-btn::after, .rail::after, .inbox-pop::after, .site-pop::after, .island-panel::after, .cmd::after,
 .toast::after, .glass::after, .map-modes::after, .map-dock::after, .compass::after, .scalebar::after,
 .tab[data-state='active']::after, .seg > button[data-state='on']::after, .seg > button.on::after, .rail-item.active::after {
   content: '';
@@ -56,7 +56,13 @@
 .tab[data-state='active'] { background: var(--glass-fill-strong); box-shadow: var(--glass-rim), var(--glass-shadow); border-radius: 999px; }
 
 /* ---------------------------------------------------------------- navigation */
-.topbar { border-radius: 24px; }
+/* The bar itself is not a surface. Each control in it is its own glass, at one height, so nothing is glass on glass. */
+.topbar { position: relative; }
+.topbar .cmd-trigger, .topbar .island, .topbar .tb-bell, .topbar .tb-night button, .topbar .user-btn { box-sizing: border-box; height: var(--tb-ctl); min-height: 0; }
+.topbar .cmd-trigger, .topbar .island { border-radius: 999px; }
+.topbar .tb-bell, .topbar .tb-night button, .topbar .user-btn { box-sizing: border-box; width: var(--tb-ctl); min-width: 0; padding: 0; border-radius: 50%; justify-content: center; }
+/* Content that scrolls beneath the bar is softened by a blur that fades out below the controls, so the site name stays legible. */
+.topbar::before { content: ''; position: absolute; inset: -8px 0 -28px; z-index: -1; pointer-events: none; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); -webkit-mask: linear-gradient(#000 55%, transparent); mask: linear-gradient(#000 55%, transparent); }
 .island-panel { border-radius: 22px; }
 .island.has-crit { border-color: var(--st-critical-line); }
 .rail { border-radius: 28px; }
@@ -109,8 +115,9 @@ input.input, select.input { border-radius: 999px; padding: 0 14px; }
 }
 
 /* Reduced transparency: the same shapes on a solid surface. */
+.topbar::before { -webkit-backdrop-filter: none; backdrop-filter: none; -webkit-mask: none; mask: none; background: var(--bg-1); }
 @media (prefers-reduced-transparency: reduce) {
-  .btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .topbar, .rail,
+  .btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .rail,
   .inbox-pop, .site-pop, .island-panel, .cmd, .toast, .modal, .glass, .map-modes, .map-dock, .compass, .scalebar {
     background: var(--bg-2);
     -webkit-backdrop-filter: none;
