@@ -8,7 +8,7 @@ import type { Transition } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./switch.module.css";
 
-export interface SwitchProps extends ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> {
+interface SwitchProps extends ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> {
   label?: string;
 }
 
@@ -71,4 +71,3 @@ export const Switch = forwardRef<ElementRef<typeof SwitchPrimitive.Root>, Switch
 
 Switch.displayName = "Switch";
 
-export default Switch;

@@ -8,14 +8,14 @@ import { ArrowDown, ArrowUp, FileText, Paperclip, RotateCw, SmilePlus, X } from 
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./chat-thread.module.css";
 
-export interface ChatParticipant {
+interface ChatParticipant {
   id: string;
   name: string;
   /** Portrait URL. Initials show when it is missing. */
   avatar?: string;
 }
 
-export interface ChatAttachment {
+interface ChatAttachment {
   id: string;
   name: string;
   kind: "image" | "file";
@@ -28,16 +28,16 @@ export interface ChatAttachment {
   alt?: string;
 }
 
-export interface ChatReaction {
+interface ChatReaction {
   emoji: string;
   count: number;
   /** The current user reacted with this emoji. */
   mine?: boolean;
 }
 
-export type ChatMessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
+type ChatMessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
 
-export interface ChatMessage {
+interface ChatMessage {
   id: string;
   authorId: string;
   text?: string;
@@ -48,13 +48,13 @@ export interface ChatMessage {
   status?: ChatMessageStatus;
 }
 
-export interface ChatDraft {
+interface ChatDraft {
   text: string;
   files: File[];
 }
 
 /** Words the composer shows or announces. Each has an English default. */
-export interface ChatComposerLabels {
+interface ChatComposerLabels {
   /** Accessible name of the send button. */
   send?: string;
   /** Accessible name of the attach button. */
@@ -66,7 +66,7 @@ export interface ChatComposerLabels {
 }
 
 /** Every word the thread shows or announces. Each has an English default; words with a count or names are functions, so an app can apply its own plural rules. */
-export interface ChatThreadLabels extends ChatComposerLabels {
+interface ChatThreadLabels extends ChatComposerLabels {
   sending?: string;
   sent?: string;
   delivered?: string;
@@ -131,12 +131,12 @@ function relativeDay(locale: string, offset: 0 | -1) {
   return word.charAt(0).toLocaleUpperCase(locale) + word.slice(1);
 }
 
-export interface ChatThreadHandle {
+interface ChatThreadHandle {
   scrollToBottom: (smooth?: boolean) => void;
   focusComposer: () => void;
 }
 
-export interface ChatThreadProps {
+interface ChatThreadProps {
   participants: ChatParticipant[];
   currentUserId: string;
   /** Controlled messages, oldest first. Leave it out to let the thread keep its own list. */
@@ -207,7 +207,7 @@ function withCount(text: string, value: number, node: ReactNode) {
   return at < 0 ? text : <>{text.slice(0, at)}{node}{text.slice(at + digits.length)}</>;
 }
 
-export function formatBytes(bytes = 0) {
+function formatBytes(bytes = 0) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 ** 2) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
@@ -267,7 +267,7 @@ function useAutoHeight(mirror: RefObject<HTMLElement | null>, maxHeight: number,
 
 type Pending = { id: string; file: File; url?: string };
 
-export interface ChatComposerProps {
+interface ChatComposerProps {
   onSend: (draft: ChatDraft) => void;
   placeholder?: string;
   allowAttachments?: boolean;
@@ -392,7 +392,7 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(fu
  * A chat or support thread: grouped messages with day separators, reactions, read receipts that glide to the latest read message,
  * a typing indicator, and a composer. The list stays pinned to the newest message and offers a pill when new messages land out of view.
  */
-export const ChatThread = forwardRef<ChatThreadHandle, ChatThreadProps>(function ChatThread({
+const ChatThread = forwardRef<ChatThreadHandle, ChatThreadProps>(function ChatThread({
   participants, currentUserId, messages: messagesProp, defaultMessages, typing = [], readBy, onSend, onReact, onRetry,
   reactions = DEFAULT_REACTIONS, placeholder = "Message", composer = true, allowAttachments = true, accept,
   groupWindow = 5 * 60_000, locale = "en-US", label = "Conversation", labels, className,
@@ -696,4 +696,3 @@ function ReactionPicker({ open, mine, reactions, reduced, labels, id, onToggle, 
   </div>;
 }
 
-export default ChatThread;

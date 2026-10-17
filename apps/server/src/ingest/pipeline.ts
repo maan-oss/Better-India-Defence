@@ -11,10 +11,10 @@ import { infraPosition, type WorldMemory } from '../world/worldMemory.ts';
 import type { AlertEngine } from '../alerts/alertEngine.ts';
 import type { ReconstructionService } from '../reconstruction/service.ts';
 
-export const MAX_FUTURE_SKEW_MS = 30_000;
-export const MAX_AGE_MS = 7 * 24 * 3600_000;
+const MAX_FUTURE_SKEW_MS = 30_000;
+const MAX_AGE_MS = 7 * 24 * 3600_000;
 
-export interface IngestResult {
+interface IngestResult {
   accepted: number;
   duplicates: number;
   rejected: { index: number; reason: string }[];

@@ -5,7 +5,7 @@ import { AnimatePresence, animate, cancelFrame, frame, motion, useInView, useMot
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./bar-chart.module.css";
 
-export interface BarChartDatum {
+interface BarChartDatum {
   /** Stable identity, such as an ISO date. A bar whose key survives a data change keeps its place, so switching ranges morphs instead of redrawing. */
   key: string;
   /** Full label for the headline and screen readers, such as "Tue, Sep 15". */
@@ -16,7 +16,7 @@ export interface BarChartDatum {
 }
 
 /** Use a bar chart for one measure across a run of days, weeks, or months, when people compare each period against the rest and against the average. */
-export interface BarChartProps {
+interface BarChartProps {
   data: BarChartDatum[];
   /** What is measured, such as "Active minutes". Names the chart for assistive technology. */
   label: string;
@@ -391,4 +391,3 @@ export function BarChart({ data, label, period, unit = "", averageLabel = "Daily
   </figure>;
 }
 
-export default BarChart;

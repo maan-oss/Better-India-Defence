@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { boxFootprint, buildingBoxes, terrainHeight, type FacilityDef, type RoadDef } from '@strata/domain/client';
+import { buildingBoxes, terrainHeight, type FacilityDef, type RoadDef } from '@strata/domain/client';
 import type { DsmGeometry, StructureState, WorldObjectState } from '../api/types';
 import { P } from '../lib/palette';
 
@@ -200,9 +200,3 @@ export function buildObjects(objects: WorldObjectState[]): THREE.Group {
   return g;
 }
 
-export function footprintCenter(id: string, f: FacilityDef): THREE.Vector3 | null {
-  const b = f.buildings.find((x) => x.id === id);
-  if (!b) return null;
-  const fp = boxFootprint(b);
-  return new THREE.Vector3(fp.reduce((s, p) => s + p.x, 0) / 4, fp.reduce((s, p) => s + p.y, 0) / 4, terrainHeight(b.center.x, b.center.y) + b.height);
-}

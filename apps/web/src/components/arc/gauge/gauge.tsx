@@ -7,8 +7,8 @@ import styles from "./gauge.module.css";
 
 type GaugeTone = "accent" | "success" | "warning" | "danger";
 /** A band that starts at `from`: the highest band the value reaches sets the tone and names the state, so it never rests on color alone. */
-export interface GaugeThreshold { from: number; tone: GaugeTone; label: string; }
-export interface GaugeProps { value: number; min?: number; max?: number; label: string; detail?: string; tone?: GaugeTone; thresholds?: GaugeThreshold[]; }
+interface GaugeThreshold { from: number; tone: GaugeTone; label: string; }
+interface GaugeProps { value: number; min?: number; max?: number; label: string; detail?: string; tone?: GaugeTone; thresholds?: GaugeThreshold[]; }
 
 /** Copy enters from the side the value moved toward: a rise comes up from below, a fall drops from above. */
 const rise: Variants = { hidden: (direction: number) => ({ opacity: 0, y: `${.3 * direction}em`, filter: `blur(${motionTokens.blur.soft}px)` }), shown: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: motionTokens.duration.standard, ease: [...motionTokens.ease.enter] } }, gone: (direction: number) => ({ opacity: 0, y: `${-.3 * direction}em`, filter: `blur(${motionTokens.blur.subtle}px)`, transition: { duration: motionTokens.duration.fast, ease: [...motionTokens.ease.standard] } }) };
@@ -102,4 +102,3 @@ export function Gauge({ value, min = 0, max = 100, label, detail, tone = "accent
   </figure>;
 }
 
-export default Gauge;

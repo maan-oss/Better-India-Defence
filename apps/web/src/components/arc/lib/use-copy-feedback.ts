@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export type CopyFeedbackState = "idle" | "copied" | "error";
+type CopyFeedbackState = "idle" | "copied" | "error";
 
 /** Shared clipboard state for actions that render their own button or menu. */
 export function useCopyFeedback(duration = 1900) {

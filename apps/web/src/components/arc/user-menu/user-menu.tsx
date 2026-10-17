@@ -9,11 +9,11 @@ import { ChevronDown, LoaderCircle, LogOut, Monitor, Moon, Sun, SunMoon } from "
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./user-menu.module.css";
 
-export type UserStatus = "available" | "busy" | "away";
-export type ThemePreference = "light" | "dark" | "system";
+type UserStatus = "available" | "busy" | "away";
+type ThemePreference = "light" | "dark" | "system";
 
 /** Statuses in menu order. Each one has its own dot shape as well as color: solid, barred, or hollow. */
-export const userStatuses: { value: UserStatus; label: string }[] = [
+const userStatuses: { value: UserStatus; label: string }[] = [
   { value: "available", label: "Available" },
   { value: "busy", label: "Busy" },
   { value: "away", label: "Away" },
@@ -25,8 +25,8 @@ const themes: { value: ThemePreference; label: string; icon: ReactNode }[] = [
   { value: "system", label: "System", icon: <Monitor size={16} strokeWidth={1.75} aria-hidden="true" /> },
 ];
 
-export interface UserMenuUser { name: string; email: string; plan?: string; avatarSrc?: string; avatarSrcSet?: string }
-export interface UserMenuItem { label: string; icon?: ReactNode; keys?: string[]; onSelect?: () => void }
+interface UserMenuUser { name: string; email: string; plan?: string; avatarSrc?: string; avatarSrcSet?: string }
+interface UserMenuItem { label: string; icon?: ReactNode; keys?: string[]; onSelect?: () => void }
 
 /**
  * The account menu behind a person's photo in an app's top bar. It holds a compact identity header, a short group of account
@@ -34,7 +34,7 @@ export interface UserMenuItem { label: string; icon?: ReactNode; keys?: string[]
  * Theme and status choices keep the menu open; everything else closes it and returns focus to the trigger.
  * When `onSignOut` returns a promise, the item shows its progress and the menu closes once it settles.
  */
-export interface UserMenuProps {
+interface UserMenuProps {
   user: UserMenuUser;
   /** Presence status. Passing `status` or `onStatusChange` shows the presence dot and an inline status switch. */
   status?: UserStatus;
@@ -89,7 +89,7 @@ const stillMotion: Variants = { closed: { opacity: 0 }, open: { opacity: 1, tran
 const rowMotion: Variants = { closed: { opacity: 0, y: 3 }, open: { opacity: 1, y: 0, transition: { duration: .2, ease: enter } } };
 
 /** A presence mark that morphs between statuses: the color crossfades while a hole opens for away and a bar slides in for busy. */
-export function PresenceDot({ status, className }: { status: UserStatus | "offline"; className?: string }) {
+function PresenceDot({ status, className }: { status: UserStatus | "offline"; className?: string }) {
   return <span className={[styles.dot, className].filter(Boolean).join(" ")} data-status={status} aria-hidden="true" />;
 }
 
@@ -418,4 +418,3 @@ export function UserMenu({ user, status: statusProp, defaultStatus = "available"
   </span>;
 }
 
-export default UserMenu;

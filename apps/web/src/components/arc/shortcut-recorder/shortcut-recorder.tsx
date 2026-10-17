@@ -14,8 +14,8 @@ import styles from "./shortcut-recorder.module.css";
  * matters, so ⌥K records as "alt+k" instead of "˚".
  * ============================================================================================== */
 
-export type Platform = "mac" | "other";
-export interface ShortcutToken { /** What the key cap shows. */ label: string; /** Physical key id, matched against held keys. */ id: string; spoken: string }
+type Platform = "mac" | "other";
+interface ShortcutToken { /** What the key cap shows. */ label: string; /** Physical key id, matched against held keys. */ id: string; spoken: string }
 
 const MODIFIER_ORDER = ["mod", "ctrl", "alt", "shift", "meta"] as const;
 type Modifier = (typeof MODIFIER_ORDER)[number];
@@ -29,7 +29,7 @@ const CODE_KEYS: Record<string, string> = {
 const MODIFIER_KEYS: Record<string, string> = { Meta: "meta", OS: "meta", Control: "ctrl", Alt: "alt", AltGraph: "alt", Shift: "shift" };
 
 /** The physical key id for an event: "k", "1", "enter", "meta", "shift"… `null` for keys that never make a shortcut, such as Caps Lock. */
-export function keyId(event: Pick<KeyboardEvent, "key" | "code">): string | null {
+function keyId(event: Pick<KeyboardEvent, "key" | "code">): string | null {
   const { code, key } = event;
   if (MODIFIER_KEYS[key]) return MODIFIER_KEYS[key];
   if (/^Key[A-Z]$/.test(code)) return code.slice(3).toLowerCase();
@@ -48,7 +48,7 @@ function splitShortcut(shortcut: string) {
 }
 
 /** One spelling per combination: on a Mac, Command is `mod`; elsewhere, Ctrl is. Modifiers come in a fixed order. */
-export function normalizeShortcut(shortcut: string, platform: Platform) {
+function normalizeShortcut(shortcut: string, platform: Platform) {
   const { mods, key } = splitShortcut(shortcut);
   if (platform === "mac" && mods.delete("meta")) mods.add("mod");
   if (platform === "other" && mods.delete("ctrl")) mods.add("mod");
@@ -56,7 +56,7 @@ export function normalizeShortcut(shortcut: string, platform: Platform) {
 }
 
 /** Reads a keydown into a shortcut string, or `null` while only modifiers are down. */
-export function shortcutFromEvent(event: Pick<KeyboardEvent, "key" | "code" | "metaKey" | "ctrlKey" | "altKey" | "shiftKey">, platform: Platform) {
+function shortcutFromEvent(event: Pick<KeyboardEvent, "key" | "code" | "metaKey" | "ctrlKey" | "altKey" | "shiftKey">, platform: Platform) {
   const key = keyId(event);
   if (!key || ["meta", "ctrl", "alt", "shift"].includes(key)) return null;
   const mods: string[] = [];
@@ -68,12 +68,6 @@ export function shortcutFromEvent(event: Pick<KeyboardEvent, "key" | "code" | "m
   return normalizeShortcut([...mods, key].join("+"), platform);
 }
 
-/** True when a keydown is this shortcut. Use it to run the action a recorded shortcut is bound to. */
-export function matchesShortcut(event: Pick<KeyboardEvent, "key" | "code" | "metaKey" | "ctrlKey" | "altKey" | "shiftKey">, shortcut: string, platform: Platform) {
-  const pressed = shortcutFromEvent(event, platform);
-  return !!pressed && pressed === normalizeShortcut(shortcut, platform);
-}
-
 const MAC_KEYS: Record<string, [string, string]> = { enter: ["↩", "Return"], backspace: ["⌫", "Delete"], delete: ["⌦", "Forward delete"], tab: ["⇥", "Tab"], escape: ["esc", "Escape"] };
 const SHARED_KEYS: Record<string, [string, string]> = {
   space: ["Space", "Space"], enter: ["Enter", "Enter"], escape: ["Esc", "Escape"], backspace: ["Backspace", "Backspace"], delete: ["Del", "Delete"], tab: ["Tab", "Tab"],
@@ -82,7 +76,7 @@ const SHARED_KEYS: Record<string, [string, string]> = {
 };
 
 /** Key caps for a shortcut in platform order: ⌃ ⌥ ⇧ ⌘ on a Mac, Ctrl Alt Shift Win elsewhere. */
-export function shortcutTokens(shortcut: string, platform: Platform): ShortcutToken[] {
+function shortcutTokens(shortcut: string, platform: Platform): ShortcutToken[] {
   const { mods, key } = splitShortcut(normalizeShortcut(shortcut, platform));
   const tokens: ShortcutToken[] = [];
   if (platform === "mac") {
@@ -104,7 +98,7 @@ export function shortcutTokens(shortcut: string, platform: Platform): ShortcutTo
 }
 
 /** "⌘⇧K" on a Mac, "Ctrl+Shift+K" elsewhere, plus a spoken form for assistive technology. */
-export function formatShortcut(shortcut: string, platform: Platform) {
+function formatShortcut(shortcut: string, platform: Platform) {
   const tokens = shortcutTokens(shortcut, platform);
   return { text: tokens.map(token => token.label).join(platform === "mac" ? "" : "+"), spoken: tokens.map(token => token.spoken).join(" ") };
 }
@@ -121,13 +115,13 @@ const detectPlatform = (): Platform => {
   return /mac|iphone|ipad|ipod/i.test(hint) ? "mac" : "other";
 };
 /** The viewer's platform. Server renders assume a Mac and settle on the first client render. */
-export function usePlatform(override?: Platform): Platform {
+function usePlatform(override?: Platform): Platform {
   const detected = useSyncExternalStore(subscribe, detectPlatform, () => "mac" as Platform);
   return override ?? detected;
 }
 
 /** Keys held down right now, by physical id. Clears on window blur, and after Command lifts (macOS drops the other keyups). */
-export function usePressedKeys(enabled = true) {
+function usePressedKeys(enabled = true) {
   const [held, setHeld] = useState<ReadonlySet<string>>(() => new Set());
   useEffect(() => {
     if (!enabled) return;
@@ -157,7 +151,7 @@ const EMPTY: ReadonlySet<string> = new Set();
  * Kbd and ShortcutKeys
  * ============================================================================================== */
 
-export interface KbdProps extends HTMLAttributes<HTMLElement> {
+interface KbdProps extends HTMLAttributes<HTMLElement> {
   children: ReactNode;
   /** Draws the key pushed down and lit, such as while it is held. */
   pressed?: boolean;
@@ -165,12 +159,12 @@ export interface KbdProps extends HTMLAttributes<HTMLElement> {
 }
 
 /** A key cap. Use it inline in copy, in menus, or through `ShortcutKeys` for a whole combination. */
-export const Kbd = forwardRef<HTMLElement, KbdProps>(function Kbd({ children, pressed = false, size = "md", className, ...props }, ref) {
+const Kbd = forwardRef<HTMLElement, KbdProps>(function Kbd({ children, pressed = false, size = "md", className, ...props }, ref) {
   return <kbd ref={ref} {...props} className={[styles.kbd, className].filter(Boolean).join(" ")} data-size={size} data-pressed={pressed || undefined}>{children}</kbd>;
 });
 Kbd.displayName = "Kbd";
 
-export interface ShortcutKeysProps {
+interface ShortcutKeysProps {
   shortcut: string;
   platform?: Platform;
   /** Held key ids from `usePressedKeys`; matching caps light up. */
@@ -192,9 +186,9 @@ export function ShortcutKeys({ shortcut, platform: platformProp, pressed, size =
  * ShortcutRecorder
  * ============================================================================================== */
 
-export interface ShortcutBinding { shortcut: string; label: string }
+interface ShortcutBinding { shortcut: string; label: string }
 
-export interface ShortcutRecorderProps {
+interface ShortcutRecorderProps {
   label: string;
   hideLabel?: boolean;
   value?: string | null;
@@ -237,7 +231,7 @@ const chipFade: Variants = { enter: { opacity: 0 }, rest: { opacity: 1, scale: 1
  * build the chord, the finished shortcut settles into place, and a combination that is already taken asks before it is used.
  * Escape cancels, Backspace clears, and the reset button restores the default. Caps follow the platform: ⌘ on a Mac, Ctrl elsewhere.
  */
-export function ShortcutRecorder({
+function ShortcutRecorder({
   label, hideLabel = false, value, defaultValue = null, onValueChange, resetValue, bindings = [], warnReserved = true, requireModifier = true,
   platform: platformProp, placeholder = "Record shortcut", description, disabled = false, id, className,
 }: ShortcutRecorderProps) {
@@ -423,7 +417,7 @@ export function ShortcutRecorder({
 export interface ShortcutListItem { label: string; shortcut: string; /** Extra words that match when searching. */ keywords?: string }
 export interface ShortcutListGroup { label: string; items: ShortcutListItem[] }
 
-export interface ShortcutListProps {
+interface ShortcutListProps {
   groups: ShortcutListGroup[];
   /** Accessible name of the list. */
   label?: string;
@@ -506,4 +500,3 @@ export function ShortcutList({ groups, label = "Keyboard shortcuts", searchable 
   </section>;
 }
 
-export default ShortcutRecorder;

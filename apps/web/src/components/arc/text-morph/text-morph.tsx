@@ -9,7 +9,7 @@ import styles from "./text-morph.module.css";
  * and the width follows on a spring so the surrounding layout glides instead of jumping. Use it for status words that change a few letters at a time,
  * such as Publish, Publishing, and Published, or Follow and Following. It stays on one line, and assistive technology reads the plain text.
  */
-export interface TextMorphProps { children: string; as?: "span" | "div" | "p" | "strong" | "h1" | "h2" | "h3"; className?: string; id?: string }
+interface TextMorphProps { children: string; as?: "span" | "div" | "p" | "strong" | "h1" | "h2" | "h3"; className?: string; id?: string }
 
 const enter = [...motionTokens.ease.enter] as [number, number, number, number];
 const standard = [...motionTokens.ease.standard] as [number, number, number, number];
@@ -76,4 +76,3 @@ export function TextMorph({ children, as = "span", className, id }: TextMorphPro
   </Tag>;
 }
 
-export default TextMorph;

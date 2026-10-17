@@ -9,7 +9,7 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./select.module.css";
 
-export interface SelectProps extends Omit<ComponentPropsWithoutRef<typeof SelectPrimitive.Root>, "children"> {
+interface SelectProps extends Omit<ComponentPropsWithoutRef<typeof SelectPrimitive.Root>, "children"> {
   label: string;
   description?: string;
   placeholder?: string;

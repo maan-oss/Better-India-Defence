@@ -14,14 +14,14 @@ import {
   ComboboxTrigger,
 } from '../../../primitives/combobox'
 
-export interface Member {
+interface Member {
   id: string
   name: string
   email?: string
   avatar?: string
 }
 
-export interface MemberSelectorProps {
+interface MemberSelectorProps {
   members: Member[]
   selected: string[]
   onChange: (selected: string[]) => void
@@ -32,13 +32,13 @@ export interface MemberSelectorProps {
 }
 
 /** Strata: first name plus surname initial, so "Demo Operator" and "Demo Viewer" stay distinct in a chip. */
-export function shortName(name: string): string {
+function shortName(name: string): string {
   const [first, ...rest] = name.trim().split(/\s+/);
   const last = rest[rest.length - 1];
   return last ? `${first} ${last[0]}.` : (first ?? '');
 }
 
-export function getInitials(name: string): string {
+function getInitials(name: string): string {
   return name
     .split(' ')
     .filter(Boolean)
@@ -332,4 +332,4 @@ export const MemberSelector = React.forwardRef<HTMLDivElement, MemberSelectorPro
 )
 
 MemberSelector.displayName = 'MemberSelector'
-export default MemberSelector
+

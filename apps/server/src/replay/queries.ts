@@ -2,10 +2,10 @@ import { FACILITY, diffSnapshots, findSensor, type DiffEntry, type Vec3, type Wo
 import type { Db } from '../db/client.ts';
 import type { WorldMemory } from '../world/worldMemory.ts';
 
-export const STATUS_CODES = ['tentative', 'confirmed', 'coasting', 'lost', 'closed'] as const;
+const STATUS_CODES = ['tentative', 'confirmed', 'coasting', 'lost', 'closed'] as const;
 const statusCode = (s: string) => Math.max(0, STATUS_CODES.indexOf(s as (typeof STATUS_CODES)[number]));
 
-export interface TrackWindow {
+interface TrackWindow {
   from: number;
   to: number;
   tracks: {

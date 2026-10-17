@@ -50,7 +50,7 @@ const toIncident = (r: IncidentRow): IncidentRecord => ({
   evidence: r.evidence,
 });
 
-export interface SensorInvolvement {
+interface SensorInvolvement {
   sensorId: string;
   kind: string;
   reason: string;
@@ -60,7 +60,7 @@ export interface SensorInvolvement {
   statusDuringWindow: { t: number; status: string }[];
 }
 
-export interface IncidentPackage {
+interface IncidentPackage {
   incident: IncidentRecord;
   window: { from: number; to: number };
   sensors: SensorInvolvement[];

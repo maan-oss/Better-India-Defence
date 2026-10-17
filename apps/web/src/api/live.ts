@@ -3,7 +3,7 @@ import type { LiveMessage } from '@strata/domain/client';
 type Listener = (m: LiveMessage) => void;
 
 /** WebSocket client with exponential reconnect. Batches from the server are arrays of LiveMessage. */
-export class LiveClient {
+class LiveClient {
   private ws: WebSocket | null = null;
   private listeners = new Set<Listener>();
   private statusListeners = new Set<(s: 'connecting' | 'open' | 'closed') => void>();

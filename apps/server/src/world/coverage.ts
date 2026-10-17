@@ -139,5 +139,3 @@ export class CoverageService {
   }
 }
 
-export const allCameraIds = () => getCameras().map((c) => c.id);
-export const facility = FACILITY;

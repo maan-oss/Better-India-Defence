@@ -46,7 +46,6 @@
 .boot-card { position: relative; }
 .boot-mark { color: var(--accent); }
 .boot-wm { font-size: var(--fs-body-lg); }
-.boot-logo { display: none; }
 
 /* Branded empty state */
 .brand-empty { margin: auto; padding: 48px 24px; max-width: 460px; }

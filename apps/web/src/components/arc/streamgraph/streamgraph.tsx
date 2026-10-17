@@ -5,7 +5,7 @@ import { animate, motion, useInView, useMotionValue, useReducedMotion, useSpring
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./streamgraph.module.css";
 
-export interface StreamgraphSeries {
+interface StreamgraphSeries {
   /** Stable identity. A layer keeps its place and color across data changes, so switching datasets morphs it. */
   key: string;
   /** Name in the legend, the direct label, the tooltip, and the data table. */
@@ -14,7 +14,7 @@ export interface StreamgraphSeries {
   color?: string;
 }
 
-export interface StreamgraphDatum {
+interface StreamgraphDatum {
   /** Stable identity, such as an ISO week. */
   key: string;
   /** Full label for the tooltip and screen readers, such as "Week of Sep 14". */
@@ -26,7 +26,7 @@ export interface StreamgraphDatum {
 }
 
 /** Use a streamgraph for how the mix of several parts changes over time, when the overall shape matters more than exact values. */
-export interface StreamgraphProps {
+interface StreamgraphProps {
   data: StreamgraphDatum[];
   /** Layers from the centre out: the first runs through the middle of the stream, the rest alternate above and below it. */
   series: StreamgraphSeries[];
@@ -394,4 +394,3 @@ export function Streamgraph({ data, series, label, unit = "", height = 260, offs
   </figure>;
 }
 
-export default Streamgraph;

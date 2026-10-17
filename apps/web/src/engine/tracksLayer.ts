@@ -5,7 +5,7 @@ import { AFF_COLOR, pixelScale, symbolFor, symbolTexture } from './symbols';
 import { P } from '../lib/palette';
 
 /** Symbol height on screen (CSS px). */
-export const SYMBOL_PX = 24;
+const SYMBOL_PX = 24;
 
 interface TrackObj {
   group: THREE.Group;

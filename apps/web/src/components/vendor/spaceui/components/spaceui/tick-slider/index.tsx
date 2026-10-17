@@ -19,7 +19,7 @@ const MARK_GAP = 6
 /** A mark's own width — `w-0.5`. It counts: see `railWidth`. */
 const MARK_WIDTH = 2
 
-export type TickSliderProps = {
+type TickSliderProps = {
   value: number
   onChange: (next: number) => void
   min?: number

@@ -9,11 +9,11 @@ import { ChevronDown } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./button-group.module.css";
 
-export type ButtonGroupVariant = "outline" | "solid";
-export type ButtonGroupSize = "sm" | "md";
-export type ButtonGroupOrientation = "horizontal" | "vertical";
+type ButtonGroupVariant = "outline" | "solid";
+type ButtonGroupSize = "sm" | "md";
+type ButtonGroupOrientation = "horizontal" | "vertical";
 
-export interface ButtonGroupItem {
+interface ButtonGroupItem {
   /** Stable key for the segment. */
   id: string;
   /** Visible text and the accessible name. Changing it crossfades in place, so "Share" can answer "Copied". */
@@ -31,7 +31,7 @@ export interface ButtonGroupItem {
   disabled?: boolean;
 }
 
-export interface ButtonGroupMenuItem {
+interface ButtonGroupMenuItem {
   id: string;
   label: string;
   icon?: ReactNode;
@@ -42,13 +42,13 @@ export interface ButtonGroupMenuItem {
   destructive?: boolean;
 }
 
-export interface ButtonGroupMenu {
+interface ButtonGroupMenu {
   /** Accessible name and tooltip of the chevron segment, such as "More actions". */
   label: string;
   items: ButtonGroupMenuItem[];
 }
 
-export interface ButtonGroupProps {
+interface ButtonGroupProps {
   items: ButtonGroupItem[];
   /** Adds a trailing chevron segment that opens these actions in a menu aligned to the group's edge. */
   menu?: ButtonGroupMenu;
@@ -339,4 +339,3 @@ export function ButtonGroup({ items, menu, label, variant = "outline", size = "m
   </DropdownPrimitive.Root>;
 }
 
-export default ButtonGroup;

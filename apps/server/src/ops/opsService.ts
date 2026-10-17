@@ -58,7 +58,7 @@ export const VaInput = z.object({
   notes: z.string().max(500).nullish(),
 });
 
-export interface Team {
+interface Team {
   id: string;
   callsign: string;
   kind: string;
@@ -76,7 +76,7 @@ export interface Team {
   taskId: string | null;
 }
 
-export interface Task {
+interface Task {
   id: string;
   number: number;
   teamId: string;
@@ -97,7 +97,7 @@ export interface Task {
   closedAt: number | null;
 }
 
-export interface LogEntry {
+interface LogEntry {
   id: number;
   t: number;
   kind: string;
@@ -106,13 +106,13 @@ export interface LogEntry {
   ref: string | null;
 }
 
-export interface SitrepSection {
+interface SitrepSection {
   key: string;
   title: string;
   text: string;
 }
 
-export interface Sitrep {
+interface Sitrep {
   id: string;
   number: number;
   version: number;

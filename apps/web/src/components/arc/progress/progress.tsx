@@ -6,7 +6,7 @@ import { Check } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./progress.module.css";
 
-export interface ProgressProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+interface ProgressProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
   value?: number;
   max?: number;
   label?: string;
@@ -57,4 +57,3 @@ export function Progress({ value = 0, max = 100, label, showValue = false, class
   </div>;
 }
 
-export default Progress;

@@ -7,7 +7,7 @@ import type { AnimationPlaybackControls, Transition, Variants } from "motion/rea
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./password-strength.module.css";
 
-export interface PasswordRule {
+interface PasswordRule {
   id: string;
   label: string;
   test: (password: string) => boolean;
@@ -15,14 +15,14 @@ export interface PasswordRule {
   remaining?: (password: string) => number;
 }
 
-export interface PasswordStrengthResult { level: 0 | 1 | 2 | 3 | 4; label: string; met: string[] }
+interface PasswordStrengthResult { level: 0 | 1 | 2 | 3 | 4; label: string; met: string[] }
 
 /**
  * A new password field that shows how strong the password is while it is typed: four segments fill and change tone,
  * each rule checks off with a drawn tick, and the strength word morphs in place. Use it when creating or changing a password;
  * use a plain password field for sign in. Scoring happens on the device, nothing is sent anywhere.
  */
-export interface PasswordStrengthProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "children"> {
+interface PasswordStrengthProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "children"> {
   label: string;
   value?: string;
   defaultValue?: string;
@@ -36,7 +36,7 @@ export interface PasswordStrengthProps extends Omit<InputHTMLAttributes<HTMLInpu
 }
 
 const count = (password: string) => Array.from(password).length;
-export const defaultPasswordRules: PasswordRule[] = [
+const defaultPasswordRules: PasswordRule[] = [
   { id: "length", label: "At least 12 characters", test: password => count(password) >= 12, remaining: password => Math.max(0, 12 - count(password)) },
   { id: "case", label: "Upper and lowercase letters", test: password => /\p{Ll}/u.test(password) && /\p{Lu}/u.test(password) },
   { id: "number", label: "At least one number", test: password => /\p{N}/u.test(password) },
@@ -48,7 +48,7 @@ const LEVELS = ["", "Weak", "Fair", "Good", "Strong"] as const;
 const SHORT = 8;
 
 /** Scores a password on the device: one step per share of rules met, capped at the first step while it is shorter than eight characters. */
-export function estimateStrength(password: string, rules: PasswordRule[] = defaultPasswordRules): PasswordStrengthResult {
+function estimateStrength(password: string, rules: PasswordRule[] = defaultPasswordRules): PasswordStrengthResult {
   if (!password) return { level: 0, label: "", met: [] };
   const met = rules.filter(rule => rule.test(password)).map(rule => rule.id);
   if (count(password) < SHORT) return { level: 1, label: "Too short", met };
@@ -226,4 +226,3 @@ export const PasswordStrength = forwardRef<HTMLInputElement, PasswordStrengthPro
 
 PasswordStrength.displayName = "PasswordStrength";
 
-export default PasswordStrength;

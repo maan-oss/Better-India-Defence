@@ -14,7 +14,7 @@ import styles from "./carousel.module.css";
  * The active slide sits in the center, its neighbours shrink and dim with distance, and the page indicator stretches into a pill that
  * travels with the slides frame by frame.
  */
-export interface CarouselProps {
+interface CarouselProps {
   /** Names the carousel for assistive technology, for example "From the Harbour suites". */
   label: string;
   /** One child per slide. */
@@ -344,4 +344,3 @@ function Dot({ index, last, progress, drain, selected, label, controls, tabRef, 
   </button>;
 }
 
-export default Carousel;

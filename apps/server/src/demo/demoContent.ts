@@ -11,7 +11,7 @@ import type { Platform } from '../platform.ts';
  * Centre door that plays a generated recording — so recognition, sightings, review and the camera wall run
  * end to end on first launch. Runs once; recorded in config as `demo.content`.
  */
-export function demoAssetsDir(): string | null {
+function demoAssetsDir(): string | null {
   const cands = [resolve(import.meta.dirname, '../demo-assets'), resolve(import.meta.dirname, '../../demo-assets'), resolve('apps/server/demo-assets')];
   return cands.find((c) => existsSync(join(c, 'subject-a.jpg'))) ?? null;
 }

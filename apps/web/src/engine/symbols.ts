@@ -8,9 +8,9 @@ import { alpha, P } from '../lib/palette';
  * the function, and a dashed frame marks a track whose present position is not observed (coasting / lost —
  * the platform's INFERRED state). Colour reinforces the shape; it is never the only cue.
  */
-export type Affiliation = 'friend' | 'hostile' | 'suspect' | 'neutral' | 'unknown';
-export type Dimension = 'ground' | 'air';
-export type Fn = 'infantry' | 'vehicle' | 'uav' | 'aircraft' | 'bird' | 'unknown';
+type Affiliation = 'friend' | 'hostile' | 'suspect' | 'neutral' | 'unknown';
+type Dimension = 'ground' | 'air';
+type Fn = 'infantry' | 'vehicle' | 'uav' | 'aircraft' | 'bird' | 'unknown';
 
 export const AFF_COLOR: Record<Affiliation, string> = {
   friend: P.friend,
@@ -20,7 +20,7 @@ export const AFF_COLOR: Record<Affiliation, string> = {
   unknown: P.unknownAff,
 };
 
-export interface SymbolSpec {
+interface SymbolSpec {
   aff: Affiliation;
   dim: Dimension;
   fn: Fn;

@@ -5,8 +5,8 @@ import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./segmented-control.module.css";
 
-export interface Segment { value: string; label: string; /** Optional content after the label, such as a badge. */ accessory?: ReactNode; }
-export interface SegmentedControlProps {
+interface Segment { value: string; label: string; /** Optional content after the label, such as a badge. */ accessory?: ReactNode; }
+interface SegmentedControlProps {
   options: Segment[];
   value: string;
   onValueChange: (value: string) => void;

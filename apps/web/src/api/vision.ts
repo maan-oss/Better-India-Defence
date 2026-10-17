@@ -156,11 +156,6 @@ export interface Identity {
   photoTemplateId: string | null;
 }
 
-export interface IdentityDetail extends Identity {
-  templates: number;
-  templatesList?: never;
-}
-
 export interface Template {
   id: string;
   quality: FaceQuality;

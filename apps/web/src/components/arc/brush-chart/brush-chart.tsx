@@ -5,13 +5,13 @@ import { animate, motion, useInView, useMotionValue, useReducedMotion, useSpring
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./brush-chart.module.css";
 
-export interface BrushChartDatum {
+interface BrushChartDatum {
   /** A point in time, as a Date or epoch milliseconds. Points must be in ascending order. */
   date: Date | number;
   value: number;
 }
 
-export interface BrushChartAnnotation {
+interface BrushChartAnnotation {
   date: Date | number;
   /** Short label printed beside the marker, such as "v2 launch". */
   label: string;
@@ -20,7 +20,7 @@ export interface BrushChartAnnotation {
 }
 
 /** Use a brush chart for a long, dense time series where people need the whole history and a close look at any stretch of it. */
-export interface BrushChartProps {
+interface BrushChartProps {
   data: BrushChartDatum[];
   /** What is measured, such as "Daily active users". Names the chart for assistive technology. */
   label: string;
@@ -456,4 +456,3 @@ export function BrushChart({ data, label, unit = "", formatValue = value => grou
   </figure>;
 }
 
-export default BrushChart;

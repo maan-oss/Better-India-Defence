@@ -139,7 +139,7 @@ const MEASURING_CONFIG = {
   droppable: { strategy: MeasuringStrategy.Always },
 }
 
-export interface KanbanMoveEvent {
+interface KanbanMoveEvent {
   event: DragEndEvent
   activeContainer: string
   activeIndex: number
@@ -147,7 +147,7 @@ export interface KanbanMoveEvent {
   overIndex: number
 }
 
-export interface KanbanCommitMeta<T> {
+interface KanbanCommitMeta<T> {
   kind: 'item' | 'column'
   event: DragEndEvent
   activeContainer: string
@@ -157,7 +157,7 @@ export interface KanbanCommitMeta<T> {
   previousValue: Record<string, T[]>
 }
 
-export interface KanbanRootProps<T> extends Omit<
+interface KanbanRootProps<T> extends Omit<
   useRender.ComponentProps<'div'>,
   'children' | 'onDragStart' | 'onDragEnd'
 > {
@@ -544,7 +544,7 @@ function Kanban<T>({
   )
 }
 
-export type KanbanBoardProps = useRender.ComponentProps<'div'>
+type KanbanBoardProps = useRender.ComponentProps<'div'>
 
 function KanbanBoard({ className, render, ...props }: KanbanBoardProps) {
   const { columnIds } = useContext(KanbanContext)
@@ -566,7 +566,7 @@ function KanbanBoard({ className, render, ...props }: KanbanBoardProps) {
   )
 }
 
-export interface KanbanColumnProps extends useRender.ComponentProps<'div'> {
+interface KanbanColumnProps extends useRender.ComponentProps<'div'> {
   value: string
   disabled?: boolean
 }
@@ -642,7 +642,7 @@ function KanbanColumn({ value, className, render, disabled, ...props }: KanbanCo
   )
 }
 
-export interface KanbanColumnHandleProps extends useRender.ComponentProps<'div'> {
+interface KanbanColumnHandleProps extends useRender.ComponentProps<'div'> {
   cursor?: boolean
 }
 
@@ -670,7 +670,7 @@ function KanbanColumnHandle({ className, render, cursor = true, ...props }: Kanb
   })
 }
 
-export interface KanbanItemProps extends useRender.ComponentProps<'div'> {
+interface KanbanItemProps extends useRender.ComponentProps<'div'> {
   value: string
   disabled?: boolean
 }
@@ -737,7 +737,7 @@ function KanbanItem({ value, className, render, disabled, ...props }: KanbanItem
   )
 }
 
-export interface KanbanItemHandleProps extends useRender.ComponentProps<'div'> {
+interface KanbanItemHandleProps extends useRender.ComponentProps<'div'> {
   cursor?: boolean
 }
 
@@ -760,7 +760,7 @@ function KanbanItemHandle({ className, render, cursor = true, ...props }: Kanban
   })
 }
 
-export interface KanbanColumnContentProps extends useRender.ComponentProps<'div'> {
+interface KanbanColumnContentProps extends useRender.ComponentProps<'div'> {
   value: string
 }
 
@@ -795,7 +795,7 @@ function KanbanColumnContent({ value, className, render, ...props }: KanbanColum
   )
 }
 
-export interface KanbanOverlayProps extends Omit<React.ComponentProps<typeof DragOverlay>, 'children'> {
+interface KanbanOverlayProps extends Omit<React.ComponentProps<typeof DragOverlay>, 'children'> {
   children?: ReactNode | ((params: { value: UniqueIdentifier; variant: 'column' | 'item' }) => ReactNode)
 }
 
@@ -823,13 +823,4 @@ function KanbanOverlay({ children, className, ...props }: KanbanOverlayProps) {
   )
 }
 
-export {
-  Kanban,
-  KanbanBoard,
-  KanbanColumn,
-  KanbanColumnHandle,
-  KanbanItem,
-  KanbanItemHandle,
-  KanbanColumnContent,
-  KanbanOverlay,
-}
+export { Kanban, KanbanBoard, KanbanColumn, KanbanItem, KanbanItemHandle, KanbanColumnContent, KanbanOverlay };

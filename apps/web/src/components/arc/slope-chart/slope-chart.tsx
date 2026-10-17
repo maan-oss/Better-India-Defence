@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useInView, useMotionValue, useReducedMotion, u
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./slope-chart.module.css";
 
-export interface SlopeItem {
+interface SlopeItem {
   /** Stable identity. An item keeps its line across datasets, so switching morphs it. */
   key: string;
   /** Name beside the start value, in the tooltip, and in the table. */
@@ -17,7 +17,7 @@ export interface SlopeItem {
 }
 
 /** Use a slope chart to show how several items changed between exactly two moments, and how their order changed. */
-export interface SlopeChartProps {
+interface SlopeChartProps {
   data: SlopeItem[];
   /** What is measured, such as "Conversion rate by channel". Names the chart for assistive technology. */
   label: string;
@@ -253,4 +253,3 @@ export function SlopeChart({ data, label, startLabel, endLabel, formatValue, for
   </figure>;
 }
 
-export default SlopeChart;

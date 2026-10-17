@@ -7,9 +7,9 @@ import { motionTokens } from "../lib/motion-tokens";
 import styles from "./number-field.module.css";
 
 /** Text shown beside the number. A function receives the value, so a unit can follow it: `n => n === 1 ? " seat" : " seats"`. */
-export type NumberFieldAffix = string | ((value: number) => string);
+type NumberFieldAffix = string | ((value: number) => string);
 
-export interface NumberFieldProps {
+interface NumberFieldProps {
   label: string;
   value?: number;
   defaultValue?: number;
@@ -38,7 +38,7 @@ export interface NumberFieldProps {
   limitHint?: boolean | ((edge: "min" | "max", limit: number) => string);
 }
 
-export type NumberFieldSize = "sm" | "md" | "lg";
+type NumberFieldSize = "sm" | "md" | "lg";
 
 type Source = "button" | "key" | "scrub" | "type";
 type Part = { key: string; digit: number } | { key: string; text: string };

@@ -9,7 +9,7 @@ import { motionTokens } from "../lib/motion-tokens";
 import styles from "./resizable-panels.module.css";
 
 /** One pane of a `ResizablePanels` group. It only carries configuration; the group renders it. */
-export interface ResizablePanelProps {
+interface ResizablePanelProps {
   /** Stable id, also used by the dividers' `aria-controls`. */
   id: string;
   /** Names the pane for its divider, for example "Folders". */
@@ -32,7 +32,7 @@ export interface ResizablePanelProps {
  * a pane's limits, and snap collapsible panes closed. Each divider is a focusable separator: arrows resize, Home and End jump to the limits,
  * Enter hides or restores a collapsible pane, and a double-click resets the layout. The group needs a definite height.
  */
-export interface ResizablePanelsProps {
+interface ResizablePanelsProps {
   /** Names the group for assistive technology. */
   label?: string;
   /** `ResizablePanel` elements, in order. The set of panes should stay the same for the life of the group. */
@@ -372,4 +372,3 @@ function Handle({ before, after, share, available, limits, mode, active, reduced
   </div>;
 }
 
-export default ResizablePanels;

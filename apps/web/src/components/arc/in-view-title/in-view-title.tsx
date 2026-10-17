@@ -4,13 +4,13 @@ import { motion, useInView, useReducedMotion, type Transition } from "motion/rea
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./in-view-title.module.css";
 
-export type InViewTitleVariant = "word" | "line" | "blur" | "tracking" | "wipe";
+type InViewTitleVariant = "word" | "line" | "blur" | "tracking" | "wipe";
 /**
  * A section title that reveals itself once it scrolls into view. `blur` sharpens word by word and suits most headings; `word` and `line` rise out of a clip for editorial pages;
  * `tracking` opens tight letter spacing; `wipe` uncovers the title from left to right through a soft edge. Pass `lines` to set the breaks for `line`, and `once={false}` to replay on every entry.
  * Titles that are already above the viewport show immediately, and server rendered titles appear on their own if scripts are slow.
  */
-export interface InViewTitleProps { text: string; variant?: InViewTitleVariant; as?: "h1" | "h2" | "h3"; lines?: string[]; className?: string; id?: string; once?: boolean }
+interface InViewTitleProps { text: string; variant?: InViewTitleVariant; as?: "h1" | "h2" | "h3"; lines?: string[]; className?: string; id?: string; once?: boolean }
 const subscribeHydration = () => () => {};
 const clientSnapshot = () => true;
 const serverSnapshot = () => false;
@@ -71,4 +71,3 @@ export function InViewTitle({ text, variant = "blur", as = "h2", lines, classNam
   return <div ref={ref} className={wrapperClass}><motion.div className={`${styles.wipe} ${styles.part}`} initial={false} animate={visible ? { "--wipe": "0%", x: "0em" } : { "--wipe": "100%", x: "-0.12em" }} transition={reveal(instant, visible, 0, .9)}><Tag id={id}>{text}</Tag></motion.div></div>;
 }
 
-export default InViewTitle;

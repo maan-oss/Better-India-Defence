@@ -4,7 +4,7 @@ import { hash01, type IngestEnvelope } from '@strata/domain';
  * Failure injection applied to the wire stream (live mode, operator controlled from the Simulation Lab).
  * Every injected fault is something the ingestion layer must survive and surface honestly.
  */
-export interface FailureConfig {
+interface FailureConfig {
   duplicateRate: number;
   outOfOrderRate: number;
   badTimestampRate: number;
@@ -13,7 +13,7 @@ export interface FailureConfig {
   disconnectedUntil: number;
 }
 
-export const DEFAULT_FAILURES: FailureConfig = {
+const DEFAULT_FAILURES: FailureConfig = {
   duplicateRate: 0,
   outOfOrderRate: 0,
   badTimestampRate: 0,
@@ -22,7 +22,7 @@ export const DEFAULT_FAILURES: FailureConfig = {
   disconnectedUntil: 0,
 };
 
-export interface FailureCounters {
+interface FailureCounters {
   duplicated: number;
   reordered: number;
   badTimestamps: number;

@@ -8,9 +8,9 @@ import { Check, ChevronDown, ChevronRight, ChevronUp, ChevronsDownUp, ChevronsUp
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./json-viewer.module.css";
 
-export type JsonValueType = "object" | "array" | "string" | "number" | "boolean" | "null" | "other";
+type JsonValueType = "object" | "array" | "string" | "number" | "boolean" | "null" | "other";
 
-export interface JsonViewerCopyDetail {
+interface JsonViewerCopyDetail {
   kind: "value" | "path";
   path: string;
   text: string;
@@ -22,7 +22,7 @@ export interface JsonViewerCopyDetail {
  * The tree follows the WAI-ARIA tree pattern: arrows move and open, Home and End jump, Enter toggles, and the modifier
  * key with C copies the focused value.
  */
-export interface JsonViewerProps {
+interface JsonViewerProps {
   data: unknown;
   /** Name of the root in paths, as in `root.users[0].name`. Defaults to "root". */
   rootName?: string;
@@ -527,4 +527,3 @@ export const JsonViewer = forwardRef<HTMLDivElement, JsonViewerProps>(function J
   </div>;
 });
 
-export default JsonViewer;

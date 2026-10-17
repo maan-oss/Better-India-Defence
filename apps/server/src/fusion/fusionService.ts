@@ -4,7 +4,7 @@ import { chunkedValues } from '../db/client.ts';
 import type { LiveHub } from '../live/hub.ts';
 import type { Metrics } from '../metrics.ts';
 
-export const REORDER_WINDOW_MS = 1500;
+const REORDER_WINDOW_MS = 1500;
 
 /**
  * Wraps the deterministic TrackEngine with a reorder buffer (watermark = newest observation − window),

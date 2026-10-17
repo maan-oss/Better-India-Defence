@@ -36,14 +36,14 @@ export interface ThreadComment {
 }
 
 /** What changed, for syncing to a server. `comments` on `onCommentsChange` is always the full next tree. */
-export type CommentThreadEvent =
+type CommentThreadEvent =
   | { type: "reply"; comment: ThreadComment; parentId: string | null }
   | { type: "edit"; id: string; body: string }
   | { type: "delete"; id: string }
   | { type: "react"; id: string; emoji: string; added: boolean };
 
 /** Every word the thread shows or announces. Each one has an English default; words with a count or a name are functions, so an app can apply its own plural rules. */
-export interface CommentThreadLabels {
+interface CommentThreadLabels {
   /** Accessible name of the whole thread. */
   thread?: string;
   /** Header and resolved chip, such as "3 comments". */
@@ -129,7 +129,7 @@ const withDefaults = <T extends object>(defaults: Required<T>, given?: T): Requi
  * authors edit and delete their own comments in place, mentions autocomplete in the composer, and resolving folds the
  * whole thread into a single chip that reopens it. Controlled with `comments` and `resolved`, or uncontrolled.
  */
-export interface CommentThreadProps {
+interface CommentThreadProps {
   comments?: ThreadComment[];
   defaultComments?: ThreadComment[];
   onCommentsChange?: (comments: ThreadComment[], event: CommentThreadEvent) => void;
@@ -592,4 +592,3 @@ export const CommentThread = forwardRef<HTMLElement, CommentThreadProps>(functio
   </section>;
 });
 
-export default CommentThread;

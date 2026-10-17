@@ -51,7 +51,7 @@ Open <http://127.0.0.1:5173>. The terminal shows `FIRST RUN — … setup code X
 `data/setup-code.txt`, readable only by the service account). Enter it, then:
 
 1. **Administrator** — your account (password strength is checked; at least 12 characters).
-2. **Site** — name, classification banner and the anchor point: this device's location, latitude /
+2. **Site** — name, classification marking (printed on exports, not on screen) and the anchor point: this device's location, latitude /
    longitude, or an MGRS grid reference; and the area to cover.
 3. **Ground imagery** — none, your own XYZ tile server, or OpenStreetMap (shown with an OPSEC warning:
    every console then asks a third party for tiles around your site).
@@ -157,7 +157,6 @@ How an installation uses each screen day to day: **[docs/OPERATIONS.md](docs/OPE
 | `npm run test:e2e` | Production build + Playwright browser tests on isolated ports |
 | `npm run build` | Typecheck, bundle server, vision worker, simulator and adapters, build web client |
 | `node packages/adapters/dist/cli.js adapters.json` | Field adapters: NMEA, MAVLink, CoT ([docs/INTEROP.md](docs/INTEROP.md)) |
-| `npm start` | Run the production build (see below) |
 | `scripts/stop-dev.sh` | Stop processes started by `npm run dev` / `npm start` |
 
 ## Production
@@ -208,7 +207,7 @@ apps/server          Fastify API: ingestion, fusion, world memory, reconstructio
 models               model manifest (pinned SHA-256); model files are fetched, not committed
 apps/web             React + Three.js client
 e2e                  Playwright tests
-docs                 OPERATIONS, INTEROP, ARCHITECTURE, SECURITY, REALITY_LIMITS
+docs                 OPERATIONS, INTEROP, ARCHITECTURE, DESIGN, SECURITY, REALITY_LIMITS
 ```
 
 ## Documentation
@@ -218,7 +217,7 @@ docs                 OPERATIONS, INTEROP, ARCHITECTURE, SECURITY, REALITY_LIMITS
 - [docs/INTEROP.md](docs/INTEROP.md) — cameras, NMEA, MAVLink, Cursor-on-Target, writing adapters
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — components, algorithms, data model, runtime
 - [docs/DESIGN.md](docs/DESIGN.md) — display design: the colour system and the rules for using it
-- [docs/BRAND.md](docs/BRAND.md) — the STRATA identity: mark, wordmark, colour, type, motif, illustrations
+- The brand identity lives in the app: ⌘K → *Brand guidelines* (`/brand`), which is the live version.
 - [docs/SECURITY.md](docs/SECURITY.md) — implemented controls and what is missing for real use
 
 ## Responsible use

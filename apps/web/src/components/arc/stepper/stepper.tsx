@@ -6,10 +6,10 @@ import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion } fr
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./stepper.module.css";
 
-export type StepperOrientation = "horizontal" | "vertical";
-export type StepperStatus = "complete" | "current" | "upcoming" | "error";
+type StepperOrientation = "horizontal" | "vertical";
+type StepperStatus = "complete" | "current" | "upcoming" | "error";
 
-export interface StepperStep {
+interface StepperStep {
   /** Stable key, so each step keeps its own motion when the list changes. */
   id: string;
   label: string;
@@ -24,7 +24,7 @@ export interface StepperStep {
  * content and drive it with `current`; set `current` to `steps.length` once every step is done. Pass `onStepSelect` to let
  * people return to completed steps by click or keyboard. For a multi-step form that owns its own content, use MultiStepForm.
  */
-export interface StepperProps {
+interface StepperProps {
   steps: StepperStep[];
   /** Index of the step in progress. `steps.length` marks the whole flow complete. */
   current: number;
@@ -183,4 +183,3 @@ export function Stepper({ steps, current, orientation = "horizontal", onStepSele
   </Root>;
 }
 
-export default Stepper;

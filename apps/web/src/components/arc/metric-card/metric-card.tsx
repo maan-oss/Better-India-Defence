@@ -5,7 +5,7 @@ import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, typ
 import { motionTokens } from "../lib/motion-tokens";
 import { AnimatedCounter } from "../animated-counter/animated-counter";
 import styles from "./metric-card.module.css";
-export interface MetricCardProps { label: string; value: number; suffix?: string; context: string; change?: string }
+interface MetricCardProps { label: string; value: number; suffix?: string; context: string; change?: string }
 
 /** Copy that holds a number enters from the side it moved toward: a larger value rises from below, a smaller one drops from above. */
 const rise: Variants = { hidden: (direction: number) => ({ opacity: 0, y: `${.3 * direction}em`, filter: `blur(${motionTokens.blur.soft}px)` }), shown: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: motionTokens.duration.standard, ease: [...motionTokens.ease.enter] } }, gone: (direction: number) => ({ opacity: 0, y: `${-.3 * direction}em`, filter: `blur(${motionTokens.blur.subtle}px)`, transition: { duration: motionTokens.duration.fast, ease: [...motionTokens.ease.standard] } }) };

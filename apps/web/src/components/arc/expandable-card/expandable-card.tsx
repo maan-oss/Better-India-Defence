@@ -8,7 +8,7 @@ import { ChevronDown as NavArrowDown } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./expandable-card.module.css";
 
-export interface ExpandableCardProps extends Omit<ComponentPropsWithoutRef<"article">, "title" | "children" | "onAnimationStart" | "onAnimationEnd" | "onAnimationIteration" | "onDrag" | "onDragStart" | "onDragEnd" | "onDragOver" | "onDragLeave" | "onDragEnter" | "onDragExit" | "onDrop"> {
+interface ExpandableCardProps extends Omit<ComponentPropsWithoutRef<"article">, "title" | "children" | "onAnimationStart" | "onAnimationEnd" | "onAnimationIteration" | "onDrag" | "onDragStart" | "onDragEnd" | "onDragOver" | "onDragLeave" | "onDragEnter" | "onDragExit" | "onDrop"> {
   title: string;
   description?: string;
   children: ReactNode;
@@ -126,4 +126,3 @@ export function ExpandableCard({ title, description, children, defaultExpanded =
   </div>;
 }
 
-export default ExpandableCard;

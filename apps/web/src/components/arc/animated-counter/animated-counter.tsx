@@ -5,7 +5,7 @@ import { AnimatePresence, animate, motion, useInView, useMotionValue, useReduced
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./animated-counter.module.css";
 
-export interface AnimatedCounterProps {
+interface AnimatedCounterProps {
   value: number; label?: string; prefix?: string; suffix?: string; decimals?: number;
   /** Roll every digit up from zero the first time the counter scrolls into view. */
   animateOnView?: boolean;
@@ -89,4 +89,3 @@ export function AnimatedCounter({ value, label, prefix = "", suffix = "", decima
   </span>;
 }
 
-export default AnimatedCounter;

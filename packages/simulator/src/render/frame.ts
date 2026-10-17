@@ -122,7 +122,7 @@ function pushTerrain(tris: Triangle[], mats: Material[], pose: CameraPose, range
   }
 }
 
-export interface RenderOptions {
+interface RenderOptions {
   label: string;
   rangeM: number;
   /** Excludes the carrying platform's own entity (drone cameras). */

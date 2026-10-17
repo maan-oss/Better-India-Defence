@@ -1,7 +1,7 @@
 /**
  * STRATA identity: the Core mark — a core sample cut through stratified ground. The top stratum is the terrain
  * profile with one observation on its ridge; the strata below soften with depth (the record under the present).
- * See docs/BRAND.md for construction, clear space and usage.
+ * Construction, clear space and usage are in the in-app brand book (/brand).
  */
 import { useId } from 'react';
 
@@ -53,7 +53,3 @@ export function Lockup({ size = 28, className }: { size?: number; className?: st
   );
 }
 
-/** The mark as a standalone SVG string (favicon, manifest icons, exports). */
-export function markSvg(fg = '#f0eee6', ink = '#1f1e1d', bg?: string): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${bg ? `<rect width="64" height="64" fill="${bg}"/>` : ''}<clipPath id="c"><rect x="5" y="5" width="54" height="54" rx="14"/></clipPath><rect x="5" y="5" width="54" height="54" rx="14" fill="${fg}"/><g clip-path="url(#c)" fill="none" stroke="${ink}" stroke-linecap="round" stroke-linejoin="round"><path d="${TOP}" stroke-width="5.4"/><path d="${MID}" stroke-width="4.5" opacity=".6"/><path d="${LOW}" stroke-width="4" opacity=".34"/></g><circle cx="${DOT.cx}" cy="${DOT.cy}" r="4.2" fill="${fg}" stroke="${ink}" stroke-width="3"/></svg>`;
-}

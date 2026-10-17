@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 /** Per-console display preferences (kept in this browser only). */
-export type Theme = 'dark' | 'night';
+type Theme = 'dark' | 'night';
 
 interface UiState {
   theme: Theme;
@@ -27,7 +27,7 @@ function write(key: string, v: string): void {
   }
 }
 
-export function applyTheme(t: Theme): void {
+function applyTheme(t: Theme): void {
   if (t === 'dark') delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = t;
 }

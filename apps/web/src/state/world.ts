@@ -40,7 +40,7 @@ export type Selection =
   | { kind: 'incident'; id: string }
   | { kind: 'point'; position: Vec3 };
 
-export interface FlyRequest {
+interface FlyRequest {
   position: Vec3;
   distance: number;
   pitchDeg?: number;

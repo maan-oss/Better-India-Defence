@@ -314,4 +314,3 @@ export function normalizeEnvelope(env: IngestEnvelope, frame: EnuFrame, received
   return out;
 }
 
-export const vecOrNull = (v: Vec3 | null) => (v ? [v.x, v.y, v.z] : [null, null, null]);

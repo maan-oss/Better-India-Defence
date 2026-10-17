@@ -9,11 +9,11 @@ import { motionTokens } from "../lib/motion-tokens";
 import { Tooltip } from "../tooltip/tooltip";
 import styles from "./floating-button-group.module.css";
 
-export type FloatingButtonGroupVariant = "muted" | "floating";
-export type FloatingButtonGroupSize = "sm" | "md";
-export type FloatingButtonGroupOrientation = "horizontal" | "vertical";
+type FloatingButtonGroupVariant = "muted" | "floating";
+type FloatingButtonGroupSize = "sm" | "md";
+type FloatingButtonGroupOrientation = "horizontal" | "vertical";
 
-export interface FloatingButtonGroupAction {
+interface FloatingButtonGroupAction {
   type?: "action";
   /** Stable key, also passed to onAction. */
   id: string;
@@ -32,14 +32,14 @@ export interface FloatingButtonGroupAction {
   reserveLabels?: readonly string[];
 }
 
-export interface FloatingButtonGroupSeparator {
+interface FloatingButtonGroupSeparator {
   type: "separator";
   id?: string;
 }
 
-export type FloatingButtonGroupItem = FloatingButtonGroupAction | FloatingButtonGroupSeparator;
+type FloatingButtonGroupItem = FloatingButtonGroupAction | FloatingButtonGroupSeparator;
 
-export interface FloatingButtonGroupProps {
+interface FloatingButtonGroupProps {
   items: readonly FloatingButtonGroupItem[];
   /** Accessible name of the toolbar, such as "Board actions". */
   label: string;
@@ -301,4 +301,3 @@ export function FloatingButtonGroup({ items, label, variant = "muted", size = "m
   return side === "left" || side === "right" ? <TooltipPrimitive.Provider delayDuration={250} skipDelayDuration={300} disableHoverableContent>{group}</TooltipPrimitive.Provider> : group;
 }
 
-export default FloatingButtonGroup;

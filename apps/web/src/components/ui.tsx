@@ -4,7 +4,7 @@
  * Use these instead of hand-rolled menus, dialogs, tabs and button groups.
  */
 import type { ReactNode } from 'react';
-import { Dialog as D, DropdownMenu as DM, Tabs as T, ToggleGroup as TG, Tooltip as TT } from 'radix-ui';
+import { Dialog as D, Tabs as T, ToggleGroup as TG, Tooltip as TT } from 'radix-ui';
 import { Icon } from './Icons';
 import ArcSegmented from './arc/segmented-control/segmented-control';
 
@@ -110,30 +110,6 @@ export function Tip({ content, children, side = 'top', disabled }: { content: Re
     </TT.Root>
   );
 }
-
-/** Dropdown menu. `trigger` must be a single button. */
-export function Menu({ trigger, children, align = 'end', label }: { trigger: ReactNode; children: ReactNode; align?: 'start' | 'end'; label?: string }) {
-  return (
-    <DM.Root modal={false}>
-      <DM.Trigger asChild>{trigger}</DM.Trigger>
-      <DM.Portal>
-        <DM.Content align={align} sideOffset={6} collisionPadding={8} className="menu" aria-label={label}>
-          {children}
-        </DM.Content>
-      </DM.Portal>
-    </DM.Root>
-  );
-}
-export function MenuItem({ icon, children, onSelect, tone }: { icon?: ReactNode; children: ReactNode; onSelect: () => void; tone?: 'danger' }) {
-  return (
-    <DM.Item className={`m-item ${tone ?? ''}`} onSelect={onSelect}>
-      {icon}
-      <span className="grow">{children}</span>
-    </DM.Item>
-  );
-}
-export const MenuSeparator = () => <DM.Separator className="m-sep" />;
-export const MenuLabel = ({ children }: { children: ReactNode }) => <DM.Label className="m-head">{children}</DM.Label>;
 
 /** Modal dialog: focus trap, Escape and outside click close, focus returns to the opener. */
 export function Dialog({ title, description, children, onClose, wide, footer }: { title: string; description?: ReactNode; children: ReactNode; onClose: () => void; wide?: boolean; footer?: ReactNode }) {

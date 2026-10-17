@@ -86,13 +86,13 @@ function nearestPatch(owner: string, p: Vec3): SurfacePatch | null {
   return best;
 }
 
-export interface LidarCompareInput {
+interface LidarCompareInput {
   scan: Uint8Array;
   expected: SolidBox[];
   transient: Vec3[];
 }
 
-export interface LidarCompareOutput {
+interface LidarCompareOutput {
   stats: { rays: number; returns: number; consistent: number; closer: number; farther: number; rmsResidualM: number };
   regions: { kind: 'closer' | 'farther'; points: number; centroid: Vec3; min: Vec3; max: Vec3; expectedOwner: string | null; meanDeltaM: number; transient: boolean }[];
   patchSupport: Record<string, { points: number; rms: number }>;
@@ -136,7 +136,7 @@ export function lidarCompare(input: LidarCompareInput): LidarCompareOutput {
   };
 }
 
-export interface DsmInput {
+interface DsmInput {
   scans: Uint8Array[];
   buildingId: string;
   cellM: number;
@@ -184,7 +184,7 @@ function decodePngGray(bytes: Uint8Array): Gray {
   return rgbaToGray(png.data, png.width, png.height);
 }
 
-export interface ImageryDiffInput {
+interface ImageryDiffInput {
   a: Uint8Array;
   b: Uint8Array;
   gsdM: number;
@@ -209,7 +209,7 @@ export function imageryDiff(input: ImageryDiffInput) {
   };
 }
 
-export interface MultiFrameInput {
+interface MultiFrameInput {
   frames: { t: number; jpeg: Uint8Array }[];
   roi: { x: number; y: number; w: number; h: number };
   scale: number;

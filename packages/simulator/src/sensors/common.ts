@@ -1,6 +1,6 @@
 import { EnuFrame, FACILITY, INGEST_SCHEMA_VERSION, type IngestEnvelope, type Vec3, hashString } from '@strata/domain';
 
-export const frame = new EnuFrame(FACILITY.origin);
+const frame = new EnuFrame(FACILITY.origin);
 
 export const toGeo = (p: Vec3) => {
   const g = frame.toGeodetic(p);

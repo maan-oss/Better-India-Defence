@@ -18,7 +18,7 @@ function makeNoise(seed: number) {
   return (x: number, t: number) => waves.reduce((acc, w) => acc + w.a * Math.cos(x * w.f + w.p + t * (0.25 + w.f * 0.05)), 0);
 }
 
-export interface StrataFieldProps {
+interface StrataFieldProps {
   width?: number;
   height?: number;
   lines?: number;

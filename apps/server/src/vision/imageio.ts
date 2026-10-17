@@ -4,9 +4,9 @@ import { PNG } from 'pngjs';
 import { type RgbImage, fromRgba, makeRgb, toRgba } from '@strata/domain/vision';
 
 /** Hard limits so a hostile or corrupt upload cannot exhaust memory. */
-export const MAX_PIXELS = 40_000_000;
+const MAX_PIXELS = 40_000_000;
 
-export type ImageFormat = 'jpeg' | 'png' | 'other';
+type ImageFormat = 'jpeg' | 'png' | 'other';
 
 export function sniff(bytes: Uint8Array): ImageFormat {
   if (bytes[0] === 0xff && bytes[1] === 0xd8) return 'jpeg';
@@ -14,7 +14,7 @@ export function sniff(bytes: Uint8Array): ImageFormat {
   return 'other';
 }
 
-export class ImageDecodeError extends Error {}
+class ImageDecodeError extends Error {}
 
 /** Decode JPEG/PNG natively; anything else (WebP, BMP, TIFF, HEIC if ffmpeg supports it) via ffmpeg. */
 export function decodeImage(bytes: Uint8Array): RgbImage {
@@ -53,7 +53,7 @@ export function encodePng(img: RgbImage): Uint8Array {
 }
 
 /** EXIF orientation tag (1–8) from a JPEG APP1 segment; 1 when absent. */
-export function exifOrientation(b: Uint8Array): number {
+function exifOrientation(b: Uint8Array): number {
   let i = 2;
   while (i + 4 < b.length && b[i] === 0xff) {
     const marker = b[i + 1]!;
@@ -79,7 +79,7 @@ export function exifOrientation(b: Uint8Array): number {
   return 1;
 }
 
-export function applyOrientation(img: RgbImage, o: number): RgbImage {
+function applyOrientation(img: RgbImage, o: number): RgbImage {
   if (o <= 1 || o > 8) return img;
   const swap = o >= 5;
   const W = swap ? img.height : img.width;

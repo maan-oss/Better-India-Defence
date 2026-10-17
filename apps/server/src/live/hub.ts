@@ -7,7 +7,7 @@ import type { Metrics } from '../metrics.ts';
  * rate; track updates are coalesced so a slow client only ever receives the latest track set.
  */
 /** Who is connected to the live picture (for "on watch"). */
-export interface PresenceUser {
+interface PresenceUser {
   username: string;
   displayName: string;
   role: string;

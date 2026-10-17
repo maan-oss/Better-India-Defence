@@ -7,10 +7,10 @@ import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, typ
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./sortable-data-table.module.css";
 
-export type SortDirection = "asc" | "desc";
-export type SortState = { key: string; direction: SortDirection };
+type SortDirection = "asc" | "desc";
+type SortState = { key: string; direction: SortDirection };
 
-export type DataColumn<T> = {
+type DataColumn<T> = {
   key: string;
   label: string;
   sortable?: boolean;
@@ -21,7 +21,7 @@ export type DataColumn<T> = {
   width?: number | string;
 };
 
-export type SortableDataTableProps<T extends Record<string, unknown>> = {
+type SortableDataTableProps<T extends Record<string, unknown>> = {
   rows: T[];
   columns: DataColumn<T>[];
   rowKey: keyof T | ((row: T) => string);
@@ -309,4 +309,3 @@ export function SortableDataTable<T extends Record<string, unknown>>({ rows, col
   </div>;
 }
 
-export default SortableDataTable;

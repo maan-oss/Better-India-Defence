@@ -10,7 +10,7 @@ import styles from "./calendar.module.css";
 
 export type CalendarDateMatcher = (date: Date) => boolean;
 
-export interface CalendarProps {
+interface CalendarProps {
   value?: Date;
   onChange?: (date: Date) => void;
   month?: Date;
@@ -58,7 +58,7 @@ const subscribeNothing = () => () => {};
 const clientSnapshot = () => true;
 const serverSnapshot = () => false;
 /** The viewer's local date. Undefined on the server and during hydration, so markup never depends on the server clock or time zone; afterwards it follows the real date across midnight. */
-export function useToday() {
+function useToday() {
   const key = useSyncExternalStore(subscribeToday, readToday, serverToday);
   return useMemo(() => (key ? fromKey(key) : undefined), [key]);
 }
@@ -325,4 +325,3 @@ export function Calendar({
     </section>;
 }
 
-export { addDays, addMonths, sameDay, startOfDay };

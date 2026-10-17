@@ -4,7 +4,7 @@
  * uploaded orthophoto. Over a site of a few kilometres, Web-Mercator's latitude scaling is linear to well under
  * a pixel, so the mosaic is placed by its tile-edge bounds.
  */
-export interface Basemap {
+interface Basemap {
   url: string;
   attribution: string;
   maxZoom: number;

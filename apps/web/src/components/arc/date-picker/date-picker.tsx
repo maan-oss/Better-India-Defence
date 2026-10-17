@@ -9,7 +9,7 @@ import { Calendar, type CalendarDateMatcher } from "../calendar/calendar";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./date-picker.module.css";
 
-export interface DatePickerProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "value" | "onChange"> {
+interface DatePickerProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "value" | "onChange"> {
   label: string;
   value?: Date;
   onChange?: (date: Date | undefined) => void;

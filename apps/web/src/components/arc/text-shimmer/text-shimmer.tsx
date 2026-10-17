@@ -24,7 +24,7 @@ function shimmerImage(t: number, settle: number) {
  * The band uses the current text color over a muted base. When `active` turns false the band glides off and the text settles to solid.
  * A changed label rises in place while the line springs to its new width. The component sets `aria-busy`; announce completion from your own live region.
  */
-export interface TextShimmerProps {
+interface TextShimmerProps {
   /** The status text. Keep it to one short line. */
   children: string;
   /** Sweep while work is ongoing. Defaults to true. */
@@ -112,4 +112,3 @@ export function TextShimmer({ children, active = true, duration = 1.8, as = "spa
   </Tag>;
 }
 
-export default TextShimmer;

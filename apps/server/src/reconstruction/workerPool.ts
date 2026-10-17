@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 import type { SiteConfig } from '@strata/domain';
 import type { computeVisibility, dsmReconstruct, imageryDiff, lidarCompare, multiFrame } from './analysis.ts';
 
-export type AnalysisKinds = {
+type AnalysisKinds = {
   visibility: { input: undefined; output: ReturnType<typeof computeVisibility> };
   lidar_compare: { input: Parameters<typeof lidarCompare>[0]; output: ReturnType<typeof lidarCompare> };
   dsm: { input: Parameters<typeof dsmReconstruct>[0]; output: ReturnType<typeof dsmReconstruct> };

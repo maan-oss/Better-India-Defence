@@ -7,7 +7,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./tooltip.module.css";
 
-export interface TooltipProps {
+interface TooltipProps {
   content: ReactNode;
   children: ReactElement;
   side?: "top" | "bottom";
@@ -78,4 +78,3 @@ export function Tooltip({ content, children, side = "top" }: TooltipProps) {
   </TooltipPrimitive.Provider>;
 }
 
-export default Tooltip;

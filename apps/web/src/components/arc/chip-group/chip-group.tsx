@@ -7,7 +7,7 @@ import type { AnimationPlaybackControls, HTMLMotionProps, MotionValue, TargetAnd
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./chip-group.module.css";
 
-export interface ChipOption { value: string; label: string; }
+interface ChipOption { value: string; label: string; }
 
 /**
  * Selectable filter chips for narrowing a list by facets people toggle often, such as topics, statuses, or tags.
@@ -15,7 +15,7 @@ export interface ChipOption { value: string; label: string; }
  * neighbours glide to their new places, even across lines. Long sets fold behind a “+N more” chip that opens with a height morph.
  * Arrow keys move between chips, Space or Enter toggles, and each chip is a pressed or unpressed button.
  */
-export interface ChipGroupProps {
+interface ChipGroupProps {
   options: ChipOption[];
   value: string[];
   onValueChange: (value: string[]) => void;
@@ -252,4 +252,3 @@ export function ChipGroup({ options, value, onValueChange, label, multiple = tru
   </LayoutGroup>;
 }
 
-export default ChipGroup;

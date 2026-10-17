@@ -12,7 +12,7 @@ import {
 } from 'motion/react'
 import { cn } from '../../../lib/utils'
 
-export type PinListItem = {
+type PinListItem = {
   id: number | string
   name: string
   info?: string
@@ -20,7 +20,7 @@ export type PinListItem = {
   pinned: boolean
 }
 
-export type PinListProps = {
+type PinListProps = {
   items: PinListItem[]
   labels?: {
     pinned?: string

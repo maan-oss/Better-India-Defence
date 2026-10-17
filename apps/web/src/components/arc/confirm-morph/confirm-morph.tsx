@@ -9,7 +9,7 @@ import { motionTokens } from "../lib/motion-tokens";
 import styles from "./confirm-morph.module.css";
 
 /** Where the control is in its life: resting, asking, working, finished, or failed. */
-export type ConfirmMorphState = "idle" | "confirming" | "pending" | "done" | "error";
+type ConfirmMorphState = "idle" | "confirming" | "pending" | "done" | "error";
 
 /**
  * A button for destructive or important actions that asks in place. Pressing it morphs the same surface into an inline
@@ -17,7 +17,7 @@ export type ConfirmMorphState = "idle" | "confirming" | "pending" | "done" | "er
  * nothing around it jumps. Escape, an outside press, or the timeout all return it to rest.
  * Use it where a modal dialog would be heavy: deleting a selection, revoking access, discarding a draft.
  */
-export interface ConfirmMorphProps {
+interface ConfirmMorphProps {
   /** The resting label, such as "Delete". */
   label: ReactNode;
   /** A plain icon before the resting label. */
@@ -288,4 +288,3 @@ export function ConfirmMorph({
   </div>;
 }
 
-export default ConfirmMorph;

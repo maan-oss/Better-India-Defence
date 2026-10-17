@@ -7,7 +7,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./time-picker.module.css";
 
-export interface TimePickerProps {
+interface TimePickerProps {
   label: string;
   value?: string;
   defaultValue?: string;

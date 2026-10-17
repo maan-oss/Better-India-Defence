@@ -7,13 +7,13 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./multi-select.module.css";
 
-export interface MultiSelectOption {
+interface MultiSelectOption {
   value: string;
   label: string;
   disabled?: boolean;
 }
 
-export interface MultiSelectProps {
+interface MultiSelectProps {
   label: string;
   options: MultiSelectOption[];
   value?: string[];

@@ -75,11 +75,6 @@
 .pv { border-top: 1px solid var(--line); padding-top: var(--sp-4); }
 .cmp { position: relative; width: 100%; max-height: 60vh; background: var(--bg-0); border: 1px solid var(--line-2); border-radius: var(--radius-lg); cursor: ew-resize; overflow: hidden; touch-action: none; }
 .cmp img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; user-select: none; pointer-events: none; }
-.cmp-a { image-rendering: pixelated; }
-.cmp-line { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--text-0); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5); pointer-events: none; }
-.cmp-tag { position: absolute; top: 8px; font-size: var(--fs-micro); font-weight: 600; background: rgba(23, 23, 23, 0.82); padding: 2px 7px; border-radius: var(--radius-sm); }
-.cmp-tag.l { left: 6px; }
-.cmp-tag.r { right: 6px; }
 .chain { list-style: none; padding: 0; margin: 10px 0 0; border-left: 1px solid var(--line-2); }
 .chain li { padding: 6px 0 8px 14px; position: relative; display: flex; flex-direction: column; gap: 2px; }
 .chain li::before { content: ''; position: absolute; left: -4px; top: 11px; width: 7px; height: 7px; background: var(--bg-0); border: 1px solid var(--text-2); border-radius: 50%; }
@@ -134,9 +129,6 @@
 .reg { display: grid; grid-template-columns: 380px 1fr; min-height: 0; height: 100%; }
 .reg-list { border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
 .reg-detail { overflow: auto; padding: var(--sp-5) var(--sp-6); min-height: 0; }
-.tpl-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-.tpl-grid figure { margin: 0; width: 112px; display: flex; flex-direction: column; gap: 3px; font-size: var(--fs-micro); }
-.tpl-grid img { width: 112px; height: 112px; object-fit: cover; border-radius: var(--radius); }
 .chooser { display: flex; flex-wrap: wrap; gap: 10px; }
 .chooser button { background: var(--bg-2); border: 1px solid var(--line-2); border-radius: var(--radius-lg); padding: var(--sp-2); cursor: pointer; display: flex; flex-direction: column; gap: 4px; color: inherit; width: 140px; text-align: left; }
 .chooser button:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -157,19 +149,8 @@
 }
 
 /* live cameras */
-.camwall { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: var(--sp-3); }
-.camtile { border: 1px solid var(--line-2); background: var(--bg-2); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; }
-.camtile.sel { border-color: var(--text-1); }
-.camtile-v { position: relative; aspect-ratio: 16 / 9; background: var(--bg-0); cursor: pointer; overflow: hidden; }
-.camtile-v img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .camtile-off { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-2); font-size: var(--fs-caption); padding: 12px; text-align: center; }
 .camtile-off.error { color: var(--st-critical-text); }
-.camtile-state { position: absolute; left: 8px; top: 8px; font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.04em; padding: 1px 6px; border-radius: var(--radius-sm); background: rgba(23, 23, 23, 0.8); }
-.camtile-state.live { color: var(--text-0); }
-.camtile-state.error { color: var(--st-critical-text); }
-.camtile-state.connecting { color: var(--st-caution-text); }
-.camtile-zone { position: absolute; right: 8px; top: 8px; font-size: var(--fs-micro); padding: 1px 6px; background: rgba(23, 23, 23, 0.8); color: var(--text-0); border: 1px dashed rgba(243, 241, 234, 0.5); font-weight: 500; }
-.camtile-b { padding: 10px var(--sp-3); display: flex; flex-direction: column; gap: 4px; }
 
 /* In the review queue every row is pending: keep the list quiet, the detail header carries the flag. */
 .rv-list .dchip.STRONG.wl { background: transparent; border: 0; padding: 0; }

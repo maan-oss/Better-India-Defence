@@ -3,7 +3,7 @@ import { type RgbImage, fromRgb24 } from '@strata/domain/vision';
 
 /** Video handling through the system ffmpeg/ffprobe (required for video; images work without it). */
 
-export interface VideoInfo {
+interface VideoInfo {
   durationS: number;
   width: number;
   height: number;
@@ -64,7 +64,7 @@ export function frameAt(path: string, tS: number, maxWidth = 100_000): RgbImage 
   return fromRgb24(new Uint8Array(r.stdout.buffer, r.stdout.byteOffset, w * h * 3), w, h);
 }
 
-export interface FrameStreamOptions {
+interface FrameStreamOptions {
   /** Frames per second to sample. */
   fps: number;
   startS?: number;

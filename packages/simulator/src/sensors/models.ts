@@ -47,7 +47,7 @@ export interface StepOutput {
   media: MediaUpload[];
 }
 
-export interface OrthoRenderer {
+interface OrthoRenderer {
   (world: TruthWorld, t: number, gsdM: number, halfExtentM: number): { png: Uint8Array; width: number; height: number };
 }
 

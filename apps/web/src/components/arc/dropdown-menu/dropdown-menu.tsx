@@ -8,8 +8,8 @@ import { ChevronDown } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./dropdown-menu.module.css";
 
-export interface DropdownItem { label: string; onSelect?: () => void; disabled?: boolean; icon?: ReactNode; destructive?: boolean; separatorBefore?: boolean; }
-export interface DropdownMenuProps { label: string; items: DropdownItem[]; icon?: ReactNode; }
+interface DropdownItem { label: string; onSelect?: () => void; disabled?: boolean; icon?: ReactNode; destructive?: boolean; separatorBefore?: boolean; }
+interface DropdownMenuProps { label: string; items: DropdownItem[]; icon?: ReactNode; }
 
 type Highlight = { top: number; height: number; danger: boolean; glide: boolean };
 
@@ -69,4 +69,3 @@ export function DropdownMenu({ label, items, icon }: DropdownMenuProps) {
   </DropdownPrimitive.Root>;
 }
 
-export default DropdownMenu;

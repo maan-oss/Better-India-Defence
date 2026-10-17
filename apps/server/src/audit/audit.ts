@@ -6,7 +6,7 @@ import type { Db } from '../db/client.ts';
  * or deletion breaks the chain (verify()). The table also has a trigger rejecting UPDATE/DELETE. Records
  * are appended through a single serialised writer to keep the chain linear.
  */
-export interface AuditInput {
+interface AuditInput {
   actor: string;
   role: string;
   action: string;
@@ -15,7 +15,7 @@ export interface AuditInput {
   ip?: string | null;
 }
 
-export interface AuditRecord extends Required<Omit<AuditInput, 'detail'>> {
+interface AuditRecord extends Required<Omit<AuditInput, 'detail'>> {
   seq: number;
   t: number;
   detail: Record<string, unknown>;

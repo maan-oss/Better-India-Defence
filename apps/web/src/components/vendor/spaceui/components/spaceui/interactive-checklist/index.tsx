@@ -11,7 +11,7 @@ export type ChecklistItem = {
   done: boolean
 }
 
-export type InteractiveChecklistProps = {
+type InteractiveChecklistProps = {
   items?: ChecklistItem[]
   defaultItems?: ChecklistItem[]
   onChange?: (items: ChecklistItem[]) => void
@@ -226,4 +226,3 @@ export function InteractiveChecklist({
   )
 }
 
-export default InteractiveChecklist

@@ -6,10 +6,10 @@ import { AnimatePresence, animate, motion, useIsPresent, useMotionValue, useRedu
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./badge.module.css";
 
-export type BadgeTone = "neutral" | "success" | "info" | "warning" | "danger";
-export type BadgeSize = "sm" | "md";
+type BadgeTone = "neutral" | "success" | "info" | "warning" | "danger";
+type BadgeSize = "sm" | "md";
 
-export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   tone?: BadgeTone;
   size?: BadgeSize;
   icon?: ReactNode;
@@ -78,4 +78,3 @@ export function Badge({ tone = "neutral", size = "md", icon, className, children
   </span>;
 }
 
-export default Badge;

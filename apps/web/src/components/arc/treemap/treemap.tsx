@@ -5,7 +5,7 @@ import { AnimatePresence, animate, motion, useInView, useMotionValue, useReduced
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./treemap.module.css";
 
-export interface TreemapNode {
+interface TreemapNode {
   /** Stable identity, unique in the tree. A tile that survives a data change morphs to its new size. */
   id: string;
   label: string;
@@ -17,7 +17,7 @@ export interface TreemapNode {
 }
 
 /** Use a treemap for a hierarchy of parts, such as revenue by region, country, and plan, when sizes matter more than exact comparisons. */
-export interface TreemapProps {
+interface TreemapProps {
   /** The root. Its label names the whole in the first breadcrumb. */
   data: TreemapNode;
   /** What the whole is, such as "Revenue". Names the chart for assistive technology. */
@@ -330,4 +330,3 @@ export function Treemap({ data, label, formatValue = value => grouped.format(val
   </figure>;
 }
 
-export default Treemap;

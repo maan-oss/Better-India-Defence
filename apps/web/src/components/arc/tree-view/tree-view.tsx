@@ -14,7 +14,7 @@ export interface TreeNode {
   icon?: ReactNode;
 }
 
-export interface TreeViewProps {
+interface TreeViewProps {
   nodes: TreeNode[];
   defaultExpandedIds?: string[];
   expandedIds?: string[];
@@ -201,4 +201,3 @@ export function TreeView({ nodes, defaultExpandedIds = [], expandedIds, onExpand
   </div>;
 }
 
-export default TreeView;

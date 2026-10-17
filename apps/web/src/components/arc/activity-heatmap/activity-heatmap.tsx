@@ -7,7 +7,7 @@ import type { Variants } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./activity-heatmap.module.css";
 
-export interface ActivityDay {
+interface ActivityDay {
   /** Calendar day as YYYY-MM-DD. */
   date: string;
   count: number;
@@ -19,7 +19,7 @@ export interface ActivityDay {
  * comparison is the point. Cells wave in once on view, a tooltip glides between cells on hover or keyboard focus, and a
  * new range recolors the grid in a sweep instead of redrawing it. Arrow keys move by day and week, Enter selects.
  */
-export interface ActivityHeatmapProps {
+interface ActivityHeatmapProps {
   /** One entry per day, oldest first. Days missing inside the range count as zero. */
   days: ActivityDay[];
   /** Accessible name for the grid, such as "Contributions in 2025". */
@@ -413,4 +413,3 @@ export function ActivityHeatmap({ days, label, period, unit: unitProp = CONTRIBU
   </div>;
 }
 
-export default ActivityHeatmap;

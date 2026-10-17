@@ -2,7 +2,7 @@
   "name": "strata",
   "private": true,
   "version": "0.1.0",
-  "description": "Strata \u2014 4D Reality Intelligence Platform: a persistent spatial memory of a physical environment.",
+  "description": "Strata — 4D Reality Intelligence Platform: a persistent spatial memory of a physical environment.",
   "type": "module",
   "workspaces": [
     "packages/*",
@@ -29,7 +29,6 @@
     "@eslint/js": "^9.39.0",
     "@playwright/test": "^1.63.0",
     "@types/node": "^22.10.0",
-    "concurrently": "^10.0.5",
     "esbuild": "^0.25.0",
     "eslint": "^9.39.0",
     "eslint-plugin-react-hooks": "^7.1.1",

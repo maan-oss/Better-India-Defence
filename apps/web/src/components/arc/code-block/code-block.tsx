@@ -7,7 +7,7 @@ import { motionTokens } from "../lib/motion-tokens";
 import { CopyButton } from "../copy-button/copy-button";
 import styles from "./code-block.module.css";
 
-export interface CodeBlockProps {
+interface CodeBlockProps {
   /** Source shown in the block and copied by the action. */
   code: string;
   /** File name displayed in the header. */

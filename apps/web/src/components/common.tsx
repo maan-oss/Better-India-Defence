@@ -19,7 +19,7 @@ export function StateChip({ state, label }: { state: EpistemicState | string; la
   );
 }
 
-export const STATE_HELP: Record<EpistemicState, string> = {
+const STATE_HELP: Record<EpistemicState, string> = {
   CAPTURED: 'Direct sensor observation.',
   RECONSTRUCTED: 'Mathematically derived from captured observations.',
   INFERRED: 'Model estimate where direct evidence is insufficient.',

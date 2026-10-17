@@ -15,7 +15,7 @@ import type { LayerKey, Selection } from '../state/world';
 import { hms } from '../lib/format';
 import { P } from '../lib/palette';
 
-export interface EngineStats {
+interface EngineStats {
   fps: number;
   frameMs: number;
   drawCalls: number;

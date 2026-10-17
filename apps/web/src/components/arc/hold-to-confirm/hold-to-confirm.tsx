@@ -13,7 +13,7 @@ import styles from "./hold-to-confirm.module.css";
  * linear timeline; letting go early rewinds it on a spring, and finishing morphs the label and icon into a done state. Space and Enter can be held too.
  * Prefer a regular confirmation dialog when people need to read consequences first; use this when the consequence is already on screen.
  */
-export interface HoldToConfirmProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "onClick" | "onDrag" | "onDragEnd" | "onDragStart" | "onAnimationStart" | "onAnimationEnd"> {
+interface HoldToConfirmProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "onClick" | "onDrag" | "onDragEnd" | "onDragStart" | "onAnimationStart" | "onAnimationEnd"> {
   /** The instruction and the action, for example “Hold to delete project”. */
   label: string;
   /** Shown once the hold completes, for example “Deleted”. */
@@ -206,4 +206,3 @@ export function HoldToConfirm({ label, confirmedLabel = "Done", onConfirm, durat
   </>;
 }
 
-export default HoldToConfirm;

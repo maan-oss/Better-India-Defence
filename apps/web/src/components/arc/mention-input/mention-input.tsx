@@ -8,9 +8,9 @@ import { Hash } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./mention-input.module.css";
 
-export type MentionKind = "person" | "channel";
+type MentionKind = "person" | "channel";
 
-export interface MentionPerson {
+interface MentionPerson {
   id: string;
   name: string;
   /** One short line under the name, such as a job title. */
@@ -19,7 +19,7 @@ export interface MentionPerson {
   avatar?: string;
 }
 
-export interface MentionChannel {
+interface MentionChannel {
   id: string;
   name: string;
   description?: string;
@@ -40,7 +40,7 @@ export interface MentionValue {
   mentions: Mention[];
 }
 
-export interface MentionInputHandle {
+interface MentionInputHandle {
   focus: () => void;
   /** Inserts text at the caret, as if typed. */
   insert: (text: string) => void;
@@ -50,7 +50,7 @@ export interface MentionInputHandle {
   textarea: HTMLTextAreaElement | null;
 }
 
-export interface MentionInputProps {
+interface MentionInputProps {
   value?: MentionValue;
   defaultValue?: MentionValue;
   onChange?: (value: MentionValue) => void;
@@ -95,17 +95,7 @@ const GLIDE = physical(.3, .1), GROW = physical(spring.smooth.visualDuration, 0)
 /** First placements. A jump made in the commit that mounts its element never reaches the DOM; an instant animation lands on the first frame. */
 const INSTANT: Transition = { duration: 0 };
 
-export const mentionText = (kind: MentionKind, label: string) => `${SYMBOL[kind]}${label}`;
-
-/** Turns a value into storage friendly text, `<@id>` for people and `<#id>` for channels by default. */
-export function serializeMentions(value: MentionValue, format: (mention: Mention) => string = mention => `<${SYMBOL[mention.kind]}${mention.id}>`) {
-  let out = "", at = 0;
-  for (const mention of [...value.mentions].sort((a, b) => a.start - b.start)) {
-    out += value.text.slice(at, mention.start) + format(mention);
-    at = mention.end;
-  }
-  return out + value.text.slice(at);
-}
+const mentionText = (kind: MentionKind, label: string) => `${SYMBOL[kind]}${label}`;
 
 /** Moves mentions along with an edit and drops any the edit touched. `hint` is the caret before the edit, which settles repeated characters. */
 function reconcile(previous: MentionValue, text: string, hint: number): Mention[] {
@@ -519,4 +509,3 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
   </div>;
 });
 
-export default MentionInput;

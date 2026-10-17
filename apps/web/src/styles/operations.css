@@ -1,7 +1,6 @@
 .boot { height: 100%; display: grid; place-items: center; color: var(--text-2); background: var(--bg-chrome); }
 .boot-card { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); animation: reveal 500ms var(--ease) both; font-size: var(--fs-body); max-width: 520px; text-align: center; }
 .boot-card b { font-size: var(--fs-body-lg); letter-spacing: 0.3em; color: var(--text-0); font-weight: 600; margin-right: -0.3em; }
-.boot-logo { color: var(--text-0); animation: pulse 2s ease-in-out infinite; }
 .boot-bar { width: 180px; height: 2px; background: var(--line-2); overflow: hidden; border-radius: 1px; }
 .boot-bar i { display: block; width: 40%; height: 100%; background: var(--text-0); animation: bootbar 1.2s var(--ease) infinite; }
 @keyframes bootbar { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
@@ -36,7 +35,6 @@
 .legend { padding: 10px 12px; font-size: var(--fs-caption); display: flex; flex-direction: column; gap: 4px; min-width: 190px; }
 .legend .ramp { height: 6px; background: linear-gradient(90deg, #46327e, #277f8e, #a0da39); border-radius: 1px; }
 .intro-fade { position: absolute; inset: 0; background: var(--bg-0); pointer-events: none; transition: opacity 900ms var(--ease); z-index: 6; }
-.hover-tip { position: absolute; pointer-events: none; z-index: 8; padding: 5px 9px; font-size: var(--fs-caption); }
 
 /* right panel */
 .ctx-tabs { flex: none; height: 44px; padding: 0 var(--sp-4); border-bottom: 1px solid var(--line-2); }

@@ -6,7 +6,7 @@ import { CircleAlert, TriangleAlert } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./usage-meter.module.css";
 
-export interface UsageMeterSegment {
+interface UsageMeterSegment {
   /** Stable identity. Keep it the same while the value changes, so the segment re-flows instead of being replaced. */
   id: string;
   label: string;
@@ -14,7 +14,7 @@ export interface UsageMeterSegment {
 }
 
 /** Use a usage meter for a fixed allowance, such as storage or seats, when people need to see what takes the space and how close they are to the limit. */
-export interface UsageMeterProps {
+interface UsageMeterProps {
   /** What is measured, such as "Workspace storage". */
   label: string;
   /** Used amounts in display order. Up to four read clearly. */
@@ -337,4 +337,3 @@ export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, fr
   </div>;
 }
 
-export default UsageMeter;

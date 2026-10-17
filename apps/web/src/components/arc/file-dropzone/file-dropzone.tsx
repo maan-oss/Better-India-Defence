@@ -8,14 +8,14 @@ import type { HTMLMotionProps, TargetAndTransition, Transition } from "motion/re
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./file-dropzone.module.css";
 
-export type FileDropzoneStatus = "uploading" | "uploaded" | "failed";
+type FileDropzoneStatus = "uploading" | "uploaded" | "failed";
 /** One row in the file list. A row without a status is a plain selection. */
 /** `preview` is a thumbnail URL; image files added by the visitor get one automatically. */
-export type FileDropzoneItem = { id: string; name: string; size: number; status?: FileDropzoneStatus; progress?: number; error?: string; retryable?: boolean; file?: File; preview?: string };
+type FileDropzoneItem = { id: string; name: string; size: number; status?: FileDropzoneStatus; progress?: number; error?: string; retryable?: boolean; file?: File; preview?: string };
 /** Report 0 to 100 through onProgress, resolve when the file lands, or reject with an Error whose message becomes the row's reason. Removing the row aborts the signal. */
-export type FileDropzoneUpload = (item: FileDropzoneItem, options: { onProgress: (percent: number) => void; signal: AbortSignal }) => Promise<void>;
+type FileDropzoneUpload = (item: FileDropzoneItem, options: { onProgress: (percent: number) => void; signal: AbortSignal }) => Promise<void>;
 
-export type FileDropzoneProps = {
+type FileDropzoneProps = {
   accept?: string; multiple?: boolean; maxFiles?: number; onFilesChange?: (files: File[]) => void; label?: string; description?: string;
   /** Rows present at mount, such as files uploaded earlier. They render in place without an entrance. */
   defaultItems?: FileDropzoneItem[];
@@ -51,7 +51,7 @@ const shakeTransition: Transition = { duration: .42, ease: "easeOut" };
 /** New rows drop out of the target into the list, with a touch of life as they land. */
 const land: Transition = { type: "spring", visualDuration: .42, bounce: .14 };
 
-export function formatFileSize(bytes: number) {
+function formatFileSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < MB) return `${Math.round(bytes / 1024)} KB`;
   const mb = bytes / MB;
@@ -439,4 +439,3 @@ export function FileDropzone({ accept, multiple = true, maxFiles = 5, onFilesCha
   </div>;
 }
 
-export default FileDropzone;

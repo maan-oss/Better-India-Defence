@@ -5,7 +5,7 @@ import { AnimatePresence, animate, motion, useInView, useMotionValue, useMotionV
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./line-chart.module.css";
 
-export interface LineChartSeries {
+interface LineChartSeries {
   /** Stable identity. A series keeps its line across data changes, so switching ranges morphs the path instead of redrawing it. */
   key: string;
   /** Name in the legend, the tooltip, and the data table. */
@@ -18,7 +18,7 @@ export interface LineChartSeries {
   area?: boolean;
 }
 
-export interface LineChartDatum {
+interface LineChartDatum {
   /** Stable identity, such as an ISO date. */
   key: string;
   /** Full label for the tooltip and screen readers, such as "Tue, Sep 15". */
@@ -30,7 +30,7 @@ export interface LineChartDatum {
 }
 
 /** Use a line chart for one or more measures over time, when the shape of the trend matters more than any single value. */
-export interface LineChartProps {
+interface LineChartProps {
   data: LineChartDatum[];
   series: LineChartSeries[];
   /** What is measured, such as "Signups". Names the chart for assistive technology. */
@@ -431,4 +431,3 @@ export function LineChart({ data, series, label, unit = "", height = 220, format
   </figure>;
 }
 
-export default LineChart;

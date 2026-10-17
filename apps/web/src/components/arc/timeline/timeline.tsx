@@ -8,7 +8,7 @@ import { ChevronDown } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./timeline.module.css";
 
-export interface TimelineEvent {
+interface TimelineEvent {
   id: string;
   /** When it happened, as an ISO string or epoch milliseconds. */
   at: string | number;
@@ -34,7 +34,7 @@ export interface TimelineEvent {
  * the connecting line draws itself as rows come into view, rows expand in place, and new updates slide in at the top
  * while the rest glide down. Arrow keys move between rows, Enter or Space expands one.
  */
-export interface TimelineProps {
+interface TimelineProps {
   /** Updates in any order; the newest shows first. */
   events: TimelineEvent[];
   /** Reference time for relative labels and day groups, in epoch milliseconds. Pass a ticking clock to keep labels fresh. */
@@ -275,4 +275,3 @@ export function Timeline({ events, now, label, timeZone = "UTC", locale = "en-US
   </RevealClock.Provider>;
 }
 
-export default Timeline;

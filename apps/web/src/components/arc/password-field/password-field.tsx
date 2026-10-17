@@ -4,7 +4,7 @@ import type { InputHTMLAttributes } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./password-field.module.css";
-export interface PasswordFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> { label: string; description?: string }
+interface PasswordFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> { label: string; description?: string }
 /** One eye that a slash draws across, cutting the outline beneath it, instead of swapping two icons. */
 function EyeMorph({ slashed }: { slashed: boolean }) {
   const reduced = useReducedMotion(); const maskId = `eye-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;

@@ -8,7 +8,7 @@ import type { Platform } from '../platform.ts';
 import { audit, parse, requirePerm } from '../http/guards.ts';
 
 /** Exit code that asks the supervisor (scripts/start.mjs, scripts/dev.mjs, the container runtime) to start the service again. */
-export const RESTART_EXIT_CODE = 75;
+const RESTART_EXIT_CODE = 75;
 
 const normalise = (c: string) => c.toUpperCase().replace(/[^A-Z0-9]/g, '');
 function codeMatches(expected: string | null, given: string): boolean {

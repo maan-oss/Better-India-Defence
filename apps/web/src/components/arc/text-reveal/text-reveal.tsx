@@ -8,7 +8,7 @@ import styles from "./text-reveal.module.css";
  * The entrance runs in CSS, so it starts on first paint, never waits for hydration, and never leaves text hidden when scripts are slow.
  * Use `\n` in `text` for a deliberate line break and change the element's `key` to replay it.
  */
-export interface TextRevealProps { text: string; as?: "h1" | "h2" | "h3" | "p"; className?: string; id?: string; /** Seconds to wait before the first word rises. Defaults to 0. */ delay?: number }
+interface TextRevealProps { text: string; as?: "h1" | "h2" | "h3" | "p"; className?: string; id?: string; /** Seconds to wait before the first word rises. Defaults to 0. */ delay?: number }
 /** Total stagger stays under this many seconds, however long the text is. */
 const MAX_STAGGER = motionTokens.duration.considered;
 
@@ -28,4 +28,3 @@ export function TextReveal({ text, as = "h2", className, id, delay = 0 }: TextRe
   </Tag>;
 }
 
-export default TextReveal;

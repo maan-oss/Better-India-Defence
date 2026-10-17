@@ -4,24 +4,24 @@ import { AnimatePresence, motion } from 'motion/react'
 import * as React from 'react'
 import { cn } from '../../../lib/utils'
 
-export type SquareTone = 't100' | 't200' | 't300' | 't400' | 't500'
+type SquareTone = 't100' | 't200' | 't300' | 't400' | 't500'
 
-export type LoaderPattern = 'diamond' | 'corners' | 'bands' | 'scatter' | 'diagonal' | 'glyph'
+type LoaderPattern = 'diamond' | 'corners' | 'bands' | 'scatter' | 'diagonal' | 'glyph'
 
-export type LoaderMotion = 'morph' | 'fade' | 'scale' | 'blur' | 'flip'
+type LoaderMotion = 'morph' | 'fade' | 'scale' | 'blur' | 'flip'
 
-export interface PatternSquare {
+interface PatternSquare {
   row: number
   col: number
   tone: SquareTone
 }
 
-export interface Pattern {
+interface Pattern {
   name: LoaderPattern
   squares: PatternSquare[]
 }
 
-export const LOADING_PATTERNS: Pattern[] = [
+const LOADING_PATTERNS: Pattern[] = [
   {
     name: 'diamond',
     squares: [
@@ -123,7 +123,7 @@ export const LOADING_PATTERNS: Pattern[] = [
   },
 ]
 
-export const DEFAULT_TONE_OPACITIES: Record<SquareTone, number> = {
+const DEFAULT_TONE_OPACITIES: Record<SquareTone, number> = {
   t100: 0.2,
   t200: 0.4,
   t300: 0.65,
@@ -145,7 +145,7 @@ const MOTION_PRESETS: Record<
   flip: { initial: { opacity: 0, rotate: -90, scale: 0.5 }, animate: { opacity: 1, rotate: 0, scale: 1 } },
 }
 
-export interface LoadingOrbProps extends React.HTMLAttributes<HTMLDivElement> {
+interface LoadingOrbProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: number
   speed?: number
   pattern?: LoaderPattern | number
@@ -251,7 +251,7 @@ export function LoadingOrb({
   )
 }
 
-export interface BuildingLoaderProps extends Omit<LoadingOrbProps, 'pattern'> {
+interface BuildingLoaderProps extends Omit<LoadingOrbProps, 'pattern'> {
   state?: string
   detail?: string
   showShimmer?: boolean
@@ -259,48 +259,3 @@ export interface BuildingLoaderProps extends Omit<LoadingOrbProps, 'pattern'> {
   orbClassName?: string
 }
 
-export function BuildingLoader({
-  className,
-  state = 'Building',
-  detail = 'Composing response from context',
-  showShimmer = true,
-  size = 38,
-  pattern,
-  orbClassName,
-  ...loaderProps
-}: BuildingLoaderProps) {
-  return (
-    <div
-      className={cn('flex w-full max-w-sm items-center gap-4 rounded-xl bg-card/60 p-4 backdrop-blur-md', className)}
-    >
-      <LoadingOrb size={size} pattern={pattern} className={orbClassName} {...loaderProps} />
-      <div className="min-w-0 flex-1">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={state}
-            initial={{ opacity: 0, y: 2 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -2 }}
-            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {state && <p className="text-xs font-medium tracking-wide text-foreground">{state}...</p>}
-            {detail && <p className="mt-1 truncate text-[11px] text-muted-foreground">{detail}</p>}
-          </motion.div>
-        </AnimatePresence>
-        {showShimmer && (
-          <div className="relative mt-2.5 h-[3px] w-full overflow-hidden rounded-full bg-muted">
-            <div className="absolute inset-y-0 w-1/3 animate-[shimmer_1.5s_ease-in-out_infinite] rounded-full bg-primary/80" />
-            <style>{`
-              @keyframes shimmer {
-                0% { transform: translateX(-100%); }
-                100% { transform: translateX(350%); }
-              }
-            `}</style>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-export default LoadingOrb

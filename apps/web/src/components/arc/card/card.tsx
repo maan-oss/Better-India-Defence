@@ -9,7 +9,7 @@ import { X } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./card.module.css";
 
-export interface CardProps extends HTMLAttributes<HTMLElement> {
+interface CardProps extends HTMLAttributes<HTMLElement> {
   title: string;
   description?: string;
   media?: ReactNode;

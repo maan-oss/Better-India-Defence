@@ -25,9 +25,9 @@ import {
  * Local CPU inference for the vision models listed in models/manifest.json. Every model file is
  * SHA-256-verified before it is loaded; a missing or altered model disables only the features that need it.
  */
-export type ModelKey = 'detector' | 'face_detector' | 'face_embedder' | 'super_resolution';
+type ModelKey = 'detector' | 'face_detector' | 'face_embedder' | 'super_resolution';
 
-export interface ModelEntry {
+interface ModelEntry {
   key: ModelKey;
   file: string;
   sha256: string;
@@ -37,7 +37,7 @@ export interface ModelEntry {
   purpose: string;
 }
 
-export interface ModelStatus extends Omit<ModelEntry, 'url'> {
+interface ModelStatus extends Omit<ModelEntry, 'url'> {
   installed: boolean;
   verified: boolean;
   loaded: boolean;
@@ -64,7 +64,7 @@ function findManifest(dir: string): string | null {
   return null;
 }
 
-export interface FaceResult {
+interface FaceResult {
   face: FaceDetection;
   quality: FaceQuality;
   /** L2-normalised 128-d embedding; absent when the face is UNUSABLE. */
@@ -256,7 +256,7 @@ function feather(i: number, n: number, ramp: number, rampStart: boolean, rampEnd
 }
 
 /** Overlapping tiles covering a w×h image. `exact` keeps tiles exactly `size` (may extend past the edge). */
-export function tiles(w: number, h: number, size: number, overlap: number, exact = false): { x: number; y: number; w: number; h: number }[] {
+function tiles(w: number, h: number, size: number, overlap: number, exact = false): { x: number; y: number; w: number; h: number }[] {
   const step = size - overlap;
   const xs: number[] = [];
   const ys: number[] = [];

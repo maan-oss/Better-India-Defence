@@ -9,9 +9,9 @@ import styles from "./filter-toolbar.module.css";
 
 export interface FilterChip { id: string; label: string; value?: string; }
 /** One value a field can take. `hint` sits at the end of the row, for example a count. */
-export interface FilterOption { value: string; label?: string; hint?: string | number; icon?: ReactNode; }
-export interface FilterField { id: string; label: string; icon?: ReactNode; options: (string | FilterOption)[]; }
-export interface FilterMenuProps {
+interface FilterOption { value: string; label?: string; hint?: string | number; icon?: ReactNode; }
+interface FilterField { id: string; label: string; icon?: ReactNode; options: (string | FilterOption)[]; }
+interface FilterMenuProps {
   fields: FilterField[];
   /** Receives a chip whose id is the field id, so a second pick for a field replaces the first. */
   onSelect: (filter: FilterChip, field: FilterField) => void;
@@ -21,7 +21,7 @@ export interface FilterMenuProps {
   /** The trigger edge the panel lines up with. It flips or shifts when the viewport, or a clipping ancestor, has no room. */
   align?: "start" | "end";
 }
-export interface FilterToolbarProps {
+interface FilterToolbarProps {
   filters: FilterChip[];
   onRemove: (id: string) => void;
   onClearAll?: () => void;
@@ -458,4 +458,3 @@ export function FilterToolbar({ filters, onRemove, onClearAll, children, label =
   </div>;
 }
 
-export default FilterToolbar;

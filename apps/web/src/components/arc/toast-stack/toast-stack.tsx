@@ -8,15 +8,15 @@ import { CircleCheck, CircleX, Info, TriangleAlert, X } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./toast-stack.module.css";
 
-export type ToastType = "success" | "info" | "warning" | "error" | "loading";
+type ToastType = "success" | "info" | "warning" | "error" | "loading";
 
-export interface ToastAction {
+interface ToastAction {
   label: string;
   /** Runs the action. The toast closes afterwards unless the handler updates it, so an Undo can morph the toast into its result. */
   onClick: (id: string) => void;
 }
 
-export interface ToastOptions {
+interface ToastOptions {
   /** Reuse an id to update a toast in place instead of stacking a new one. */
   id?: string;
   type?: ToastType;
@@ -27,7 +27,7 @@ export interface ToastOptions {
   duration?: number;
 }
 
-export interface ToastStackApi {
+interface ToastStackApi {
   /** Shows a toast and returns its id. */
   toast: (options: ToastOptions) => string;
   /** Morphs a toast in place: icon, copy, and height animate to the new content and its timer restarts. Pass `action: undefined` to remove the action. */
@@ -36,7 +36,7 @@ export interface ToastStackApi {
   dismiss: (id?: string) => void;
 }
 
-export interface ToastStackProviderProps {
+interface ToastStackProviderProps {
   children: ReactNode;
   /** Base lifetime in milliseconds. Warnings and errors stay 1.6 times longer. */
   duration?: number;
@@ -49,7 +49,7 @@ export interface ToastStackProviderProps {
  * Use it for short, non-blocking results of what someone just did: new toasts rise from the bottom edge, older ones tuck behind,
  * and hovering or focusing the stack fans it out into a list. Toasts pause while the stack is open or the tab is hidden, and swipe right to dismiss.
  */
-export interface ToastStackProps {
+interface ToastStackProps {
   /** Accessible name of the notification region. */
   label?: string;
   position?: "bottom-right" | "bottom-center" | "bottom-left";
@@ -468,4 +468,3 @@ export function ToastStack({ label = "Notifications", position = "bottom-right",
   </section>;
 }
 
-export default ToastStack;

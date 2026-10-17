@@ -21,14 +21,14 @@ import type { IncidentService } from '../incidents/incidentService.ts';
 import type { AlertEngine } from '../alerts/alertEngine.ts';
 import type { SensorMonitor } from '../ingest/sensorMonitor.ts';
 
-export type CopilotAction =
+type CopilotAction =
   | { type: 'flyTo'; position: Vec3; label: string; radiusM?: number }
   | { type: 'setTime'; t: number }
   | { type: 'select'; kind: 'track' | 'sensor' | 'patch' | 'change' | 'incident' | 'alert'; id: string }
   | { type: 'diff'; a: number; b: number }
   | { type: 'layer'; layer: string; on: boolean };
 
-export interface CopilotAnswer {
+interface CopilotAnswer {
   intent: CopilotIntent['intent'];
   provider: 'deterministic' | 'anthropic';
   routedBy: string;
@@ -39,7 +39,7 @@ export interface CopilotAnswer {
   insufficient: string | null;
 }
 
-export interface CopilotRequest {
+interface CopilotRequest {
   text: string;
   t: number;
   context: CopilotContext;

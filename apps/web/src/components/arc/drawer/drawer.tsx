@@ -30,10 +30,10 @@ export function Drawer({ open: openProp, defaultOpen = false, onOpenChange, ...p
   return <DrawerContext.Provider value={value}><DialogPrimitive.Root {...props} open={open} onOpenChange={setOpen} /></DrawerContext.Provider>;
 }
 
-export const DrawerTrigger = DialogPrimitive.Trigger;
-export const DrawerClose = DialogPrimitive.Close;
+const DrawerTrigger = DialogPrimitive.Trigger;
+const DrawerClose = DialogPrimitive.Close;
 
-export interface DrawerContentProps
+interface DrawerContentProps
   extends ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
   title: string;
   description?: string;
@@ -187,4 +187,3 @@ export function DrawerContent({
   );
 }
 
-export default Drawer;

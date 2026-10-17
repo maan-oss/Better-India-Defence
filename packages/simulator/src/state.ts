@@ -2,7 +2,6 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { z } from 'zod';
 import { SCENARIO_KEYS } from './truth/scenarios.ts';
-import type { ScheduledScenario } from './truth/world.ts';
 
 const stateSchema = z.object({
   version: z.literal(1),
@@ -22,4 +21,3 @@ export function saveState(path: string, s: SimState): void {
   writeFileSync(path, JSON.stringify(s, null, 2));
 }
 
-export const scheduleOf = (s: SimState): ScheduledScenario[] => s.schedule;

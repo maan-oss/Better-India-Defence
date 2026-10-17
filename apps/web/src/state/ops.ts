@@ -3,7 +3,7 @@ import { EnuFrame, toMgrs, type AlertRecord, type LiveMessage, type ThreatAssess
 import { get } from '../api/client';
 import { useWorld } from './world';
 
-export interface Readiness {
+interface Readiness {
   level: 'NORMAL' | 'ALERT' | 'HIGH ALERT' | 'LOCKDOWN';
   reason: string;
   t: number;
@@ -34,7 +34,7 @@ const readSound = (): boolean => {
 
 /** Short tone patterns (Web Audio, no assets): critical = three high beeps, high = two lower beeps. */
 let ctx: AudioContext | null = null;
-export function alarm(priority: AlertRecord['priority']): void {
+function alarm(priority: AlertRecord['priority']): void {
   try {
     ctx ??= new AudioContext();
     const n = priority === 'critical' ? 3 : 2;

@@ -18,7 +18,7 @@ export interface ContextMenuItem {
   checked?: boolean;
 }
 
-export interface ContextMenuProps {
+interface ContextMenuProps {
   children: ReactNode;
   items: ContextMenuItem[];
   label?: string;
@@ -171,9 +171,8 @@ export function ContextMenu({ children, items, label = "Context menu", trigger =
   </>;
 }
 
-export const contextMenuExampleItems: ContextMenuItem[] = [
+const contextMenuExampleItems: ContextMenuItem[] = [
   { id: "copy", label: "Copy link", icon: <Copy size={15} /> },
   { id: "delete", label: "Delete project", icon: <Trash2 size={15} />, destructive: true },
 ];
 
-export default ContextMenu;

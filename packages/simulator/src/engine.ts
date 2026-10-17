@@ -16,7 +16,7 @@ import {
 } from './sensors/models.ts';
 import { renderOrtho } from './render/ortho.ts';
 
-export interface EngineStats {
+interface EngineStats {
   steps: number;
   messages: number;
   media: number;

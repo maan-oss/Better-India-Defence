@@ -5,10 +5,10 @@ import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, use
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./slider.module.css";
 
-export type SliderValue = number | [number, number];
-export interface SliderMark { value: number; label?: string; }
+type SliderValue = number | [number, number];
+interface SliderMark { value: number; label?: string; }
 
-export interface SliderProps<T extends SliderValue = number> {
+interface SliderProps<T extends SliderValue = number> {
   /** Visible label. Range thumbs are named from it unless `thumbLabels` says otherwise. */
   label: string;
   /** A number for one thumb, a pair for a range. */
@@ -402,4 +402,3 @@ export function Slider<T extends SliderValue = number>({ label, value, defaultVa
   </div>;
 }
 
-export default Slider;

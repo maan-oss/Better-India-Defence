@@ -5,7 +5,7 @@ import { AnimatePresence, animate, motion, useInView, useMotionValue, useMotionV
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./sparkline.module.css";
 
-export interface SparklineProps {
+interface SparklineProps {
   data: number[];
   label: string;
   value?: string;
@@ -255,4 +255,3 @@ export function Sparkline({ data, label, value, change, tone = "accent", width =
   </figure>;
 }
 
-export default Sparkline;

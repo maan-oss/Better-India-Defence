@@ -4,7 +4,7 @@ import { type VariantProps, cva } from 'class-variance-authority'
 import * as React from 'react'
 import { cn } from '../../../lib/utils'
 
-export const badgeVariants = cva('rounded-xl flex h-auto md:h-full items-center font-semibold transition-colors', {
+const badgeVariants = cva('rounded-xl flex h-auto md:h-full items-center font-semibold transition-colors', {
   variants: {
     variant: {
       default: 'border-transparent bg-muted text-foreground',
@@ -37,11 +37,11 @@ export const badgeVariants = cva('rounded-xl flex h-auto md:h-full items-center 
   },
 })
 
-export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {
+interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {
   contentClassName?: string
 }
 
-export function Badge({ className, variant, size, circle, contentClassName, ...props }: BadgeProps) {
+function Badge({ className, variant, size, circle, contentClassName, ...props }: BadgeProps) {
   return (
     <div className={cn(badgeVariants({ variant, badgeSize: size, circle }), 'rounded-lg', className)} {...props}>
       <span className={cn('font-medium whitespace-pre-line leading-none', contentClassName)}>{props.children}</span>
@@ -49,7 +49,7 @@ export function Badge({ className, variant, size, circle, contentClassName, ...p
   )
 }
 
-export const statusIndicatorVariants = cva('rounded-md', {
+const statusIndicatorVariants = cva('rounded-md', {
   variants: {
     status: {
       online: 'bg-green-500',
@@ -80,7 +80,7 @@ export const statusIndicatorVariants = cva('rounded-md', {
   },
 })
 
-export interface StatusBadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {
+interface StatusBadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {
   status?: 'online' | 'offline' | 'busy' | 'away' | 'available' | 'error' | 'warning' | 'info'
   primaryText?: string
   showIndicator?: boolean

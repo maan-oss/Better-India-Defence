@@ -14,7 +14,7 @@ import styles from "./inline-edit.module.css";
  * optimistically and a check draws once the save lands; Escape rolls the text back. A failed save restores the last saved value and says why.
  * Use a regular form when several fields must be saved together.
  */
-export interface InlineEditProps {
+interface InlineEditProps {
   /** The saved value. A new value from outside replaces the text while it is not being edited. */
   value: string;
   /** Persists the new value. Return a promise to show the saving state, and reject it to roll back. */
@@ -356,4 +356,3 @@ export function InlineEdit({ value, onSave, label, validate, placeholder = "", m
   </div>;
 }
 
-export default InlineEdit;

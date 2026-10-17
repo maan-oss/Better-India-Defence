@@ -5,7 +5,7 @@ import { animate, motion, useInView, useMotionValue, useReducedMotion, useSpring
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./ridgeline.module.css";
 
-export interface RidgelineSeries {
+interface RidgelineSeries {
   /** Stable identity. A ridge that survives a data change morphs into its new shape. */
   id: string;
   label: string;
@@ -14,7 +14,7 @@ export interface RidgelineSeries {
 }
 
 /** Use a ridgeline to compare the shape of many distributions at once, such as daily temperatures by month or response times by region. */
-export interface RidgelineProps {
+interface RidgelineProps {
   /** One ridge per series, drawn top to bottom. */
   series: RidgelineSeries[];
   /** What is measured, such as "Daily highs in Zurich". Names the chart for assistive technology. */
@@ -352,4 +352,3 @@ export function Ridgeline({ series, label, unit = "", formatValue, domain, overl
   </figure>;
 }
 
-export default Ridgeline;

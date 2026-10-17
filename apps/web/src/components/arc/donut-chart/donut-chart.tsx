@@ -5,7 +5,7 @@ import { AnimatePresence, animate, frame, cancelFrame, motion, motionValue, useI
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./donut-chart.module.css";
 
-export interface DonutChartDatum {
+interface DonutChartDatum {
   /** Stable identity. A segment whose key survives a data change keeps its place and color, so switching datasets morphs the arcs. */
   key: string;
   label: string;
@@ -15,7 +15,7 @@ export interface DonutChartDatum {
 }
 
 /** Use a donut chart for a few parts of one whole, when the share of each part matters more than precise comparison. */
-export interface DonutChartProps {
+interface DonutChartProps {
   data: DonutChartDatum[];
   /** What the whole is, such as "Visits by source". Names the chart for assistive technology. */
   label: string;
@@ -423,4 +423,3 @@ export function DonutChart({ data, label, unit = "", formatValue = value => grou
   </figure>;
 }
 
-export default DonutChart;

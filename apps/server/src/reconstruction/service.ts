@@ -8,9 +8,9 @@ import type { FusionService } from '../fusion/fusionService.ts';
 import type { LiveHub } from '../live/hub.ts';
 import type { Logger } from '../logger.ts';
 
-export type ReconstructionKind = 'lidar_change_detection' | 'imagery_change_detection' | 'lidar_dsm' | 'multi_frame' ;
+type ReconstructionKind = 'lidar_change_detection' | 'imagery_change_detection' | 'lidar_dsm' | 'multi_frame' ;
 
-export interface ReconstructionRow {
+interface ReconstructionRow {
   id: string;
   kind: ReconstructionKind;
   status: 'queued' | 'running' | 'completed' | 'failed';

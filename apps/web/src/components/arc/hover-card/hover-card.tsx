@@ -38,7 +38,7 @@ const cards = {
  * It waits half a second, opens almost at once when moving between triggers, stays open while the pointer travels into it, and closes fast on leave or Escape.
  * On touch, a tap toggles it. Keep the content read only; anything actionable belongs behind the trigger itself.
  */
-export interface HoverCardProps {
+interface HoverCardProps {
   /** The trigger, such as a mention button or a link. It must accept a ref and be focusable. */
   children: ReactElement;
   /** The preview. `HoverCardProfile` covers people; any read only content works. */
@@ -162,10 +162,10 @@ export function HoverCard({ children, content, side = "bottom", align = "start",
   </PopoverPrimitive.Root>;
 }
 
-export interface HoverCardStat { label: string; value: string | number }
+interface HoverCardStat { label: string; value: string | number }
 
 /** A person preview for `HoverCard`: portrait, name, role, a short bio, a couple of numbers, and a quiet footer line. Its rows settle in with a tiny stagger. */
-export interface HoverCardProfileProps {
+interface HoverCardProfileProps {
   name: string;
   /** Role and team, such as "Product designer, Payments". */
   role?: string;
@@ -202,4 +202,3 @@ export function HoverCardProfile({ name, role, avatar, bio, stats = [], meta }: 
   </div>;
 }
 
-export default HoverCard;

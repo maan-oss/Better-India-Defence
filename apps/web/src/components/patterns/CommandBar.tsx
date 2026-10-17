@@ -213,7 +213,7 @@ export function CommandBar({ open, onOpenChange, onShortcuts }: { open: boolean;
 }
 
 /** Open a search hit: incidents have a page; everything else is shown on the operational picture. */
-export function openHit(r: SearchHit, nav: (to: string) => void) {
+function openHit(r: SearchHit, nav: (to: string) => void) {
   const w = useWorld.getState();
   const facility = w.facility;
   if (r.kind === 'incident') return nav(`/incidents/${r.id}`);

@@ -7,7 +7,7 @@ import { motionTokens } from "../lib/motion-tokens";
 import { useCopyFeedback } from "../lib/use-copy-feedback";
 import styles from "./copy-button.module.css";
 
-export interface CopyButtonProps {
+interface CopyButtonProps {
   value: string;
   label?: string;
   className?: string;

@@ -7,8 +7,8 @@ import { Check, Info as InfoCircle, TriangleAlert as WarningTriangle, CircleX as
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./alert.module.css";
 
-export type AlertTone = "info" | "success" | "warning" | "danger";
-export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
+type AlertTone = "info" | "success" | "warning" | "danger";
+interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   tone?: AlertTone;
   title: string;
   children?: ReactNode;
@@ -105,4 +105,3 @@ export function Alert({ open, onDismiss, ...props }: AlertProps) {
   </AnimatePresence>;
 }
 
-export default Alert;

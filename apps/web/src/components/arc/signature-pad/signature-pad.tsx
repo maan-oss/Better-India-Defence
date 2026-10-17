@@ -21,7 +21,7 @@ export interface InkStroke {
   at: number;
 }
 
-export interface OutlineOptions {
+interface OutlineOptions {
   /** Diameter of the stroke at half pressure, in pad units. */
   size: number;
   /** How much pressure changes the width, from 0 to 1. */
@@ -38,7 +38,7 @@ export interface OutlineOptions {
 }
 
 /** Pad coordinates. Strokes are stored in this space and scale with the pad. */
-export const PAD_WIDTH = 600, PAD_HEIGHT = 260;
+const PAD_WIDTH = 600, PAD_HEIGHT = 260;
 
 const INK: Record<InkColor, { label: string; export: string }> = {
   black: { label: "Black ink", export: "#17171a" },
@@ -73,7 +73,7 @@ const easeOut = (t: number) => t * (2 - t);
  * toward the pointer, width follows pen pressure or, for a mouse or finger, speed, the ends taper, sharp turns get round joins,
  * and both ends get round caps. Returns the outline polygon; pass it to `outlineToPath` for SVG.
  */
-export function getStrokeOutline(input: InkPoint[], options: OutlineOptions): Vec[] {
+function getStrokeOutline(input: InkPoint[], options: OutlineOptions): Vec[] {
   const { size, thinning = .62, streamline = .42, simulatePressure = true, taperStart = 0, taperEnd = 0, last = true } = options;
   if (!input.length) return [];
   const usePen = !simulatePressure && input.some(point => point.p > 0);
@@ -157,7 +157,7 @@ export function getStrokeOutline(input: InkPoint[], options: OutlineOptions): Ve
 
 const round = (value: number) => Math.round(value * 100) / 100;
 /** Draws an outline as one smooth closed path, with quadratic curves through the midpoints of its edges. */
-export function outlineToPath(points: Vec[]) {
+function outlineToPath(points: Vec[]) {
   if (points.length < 3) return "";
   let d = `M${round(points[0][0])} ${round(points[0][1])} Q`;
   for (let i = 0; i < points.length; i++) {
@@ -173,7 +173,7 @@ function strokeOptions(stroke: Pick<InkStroke, "width" | "points">, last: boolea
   return { size, simulatePressure: !pen, taperStart: size * 1.5, taperEnd: pen ? 0 : size * 5, last };
 }
 /** The SVG path of a stroke, or of its first `upTo` ms while it is replayed. */
-export function strokePath(stroke: Pick<InkStroke, "width" | "points">, upTo = Infinity) {
+function strokePath(stroke: Pick<InkStroke, "width" | "points">, upTo = Infinity) {
   const all = stroke.points;
   const done = upTo >= all[all.length - 1].t;
   const points = done ? all : all.filter(point => point.t <= upTo);
@@ -191,7 +191,7 @@ function inkBounds(strokes: InkStroke[]) {
 }
 
 /** A standalone SVG of the signature, cropped to the ink, with print ink colors. */
-export function signatureToSvg(strokes: InkStroke[]) {
+function signatureToSvg(strokes: InkStroke[]) {
   if (!strokes.length) return "";
   const box = inkBounds(strokes);
   const paths = strokes.map(stroke => `<path d="${strokePath(stroke)}" fill="${INK[stroke.color].export}"/>`).join("");
@@ -228,7 +228,7 @@ function download(blob: Blob, name: string) {
  * and exports a cropped PNG or SVG. A "Sign here" hint rests on the baseline until the first stroke.
  * Keyboard: Mod+Z undoes, Shift+Mod+Z or Mod+Y redoes, and Delete clears.
  */
-export interface SignaturePadProps {
+interface SignaturePadProps {
   /** Printed under the baseline, such as the signer's name. */
   signer?: string;
   /** Resting hint on the baseline before the first stroke. */
@@ -539,4 +539,3 @@ function Choice<T extends string>({ label, options, value, onChange, render, nam
   </div>;
 }
 
-export default SignaturePad;

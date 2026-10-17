@@ -14,7 +14,7 @@ import { sniff } from '../vision/imageio.ts';
  * Evidence library: media brought into the system (uploads, camera captures) with immutable originals,
  * SHA-256 integrity, a custody trail (audit log) and derived products that always reference their source.
  */
-export interface EvidenceItem {
+interface EvidenceItem {
   id: string;
   kind: 'image' | 'video';
   title: string;
@@ -41,7 +41,7 @@ export interface EvidenceItem {
   analysis: AnalysisSummary | Record<string, never>;
 }
 
-export interface AnalysisSummary {
+interface AnalysisSummary {
   mode: 'standard' | 'thorough';
   framesAnalysed: number;
   sampleFps: number | null;
@@ -56,7 +56,7 @@ export interface AnalysisSummary {
   ms: number;
 }
 
-export interface EvidenceProduct {
+interface EvidenceProduct {
   id: string;
   itemId: string;
   kind: 'enhancement' | 'multi_frame' | 'frame';

@@ -7,7 +7,7 @@ import type { Transition } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./radio-cards.module.css";
 
-export interface RadioCardOption {
+interface RadioCardOption {
   value: string;
   label: ReactNode;
   /** One or two short lines under the label. */
@@ -26,7 +26,7 @@ export interface RadioCardOption {
  * glides from card to card on a spring, so the eye follows the change. Behaves as a native radio group: one tab stop,
  * arrow keys move and select, and a hidden input carries the value in forms.
  */
-export interface RadioCardsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+interface RadioCardsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   options: RadioCardOption[];
   value?: string | null;
   defaultValue?: string | null;
@@ -150,4 +150,3 @@ export const RadioCards = forwardRef<HTMLDivElement, RadioCardsProps>(function R
   </div>;
 });
 
-export default RadioCards;

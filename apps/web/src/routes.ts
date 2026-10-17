@@ -5,7 +5,7 @@
  */
 import { createElement, type ComponentType } from 'react';
 
-export const pageLoaders = {
+const pageLoaders = {
   operations: () => import('./pages/Operations').then((m) => ({ default: m.Operations })),
   incidents: () => import('./pages/Incidents').then((m) => ({ default: m.Incidents })),
   sensors: () => import('./pages/Sensors').then((m) => ({ default: m.Sensors })),
@@ -26,7 +26,7 @@ export const pageLoaders = {
   identity: () => import('./pages/Identity').then((m) => ({ default: m.Identity })),
 } as const;
 
-export type PageKey = keyof typeof pageLoaders;
+type PageKey = keyof typeof pageLoaders;
 
 const loaded = new Map<PageKey, ComponentType<object>>();
 const requested = new Map<PageKey, Promise<void>>();

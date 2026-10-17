@@ -1,7 +1,7 @@
 import { buildHandoff, appearanceScore, type HandoffObservation, type HandoffResult } from '@strata/domain';
 import type { Db } from '../db/client.ts';
 
-export interface TestSubject {
+interface TestSubject {
   id: string;
   label: string;
   consentRef: string;

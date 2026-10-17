@@ -6,7 +6,7 @@ import { useSession } from '../../state/session';
 import { dateTime } from '../../lib/format';
 import { ErrorNote, Modal, useAsync } from '../common';
 
-export const DECISION_TEXT: Record<FaceEvent['decision'], string> = {
+const DECISION_TEXT: Record<FaceEvent['decision'], string> = {
   STRONG: 'Strong match',
   POSSIBLE: 'Possible match',
   NO_MATCH: 'No match',

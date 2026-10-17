@@ -32,7 +32,7 @@ const KeyboardContext = React.createContext<{
   activeKeys: new Set(),
 });
 
-export interface MacKeyProps extends React.HTMLAttributes<HTMLDivElement> {
+interface MacKeyProps extends React.HTMLAttributes<HTMLDivElement> {
   label?: React.ReactNode;
   subLabel?: React.ReactNode;
   icon?: React.ReactNode;
@@ -323,7 +323,7 @@ function Row({ children }: { children: React.ReactNode }) {
   return <div className="flex w-full gap-1.5">{children}</div>;
 }
 
-export function MacKey({
+function MacKey({
   className,
   label,
   subLabel,

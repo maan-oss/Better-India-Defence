@@ -9,8 +9,8 @@ import type { TargetAndTransition, Variants } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./accordion.module.css";
 
-export interface AccordionItem { title: string; content: ReactNode; }
-export interface AccordionProps {
+interface AccordionItem { title: string; content: ReactNode; }
+interface AccordionProps {
   items: AccordionItem[];
   defaultOpen?: number;
   /** "lg" suits page-level FAQs: questions at the large text size, answers at body size. */
@@ -56,4 +56,3 @@ export function Accordion({ items, defaultOpen = 0, size = "md" }: AccordionProp
   </AccordionPrimitive.Root>;
 }
 
-export default Accordion;

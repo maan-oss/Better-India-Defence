@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./image-compare.module.css";
 
-export interface ImageCompareProps {
+interface ImageCompareProps {
   /** The original, shown on the left (or top). Pass an image with its own alt text; it is sized to cover the frame. */
   before: ReactNode;
   /** The result, shown on the right (or bottom). */
@@ -275,4 +275,3 @@ export function ImageCompare({ before, after, position, defaultPosition = 50, on
   </div>;
 }
 
-export default ImageCompare;

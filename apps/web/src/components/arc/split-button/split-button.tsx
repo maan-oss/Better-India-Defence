@@ -9,8 +9,8 @@ import { ChevronDown } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./split-button.module.css";
 
-export interface SplitButtonAction { label: string; onSelect?: () => void; disabled?: boolean; destructive?: boolean; icon?: ReactNode; }
-export interface SplitButtonProps { label: string; actions: SplitButtonAction[]; onClick?: () => void; disabled?: boolean; icon?: ReactNode; variant?: "primary" | "secondary"; }
+interface SplitButtonAction { label: string; onSelect?: () => void; disabled?: boolean; destructive?: boolean; icon?: ReactNode; }
+interface SplitButtonProps { label: string; actions: SplitButtonAction[]; onClick?: () => void; disabled?: boolean; icon?: ReactNode; variant?: "primary" | "secondary"; }
 
 const rest: TargetAndTransition = { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" };
 const fadeIn: TargetAndTransition = { ...rest, opacity: 0 };
@@ -107,4 +107,3 @@ export function SplitButton({ label, actions, onClick, disabled, icon, variant =
   </DropdownPrimitive.Root>;
 }
 
-export default SplitButton;

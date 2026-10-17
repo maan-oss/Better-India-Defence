@@ -6,8 +6,8 @@ import { motionTokens } from "../lib/motion-tokens";
 import { Avatar } from "../avatar/avatar";
 import styles from "./avatar-group.module.css";
 
-export interface AvatarGroupMember { name: string; src?: string; status?: "online" | "offline"; }
-export interface AvatarGroupProps { members: AvatarGroupMember[]; max?: number; size?: "sm" | "md" | "lg"; label?: string; }
+interface AvatarGroupMember { name: string; src?: string; status?: "online" | "offline"; }
+interface AvatarGroupProps { members: AvatarGroupMember[]; max?: number; size?: "sm" | "md" | "lg"; label?: string; }
 
 /** The overflow count rolls the way it moved: more people rise in from below, fewer drop in from above. */
 const rise: Variants = { hidden: (direction: number) => ({ opacity: 0, y: `${.4 * direction}em`, filter: `blur(${motionTokens.blur.subtle}px)` }), shown: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: motionTokens.duration.standard, ease: [...motionTokens.ease.enter] } }, gone: (direction: number) => ({ opacity: 0, y: `${-.4 * direction}em`, filter: `blur(${motionTokens.blur.subtle}px)`, transition: { duration: motionTokens.duration.fast, ease: [...motionTokens.ease.standard] } }) };
@@ -31,4 +31,3 @@ export function AvatarGroup({ members, max = 4, size = "md", label = "Team membe
   </div>;
 }
 
-export default AvatarGroup;

@@ -9,7 +9,7 @@ import { MoreHorizontal } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./swipe-actions.module.css";
 
-export interface SwipeAction {
+interface SwipeAction {
   label: string;
   icon: ReactNode;
   /** Fill of the revealed action. Pair `danger` with a label that names the destructive result. */
@@ -25,10 +25,10 @@ export interface SwipeAction {
  * Only one row stays open at a time; touching anywhere else or pressing Escape puts it away. Every row also has a More actions menu with the same
  * actions, so keyboard and screen reader users never need the gesture.
  */
-export interface SwipeActionsProps { label: string; children: ReactNode; className?: string }
+interface SwipeActionsProps { label: string; children: ReactNode; className?: string }
 
 /** One row. `leading` actions sit under the left edge and `trailing` actions under the right; the outermost action on each side commits on a full swipe. */
-export interface SwipeActionsRowProps {
+interface SwipeActionsRowProps {
   /** Names the row in its menu button, for example the message subject. */
   label: string;
   leading?: SwipeAction[];
@@ -353,4 +353,3 @@ function ActionLayer({ action, side, rank, count, coverRank, x, cover, onPress }
   </motion.button>;
 }
 
-export default SwipeActions;

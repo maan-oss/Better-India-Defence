@@ -20,7 +20,7 @@ import type { Db } from '../db/client.ts';
 import type { LiveHub } from '../live/hub.ts';
 import type { CameraFrameRef, StaticDetection } from '../ingest/normalize.ts';
 
-export interface WorldObjectRec {
+interface WorldObjectRec {
   id: string;
   kind: string;
   label: string;
@@ -39,7 +39,7 @@ export interface WorldObjectRec {
   misses: number;
 }
 
-export interface DsmGeometry {
+interface DsmGeometry {
   type: 'dsm';
   x0: number;
   y0: number;
@@ -51,7 +51,7 @@ export interface DsmGeometry {
   baseZ: number;
 }
 
-export interface StructureVersion {
+interface StructureVersion {
   id: string;
   assetKey: string;
   version: number;
@@ -89,7 +89,7 @@ export function decodeDsm(g: DsmGeometry): Float32Array {
   return new Float32Array(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
 }
 
-export function dsmBoxes(ownerId: string, g: DsmGeometry): SolidBox[] {
+function dsmBoxes(ownerId: string, g: DsmGeometry): SolidBox[] {
   const h = decodeDsm(g);
   const out: SolidBox[] = [];
   for (let r = 0; r < g.rows; r++)
@@ -431,7 +431,7 @@ export function infraPosition(assetId: string): Vec3 {
   return a ? { x: a.position.x, y: a.position.y, z: 0 } : { x: 0, y: 0, z: 0 };
 }
 
-export function labelFor(kind: string, id: string): string {
+function labelFor(kind: string, id: string): string {
   const n = id.split('-').pop();
   switch (kind) {
     case 'container':

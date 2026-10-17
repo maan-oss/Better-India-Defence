@@ -32,10 +32,10 @@ import type { AnalysisOut } from '../vision/worker.ts';
  * bounded). Detections are published as ordinary `camera.detections` messages through the ingest pipeline —
  * the same path as any other sensor — and faces go to the identity service.
  */
-export const ADAPTER = 'strata.camera-analytics.v1';
+const ADAPTER = 'strata.camera-analytics.v1';
 const SIM_ADAPTER = 'vms.onvif-analytics-bridge.v1';
 
-export const PoseInput = z.object({
+const PoseInput = z.object({
   lat: z.number().min(-90).max(90),
   lon: z.number().min(-180).max(180),
   heightM: z.number().min(0).max(300),
@@ -62,7 +62,7 @@ export const CameraSourceInput = z.object({
 });
 export type CameraSourceInput = z.infer<typeof CameraSourceInput>;
 
-export interface CameraSourceStatus {
+interface CameraSourceStatus {
   state: 'stopped' | 'connecting' | 'live' | 'error';
   lastFrameAt: number | null;
   lastError: string | null;
@@ -75,7 +75,7 @@ export interface CameraSourceStatus {
   restarts: number;
 }
 
-export interface CameraSourceRecord {
+interface CameraSourceRecord {
   id: string;
   name: string;
   binding: 'site' | 'new';

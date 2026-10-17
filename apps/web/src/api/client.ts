@@ -1,5 +1,5 @@
 /** Thin typed fetch wrapper. Session is a HttpOnly cookie; the browser never stores tokens. */
-export class ApiError extends Error {
+class ApiError extends Error {
   constructor(
     message: string,
     readonly status: number,

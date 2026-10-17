@@ -27,7 +27,7 @@ const ZONE_RULES: Record<string, { categories: TrackSnapshot['category'][]; prio
   'zn-airside': { categories: ['aerial'], priority: 'high' },
 };
 
-export interface RaiseInput {
+interface RaiseInput {
   rule: string;
   dedupeKey: string;
   priority: Priority;
@@ -60,7 +60,7 @@ interface AlertRow {
   ack_at: number | null;
 }
 
-export const toAlert = (r: AlertRow): AlertRecord => ({
+const toAlert = (r: AlertRow): AlertRecord => ({
   id: r.id,
   t: r.t,
   priority: r.priority,

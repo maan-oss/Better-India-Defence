@@ -9,7 +9,7 @@ import { Search, X } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./expanding-search.module.css";
 
-export interface ExpandingSearchItem {
+interface ExpandingSearchItem {
   id: string;
   title: string;
   /** One short line under the title, such as the type, owner, or last edit. */
@@ -26,7 +26,7 @@ export interface ExpandingSearchItem {
  * The button morphs into the field, results unfold beneath it, and Escape, choosing a result, or leaving the field empty folds it back into the icon.
  * Place it in the space the field may grow into; it fills that space's width and keeps the button on the `anchor` edge.
  */
-export interface ExpandingSearchProps {
+interface ExpandingSearchProps {
   /** Names the button, the field, and the results, such as "Search projects and docs". */
   label: string;
   items: ExpandingSearchItem[];
@@ -333,4 +333,3 @@ export function ExpandingSearch({ label, items, suggestions = [], suggestionsLab
   </div>;
 }
 
-export default ExpandingSearch;

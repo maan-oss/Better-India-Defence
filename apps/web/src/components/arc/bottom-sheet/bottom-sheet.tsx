@@ -13,7 +13,7 @@ import styles from "./bottom-sheet.module.css";
  * Use it for secondary tasks where a peek is useful before committing to the full view: trip details, share options, filters.
  * Use a dialog when the decision must interrupt, and a drawer for side panels on wide layouts.
  */
-export interface BottomSheetProps {
+interface BottomSheetProps {
   /** The control that opens the sheet, usually a button. Focus returns to it when the sheet closes. */
   trigger?: ReactNode;
   open?: boolean;
@@ -382,6 +382,5 @@ function Sheet({ title, description, detents = [.45, .92], initialDetent = 0, on
   </>;
 }
 
-export const BottomSheetClose = DialogPrimitive.Close;
+const BottomSheetClose = DialogPrimitive.Close;
 
-export default BottomSheet;

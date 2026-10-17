@@ -14,7 +14,7 @@ export interface Triangle {
   normal: Vec3;
 }
 
-export interface GBuffer {
+interface GBuffer {
   width: number;
   height: number;
   invDepth: Float32Array;

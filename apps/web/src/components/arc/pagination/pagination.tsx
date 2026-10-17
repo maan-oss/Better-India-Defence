@@ -4,7 +4,7 @@ import { ChevronLeft as NavArrowLeft, ChevronRight as NavArrowRight } from "luci
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type Variants } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./pagination.module.css";
-export interface PaginationProps { page: number; pageCount: number; onPageChange: (page: number) => void; label?: string }
+interface PaginationProps { page: number; pageCount: number; onPageChange: (page: number) => void; label?: string }
 /** When the five page window shifts, numbers travel like a belt: each one moves by the same number of slots. */
 const slot = 1000 / 9; // One button plus the gap (36px + 4px), as a percentage of the button width.
 const slide: Variants = {

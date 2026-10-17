@@ -7,10 +7,10 @@ import { motionTokens } from "../lib/motion-tokens";
 import { Button } from "../button/button";
 import styles from "./theme-switch.module.css";
 
-export type ThemeSwitchVariant = "reveal" | "eclipse" | "split" | "rise";
-export type Theme = "light" | "dark";
+type ThemeSwitchVariant = "reveal" | "eclipse" | "split" | "rise";
+type Theme = "light" | "dark";
 
-export interface ThemeSwitchProps {
+interface ThemeSwitchProps {
   theme: Theme;
   variant?: ThemeSwitchVariant;
   onThemeChange: (next: Theme, variant: ThemeSwitchVariant, trigger: HTMLElement) => void;
@@ -79,4 +79,3 @@ export function ThemeSwitch({ theme, variant = "reveal", onThemeChange, label, i
   );
 }
 
-export default ThemeSwitch;

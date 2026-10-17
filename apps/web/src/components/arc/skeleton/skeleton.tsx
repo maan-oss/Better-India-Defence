@@ -5,7 +5,7 @@ import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, typ
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./skeleton.module.css";
 
-export interface SkeletonProps {
+interface SkeletonProps {
   label?: string;
   lines?: number;
   avatar?: boolean;
@@ -66,4 +66,3 @@ export function Skeleton({ label = "Loading content", lines = 3, avatar = false,
   </HeightFrame>;
 }
 
-export default Skeleton;

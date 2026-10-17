@@ -18,7 +18,7 @@ import type { FaceOut } from '../vision/worker.ts';
  * public benchmark (see docs/REALITY_LIMITS.md): STRONG ≥ strong, POSSIBLE ≥ possible. Every watchlist
  * candidate goes to a human review queue; the system never acts on an identity on its own.
  */
-export const FACE_MODEL = 'sface-2021dec';
+const FACE_MODEL = 'sface-2021dec';
 
 export const FaceSettings = z.object({
   strong: z.number().min(0.2).max(0.9),
@@ -32,7 +32,7 @@ export const FaceSettings = z.object({
 });
 export type FaceSettings = z.infer<typeof FaceSettings>;
 
-export const DEFAULT_FACE_SETTINGS: FaceSettings = { strong: 0.42, possible: 0.32, minGrade: 'POOR', retentionDays: 30, alertUnknownInRestricted: true };
+const DEFAULT_FACE_SETTINGS: FaceSettings = { strong: 0.42, possible: 0.32, minGrade: 'POOR', retentionDays: 30, alertUnknownInRestricted: true };
 
 const GRADE_RANK = { UNUSABLE: 0, POOR: 1, FAIR: 2, GOOD: 3 } as const;
 
@@ -74,7 +74,7 @@ export interface Identity {
   photoTemplateId: string | null;
 }
 
-export interface Candidate {
+interface Candidate {
   identityId: string;
   name: string;
   list: 'AUTHORISED' | 'WATCHLIST';
@@ -82,7 +82,7 @@ export interface Candidate {
   templateId: string;
 }
 
-export interface FaceEventRecord {
+interface FaceEventRecord {
   id: string;
   t: number;
   sourceKind: 'camera' | 'evidence';

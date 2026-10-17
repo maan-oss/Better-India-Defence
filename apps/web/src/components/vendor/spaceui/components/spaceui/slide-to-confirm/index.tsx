@@ -6,7 +6,7 @@ import { IconArrowRight, IconCheck } from '@tabler/icons-react'
 import { TextMorph } from 'torph/react'
 import { cn } from '../../../lib/utils'
 
-export type SlideToConfirmProps = {
+type SlideToConfirmProps = {
   width?: number
   corner?: number
   speed?: number

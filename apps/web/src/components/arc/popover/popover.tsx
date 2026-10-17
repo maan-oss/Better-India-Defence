@@ -5,11 +5,11 @@ import { forwardRef } from "react";
 import type { ComponentPropsWithoutRef } from "react";
 import styles from "./popover.module.css";
 
-export const Popover = PopoverPrimitive.Root;
-export const PopoverClose = PopoverPrimitive.Close;
+const Popover = PopoverPrimitive.Root;
+const PopoverClose = PopoverPrimitive.Close;
 
 /** The trigger anchors the panel, so it opts out of press-scale: a scaled rect measured on open would shift the panel as the trigger springs back. */
-export const PopoverTrigger = forwardRef<
+const PopoverTrigger = forwardRef<
   HTMLButtonElement,
   ComponentPropsWithoutRef<typeof PopoverPrimitive.Trigger>
 >(function PopoverTrigger({ className, ...props }, ref) {

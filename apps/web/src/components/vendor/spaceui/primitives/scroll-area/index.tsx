@@ -53,7 +53,7 @@ export function ScrollArea({
   )
 }
 
-export function ScrollBar({
+function ScrollBar({
   className,
   orientation = 'vertical',
   ...props
@@ -75,4 +75,4 @@ export function ScrollBar({
     </ScrollAreaPrimitive.Scrollbar>
   )
 }
-export { ScrollAreaPrimitive }
+

@@ -15,7 +15,7 @@ export interface DateRange {
 }
 
 /** A shortcut in the preset rail. `range` receives the viewer's local today. */
-export interface DateRangePreset {
+interface DateRangePreset {
   label: string;
   range: (today: Date) => DateRange;
 }
@@ -27,7 +27,7 @@ export interface DateRangePreset {
  * formatted label flies back into the trigger as the surface shrinks around it.
  * Use it for reports, filters, and bookings where a start and end date are chosen together.
  */
-export interface DateRangePickerProps {
+interface DateRangePickerProps {
   /** Controlled value. Pass `null` for no selection. */
   value?: DateRange | null;
   /** Uncontrolled starting value. */
@@ -69,7 +69,7 @@ const ordered = (a: Date, b: Date): DateRange => dayDiff(a, b) <= 0 ? { start: a
 const sameRange = (a?: DateRange | null, b?: DateRange | null) => Boolean(a && b && sameDay(a.start, b.start) && sameDay(a.end, b.end));
 const clampDate = (date: Date, min?: Date, max?: Date) => min && dayDiff(date, min) < 0 ? startOfDay(min) : max && dayDiff(date, max) > 0 ? startOfDay(max) : date;
 
-export const defaultDateRangePresets: DateRangePreset[] = [
+const defaultDateRangePresets: DateRangePreset[] = [
   { label: "Today", range: today => ({ start: today, end: today }) },
   { label: "Yesterday", range: today => ({ start: addDays(today, -1), end: addDays(today, -1) }) },
   { label: "Last 7 days", range: today => ({ start: addDays(today, -6), end: today }) },
@@ -92,7 +92,7 @@ const subscribeToday = (notify: () => void) => {
 const readToday = () => keyOf(new Date());
 const serverToday = () => "";
 /** The viewer's local date, or undefined during server render and hydration. */
-export function useToday() {
+function useToday() {
   const key = useSyncExternalStore(subscribeToday, readToday, serverToday);
   return useMemo(() => (key ? fromKey(key) : undefined), [key]);
 }
@@ -625,4 +625,3 @@ export function DateRangePicker({ value, defaultValue = null, onChange, label = 
   </motion.div>;
 }
 
-export default DateRangePicker;

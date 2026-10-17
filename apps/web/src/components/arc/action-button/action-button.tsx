@@ -8,7 +8,7 @@ import { ArrowRight } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./action-button.module.css";
 
-export interface ActionButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick" | "onDrag" | "onDragEnd" | "onDragStart" | "onAnimationStart"> {
+interface ActionButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick" | "onDrag" | "onDragEnd" | "onDragStart" | "onAnimationStart"> {
   label: string;
   successLabel?: string;
   pendingLabel?: string;
@@ -137,4 +137,3 @@ export function ActionButton({ label, successLabel = "Saved", pendingLabel = "Sa
   </motion.button>;
 }
 
-export default ActionButton;

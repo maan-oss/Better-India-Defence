@@ -20,7 +20,7 @@ import type { SimState } from './state.ts';
  *
  * Control: GET /control/state, POST /control/scenarios, POST /control/failures, POST /control/burst.
  */
-export interface ServiceDeps {
+interface ServiceDeps {
   engine: SimulatorEngine;
   failures: FailureInjector;
   client: IngestClient;
