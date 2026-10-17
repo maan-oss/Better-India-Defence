@@ -19,8 +19,6 @@
 .btn:hover, .cmd-trigger:hover, .island:hover, .tb-bell:hover, .tb-night button:hover, .user-btn:hover { background: var(--glass-fill-strong); }
 
 /* ---------------------------------------------------------------- buttons */
-.btn { transition: background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), transform 160ms var(--ease); }
-.btn:active:not(:disabled) { transform: scale(0.96); }
 .btn.primary { background: var(--glass-prominent); color: var(--accent-ink); border-color: rgba(255, 255, 255, 0.6); box-shadow: var(--glass-prominent-rim), var(--glass-shadow); }
 .btn.primary:hover { background: var(--glass-prominent-hover); border-color: rgba(255, 255, 255, 0.6); }
 .btn.critical { background: linear-gradient(180deg, #ff8a88 0%, var(--st-critical) 60%, #c93a3f 100%); color: #fff; border-color: rgba(255, 255, 255, 0.35); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), var(--glass-shadow); }

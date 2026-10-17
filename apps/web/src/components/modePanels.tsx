@@ -288,8 +288,10 @@ function ImageryCompare({ before, after }: { before: { id: string; t: number; me
     <div className="col">
       <div
         className="compare"
+        title={zoom ? 'Click to zoom out' : 'Click to zoom in'}
         style={{ aspectRatio: '1 / 1' }}
-        onDoubleClick={(e) => {
+        onClick={(e) => {
+          if ((e.target as HTMLElement).tagName === 'INPUT') return;
           const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
           setZoom(zoom ? null : { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height });
         }}

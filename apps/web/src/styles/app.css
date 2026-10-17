@@ -21,7 +21,7 @@ a:hover { text-decoration-color: var(--text-1); }
 h1, h2, h3, h4, h5 { text-wrap: balance; }
 ::selection { background: rgba(240, 238, 230, 0.2); color: var(--text-0); }
 :focus { outline: none; }
-:focus-visible { outline: none; box-shadow: var(--glow-accent); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .mono { font-family: var(--font-mono); font-size: var(--fs-caption); letter-spacing: -0.02em; font-feature-settings: 'zero' 1; }
 .num { font-variant-numeric: tabular-nums; }
 .muted { color: var(--text-2); }
@@ -85,12 +85,12 @@ h1, h2, h3, h4, h5 { text-wrap: balance; }
 .readiness { height: 24px; padding: 0 10px 0 8px; border-radius: 999px; font-size: var(--fs-micro); letter-spacing: 0.06em; font-weight: 600; cursor: pointer; border: 1px solid var(--line-2); background: var(--bg-2); color: var(--text-1); white-space: nowrap; display: inline-flex; align-items: center; gap: 7px; transition: background var(--t-fast), border-color var(--t-fast); flex: none; }
 .readiness:hover { border-color: var(--line-3); background: var(--bg-3); }
 .readiness::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--st-normal); }
-.readiness.r-ALERT { color: var(--st-caution-text); border-color: var(--st-caution-line); background: var(--st-caution-tint); }
+.readiness.r-ALERT { border-color: var(--st-caution-line); background: var(--st-caution-tint); }
 .readiness.r-ALERT::before { background: var(--st-caution); }
 .readiness.r-HIGH-ALERT { color: #1a0a00; background: var(--st-serious); border-color: var(--st-serious); }
 .readiness.r-HIGH-ALERT::before { background: #1a0a00; }
 .readiness.r-LOCKDOWN { color: #fff; background: var(--st-critical); border-color: var(--st-critical); }
-.readiness.r-LOCKDOWN::before { background: #fff; animation: pulse 1.2s ease-in-out infinite; }
+.readiness.r-LOCKDOWN::before { background: #fff; }
 
 /* ---------------------------------------------------------------- rail */
 .rail {
@@ -198,14 +198,12 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .seg > button:hover:not(:disabled) { color: var(--text-0); }
 .seg > button[data-state='on'], .seg > button.on { color: var(--text-0); background: var(--bg-4); box-shadow: 0 0 0 1px var(--line-2); }
 .seg > button:disabled { opacity: 0.45; cursor: not-allowed; }
-.seg > button:focus-visible { box-shadow: var(--glow-accent); }
 
 /* Page-level view switcher (Radix Tabs). */
 .tabs-list { display: flex; align-items: stretch; gap: var(--sp-5); height: 100%; }
 .tab { position: relative; background: transparent; border: 0; padding: 0 2px; color: var(--text-2); font-size: var(--fs-body); font-weight: 500; cursor: pointer; white-space: nowrap; display: flex; align-items: center; transition: color var(--t-fast); }
 .tab:hover { color: var(--text-0); }
 .tab[data-state='active'] { color: var(--text-0); }
-.tab:focus-visible { box-shadow: none; outline: 2px solid var(--focus); outline-offset: -2px; border-radius: 999px; }
 /* Tabs are pills: the selected one is filled, never underlined. */
 .tabs-list { gap: 4px; }
 .tab { height: 30px; align-self: center; padding: 0 14px; border-radius: 999px; }
@@ -521,7 +519,6 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .ev-table { padding: 0 8px; }
 button.obs-link { all: unset; cursor: pointer; font-family: var(--font-mono); font-size: var(--fs-caption); color: var(--text-0); text-decoration: underline dotted var(--line-3); text-underline-offset: 3px; }
 button.obs-link:hover { text-decoration-color: var(--text-1); }
-button.obs-link:focus-visible { box-shadow: var(--glow-accent); border-radius: 3px; }
 
 /* Sensors */
 .sn-search { width: 240px; }
@@ -554,7 +551,6 @@ button.obs-link:focus-visible { box-shadow: var(--glow-accent); border-radius: 3
 
 /* Incidents */
 button.list-row { all: unset; box-sizing: border-box; display: flex; width: 100%; padding: var(--sp-3) var(--sp-4); gap: var(--sp-3); align-items: stretch; border-bottom: 1px solid var(--line); cursor: pointer; position: relative; transition: background var(--t-fast); }
-button.list-row:focus-visible { box-shadow: inset var(--glow-accent); }
 .inc-filters { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; background: var(--bg-1); }
 .inc-filters label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* Block margins only: the InlineEdit root keeps its own negative inline margin, so the title lines up with the meta line. */
@@ -593,7 +589,6 @@ button.rc-job { all: unset; box-sizing: border-box; cursor: pointer; display: fl
 button.rc-job > span:first-child { font-size: var(--fs-body); min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 button.rc-job > span:last-child { font-size: var(--fs-micro); }
 button.rc-job[aria-current] > span:first-child { text-decoration: underline; text-underline-offset: 3px; }
-button.rc-job:focus-visible { box-shadow: var(--glow-accent); border-radius: 3px; }
 .rc-new { display: flex; flex-direction: column; gap: 14px; padding-top: 4px; }
 .rc-two { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: start; }
 .rc-outputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }

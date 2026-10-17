@@ -399,10 +399,6 @@ export class WorldEngine {
       if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 4 || e.button !== 0) return;
       this.onPick?.(this.pick(e.clientX, e.clientY));
     });
-    el.addEventListener('dblclick', (e) => {
-      const p = this.groundPoint(e.clientX, e.clientY);
-      if (p) this.flyTo(p, Math.max(120, this.controls.distance * 0.5));
-    });
     let hoverAt = 0;
     el.addEventListener('pointermove', (e) => {
       if (performance.now() - hoverAt < 80) return;

@@ -208,10 +208,10 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
       return area?.to === '/incidents' ? (incidents.find((i) => i.id === v)?.code ?? v) : v;
     })
     .join(' · ');
+  // The page header names the page, so the bar only places it: an area's own page shows the site alone.
   const crumbs = [
     { label: siteName, onClick: () => setSiteOpen((o) => !o) },
-    rest.length && area ? { label: title, href: area.to } : { label: title },
-    ...(rest.length ? [{ label: restLabel }] : []),
+    ...(rest.length && area ? [{ label: title, href: area.to }, { label: restLabel }] : []),
   ];
   const role = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '';
   useEffect(() => {

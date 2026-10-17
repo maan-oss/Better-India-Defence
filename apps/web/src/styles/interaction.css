@@ -1,0 +1,43 @@
+/*
+ * One vocabulary of interaction for every control. Hover is for a pointer. Press sinks a control while it is held,
+ * and release springs it back. Focus is a ring for the keyboard only: a pointer never draws an outline, and a text
+ * field shows its focus as a border. Selection is a filled shape, never a line. Disabled is faded and inert.
+ * Loaded after glass.css, so the states here win over the material rules.
+ */
+
+/* Keyboard focus: one ring. Text fields and floating panels never ring; they take their focus from the border. */
+input:focus-visible, textarea:focus-visible, select:focus-visible { outline: none; }
+.modal:focus-visible, .cmd:focus-visible, .inbox-pop:focus-visible, .site-pop:focus-visible, [tabindex='-1']:focus-visible { outline: none; }
+
+/* Each control animates its own state change: a quick sink on press, a spring on release. */
+.btn, .chip, .tab, .seg > button, .rail-item, .tb-bell, .tb-night button, .user-btn, .cmd-trigger {
+  transition: transform 320ms cubic-bezier(0.34, 1.4, 0.64, 1), background-color 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease), box-shadow 160ms var(--ease), opacity 160ms var(--ease);
+}
+.btn:active:not(:disabled), .chip:active, .tab:active, .seg > button:active:not(:disabled), .rail-item:active,
+.tb-bell:active, .tb-night button:active, .user-btn:active, .cmd-trigger:active {
+  transform: scale(0.96);
+  transition-duration: 90ms;
+}
+.btn.primary:active:not(:disabled) { filter: brightness(0.94); }
+
+/* Rows press by colour, not by scale: a full-width row that shrank would look broken. */
+button.list-row, .list-row, .table tr.click, .more-list a, .cmd-item, .inbox-row { transition: background-color 120ms var(--ease), color 120ms var(--ease); }
+button.list-row:active, .list-row:active, .table tr.click:active, .more-list a:active, .cmd-item:active, .inbox-row:active { background: var(--bg-4); }
+
+/* Hover: pointer devices only. Touch shows the press and nothing sticks after a tap. */
+@media (hover: hover) and (pointer: fine) {
+  .chip:hover { background: var(--glass-fill-strong); }
+  .tab:hover, .seg > button:hover:not(:disabled), .user-btn:hover, .tb-night button:hover { color: var(--text-0); }
+  button.list-row:hover, .list-row:hover, .table tr.click:hover, .more-list a:hover, .cmd-item:hover, .inbox-row:hover { background: var(--bg-3); }
+}
+
+/* Selected: a filled shape. The selected row is filled, the selected tab or segment is a glass capsule. */
+.list-row.sel, .list-row[aria-selected='true'], .table tr.sel, [role='option'][aria-selected='true'] { background: var(--bg-4); color: var(--text-0); }
+
+/* Disabled: faded and inert, and it never reacts to a press. */
+:disabled, [aria-disabled='true'] { opacity: 0.4; cursor: not-allowed; }
+:disabled:active, [aria-disabled='true']:active { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .chip, .tab, .seg > button, .rail-item, .tb-bell, .tb-night button, .user-btn, .cmd-trigger { transition-duration: 1ms; }
+}

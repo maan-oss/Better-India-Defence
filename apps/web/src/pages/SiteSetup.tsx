@@ -429,7 +429,7 @@ function PlanEditor({
       <div className="plan-tools row">
         <Segmented label="Drawing tool" value={tool} onChange={(t) => (setTool(t), setDraft([]))} options={(['select', 'zone', 'building', 'perimeter', 'gate'] as Tool[]).map((t) => ({ value: t, label: t.charAt(0).toUpperCase() + t.slice(1) }))} />
         <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
-          {tool === 'zone' || tool === 'perimeter' ? `Click to add vertices (${draft.length}); Enter or double-click to finish; Esc to cancel.` : tool === 'building' ? 'Drag a footprint; then set height and rotation.' : tool === 'gate' ? 'Click on the perimeter to place a gate.' : 'Click an item to edit. Drag to pan; wheel to zoom.'}
+          {tool === 'zone' || tool === 'perimeter' ? `Click to add vertices (${draft.length}); Enter to finish; Esc to cancel.` : tool === 'building' ? 'Drag a footprint; then set height and rotation.' : tool === 'gate' ? 'Click on the perimeter to place a gate.' : 'Click an item to edit. Drag to pan; wheel to zoom.'}
         </span>
         <div className="spacer" />
         {cursor && (
@@ -503,7 +503,6 @@ function PlanEditor({
             setTool('select');
           }
         }}
-        onDoubleClick={finish}
       >
         {ortho && orthoRect && <image href={`/api/site/orthophoto?key=${encodeURIComponent(ortho.key)}`} x={orthoRect.x} y={orthoRect.y} width={orthoRect.w} height={orthoRect.h} preserveAspectRatio="none" opacity={0.85} />}
         {grid.map((v) => (

@@ -13,6 +13,7 @@ import { App } from './App';
 import { TooltipProvider } from './components/ui';
 // Last: the glass layer wins over the surface rules of the component stylesheets it follows.
 import './styles/glass.css';
+import './styles/interaction.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -34,12 +34,12 @@
 .ready-step.on.r-LOCKDOWN { color: #fff; background: var(--st-critical); }
 .tlevel { font-size: var(--fs-micro); letter-spacing: 0.04em; font-weight: 600; padding: 1px 6px; border-radius: var(--radius-sm); border: 1px solid var(--line-2); color: var(--text-2); }
 .tlevel.CRITICAL { background: var(--st-critical); color: #fff; border-color: var(--st-critical); }
-.tlevel.HIGH { background: var(--st-serious-tint); color: var(--st-serious-text); border-color: var(--st-serious-line); }
-.tlevel.MEDIUM { background: var(--st-caution-tint); color: var(--st-caution-text); border-color: var(--st-caution-line); }
+.tlevel.HIGH { background: var(--st-serious-tint); border-color: var(--st-serious-line); }
+.tlevel.MEDIUM { background: var(--st-caution-tint); border-color: var(--st-caution-line); }
 .tlevel.LOW { color: var(--text-2); }
 .tstat { font-size: var(--fs-micro); letter-spacing: 0.04em; font-weight: 600; color: var(--text-1); }
 .tstat.DISPATCHED, .tstat.EN-ROUTE, .tstat.ISSUED, .tstat.ACKNOWLEDGED { color: var(--st-standby-text); }
-.tstat.ON-SCENE { color: var(--st-standby-text); background: var(--st-standby-tint); box-shadow: 0 0 0 1px var(--st-standby-line); padding: 0 5px; border-radius: var(--radius-sm); }
+.tstat.ON-SCENE { background: var(--st-standby-tint); box-shadow: 0 0 0 1px var(--st-standby-line); padding: 0 5px; border-radius: var(--radius-sm); }
 .tstat.AVAILABLE, .tstat.COMPLETE { color: var(--text-2); }
 .task { border-bottom: 1px solid var(--line); padding: var(--sp-3) var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-1); }
 .task.closed { opacity: 0.55; }

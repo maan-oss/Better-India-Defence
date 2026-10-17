@@ -32,7 +32,6 @@ import { Select as ArcSelect } from '../components/arc/select/select';
 import { SignaturePad, signatureToPng, type InkStroke } from '../components/arc/signature-pad/signature-pad';
 import { SortableDataTable } from '../components/arc/sortable-data-table/sortable-data-table';
 import { Textarea } from '../components/arc/textarea/textarea';
-import { TextMorph } from '../components/arc/text-morph/text-morph';
 import { Timeline as ArcTimeline } from '../components/arc/timeline/timeline';
 import { useToastStack } from '../components/arc/toast-stack/toast-stack';
 import { OnWatch, useOnWatch } from '../components/ops/OnWatch';
@@ -174,9 +173,6 @@ function ReadinessPanel() {
       <div className="panel-h">
         <h3>Readiness</h3>
         <div className="spacer" />
-        <span className={`readiness r-${r.level.replace(' ', '-')}`}>
-          <TextMorph>{r.level}</TextMorph>
-        </span>
       </div>
       <div className="ready-row">
         {READINESS_LEVELS.map((l) => (

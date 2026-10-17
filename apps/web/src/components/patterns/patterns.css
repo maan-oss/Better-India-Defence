@@ -25,7 +25,6 @@
 .cmd-input { display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-4); height: 52px; border-bottom: 1px solid var(--line); color: var(--text-2); flex: none; }
 .cmd-input input { flex: 1; min-width: 0; height: 100%; background: transparent; border: 0; outline: none; font-size: var(--fs-body-lg); color: var(--text-0); }
 .cmd-input input::placeholder { color: var(--text-3); }
-.cmd-input input:focus-visible { box-shadow: none; }
 .cmd-list { flex: 1; min-height: 0; padding: var(--sp-2); }
 .cmd-group { padding: var(--sp-3) 10px 6px; font-size: var(--fs-caption); font-weight: 500; color: var(--text-3); }
 .cmd-group:first-child { padding-top: var(--sp-1); }
@@ -70,14 +69,10 @@
 .isl-mode { color: var(--text-2); }
 .isl-ready { font-size: var(--fs-micro); letter-spacing: 0.05em; font-weight: 600; color: var(--text-1); }
 .isl-ready i { width: 6px; height: 6px; border-radius: 50%; background: var(--st-normal); }
-.isl-ready.r-ALERT { color: var(--st-caution-text); }
 .isl-ready.r-ALERT i { background: var(--st-caution); }
-.isl-ready.r-HIGH-ALERT { color: var(--st-serious-text); }
 .isl-ready.r-HIGH-ALERT i { background: var(--st-serious); }
-.isl-ready.r-LOCKDOWN { color: var(--st-critical-text); }
-.isl-ready.r-LOCKDOWN i { background: var(--st-critical); animation: pulse 1.2s ease-in-out infinite; }
+.isl-ready.r-LOCKDOWN i { background: var(--st-critical); }
 .isl-n { display: inline-flex; align-items: center; gap: 5px; font-variant-numeric: tabular-nums; color: var(--text-0); }
-.isl-n.crit { color: var(--st-critical-text); }
 .isl-alerts { gap: 10px; }
 .isl-unit { font-weight: 400; }
 .isl-link { color: var(--st-caution-text); }

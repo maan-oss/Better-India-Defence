@@ -169,6 +169,22 @@ The recipe (fill, sheen, rim, shadow, blur) is in `tokens.css`; the layer that a
 display keeps the same recipe in red. CSS cannot reproduce Apple's lensing shader, so the rendering is an
 approximation of its look, not a copy.
 
+**Interaction.** Every control has the same states, defined once in `interaction.css`:
+- **Hover** (pointers only): the control lightens. A touch screen shows the press and nothing sticks after a tap.
+- **Press**: the control sinks (scale 0.96) and dims while it is held, and springs back on release. Rows press by
+  colour, not by scale.
+- **Focus** (keyboard only): one 2 px ring. A pointer never draws an outline. Text fields show focus as a border.
+- **Selected**: a filled shape (a glass capsule, a filled row). Never a line or an underline.
+- **Disabled**: faded to 40 % and inert.
+- **Double-click does nothing.** Every action is one click, one tap or one key.
+
+**One title per screen.** The page header names the page. The top bar names the site, and adds the place inside
+an area only on a detail page (an incident, a sensor). A readiness level is shown once: as the selected segment.
+
+**One colour carrier per status.** A status is shown by one of: a tinted chip (tint and border together), a
+coloured dot, or a coloured figure. Never two of them for the same state. Text beside a coloured carrier stays
+neutral.
+
 Speed rules that go with it: pages load their code on rail hover and focus, and the core pages are loaded once
 the shell is idle. Navigation renders at once when that code is in memory (`apps/web/src/routes.ts`); the
 router does not run navigation as a transition, which would hold back the reveal for about 300 ms.
