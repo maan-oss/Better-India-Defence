@@ -16,7 +16,8 @@ export interface VideoInfo {
 
 export function ffmpegAvailable(): boolean {
   try {
-    return spawnSync('ffmpeg', ['-version'], { timeout: 5000 }).status === 0;
+    // Checked once at start-up: a short limit reports ffmpeg missing on a busy host and silently disables every network camera.
+    return spawnSync('ffmpeg', ['-version'], { timeout: 20_000 }).status === 0;
   } catch {
     return false;
   }

@@ -439,7 +439,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
   .topbar { grid-column: 1; grid-row: 1; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-2); padding: 0 var(--sp-2) 0 var(--sp-3); }
   .tb-crumbs li:not(:last-child) { display: none; }
   .cmd-trigger { display: none; }
-  .island .isl-alerts, .island .isl-sensors, .island .isl-mode { display: none; }
+  .island .isl-alerts, .island .isl-sensors, .island .isl-mode, .island .isl-live { display: none; }
   .main { grid-column: 1; grid-row: 2; }
   /* Tab bar: a floating frosted bar over the foot of the page, at most five destinations (four areas and More). */
   .rail { position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 40; grid-row: auto; grid-column: auto; height: 66px; flex-direction: row; border: 1px solid var(--line-2); border-radius: 33px; background: color-mix(in srgb, var(--bg-2) 80%, transparent); -webkit-backdrop-filter: blur(22px) saturate(160%); backdrop-filter: blur(22px) saturate(160%); padding: 0 6px; }
@@ -602,7 +602,7 @@ button.list-row:focus-visible { box-shadow: inset var(--glow-accent); }
 .rc-kind { width: 260px; }
 .rc-kind label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .rc-table { padding: 0 8px; }
-button.rc-job { all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 2px; max-width: 360px; min-width: 0; }
+button.rc-job { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 2px; width: 100%; max-width: 100%; min-width: 0; }
 button.rc-job > span:first-child { font-size: var(--fs-body); min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 button.rc-job > span:last-child { font-size: var(--fs-micro); }
 button.rc-job[aria-current] > span:first-child { text-decoration: underline; text-underline-offset: 3px; }

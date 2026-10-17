@@ -96,7 +96,7 @@ export function StatusIsland() {
     <>
       {/* Live needs no clock: the picture is live. Replay and pause show the playhead, which is what needs saying. */}
       {mode === 'live' ? (
-        <span className="isl-seg isl-time">
+        <span className="isl-seg isl-time isl-live">
           <span className="status-dot ok" />
           <span className="isl-mode">Live</span>
         </span>
