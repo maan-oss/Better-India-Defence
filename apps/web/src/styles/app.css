@@ -221,8 +221,10 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .switch:checked::after { transform: translateX(12px); background: var(--accent-ink); }
 
 /* ================================================================ containers */
-.panel { background: var(--bg-1); border: 1px solid var(--line-2); border-radius: var(--radius-lg); }
-.panel-h { display: flex; align-items: center; gap: var(--sp-2); min-height: 44px; padding: 0 var(--sp-4); border-bottom: 1px solid var(--line); }
+/* A panel is a raised grouped surface, not an outlined box: one tone step above the page, no stroke. Its sections are
+   separated by spacing and by the inset hairlines inside tables. */
+.panel { --panel: var(--bg-2); background: var(--panel); border-radius: var(--radius-xl); }
+.panel-h { display: flex; align-items: center; gap: var(--sp-2); min-height: 48px; padding: 0 var(--sp-4); }
 .panel-h h3 { margin: 0; font-size: var(--fs-body); font-weight: 600; color: var(--text-0); }
 .section { padding: var(--sp-4); border-bottom: 1px solid var(--line); }
 .section:last-child { border-bottom: 0; }
@@ -275,7 +277,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 
 /* Tables */
 .table { width: 100%; border-collapse: collapse; font-size: var(--fs-body); }
-.table th { text-align: left; font-weight: 500; color: var(--text-2); font-size: var(--fs-caption); padding: 0 var(--sp-3); height: 36px; border-bottom: 1px solid var(--line-2); position: sticky; top: 0; background: var(--bg-1); z-index: 1; white-space: nowrap; }
+.table th { text-align: left; font-weight: 500; color: var(--text-2); font-size: var(--fs-caption); padding: 0 var(--sp-3); height: 36px; border-bottom: 1px solid var(--line-2); position: sticky; top: 0; background: var(--panel, var(--bg-1)); z-index: 1; white-space: nowrap; }
 .table th:first-child, .table td:first-child { padding-left: var(--sp-5); }
 .table th:last-child, .table td:last-child { padding-right: var(--sp-5); }
 .table td { padding: 9px var(--sp-3); border-bottom: 1px solid var(--line); vertical-align: top; }

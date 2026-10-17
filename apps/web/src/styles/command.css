@@ -111,6 +111,13 @@
 .handover-form { display: grid; grid-template-columns: minmax(260px, 0.9fr) 1.4fr; gap: 24px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); align-items: start; }
 @media (max-width: 900px) { .handover-form { grid-template-columns: 1fr; } }
 
+/* Phone: the summary and the panels share one 16 px gutter, and the summary is one grouped surface with hairline cells. */
+@media (max-width: 760px) {
+  .cmd-grid { padding: var(--sp-3) var(--sp-4); }
+  .kpis { margin: var(--sp-3) var(--sp-4) 0; border: 0; border-radius: var(--radius-xl); overflow: hidden; background: var(--line); }
+  .kpis > .stat { background: var(--bg-2); }
+}
+
 /* Phone: tables become stacked rows (the desktop columns cannot fit 375 px), and the scope fills its card. */
 @media (max-width: 760px) {
   .table.threat-table thead, .table.teams-table thead { display: none; }

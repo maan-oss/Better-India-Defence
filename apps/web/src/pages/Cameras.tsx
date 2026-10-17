@@ -115,7 +115,7 @@ export function Cameras() {
   }, []);
   const [focus, setFocus] = useState<string | null>(null);
   const [layout, setLayout] = useState<Layout>(
-    () => (Number(localStorage.getItem("strata.wall.layout")) as Layout) || 9,
+    () => (Number(localStorage.getItem("strata.wall.layout")) as Layout) || (window.matchMedia("(max-width: 760px)").matches ? 4 : 9),
   );
   const [filter, setFilter] = useState<Filter>("all");
   const [page, setPage] = useState(0);

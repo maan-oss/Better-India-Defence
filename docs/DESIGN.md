@@ -151,18 +151,23 @@ Generated-UI habits that were removed, and are not to be reintroduced:
 
 **Shape language.** Icon-only controls, avatars, count badges, status dots and face thumbnails are circles.
 Text buttons, chips, tabs, segmented controls, search fields and single-line inputs are pills. Panels and cards
-use one radius (12 px). Overlays (sheets, popovers, the command bar, dialogs) use 20–22 px, with pills nested
+use one radius (16 px). Overlays (sheets, popovers, the command bar, dialogs) use 20–22 px, with pills nested
 inside. Nothing mixes these in one control group.
 
 **Liquid Glass.** The control and navigation layer is glass; the content layer is solid. Glass covers the
 top bar, the rail (desktop) and tab bar (phone), buttons, tabs, segmented controls, the status pill, search,
 toasts, menus, sheets and dialogs. Cards, tables, charts and forms keep their solid fills, because Apple's
 guidance is that glass belongs to the controls that float over content, not to the content itself.
+Panels are a raised grouped surface, one tone step above the page with no stroke, so the hierarchy comes from
+tone and spacing rather than from boxes inside boxes.
 - **Regular** glass (the default) blurs and tints what is behind it, for text.
 - **Clear** glass is for controls over the map (layers, compass, scale, mode bar). Less tint, so the picture
   stays the subject.
 - **Prominent** glass is the one primary action in a view: cream, tinted with the accent.
 - **Plain** buttons carry no material until hovered or pressed.
+- **Status labels** (`span.chip`) are flat. The tint is the only signal, so no second outline appears on them.
+- **Floating bars on a phone**: the top bar floats over the head of the page and the tab bar over its foot. `.page`
+  and `.field` reserve both, so no control sits under either bar.
 - The shell is a backdrop with colour in it (`--wallpaper`) so the glass has something to refract. On desktop
   the content is an inset card beneath the floating bars.
 The recipe (fill, sheen, rim, shadow, blur) is in `tokens.css`; the layer that applies it is `glass.css`. Night
@@ -174,7 +179,7 @@ approximation of its look, not a copy.
 - **Press**: the control sinks (scale 0.96) and dims while it is held, and springs back on release. Rows press by
   colour, not by scale.
 - **Focus** (keyboard only): one 2 px ring. A pointer never draws an outline. Text fields show focus as a border.
-- **Selected**: a filled shape (a glass capsule, a filled row). Never a line or an underline.
+- **Selected**: a filled shape (a glass capsule, a filled row). Never a line or an underline. A selected option that is also unavailable keeps full strength; only the other options dim.
 - **Disabled**: faded to 40 % and inert.
 - **Double-click does nothing.** Every action is one click, one tap or one key.
 
@@ -201,14 +206,14 @@ router does not run navigation as a transition, which would hold back the reveal
    text, symbol frame, dashed outline), so it survives colour blindness and red-light mode.
 5. **Fill sparingly.** Solid fills are kept for the one primary action on a screen, the alert banner
    on a camera tile, and readiness above NORMAL. Chips use Radix tint, border and text steps.
-6. **Separate with hairlines, not boxes.** On a dark UI, use one separation method per surface. KPI rows
-   are a single hairline grid, panels have one 1 px border, and shadows are only for things that float
-   (menus, dialogs, toasts).
+6. **Separate with tone and hairlines, not boxes.** Panels are one tone step above the page with no border,
+   KPI rows are a single hairline grid on a phone too, and shadows are only for things that float (menus,
+   dialogs, toasts).
 7. **Sentence case.** Headings, tabs, labels and buttons are in sentence case. Uppercase is kept for
    short status chips and classification markings.
-8. **Spacing comes from the scale.** 4, 8, 12, 16, 20, 24, 32, 40 px (`--sp-*`). Page gutters are 20 px,
-   panel padding 16 px, and control heights 24 / 28 / 36 px. Radii are 6 for chips, 8 for controls,
-   12 for containers and 16 for dialogs.
+8. **Spacing comes from the scale.** 4, 8, 12, 16, 20, 24, 32, 40 px (`--sp-*`). Page gutters are 20 px on desktop
+   and 16 px on a phone, panel padding 16 px, and control heights 24 / 28 / 36 px. Radii are 6 for chips, 8 for controls,
+   16 for panels and grouped surfaces, 12 for other containers, and 20–22 for overlays.
 9. **Summaries lead with the worst state.** The top-bar alert summary shows critical first, then high.
    The operations rail badge appears only while critical alerts are open, and is red. Other badges are
    work counts and stay neutral.

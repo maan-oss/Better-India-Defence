@@ -70,6 +70,10 @@
 .modal { background: var(--glass-fill); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-edge); box-shadow: var(--glass-rim), var(--glass-shadow); border-radius: 22px; }
 .modal-back { background: rgba(0, 0, 0, 0.28); -webkit-backdrop-filter: blur(8px) saturate(120%); backdrop-filter: blur(8px) saturate(120%); }
 
+/* Status labels are not controls. They stay flat, so the tint is the only signal and no second outline appears. */
+span.chip { box-shadow: none; border-color: var(--line-2); -webkit-backdrop-filter: none; backdrop-filter: none; }
+span.chip::after { display: none; }
+
 /* ---------------------------------------------------------------- fields */
 /* Single-line fields are capsules, like the controls beside them; text areas keep a rounded rectangle. */
 input.input, select.input { border-radius: 999px; padding: 0 14px; }
@@ -85,6 +89,7 @@ input.input, select.input { border-radius: 999px; padding: 0 14px; }
   .main { grid-row: 1; grid-column: 2; border: 1px solid var(--line); border-radius: 20px; }
   .topbar { grid-row: 1; grid-column: 2; align-self: start; z-index: 30; height: var(--top-h); margin: 12px 12px 0; }
   .page { overflow-y: auto; padding-top: calc(var(--top-h) + 24px); }
+  .main .field { padding-top: calc(var(--top-h) + 24px); }
   .page-h { border-bottom: 0; background: transparent; }
 }
 /* Phone: the content is full-bleed; the top bar floats over its head and the tab bar floats over its foot. */
@@ -98,6 +103,9 @@ input.input, select.input { border-radius: 999px; padding: 0 14px; }
   .rail-item.active::after { display: none; }
   .rail-item.active svg { background: var(--glass-fill-strong); box-shadow: var(--glass-rim); }
   .page { overflow-y: auto; padding-top: calc(var(--top-h) + 20px); }
+  /* The field view is a route scroller of its own, so it clears the floating bars the same way .page does. Its route
+     stylesheet loads after this one, so the selector is one level deeper to win. */
+  .main .field { padding-top: calc(var(--top-h) + 20px); padding-bottom: 84px; }
 }
 
 /* Reduced transparency: the same shapes on a solid surface. */
