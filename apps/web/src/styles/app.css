@@ -121,10 +121,12 @@ h1, h2, h3, h4, h5 { text-wrap: balance; }
 .rail-dot { position: absolute; top: 7px; right: calc(50% - 15px); width: 6px; height: 6px; border-radius: 50%; background: var(--st-critical); }
 .more-groups { display: grid; gap: var(--sp-5); padding: var(--sp-2) var(--sp-4) var(--sp-6); }
 .more-title { margin: 0 0 var(--sp-2); font-size: var(--fs-caption); font-weight: 600; color: var(--text-2); }
-.more-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
-.more-list a { display: flex; align-items: center; gap: var(--sp-3); min-height: 48px; padding: 0 var(--sp-3); border: 1px solid var(--line-2); border-radius: var(--radius-lg); color: var(--text-0); text-decoration: none; font-size: var(--fs-body); }
+/* One grouped card per section, hairline rows: reads as a menu, not a stack of buttons. */
+.more-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line-2); border-radius: var(--radius-panel); background: var(--bg-2); overflow: hidden; }
+.more-list li + li { border-top: 1px solid var(--line); }
+.more-list a { display: flex; align-items: center; gap: var(--sp-3); min-height: 52px; padding: 0 var(--sp-4); color: var(--text-0); text-decoration: none; font-size: var(--fs-body); }
+.more-list a:hover, .more-list a.active { background: var(--bg-3); }
 .more-list a svg { width: 18px; height: 18px; color: var(--text-2); flex: none; }
-.more-list a.active { border-color: var(--text-2); }
 .more-list a > span:not(.more-count) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .more-count { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--bg-4); color: var(--text-0); font-size: var(--fs-micro); font-weight: 600; display: grid; place-items: center; }
 .ow-stack { display: flex; list-style: none; margin: 0; padding: 0; }
@@ -436,9 +438,8 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 @media (max-width: 760px) {
   html, body { overflow-x: hidden; }
   .shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: var(--top-h) minmax(0, 1fr); }
-  .topbar { grid-column: 1; grid-row: 1; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-2); padding: 0 var(--sp-2) 0 var(--sp-3); }
+  .topbar { grid-column: 1; grid-row: 1; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--sp-2); padding: 0 var(--sp-2) 0 var(--sp-3); }
   .tb-crumbs li:not(:last-child) { display: none; }
-  .cmd-trigger { display: none; }
   .island .isl-alerts, .island .isl-sensors, .island .isl-mode, .island .isl-live { display: none; }
   .main { grid-column: 1; grid-row: 2; }
   /* Tab bar: a floating frosted bar over the foot of the page, at most five destinations (four areas and More). */
@@ -473,7 +474,8 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
   .keys-board { display: none; }
 }
 @media (max-width: 1180px) {
-  .cmd-trigger { width: 40px; padding: 0; justify-content: center; }
+  /* Icon-only search is a circle, like every other icon control; on phones it is the only search entry point. */
+  .cmd-trigger { width: 36px; height: 36px; padding: 0; justify-content: center; border-radius: 50%; }
   .cmd-trigger-text, .cmd-trigger-keys { display: none; }
 }
 

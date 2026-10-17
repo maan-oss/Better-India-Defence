@@ -9,7 +9,7 @@ export const NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { to: '/operations', label: 'Operational picture', icon: 'Ops', keys: 'G O', short: 'Map' },
       { to: '/command', label: 'Command', icon: 'Command', keys: 'G C' },
-      { to: '/cameras', label: 'Camera wall', icon: 'Camera', perm: 'media.view', keys: 'G W' },
+      { to: '/cameras', label: 'Camera wall', icon: 'Camera', perm: 'media.view', keys: 'G W', short: 'Cameras' },
       { to: '/incidents', label: 'Incidents', icon: 'Incidents', keys: 'G I' },
       { to: '/field', label: 'Field view', icon: 'Field', keys: 'G F' },
     ],

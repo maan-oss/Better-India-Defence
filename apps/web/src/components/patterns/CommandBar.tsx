@@ -148,7 +148,7 @@ export function CommandBar({ open, onOpenChange, onShortcuts }: { open: boolean;
                   <Icon.Search />
                   <input
                     autoFocus
-                    placeholder="Search the site, enter a grid reference, or type a command"
+                    placeholder="Search or run a command"
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
                     onKeyDown={(e) => {
@@ -167,7 +167,8 @@ export function CommandBar({ open, onOpenChange, onShortcuts }: { open: boolean;
                     aria-controls="cmd-list"
                     aria-activedescendant={results[active] ? `cmd-${results[active].id}` : undefined}
                   />
-                  <span className="kbd">Esc</span>
+                  <span className="kbd cmd-esc">Esc</span>
+                  <Dialog.Close className="cmd-cancel">Cancel</Dialog.Close>
                 </div>
                 <div className="cmd-list scroll" id="cmd-list" role="listbox" ref={listRef}>
                   {results.length === 0 && <div className="cmd-empty">Nothing matches “{q}”.</div>}

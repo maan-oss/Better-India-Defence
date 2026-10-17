@@ -22,6 +22,7 @@ import { ThemeSwitch } from './arc/theme-switch/theme-switch';
 import { ToastStack, ToastStackProvider } from './arc/toast-stack/toast-stack';
 import { UserMenu } from './arc/user-menu/user-menu';
 import { CommandBar } from './patterns/CommandBar';
+import { Inbox } from './patterns/Inbox';
 import { StatusIsland } from './patterns/StatusIsland';
 import { MacKeyboard } from './vendor/componentry/mac-keyboard';
 import { Mark } from '../brand/Mark';
@@ -152,7 +153,7 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
         </Tip>
       </nav>
       <Drawer open={more} onOpenChange={setMore}>
-        <DrawerContent side="bottom" title="All areas" description="Every area of the console. The tab bar keeps the four you use most.">
+        <DrawerContent side="bottom" title="All areas" description="The tab bar keeps the four you use most.">
           <div className="more-groups">
             {visible.map((g) => (
               <section key={g.group} className="more-group" aria-label={g.group}>
@@ -245,6 +246,7 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
         </span>
       </button>
       <div className="tb-right">
+        <Inbox />
         <StatusIsland />
         <span className="tb-night">
           <ThemeSwitch iconOnly variant="eclipse" theme={theme === 'night' ? 'dark' : 'light'} label={theme === 'night' ? 'Standard display' : 'Night display (red light)'} onThemeChange={(next) => setTheme(next === 'dark' ? 'night' : 'dark')} />
@@ -424,11 +426,11 @@ function AlertToasts() {
     if (r) useData.getState().onLive({ type: 'alert', alert: r });
     dismiss(a.id);
   };
-  if (!list.length) return null;
+  // The live region is mounted before anything arrives, so the first alert is announced too. Only critical alerts interrupt.
   return (
-    <div className="toasts" aria-live="assertive">
+    <div className="toasts" aria-live="polite">
       {list.map(({ a, out }) => (
-        <div key={a.id} className={`toast ${a.priority} ${out ? 'out' : ''}`} role="alert">
+        <div key={a.id} className={`toast ${a.priority} ${out ? 'out' : ''}`} role={a.priority === 'critical' ? 'alert' : 'status'}>
           <div className="t-head">
             {a.priority === 'critical' ? <span className="live-dot red" /> : <Icon.Alert />}
             <span className="t-sev">{a.priority}</span>

@@ -202,10 +202,20 @@ test('night (red-light) display can be switched from the user menu', async ({ pa
   await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'night');
 });
 
+test('inbox: opens from the bell, closes on Escape, and the alert live region is always mounted', async ({ page }) => {
+  const errors = await signIn(page, 'analyst');
+  await expect(page.locator('.toasts')).toHaveAttribute('aria-live', 'polite');
+  await page.getByRole('button', { name: /^Inbox, / }).click();
+  await expect(page.locator('.inbox')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.inbox')).toBeHidden();
+  expect(errors).toEqual([]);
+});
+
 test('command bar: Ctrl K searches areas and navigates; G then letter jumps', async ({ page }) => {
   const errors = await signIn(page, 'analyst');
   await page.keyboard.press('Control+k');
-  const input = page.getByPlaceholder('Search the site, enter a grid reference, or type a command');
+  const input = page.getByPlaceholder('Search or run a command');
   await expect(input).toBeVisible();
   await input.fill('camera wall');
   await page.keyboard.press('Enter');
@@ -215,6 +225,31 @@ test('command bar: Ctrl K searches areas and navigates; G then letter jumps', as
   await page.keyboard.press('c');
   await expect(page).toHaveURL(/\/command/);
   expect(errors).toEqual([]);
+});
+
+test('phone shell: tab bar, search and the All areas sheet work at 390 px without a hover', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  const errors = await signIn(page, 'analyst');
+  // Four areas and More, and nothing else from the desktop rail.
+  await expect(page.locator('.rail .rail-item:visible, .rail .rail-more:visible')).toHaveCount(5);
+  await page.locator('.cmd-trigger').click();
+  const input = page.getByPlaceholder('Search or run a command');
+  await expect(input).toBeVisible();
+  await expect(page.locator('.cmd-foot')).toBeHidden();
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  await expect(input).toBeHidden();
+  // The inbox is a bottom sheet on a phone, and it closes on Escape like the rest.
+  await page.locator('.tb-bell').click();
+  await expect(page.locator('.inbox')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.inbox')).toBeHidden();
+  await page.locator('.rail-more').click();
+  await expect(page.getByText('The tab bar keeps the four you use most.')).toBeVisible();
+  await page.getByRole('link', { name: 'Audit' }).click();
+  await expect(page).toHaveURL(/\/audit/);
+  expect(errors).toEqual([]);
+  await context.close();
 });
 
 test('status island opens to show readiness, alerts and sensor state', async ({ page }) => {
