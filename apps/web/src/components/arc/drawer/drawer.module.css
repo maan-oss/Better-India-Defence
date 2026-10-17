@@ -19,10 +19,12 @@
   max-width: 100vw;
   max-height: 100dvh;
   overflow: hidden;
-  border: 1px solid var(--border);
-  background: var(--surface-raised);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-fill);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: var(--foreground);
-  box-shadow: var(--shadow-floating);
+  box-shadow: var(--glass-rim), var(--glass-shadow);
 }
 /* While a layer leaves it lets clicks through, so pressing the trigger again during the close reopens the drawer from wherever it is. */
 /* Radix writes pointer-events inline on the overlay, so the closing state has to win over it. */

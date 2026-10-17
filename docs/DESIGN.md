@@ -150,8 +150,24 @@ Generated-UI habits that were removed, and are not to be reintroduced:
   (split-flap clocks, counters that roll) are not used in the chrome.
 
 **Shape language.** Icon-only controls, avatars, count badges, status dots and face thumbnails are circles.
-Text buttons, chips, tabs and segmented controls are pills. Panels and cards use one radius (12 px). Nothing
-mixes these in one control group.
+Text buttons, chips, tabs, segmented controls, search fields and single-line inputs are pills. Panels and cards
+use one radius (12 px). Overlays (sheets, popovers, the command bar, dialogs) use 20–22 px, with pills nested
+inside. Nothing mixes these in one control group.
+
+**Liquid Glass.** The control and navigation layer is glass; the content layer is solid. Glass covers the
+top bar, the rail (desktop) and tab bar (phone), buttons, tabs, segmented controls, the status pill, search,
+toasts, menus, sheets and dialogs. Cards, tables, charts and forms keep their solid fills, because Apple's
+guidance is that glass belongs to the controls that float over content, not to the content itself.
+- **Regular** glass (the default) blurs and tints what is behind it, for text.
+- **Clear** glass is for controls over the map (layers, compass, scale, mode bar). Less tint, so the picture
+  stays the subject.
+- **Prominent** glass is the one primary action in a view: cream, tinted with the accent.
+- **Plain** buttons carry no material until hovered or pressed.
+- The shell is a backdrop with colour in it (`--wallpaper`) so the glass has something to refract. On desktop
+  the content is an inset card beneath the floating bars.
+The recipe (fill, sheen, rim, shadow, blur) is in `tokens.css`; the layer that applies it is `glass.css`. Night
+display keeps the same recipe in red. CSS cannot reproduce Apple's lensing shader, so the rendering is an
+approximation of its look, not a copy.
 
 Speed rules that go with it: pages load their code on rail hover and focus, and the core pages are loaded once
 the shell is idle. Navigation renders at once when that code is in memory (`apps/web/src/routes.ts`); the

@@ -122,6 +122,32 @@
   --shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 16px 40px -8px rgba(0, 0, 0, 0.55), 0 4px 12px -4px rgba(0, 0, 0, 0.35);
   --glow-accent: 0 0 0 1px var(--bg-1), 0 0 0 3px var(--focus);
 
+  /*
+   * Liquid Glass: the control and navigation layer floats over the content, which stays solid. Apple's refraction
+   * is a GPU shader with no CSS equivalent; blur, saturation, a sheen that falls off down the surface, a bright top
+   * rim and a soft shadow are the honest approximation. Regular glass blurs and tints what is behind it; clear glass
+   * is for controls over the map; prominent glass is the one primary action per view, tinted with the accent.
+   */
+  --glass-tint: rgba(64, 64, 68, 0.44);
+  --glass-tint-strong: rgba(84, 84, 88, 0.62);
+  --glass-tint-clear: rgba(38, 38, 42, 0.22);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.06) 46%, rgba(255, 255, 255, 0.02) 54%, rgba(255, 255, 255, 0.1) 100%);
+  --glass-sheen-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.1) 46%, rgba(255, 255, 255, 0.04) 54%, rgba(255, 255, 255, 0.14) 100%);
+  --glass-fill: var(--glass-sheen), var(--glass-tint);
+  --glass-fill-strong: var(--glass-sheen-strong), var(--glass-tint-strong);
+  --glass-fill-clear: var(--glass-sheen), var(--glass-tint-clear);
+  --glass-danger: linear-gradient(180deg, rgba(255, 120, 120, 0.22), rgba(255, 120, 120, 0.06)), rgba(70, 12, 18, 0.55);
+  --glass-prominent: linear-gradient(180deg, #ffffff 0%, var(--accent) 52%, #e2dfd3 100%);
+  --glass-prominent-hover: linear-gradient(180deg, #ffffff 0%, var(--accent-2) 100%);
+  --glass-prominent-rim: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(0, 0, 0, 0.14);
+  --glass-edge: rgba(255, 255, 255, 0.16);
+  --glass-rim: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  --glass-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.6), 0 10px 30px -8px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --glass-blur: blur(24px) saturate(180%);
+  --glass-hover: rgba(255, 255, 255, 0.08);
+  /* What glass sits on: a dark field with two soft colour sources, so the blur has something to bend. */
+  --wallpaper: radial-gradient(60% 50% at 8% -5%, rgba(110, 140, 200, 0.2), transparent 70%), radial-gradient(50% 45% at 100% 105%, rgba(214, 170, 120, 0.14), transparent 70%), #141414;
+
   --rail-w: 56px;
   --rail-w-open: 216px;
   --left-w: 272px;
@@ -173,6 +199,19 @@
   --prior: #a33224;
   --unknown: #5a1a12;
   --shadow-2: 0 0 0 1px rgba(255, 60, 40, 0.14), 0 18px 48px rgba(0, 0, 0, 0.8);
+  --glass-tint: rgba(28, 4, 3, 0.52);
+  --glass-tint-strong: rgba(48, 8, 6, 0.7);
+  --glass-tint-clear: rgba(20, 2, 2, 0.26);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 90, 70, 0.2) 0%, rgba(255, 90, 70, 0.05) 46%, rgba(255, 90, 70, 0.02) 54%, rgba(255, 90, 70, 0.1) 100%);
+  --glass-sheen-strong: linear-gradient(180deg, rgba(255, 90, 70, 0.28) 0%, rgba(255, 90, 70, 0.1) 46%, rgba(255, 90, 70, 0.04) 54%, rgba(255, 90, 70, 0.14) 100%);
+  --glass-prominent: linear-gradient(180deg, #ff7a66 0%, #ff5a46 60%, #c8402e 100%);
+  --glass-prominent-hover: linear-gradient(180deg, #ff9180 0%, #ff7a66 100%);
+  --glass-prominent-rim: inset 0 1px 0 rgba(255, 200, 190, 0.6), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  --glass-edge: rgba(255, 90, 70, 0.2);
+  --glass-rim: inset 0 1px 0 rgba(255, 90, 70, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+  --glass-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.9), 0 10px 30px -8px rgba(0, 0, 0, 0.8);
+  --glass-hover: rgba(255, 90, 70, 0.1);
+  --wallpaper: radial-gradient(60% 50% at 8% -5%, rgba(255, 60, 40, 0.1), transparent 70%), #000;
 }
 :root[data-theme='night'] canvas,
 :root[data-theme='night'] img,

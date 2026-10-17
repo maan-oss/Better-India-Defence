@@ -7,11 +7,13 @@
   min-width: 12rem;
   max-width: min(22rem, calc(100vw - 20px));
   padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-panel);
-  background: var(--surface-raised);
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--glass-fill);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: var(--foreground);
-  box-shadow: var(--shadow-floating);
+  box-shadow: var(--glass-rim), var(--glass-shadow);
   transform-origin: var(--radix-popover-content-transform-origin);
   transition: opacity var(--duration-fast) var(--ease-enter), transform var(--duration-spring) var(--ease-spring);
 }

@@ -1,0 +1,85 @@
+/*
+ * Liquid Glass: the control and navigation layer floats above the content, and the content stays solid. Cards,
+ * tables and charts keep their fills; the chrome, controls and overlays are glass. Loaded last, so it wins over the
+ * surface declarations in app.css, patterns.css and operations.css. The Arc modules read the same tokens.
+ *
+ * Tokens live in tokens.css. Shapes: text controls are capsules, icon-only controls are circles, overlays are 20 px
+ * with pill controls nested inside. One prominent (cream, tinted) action per view.
+ */
+
+/* ---------------------------------------------------------------- material */
+.btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .topbar, .rail,
+.inbox-pop, .site-pop, .island-panel, .cmd, .toast, .glass, .map-modes, .map-dock, .compass, .scalebar {
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-rim), var(--glass-shadow);
+}
+.btn:hover, .cmd-trigger:hover, .island:hover, .tb-bell:hover, .tb-night button:hover, .user-btn:hover { background: var(--glass-fill-strong); }
+
+/* ---------------------------------------------------------------- buttons */
+.btn { transition: background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), transform 160ms var(--ease); }
+.btn:active:not(:disabled) { transform: scale(0.96); }
+.btn.primary { background: var(--glass-prominent); color: var(--accent-ink); border-color: rgba(255, 255, 255, 0.6); box-shadow: var(--glass-prominent-rim), var(--glass-shadow); }
+.btn.primary:hover { background: var(--glass-prominent-hover); border-color: rgba(255, 255, 255, 0.6); }
+.btn.critical { background: linear-gradient(180deg, #ff8a88 0%, var(--st-critical) 60%, #c93a3f 100%); color: #fff; border-color: rgba(255, 255, 255, 0.35); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), var(--glass-shadow); }
+.btn.critical:hover { background: linear-gradient(180deg, #ff9d9b 0%, #ec5d5e 100%); }
+.btn.danger { background: var(--glass-danger); border-color: var(--st-critical-line); color: var(--st-critical-text); }
+.btn.on { background: var(--glass-fill-strong); border-color: var(--glass-edge); color: var(--text-0); }
+/* Plain buttons carry no material until they are hovered or pressed. */
+.btn.ghost { background: transparent; border-color: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.btn.ghost:hover { background: var(--glass-fill); border-color: var(--glass-edge); box-shadow: var(--glass-rim), var(--glass-shadow); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+
+/* Segmented controls and page tabs: the selected item is a glass capsule that sits inside the track. */
+.seg > button[data-state='on'], .seg > button.on { background: var(--glass-fill-strong); box-shadow: var(--glass-rim), 0 0 0 0.5px rgba(0, 0, 0, 0.5); }
+.tab[data-state='active'] { background: var(--glass-fill-strong); box-shadow: var(--glass-rim), var(--glass-shadow); border-radius: 999px; }
+
+/* ---------------------------------------------------------------- navigation */
+.topbar { border-radius: 24px; }
+.island-panel { border-radius: 22px; }
+.island.has-crit { border-color: var(--st-critical-line); }
+.rail { border-radius: 28px; }
+.rail-item:hover, .rail-more:hover { background: var(--glass-hover); }
+.rail-item.active { background: var(--glass-fill-strong); box-shadow: var(--glass-rim); }
+
+/* ---------------------------------------------------------------- overlays */
+.cmd { border-radius: 22px; }
+.toast { border-radius: 16px; }
+/* Dialogs are text-heavy, so they take regular glass; the scrim behind them blurs the console as well as dimming it. */
+.modal { background: var(--glass-fill); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-edge); box-shadow: var(--glass-rim), var(--glass-shadow); border-radius: 22px; }
+.modal-back { background: rgba(0, 0, 0, 0.3); -webkit-backdrop-filter: blur(6px) saturate(120%); backdrop-filter: blur(6px) saturate(120%); }
+
+/* ---------------------------------------------------------------- fields */
+/* Single-line fields are capsules, like the controls beside them; text areas keep a rounded rectangle. */
+input.input, select.input { border-radius: 999px; padding: 0 14px; }
+
+/* Clear glass over the map: less tint, so the picture stays the subject. Night keeps the same recipe in red. */
+.glass, .map-modes, .map-dock, .compass, .scalebar { background: var(--glass-fill-clear); }
+
+/* ---------------------------------------------------------------- shell */
+/* Desktop: the rail and top bar float on a backdrop with colour in it; the content is an inset card beneath them. */
+@media (min-width: 761px) {
+  .shell { padding: 8px; column-gap: 8px; row-gap: 8px; background: var(--wallpaper); }
+  .main { border: 1px solid var(--line); border-radius: 20px; }
+}
+/* Phone: the top bar floats over the backdrop; the content is a card whose top corners are round, and the tab bar
+   floats over its foot. */
+@media (max-width: 760px) {
+  .shell { padding: 8px 8px 0; row-gap: 8px; background: var(--wallpaper); }
+  .main { border: 1px solid var(--line); border-bottom: 0; border-radius: 20px 20px 0 0; }
+  .rail { border-radius: 33px; }
+  .rail-item:hover, .rail-more:hover { background: transparent; }
+  .rail-item.active { background: transparent; box-shadow: none; }
+  .rail-item.active svg { background: var(--glass-fill-strong); box-shadow: var(--glass-rim); }
+}
+
+/* Reduced transparency: the same shapes on a solid surface. */
+@media (prefers-reduced-transparency: reduce) {
+  .btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .topbar, .rail,
+  .inbox-pop, .site-pop, .island-panel, .cmd, .toast, .modal, .glass, .map-modes, .map-dock, .compass, .scalebar {
+    background: var(--bg-2);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

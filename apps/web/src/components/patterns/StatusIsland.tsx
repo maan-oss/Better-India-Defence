@@ -158,7 +158,7 @@ export function StatusIsland() {
             </motion.span>
           </motion.button>
         ) : (
-          <motion.div key="panel" layoutId="island" className="island-panel" role="dialog" aria-label="Console status" transition={spring} style={{ borderRadius: 18 }}>
+          <motion.div key="panel" layoutId="island" className="island-panel" role="dialog" aria-label="Console status" transition={spring} style={{ borderRadius: 22 }}>
             <motion.div className="isp-body" initial={{ opacity: 0, y: -4, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, transition: { duration: 0.08 } }} transition={{ delay: reduced ? 0 : 0.08, duration: 0.2 }}>
               <section className="isp-clock">
                 <SplitFlapDisplay text={zulu(now)} columns={8} size="sm" showIndicators={false} staggerDelay={14} flipSpeed={26} className="isp-flap" />

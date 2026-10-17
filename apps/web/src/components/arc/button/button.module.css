@@ -11,20 +11,21 @@
 .labelContent { display: inline-flex; flex: none; align-items: center; }
 .labelPhase { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); white-space: nowrap; }
 .labelPhase svg { flex: none; }
-.primary { color: var(--background); background: var(--foreground); border-color: var(--foreground); }
-.secondary { color: var(--foreground); background: var(--surface); border-color: var(--border); }
+/* Liquid Glass: the primary action is tinted glass, the secondary is glass, the plain button has no material until it is hovered. */
+.primary { color: var(--accent-ink); background: var(--glass-prominent); border-color: rgba(255, 255, 255, 0.6); box-shadow: var(--glass-prominent-rim), var(--glass-shadow); }
+.secondary { color: var(--foreground); background: var(--glass-fill); border-color: var(--glass-edge); box-shadow: var(--glass-rim), var(--glass-shadow); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
 .ghost { color: var(--text-secondary); background: transparent; border-color: transparent; }
-.danger { color: var(--danger); background: var(--surface); border-color: var(--border); }
+.danger { color: var(--danger); background: var(--glass-danger); border-color: var(--st-critical-line); box-shadow: var(--glass-rim), var(--glass-shadow); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
 @media (hover: hover) and (pointer: fine) {
-  .primary:hover:not(:disabled) { opacity: .91; box-shadow: var(--shadow-resting); }
-  .secondary:hover:not(:disabled) { background: var(--surface-muted); box-shadow: var(--shadow-resting); }
-  .ghost:hover:not(:disabled) { color: var(--foreground); background: var(--surface-muted); }
-  .danger:hover:not(:disabled) { border-color: var(--danger); background: var(--surface-muted); }
+  .primary:hover:not(:disabled) { background: var(--glass-prominent-hover); box-shadow: var(--glass-prominent-rim), var(--glass-shadow); }
+  .secondary:hover:not(:disabled) { background: var(--glass-fill-strong); box-shadow: var(--glass-rim), var(--glass-shadow); }
+  .ghost:hover:not(:disabled) { color: var(--foreground); background: var(--glass-fill); border-color: var(--glass-edge); box-shadow: var(--glass-rim), var(--glass-shadow); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
+  .danger:hover:not(:disabled) { border-color: var(--danger); background: var(--glass-fill-strong); }
 }
 /* Color feedback on press, so touch and menu triggers (which never scale) still answer the finger. */
 .primary:active:not(:disabled) { opacity: .84; }
-.secondary:active:not(:disabled), .ghost:active:not(:disabled) { color: var(--foreground); background: var(--surface-muted); }
-.danger:active:not(:disabled) { border-color: var(--danger); background: var(--surface-muted); }
+.secondary:active:not(:disabled), .ghost:active:not(:disabled) { color: var(--foreground); background: var(--glass-fill-strong); }
+.danger:active:not(:disabled) { border-color: var(--danger); background: var(--glass-fill-strong); }
 .sm { min-height: var(--control-height-sm); padding-inline: var(--space-3); font-size: var(--text-sm); }
 .md { min-height: var(--control-height-md); }
 .lg { min-height: var(--control-height-lg); padding-inline: var(--space-5); font-size: var(--text-sm); }

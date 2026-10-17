@@ -11,6 +11,8 @@ import './brand/brand.css';
 import './state/ui';
 import { App } from './App';
 import { TooltipProvider } from './components/ui';
+// Last: the glass layer wins over the surface rules of the component stylesheets it follows.
+import './styles/glass.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
