@@ -1,20 +1,38 @@
 /*
- * Liquid Glass: the control and navigation layer floats above the content, and the content stays solid. Cards,
- * tables and charts keep their fills; the chrome, controls and overlays are glass. Loaded last, so it wins over the
- * surface declarations in app.css, patterns.css and operations.css. The Arc modules read the same tokens.
+ * Liquid Glass: the control and navigation layer floats above the content. The top bar and the rail are glass over
+ * the page, and the page scrolls beneath them, so what passes under the glass is blurred and tinted by it. Cards,
+ * tables and charts keep solid fills. Loaded last, so it wins over the surface rules in app.css, patterns.css and
+ * operations.css. The Arc modules read the same tokens. Tokens live in tokens.css.
  *
- * Tokens live in tokens.css. Shapes: text controls are capsules, icon-only controls are circles, overlays are 20 px
- * with pill controls nested inside. One prominent (cream, tinted) action per view.
+ * Shapes: text controls are capsules, icon-only controls are circles, overlays are 20-22 px with pills nested inside.
  */
 
 /* ---------------------------------------------------------------- material */
+/* Every glass surface gets the same three things: a translucent fill, a backdrop blur, and a lit edge. The lit edge is
+   the ::after rim, a 1 px gradient brightest at the top-left, which is what makes the glass read as an object. */
 .btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .topbar, .rail,
 .inbox-pop, .site-pop, .island-panel, .cmd, .toast, .glass, .map-modes, .map-dock, .compass, .scalebar {
+  position: relative;
   background: var(--glass-fill);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-edge);
   box-shadow: var(--glass-rim), var(--glass-shadow);
+}
+.btn::after, .chip::after, .seg::after, .cmd-trigger::after, .island::after, .tb-bell::after, .tb-night button::after,
+.user-btn::after, .topbar::after, .rail::after, .inbox-pop::after, .site-pop::after, .island-panel::after, .cmd::after,
+.toast::after, .glass::after, .map-modes::after, .map-dock::after, .compass::after, .scalebar::after,
+.tab[data-state='active']::after, .seg > button[data-state='on']::after, .seg > button.on::after, .rail-item.active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: var(--glass-specular);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
 .btn:hover, .cmd-trigger:hover, .island:hover, .tb-bell:hover, .tb-night button:hover, .user-btn:hover { background: var(--glass-fill-strong); }
 
@@ -27,10 +45,14 @@
 .btn.on { background: var(--glass-fill-strong); border-color: var(--glass-edge); color: var(--text-0); }
 /* Plain buttons carry no material until they are hovered or pressed. */
 .btn.ghost { background: transparent; border-color: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.btn.ghost::after { display: none; }
 .btn.ghost:hover { background: var(--glass-fill); border-color: var(--glass-edge); box-shadow: var(--glass-rim), var(--glass-shadow); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+.btn.ghost:hover::after { display: block; }
 
 /* Segmented controls and page tabs: the selected item is a glass capsule that sits inside the track. */
+.seg > button { position: relative; }
 .seg > button[data-state='on'], .seg > button.on { background: var(--glass-fill-strong); box-shadow: var(--glass-rim), 0 0 0 0.5px rgba(0, 0, 0, 0.5); }
+.tab { position: relative; }
 .tab[data-state='active'] { background: var(--glass-fill-strong); box-shadow: var(--glass-rim), var(--glass-shadow); border-radius: 999px; }
 
 /* ---------------------------------------------------------------- navigation */
@@ -46,30 +68,36 @@
 .toast { border-radius: 16px; }
 /* Dialogs are text-heavy, so they take regular glass; the scrim behind them blurs the console as well as dimming it. */
 .modal { background: var(--glass-fill); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-edge); box-shadow: var(--glass-rim), var(--glass-shadow); border-radius: 22px; }
-.modal-back { background: rgba(0, 0, 0, 0.3); -webkit-backdrop-filter: blur(6px) saturate(120%); backdrop-filter: blur(6px) saturate(120%); }
+.modal-back { background: rgba(0, 0, 0, 0.28); -webkit-backdrop-filter: blur(8px) saturate(120%); backdrop-filter: blur(8px) saturate(120%); }
 
 /* ---------------------------------------------------------------- fields */
 /* Single-line fields are capsules, like the controls beside them; text areas keep a rounded rectangle. */
 input.input, select.input { border-radius: 999px; padding: 0 14px; }
 
-/* Clear glass over the map: less tint, so the picture stays the subject. Night keeps the same recipe in red. */
+/* Clear glass over the map: less tint, so the picture stays the subject. */
 .glass, .map-modes, .map-dock, .compass, .scalebar { background: var(--glass-fill-clear); }
 
-/* ---------------------------------------------------------------- shell */
-/* Desktop: the rail and top bar float on a backdrop with colour in it; the content is an inset card beneath them. */
+/* ---------------------------------------------------------------- shell: the bars float over the content */
+/* Desktop: the content is a card that runs under the top bar; the rail floats over the backdrop at the left. */
 @media (min-width: 761px) {
-  .shell { padding: 8px; column-gap: 8px; row-gap: 8px; background: var(--wallpaper); }
-  .main { border: 1px solid var(--line); border-radius: 20px; }
+  .shell { padding: 8px; column-gap: 8px; row-gap: 0; grid-template-rows: minmax(0, 1fr); background: var(--wallpaper); }
+  .rail { grid-row: 1; }
+  .main { grid-row: 1; grid-column: 2; border: 1px solid var(--line); border-radius: 20px; }
+  .topbar { grid-row: 1; grid-column: 2; align-self: start; z-index: 30; height: var(--top-h); margin: 12px 12px 0; }
+  .page { overflow-y: auto; padding-top: calc(var(--top-h) + 24px); }
+  .page-h { border-bottom: 0; background: transparent; }
 }
-/* Phone: the top bar floats over the backdrop; the content is a card whose top corners are round, and the tab bar
-   floats over its foot. */
+/* Phone: the content is full-bleed; the top bar floats over its head and the tab bar floats over its foot. */
 @media (max-width: 760px) {
-  .shell { padding: 8px 8px 0; row-gap: 8px; background: var(--wallpaper); }
-  .main { border: 1px solid var(--line); border-bottom: 0; border-radius: 20px 20px 0 0; }
+  .shell { padding: 0; row-gap: 0; grid-template-rows: minmax(0, 1fr); background: var(--bg-1); }
+  .main { grid-row: 1; grid-column: 1; border: 0; border-radius: 0; }
+  .topbar { grid-row: 1; grid-column: 1; align-self: start; z-index: 30; height: var(--top-h); margin: 8px 8px 0; }
   .rail { border-radius: 33px; }
   .rail-item:hover, .rail-more:hover { background: transparent; }
   .rail-item.active { background: transparent; box-shadow: none; }
+  .rail-item.active::after { display: none; }
   .rail-item.active svg { background: var(--glass-fill-strong); box-shadow: var(--glass-rim); }
+  .page { overflow-y: auto; padding-top: calc(var(--top-h) + 20px); }
 }
 
 /* Reduced transparency: the same shapes on a solid surface. */

@@ -288,7 +288,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .page { height: 100%; display: flex; flex-direction: column; min-height: 0; }
 .page-h { display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-5); min-height: 52px; border-bottom: 1px solid var(--line-2); background: var(--bg-1); flex-wrap: wrap; row-gap: 0; }
 .page-h > .tabs { align-self: stretch; }
-.page-h h1 { font-size: var(--fs-body-lg); font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+.page-h h1 { font-size: var(--fs-title); font-weight: 600; margin: 0; letter-spacing: -0.02em; }
 .page-h .sub { color: var(--text-2); font-size: var(--fs-body); }
 .page-body { flex: 1; min-height: 0; display: grid; }
 .toolbar { display: flex; align-items: center; gap: var(--sp-2); padding: 10px var(--sp-5); border-bottom: 1px solid var(--line); flex-wrap: wrap; }

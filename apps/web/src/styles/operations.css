@@ -7,10 +7,11 @@
 .route-loading { position: absolute; inset: 0; display: grid; place-items: center; }
 
 /* operations layout: map (with its timeline) | inspector, split by a resizable divider */
-.ops { position: absolute; inset: 0; display: flex; }
+/* The top bar floats over the picture, so the controls start below it; the map itself runs under the glass. */
+.ops { position: absolute; inset: 0; display: flex; --ops-top: calc(var(--top-h) + 12px); }
 .ops-split { flex: 1; }
 .ops-world { position: relative; flex: 1; min-width: 0; min-height: 0; overflow: hidden; background: var(--bg-0); }
-.ops-right { height: 100%; background: var(--bg-chrome); display: flex; flex-direction: column; min-height: 0; }
+.ops-right { height: 100%; background: var(--bg-chrome); display: flex; flex-direction: column; min-height: 0; padding-top: calc(var(--top-h) + 12px); }
 .ops-bottom { flex: none; border-top: 1px solid var(--line); background: var(--bg-chrome); min-width: 0; height: var(--timeline-h); transition: height var(--t-med) var(--ease-out); }
 .ops-bottom:has(.timeline.compact) { height: 41px; }
 .world-canvas { position: absolute; inset: 0; }
@@ -106,7 +107,7 @@
 }
 
 /* map furniture */
-.compass { position: absolute; top: 12px; right: 12px; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 0; padding: 4px 4px 3px; border-radius: 50% 50% var(--radius-lg) var(--radius-lg); cursor: pointer; color: var(--text-1); font-size: var(--fs-micro); transition: border-color var(--t-fast); }
+.compass { position: absolute; top: var(--ops-top); right: 12px; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 0; padding: 4px 4px 3px; border-radius: 50% 50% var(--radius-lg) var(--radius-lg); cursor: pointer; color: var(--text-1); font-size: var(--fs-micro); transition: border-color var(--t-fast); }
 .compass:hover { border-color: var(--line-3); }
 .compass svg { transition: transform 120ms linear; display: block; }
 .scalebar { position: absolute; left: 76px; bottom: 16px; z-index: 5; display: flex; align-items: center; gap: 8px; color: var(--text-1); font-size: var(--fs-micro); pointer-events: none; text-shadow: 0 1px 2px #000; }
