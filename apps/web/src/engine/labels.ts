@@ -15,13 +15,15 @@ export interface LabelSpec {
 export class LabelLayer {
   private els = new Map<string, HTMLDivElement>();
   private v = new THREE.Vector3();
+  private chrome: Rect[] = [];
+  private chromeAt = -Infinity;
 
   constructor(private readonly root: HTMLElement) {}
 
   update(specs: LabelSpec[], camera: THREE.Camera, w: number, h: number, max = 40): void {
     const shown = new Set<string>();
     const sorted = [...specs].sort((a, b) => b.priority - a.priority).slice(0, max);
-    const occupied: Rect[] = [];
+    const occupied: Rect[] = [...this.chromeRects()];
     for (const s of sorted) {
       this.v.copy(s.position).project(camera);
       if (this.v.z > 1 || this.v.z < -1 || Math.abs(this.v.x) > 1.05 || Math.abs(this.v.y) > 1.05) continue;
@@ -66,6 +68,23 @@ export class LabelLayer {
   clear(): void {
     for (const el of this.els.values()) el.remove();
     this.els.clear();
+  }
+
+  /**
+   * Floating map controls (marked `data-map-chrome`) that no label may cover; on a phone the layers dock and
+   * compass sit over the map's left and right edges. Read at most twice a second: a layout read every frame
+   * costs more than the controls moving within that time.
+   */
+  private chromeRects(): Rect[] {
+    const now = performance.now();
+    if (now - this.chromeAt < 500) return this.chrome;
+    this.chromeAt = now;
+    const base = this.root.getBoundingClientRect();
+    this.chrome = [...(this.root.parentElement ?? document).querySelectorAll<HTMLElement>('[data-map-chrome]')].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { x0: r.left - base.left, y0: r.top - base.top, x1: r.right - base.left, y1: r.bottom - base.top };
+    });
+    return this.chrome;
   }
 }
 

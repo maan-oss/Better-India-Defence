@@ -206,8 +206,11 @@ export function Timeline() {
       g.fillStyle = P.text3;
       g.font = '10px "Geist Mono Variable"';
       const span = v.to - v.from;
-      const steps = [60_000, 300_000, 600_000, 900_000, 1800_000, 3600_000, 7200_000];
-      const step = steps.find((s) => (s / span) * W > 70) ?? 7200_000;
+      // Finest tick that still leaves room for its label. The list runs to a day: on a phone the visible span
+      // outgrows two-hour ticks, and the fallback used to pack the labels into one another.
+      const steps = [60_000, 300_000, 600_000, 900_000, 1800_000, 3600_000, 7200_000, 10800_000, 21600_000, 43200_000, 86400_000];
+      const need = g.measureText('00:00').width + 18;
+      const step = steps.find((s) => (s / span) * W > need) ?? steps[steps.length - 1]!;
       for (let tt = Math.ceil(v.from / step) * step; tt < v.to; tt += step) {
         const x = xOf(tt, W, v);
         g.fillRect(x, H - 16, 1, 4);

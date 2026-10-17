@@ -55,7 +55,7 @@ export function MapHud({ engineRef, hostRef, facility }: { engineRef: RefObject<
 
   return (
     <>
-      <button className="compass glass" onClick={() => engineRef.current?.northUp()} title="Click for north-up" aria-label={`Heading ${Math.round(view.headingDeg)} degrees; click for north up`}>
+      <button className="compass glass" data-map-chrome onClick={() => engineRef.current?.northUp()} title="Click for north-up" aria-label={`Heading ${Math.round(view.headingDeg)} degrees; click for north up`}>
         <svg viewBox="-50 -50 100 100" width="64" height="64" style={{ transform: `rotate(${-view.headingDeg}deg)` }}>
           <circle r="44" fill="none" stroke="var(--line-3)" />
           {Array.from({ length: 36 }, (_, i) => (
@@ -69,7 +69,7 @@ export function MapHud({ engineRef, hostRef, facility }: { engineRef: RefObject<
         </svg>
         <span className="mono">{String(Math.round(view.headingDeg) % 360).padStart(3, '0')}°</span>
       </button>
-      <div className="scalebar" aria-label={`Scale ${metres} metres`}>
+      <div className="scalebar" data-map-chrome aria-label={`Scale ${metres} metres`}>
         <div className="sb-bar" style={{ width: px }}>
           <i />
           <i />

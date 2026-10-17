@@ -37,7 +37,7 @@ export function ModeControl() {
     if (m === 'HISTORY' && time.mode === 'live') time.seek(time.currentLiveEdge() - 15 * 60_000);
   };
   return (
-    <div className="map-modes glass-2" title={MODE_HELP[mode]}>
+    <div className="map-modes glass-2" data-map-chrome title={MODE_HELP[mode]}>
       <SegmentedControl label="Picture mode" value={mode} onValueChange={pick} options={MODES.map((m) => ({ value: m, label: MODE_LABEL[m] }))} />
     </div>
   );
@@ -69,7 +69,7 @@ export function ToolDock({ panelOpen, onTogglePanel, onFit }: { panelOpen: boole
   return (
     <P.Root open={sheet !== null} onOpenChange={(o) => !o && setSheet(null)}>
       <P.Anchor asChild>
-        <div className="map-dock">
+        <div className="map-dock" data-map-chrome>
           <FloatingButtonGroup
             label="Map tools"
             orientation="vertical"

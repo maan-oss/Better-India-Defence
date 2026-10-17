@@ -324,7 +324,7 @@ function ThreatBoard() {
         </span>
       </div>
       <div className="scroll" style={{ maxHeight: 360 }}>
-        <table className="table">
+        <table className="table threat-table">
           <thead>
             <tr>
               <th>Level</th>
@@ -385,7 +385,7 @@ function TeamsPanel({ version }: { version: number }) {
           </button>
         )}
       </div>
-      <table className="table">
+      <table className="table teams-table">
         <thead>
           <tr>
             <th>Callsign</th>

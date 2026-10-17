@@ -96,7 +96,8 @@
 .tb-err { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding: 6px 8px 6px 14px; font-size: var(--fs-body); color: var(--st-caution-text); background: var(--st-caution-tint); border-bottom: 1px solid var(--st-caution-line); }
 
 /* Watch activity (Arc heatmap + bar chart) */
-.cmd-activity { grid-column: 1 / -1; }
+/* The heatmap's sticky weekday labels paint this surface; it must match the card or they show as a grey box. */
+.cmd-activity { grid-column: 1 / -1; --heatmap-surface: var(--bg-1); }
 .cmd-activity-body { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 24px; padding: 16px 20px 20px; align-items: start; }
 @media (max-width: 1500px) { .cmd-activity-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .cmd-activity-body > :first-child { grid-column: 1 / -1; } }
 @media (max-width: 900px) { .cmd-activity-body { grid-template-columns: 1fr; } }
@@ -109,5 +110,32 @@
 .link-btn:hover { text-decoration-color: var(--text-1); }
 .handover-form { display: grid; grid-template-columns: minmax(260px, 0.9fr) 1.4fr; gap: 24px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); align-items: start; }
 @media (max-width: 900px) { .handover-form { grid-template-columns: 1fr; } }
+
+/* Phone: tables become stacked rows (the desktop columns cannot fit 375 px), and the scope fills its card. */
+@media (max-width: 760px) {
+  .table.threat-table thead, .table.teams-table thead { display: none; }
+  .table.threat-table, .table.threat-table tbody, .table.teams-table, .table.teams-table tbody { display: block; width: 100%; }
+  .table.threat-table tr, .table.teams-table tr { display: grid; column-gap: var(--sp-3); row-gap: 2px; align-items: center; padding: var(--sp-2) var(--sp-4); border-bottom: 1px solid var(--line); }
+  .table.threat-table tr { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .table.teams-table tr { grid-template-columns: minmax(0, 1fr) auto; }
+  .table.threat-table td, .table.teams-table td { padding: 0; border: 0; min-width: 0; }
+  /* Threat: level, then track over the asset it threatens, then range. Reach, closing, CPA and grid stay on desktop. */
+  .table.threat-table td:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; }
+  .table.threat-table td:nth-child(2) { grid-column: 2; grid-row: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .table.threat-table td:nth-child(3) { grid-column: 2; grid-row: 2; font-size: var(--fs-caption); color: var(--text-2); }
+  .table.threat-table td:nth-child(4) { grid-column: 3; grid-row: 1 / span 2; justify-self: end; }
+  .table.threat-table td:nth-child(n + 5), .table.teams-table td:nth-child(5) { display: none; }
+  /* Teams: callsign and status on the first row; position and type on the second. */
+  .table.teams-table td:nth-child(1) { grid-column: 1; grid-row: 1; }
+  .table.teams-table td:nth-child(3) { grid-column: 2; grid-row: 1; justify-self: end; }
+  .table.teams-table td:nth-child(4) { grid-column: 1; grid-row: 2; font-size: var(--fs-caption); color: var(--text-2); }
+  .table.teams-table td:nth-child(2) { grid-column: 2; grid-row: 2; justify-self: end; font-size: var(--fs-caption); color: var(--text-2); }
+  /* The radar is drawn to the smaller side of its box, so a box taller than the phone is empty above and below. Legend goes above the picture. */
+  .scope-wrap { height: 400px; display: flex; flex-direction: column; }
+  .scope-wrap canvas { top: 52px; height: calc(100% - 52px); }
+  .cmd-threats .panel-h { flex-wrap: wrap; row-gap: 2px; min-height: 0; padding-top: var(--sp-2); padding-bottom: var(--sp-2); }
+  .cmd-threats .panel-h .muted { flex-basis: 100%; }
+  .scope-legend { position: relative; left: auto; bottom: auto; flex-direction: row; flex-wrap: wrap; gap: 4px 14px; padding: 12px 16px 0; }
+}
 .duty-entry { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .duty-entry > label { font-size: var(--fs-body-lg); font-weight: 500; color: var(--text-0); }

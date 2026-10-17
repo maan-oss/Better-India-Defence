@@ -202,6 +202,23 @@ test('night (red-light) display can be switched from the user menu', async ({ pa
   await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'night');
 });
 
+test('phone command: the team table fits its card and the page does not scroll sideways', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const page = await context.newPage();
+  const errors = await signIn(page, 'analyst');
+  await page.getByRole('link', { name: 'Command' }).click();
+  await expect(page.locator('.teams-table tbody tr').first()).toBeVisible();
+  const fit = await page.evaluate(() => {
+    const table = document.querySelector('.teams-table') as HTMLElement;
+    const card = table.closest('section') as HTMLElement;
+    return { table: table.getBoundingClientRect().right, card: card.getBoundingClientRect().right, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+  });
+  expect(fit.table).toBeLessThanOrEqual(fit.card + 1);
+  expect(fit.overflow).toBeLessThanOrEqual(0);
+  expect(errors).toEqual([]);
+  await context.close();
+});
+
 test('inbox: opens from the bell, closes on Escape, and the alert live region is always mounted', async ({ page }) => {
   const errors = await signIn(page, 'analyst');
   await expect(page.locator('.toasts')).toHaveAttribute('aria-live', 'polite');
