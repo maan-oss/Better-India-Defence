@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
-import { getTerrainMode, FACILITY, passwordProblems, permissionsFor, ROLE_DESCRIPTIONS, type Role } from '@strata/domain';
+import { CLASSIFICATIONS, ORGANISATION_PATTERN, getTerrainMode, FACILITY, passwordProblems, permissionsFor, ROLE_DESCRIPTIONS, type Role } from '@strata/domain';
 import type { Platform } from '../platform.ts';
 import type { SignIn } from '../auth/authService.ts';
 import { SESSION_COOKIE, audit, isService, parse, requirePerm } from '../http/guards.ts';
@@ -230,13 +230,13 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
   app.get('/api/admin/users', { preHandler: requirePerm('admin.users') }, async () => p.auth.list());
   app.get('/api/admin/roles', { preHandler: requirePerm('world.view') }, async () => (['viewer', 'operator', 'analyst', 'administrator'] as Role[]).map((r) => ({ role: r, description: ROLE_DESCRIPTIONS[r], permissions: permissionsFor(r) })));
   app.post('/api/admin/users', { preHandler: requirePerm('admin.users') }, async (req, reply) => {
-    const b = parse(z.object({ username: z.string().regex(/^[a-z0-9._-]{3,32}$/), displayName: z.string().min(1).max(64), role: z.enum(['viewer', 'operator', 'analyst', 'administrator']), password: z.string().min(12).max(256) }), req.body, reply);
+    const b = parse(z.object({ username: z.string().regex(/^[a-z0-9._-]{3,32}$/), displayName: z.string().min(1).max(64), role: z.enum(['viewer', 'operator', 'analyst', 'administrator']), password: z.string().min(12).max(256), clearance: z.enum(CLASSIFICATIONS).optional(), organisation: z.string().regex(ORGANISATION_PATTERN).optional() }), req.body, reply);
     if (!b) return;
     const problems = passwordProblems(b.password, b.username);
     if (problems.length) return reply.code(400).send({ error: 'password does not meet the password policy', problems });
     try {
-      const u = await p.auth.create(b.username, b.displayName, b.role, b.password);
-      await audit(p, req, 'user_created', u.username, { role: u.role });
+      const u = await p.auth.create(b.username, b.displayName, b.role, b.password, { clearance: b.clearance, organisation: b.organisation });
+      await audit(p, req, 'user_created', u.username, { role: u.role, clearance: u.clearance, organisation: u.organisation });
       return reply.code(201).send(u);
     } catch {
       return reply.code(409).send({ error: 'username already exists' });
@@ -244,7 +244,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
   });
   app.patch('/api/admin/users/:id', { preHandler: requirePerm('admin.users') }, async (req, reply) => {
     const { id } = req.params as { id: string };
-    const b = parse(z.object({ role: z.enum(['viewer', 'operator', 'analyst', 'administrator']).optional(), disabled: z.boolean().optional(), displayName: z.string().min(1).max(64).optional(), password: z.string().min(12).max(256).optional() }), req.body, reply);
+    const b = parse(z.object({ role: z.enum(['viewer', 'operator', 'analyst', 'administrator']).optional(), disabled: z.boolean().optional(), displayName: z.string().min(1).max(64).optional(), password: z.string().min(12).max(256).optional(), clearance: z.enum(CLASSIFICATIONS).optional(), organisation: z.string().regex(ORGANISATION_PATTERN).optional() }), req.body, reply);
     if (!b) return;
     if (id === req.user!.id && (b.disabled || (b.role && b.role !== 'administrator'))) return reply.code(400).send({ error: 'you cannot demote or disable your own account' });
     if (b.password) {
@@ -254,7 +254,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     }
     const u = await p.auth.update(id, b);
     if (!u) return reply.code(404).send({ error: 'not found' });
-    await audit(p, req, 'user_updated', u.username, { role: b.role, disabled: b.disabled, passwordChanged: Boolean(b.password) });
+    await audit(p, req, 'user_updated', u.username, { role: b.role, disabled: b.disabled, passwordChanged: Boolean(b.password), clearance: b.clearance, organisation: b.organisation });
     return u;
   });
   // A lost second-factor device: the administrator removes the factor, and the account enrols a new one at its next sign-in.

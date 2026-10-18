@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ASSET_CATEGORIES, DEPENDENCY_KINDS, SETTABLE_STATUSES } from '../assets/model.ts';
+import { CLASSIFICATIONS, ORGANISATION_PATTERN } from '../policy/access.ts';
 
 /** Request bodies for the asset register. Every write is validated here before the service sees it. */
 const text = (max: number) => z.string().trim().min(1).max(max);
@@ -21,6 +22,12 @@ export const AssetInput = z.object({
   commissionedAt: epoch,
   warrantyUntil: epoch,
   notes: optionalText(1000),
+  /** Defaults to UNCLASSIFIED. The person creating or changing the record must hold this clearance. */
+  classification: z.enum(CLASSIFICATIONS).optional(),
+  /** The owning organisation. Only an administrator may name another organisation as owner. */
+  owner: z.string().trim().regex(ORGANISATION_PATTERN, 'a lower-case organisation name').nullish(),
+  /** Organisations that may view the record. Sharing never grants change. */
+  sharedWith: z.array(z.string().trim().regex(ORGANISATION_PATTERN, 'a lower-case organisation name')).max(8).optional(),
 });
 export type AssetInput = z.infer<typeof AssetInput>;
 

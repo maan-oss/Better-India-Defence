@@ -1,5 +1,5 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { ROLE_ORDER, base32Encode, otpauthUri, passwordProblems, verifyTotp, type Role, type UserRecord } from '@strata/domain';
+import { ROLE_ORDER, base32Encode, otpauthUri, passwordProblems, verifyTotp, type Classification, type Role, type UserRecord } from '@strata/domain';
 import type { Db } from '../db/client.ts';
 import { hashPassword, verifyPassword } from './passwords.ts';
 import { openSecret, sealSecret } from './secretBox.ts';
@@ -75,25 +75,35 @@ export class AuthService {
     return (await this.db.query<{ n: number }>('SELECT count(*)::int AS n FROM users')).rows[0]!.n;
   }
 
-  async create(username: string, displayName: string, role: Role, password: string): Promise<UserRecord> {
+  async create(username: string, displayName: string, role: Role, password: string, attributes: { clearance?: Classification; organisation?: string } = {}): Promise<UserRecord> {
     if (!ROLE_ORDER.includes(role)) throw new Error('invalid role');
     const id = `usr-${randomUUID().slice(0, 8)}`;
     const now = Date.now();
-    await this.db.query('INSERT INTO users (id, username, display_name, role, password_hash, disabled, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,false,$6,$6)', [id, username, displayName, role, await hashPassword(password), now]);
-    return { id, username, displayName, role, disabled: false };
+    const clearance = attributes.clearance ?? 'UNCLASSIFIED';
+    const organisation = attributes.organisation ?? 'site';
+    await this.db.query(
+      'INSERT INTO users (id, username, display_name, role, password_hash, disabled, created_at, updated_at, clearance, organisation) VALUES ($1,$2,$3,$4,$5,false,$6,$6,$7,$8)',
+      [id, username, displayName, role, await hashPassword(password), now, clearance, organisation],
+    );
+    return { id, username, displayName, role, disabled: false, clearance, organisation };
   }
 
-  async update(id: string, patch: { role?: Role; disabled?: boolean; displayName?: string; password?: string }): Promise<UserRecord | null> {
-    const cur = (await this.db.query<{ id: string; username: string; display_name: string; role: Role; disabled: boolean }>('SELECT * FROM users WHERE id = $1', [id])).rows[0];
+  async update(id: string, patch: { role?: Role; disabled?: boolean; displayName?: string; password?: string; clearance?: Classification; organisation?: string }): Promise<UserRecord | null> {
+    const cur = (await this.db.query<{ id: string; username: string; display_name: string; role: Role; disabled: boolean; clearance: Classification; organisation: string }>('SELECT * FROM users WHERE id = $1', [id])).rows[0];
     if (!cur) return null;
     const hash = patch.password ? await hashPassword(patch.password) : null;
-    await this.db.query('UPDATE users SET role=$2, disabled=$3, display_name=$4, password_hash=COALESCE($5, password_hash), updated_at=$6 WHERE id=$1', [id, patch.role ?? cur.role, patch.disabled ?? cur.disabled, patch.displayName ?? cur.display_name, hash, Date.now()]);
-    if (patch.disabled || patch.role || patch.password) await this.db.query('DELETE FROM sessions WHERE user_id = $1', [id]);
-    return { id, username: cur.username, displayName: patch.displayName ?? cur.display_name, role: patch.role ?? cur.role, disabled: patch.disabled ?? cur.disabled };
+    const clearance = patch.clearance ?? cur.clearance;
+    const organisation = patch.organisation ?? cur.organisation;
+    await this.db.query(
+      'UPDATE users SET role=$2, disabled=$3, display_name=$4, password_hash=COALESCE($5, password_hash), updated_at=$6, clearance=$7, organisation=$8 WHERE id=$1',
+      [id, patch.role ?? cur.role, patch.disabled ?? cur.disabled, patch.displayName ?? cur.display_name, hash, Date.now(), clearance, organisation],
+    );
+    if (patch.disabled || patch.role || patch.password || patch.clearance || patch.organisation) await this.db.query('DELETE FROM sessions WHERE user_id = $1', [id]);
+    return { id, username: cur.username, displayName: patch.displayName ?? cur.display_name, role: patch.role ?? cur.role, disabled: patch.disabled ?? cur.disabled, clearance, organisation };
   }
 
   async list(): Promise<UserRecord[]> {
-    return (await this.db.query<{ id: string; username: string; display_name: string; role: Role; disabled: boolean }>('SELECT id, username, display_name, role, disabled FROM users ORDER BY username')).rows.map((r) => ({ id: r.id, username: r.username, displayName: r.display_name, role: r.role, disabled: r.disabled }));
+    return (await this.db.query<{ id: string; username: string; display_name: string; role: Role; disabled: boolean; clearance: Classification; organisation: string }>('SELECT id, username, display_name, role, disabled, clearance, organisation FROM users ORDER BY username')).rows.map((r) => ({ id: r.id, username: r.username, displayName: r.display_name, role: r.role, disabled: r.disabled, clearance: r.clearance, organisation: r.organisation }));
   }
 
   /** Forgets the failures for a username, so it can sign in again at once (an administrator's action, audited by the route). */
@@ -232,13 +242,13 @@ export class AuthService {
     return this.openSession(id, input.username, input.displayName, input.role, input.ip, now, input.providerMfa || !this.enrolmentPending(input.role));
   }
 
-  async validate(token: string): Promise<(UserRecord & { mfaPending: boolean }) | null> {
-    const r = (await this.db.query<{ id: string; username: string; display_name: string; role: Role; disabled: boolean; expires_at: number; mfa_verified: boolean }>(
-      'SELECT u.id, u.username, u.display_name, u.role, u.disabled, s.expires_at, s.mfa_verified FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = $1',
+  async validate(token: string): Promise<(UserRecord & { mfaPending: boolean; clearance: Classification; organisation: string }) | null> {
+    const r = (await this.db.query<{ id: string; username: string; display_name: string; role: Role; disabled: boolean; expires_at: number; mfa_verified: boolean; clearance: Classification; organisation: string }>(
+      'SELECT u.id, u.username, u.display_name, u.role, u.disabled, s.expires_at, s.mfa_verified, u.clearance, u.organisation FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = $1',
       [sha(token)],
     )).rows[0];
     if (!r || r.disabled || r.expires_at < Date.now()) return null;
-    return { id: r.id, username: r.username, displayName: r.display_name, role: r.role, disabled: false, mfaPending: !r.mfa_verified };
+    return { id: r.id, username: r.username, displayName: r.display_name, role: r.role, disabled: false, mfaPending: !r.mfa_verified, clearance: r.clearance, organisation: r.organisation };
   }
 
   async logout(token: string): Promise<void> {

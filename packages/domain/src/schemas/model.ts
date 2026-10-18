@@ -190,6 +190,10 @@ export interface UserRecord {
   displayName: string;
   role: Role;
   disabled: boolean;
+  /** Highest classification the person may see (see policy/access.ts). */
+  clearance?: 'UNCLASSIFIED' | 'RESTRICTED' | 'CONFIDENTIAL' | 'SECRET';
+  /** The organisation the person belongs to. */
+  organisation?: string;
 }
 
 export interface SensorStatusRecord {

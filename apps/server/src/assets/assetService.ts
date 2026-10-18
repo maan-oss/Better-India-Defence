@@ -35,6 +35,9 @@ interface AssetRow {
   id: string;
   tag: string;
   name: string;
+  classification: string;
+  owner: string;
+  shared_with: string[];
   category: string;
   status: string;
   criticality: number;
@@ -135,11 +138,11 @@ export class AssetService {
     const t = this.now();
     await this.db.transaction(async (q) => {
       await q.query(
-        `INSERT INTO assets (id, tag, name, category, status, criticality, zone_id, manufacturer, model, serial, commissioned_at, warranty_until, notes, source, created_by, updated_by, updated_at)
-         VALUES ($1,$2,$3,$4,'in_service',$5,$6,$7,$8,$9,$10,$11,$12,'operator',$13,$13,$14)`,
-        [id, input.tag, input.name, input.category, input.criticality, input.zoneId ?? null, input.manufacturer ?? null, input.model ?? null, input.serial ?? null, input.commissionedAt ?? null, input.warrantyUntil ?? null, input.notes ?? null, actor, t],
+        `INSERT INTO assets (id, tag, name, category, status, criticality, zone_id, manufacturer, model, serial, commissioned_at, warranty_until, notes, source, created_by, updated_by, updated_at, classification, owner, shared_with)
+         VALUES ($1,$2,$3,$4,'in_service',$5,$6,$7,$8,$9,$10,$11,$12,'operator',$13,$13,$14,$15,$16,$17)`,
+        [id, input.tag, input.name, input.category, input.criticality, input.zoneId ?? null, input.manufacturer ?? null, input.model ?? null, input.serial ?? null, input.commissionedAt ?? null, input.warrantyUntil ?? null, input.notes ?? null, actor, t, input.classification ?? 'UNCLASSIFIED', input.owner ?? 'site', input.sharedWith ?? []],
       );
-      await event(q, id, 'created', { tag: input.tag, name: input.name, category: input.category, criticality: input.criticality }, actor, t);
+      await event(q, id, 'created', { tag: input.tag, name: input.name, category: input.category, criticality: input.criticality, classification: input.classification ?? 'UNCLASSIFIED', owner: input.owner ?? 'site' }, actor, t);
     });
     return this.detail(id);
   }
@@ -158,6 +161,9 @@ export class AssetService {
       ['commissionedAt', 'commissioned_at', row.commissioned_at],
       ['warrantyUntil', 'warranty_until', row.warranty_until],
       ['notes', 'notes', row.notes],
+      ['classification', 'classification', row.classification],
+      ['owner', 'owner', row.owner],
+      ['sharedWith', 'shared_with', row.shared_with],
     ];
     const changed: Record<string, { from: unknown; to: unknown }> = {};
     const sets: string[] = [];
@@ -165,7 +171,7 @@ export class AssetService {
     for (const [key, column, current] of fields) {
       if (!(key in patch) || patch[key] === undefined) continue;
       const next = patch[key] ?? null;
-      if ((current ?? null) === next) continue;
+      if (JSON.stringify(current ?? null) === JSON.stringify(next)) continue;
       changed[key] = { from: current ?? null, to: next };
       values.push(next);
       sets.push(`${column} = $${values.length}`);
@@ -338,6 +344,9 @@ export class AssetService {
       commissionedAt: r.commissioned_at === null ? null : Number(r.commissioned_at),
       warrantyUntil: r.warranty_until === null ? null : Number(r.warranty_until),
       notes: r.notes,
+      classification: r.classification as AssetView['classification'],
+      owner: r.owner,
+      sharedWith: [...(r.shared_with ?? [])],
       source: r.source === 'demo' ? 'demo' : 'operator',
       updatedAt: Number(r.updated_at),
       updatedBy: r.updated_by,

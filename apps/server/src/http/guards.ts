@@ -1,13 +1,13 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { timingSafeEqual } from 'node:crypto';
-import { can, type Permission, type UserRecord } from '@strata/domain';
+import { can, type Classification, type Permission, type UserRecord } from '@strata/domain';
 import type { z } from 'zod';
 import type { Platform } from '../platform.ts';
 
 declare module 'fastify' {
   interface FastifyRequest {
     /** The signed-in account; `mfaPending` while a privileged account still has to set up its second factor. */
-    user: (UserRecord & { mfaPending: boolean }) | null;
+    user: (UserRecord & { mfaPending: boolean; clearance: Classification; organisation: string }) | null;
     sessionToken: string | null;
     /** The style nonce of the application shell served for this request, if one was served. */
     cspNonce: string | null;

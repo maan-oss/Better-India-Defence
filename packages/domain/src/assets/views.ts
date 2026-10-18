@@ -1,3 +1,4 @@
+import type { Classification } from '../policy/access.ts';
 /**
  * Response shapes of the asset register API. Defined once here so the server and the web app agree on them; the
  * server builds these from the database, the web app reads them.
@@ -16,6 +17,9 @@ export interface AssetView {
   id: string;
   tag: string;
   name: string;
+  classification: Classification;
+  owner: string;
+  sharedWith: string[];
   category: AssetCategory;
   status: AssetStatus;
   criticality: number;
