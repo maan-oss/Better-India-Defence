@@ -46,10 +46,11 @@ async function authorised(req: FastifyRequest, reply: FastifyReply, a: Platform[
   return asset;
 }
 
-/** The register's views, keyed by id, for the ones the person may see. Used to filter relations without revealing others. */
-async function visibleById(req: FastifyRequest, a: Platform['assets']): Promise<Map<string, AssetView>> {
+/** The ids among `ids` that the person may see. Reads only the access fields of those records. */
+async function visibleSet(req: FastifyRequest, a: Platform['assets'], ids: string[]): Promise<Set<string>> {
   const s = subjectOf(req);
-  return new Map((await a.list()).filter((v) => access(s, v, 'view').allowed).map((v) => [v.id, v]));
+  const rows = await a.accessRows([...new Set(ids)]);
+  return new Set(rows.filter((r) => access(s, { classification: r.classification as AssetView['classification'], owner: r.owner, sharedWith: r.shared_with }, 'view').allowed).map((r) => r.id));
 }
 
 /** The asset id a route refers to (by id or tag), or null after a 400 or 404 has been sent. */
@@ -92,7 +93,7 @@ export function registerAssets(app: FastifyInstance, p: Platform): void {
     if (!(await authorised(req, reply, a, id, 'view'))) return;
     const d = await a.detail(id);
     // Relations the person may not see are withheld and counted, not named.
-    const visible = await visibleById(req, a);
+    const visible = await visibleSet(req, a, [...d.upstream.map((u) => u.id), ...d.dependents.map((u) => u.id)]);
     const upstream = d.upstream.filter((u) => visible.has(u.id));
     const dependents = d.dependents.filter((u) => visible.has(u.id));
     return { ...d, upstream, dependents, withheld: { upstream: d.upstream.length - upstream.length, dependents: d.dependents.length - dependents.length } };
@@ -106,7 +107,7 @@ export function registerAssets(app: FastifyInstance, p: Platform): void {
     if (!q) return;
     if (!(await authorised(req, reply, a, id, 'view'))) return;
     const impact = await a.impact(id, q.status);
-    const visible = await visibleById(req, a);
+    const visible = await visibleSet(req, a, impact.rows.map((r) => r.id));
     const rows = impact.rows.filter((r) => visible.has(r.id));
     return { ...impact, rows, withheld: impact.rows.length - rows.length };
   });
@@ -186,7 +187,7 @@ export function registerAssets(app: FastifyInstance, p: Platform): void {
     if (!b) return;
     if (!(await authorised(req, reply, a, id, 'change'))) return;
     // A dependency on a record the person cannot see is refused as an unknown asset, the same as a missing one.
-    const visible = await visibleById(req, a);
+    const visible = await visibleSet(req, a, b.dependsOn.map((d) => d.id));
     if (b.dependsOn.some((d) => !visible.has(d.id))) return reply.code(400).send({ error: 'a dependency names an unknown asset' });
     return run(reply, async () => {
       const d = await a.setDependencies(id, b.dependsOn, req.user!.username);
@@ -269,8 +270,9 @@ export function registerAssets(app: FastifyInstance, p: Platform): void {
 
   /** Reorder requests the person may see: those for records they can see. */
   app.get('/api/reorders', { preHandler: requirePerm('assets.view') }, async (req) => {
-    const visible = await visibleById(req, a);
-    return (await a.reorders()).filter((r) => visible.has(r.assetId));
+    const reorders = await a.reorders();
+    const visible = await visibleSet(req, a, reorders.map((r) => r.assetId));
+    return reorders.filter((r) => visible.has(r.assetId));
   });
 
   /** Approval or rejection. Analyst rights, and never by the person who asked: the request is then refused. */

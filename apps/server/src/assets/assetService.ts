@@ -110,8 +110,40 @@ export class AssetService {
     return id;
   }
 
+  /**
+   * What a detail needs: the asset, everything that depends on it, and everything those depend on, since availability
+   * follows the whole chain upstream. Loaded by the closure, so a detail does not read the whole register.
+   */
+  private async neighbourhood(id: string): Promise<{ assets: AssetRow[]; edges: DependencyEdge[]; plans: PlanRow[] }> {
+    const ids = (
+      await this.db.query<{ id: string }>(
+        `WITH RECURSIVE down(id) AS (
+           SELECT $1::text
+           UNION
+           SELECT d.asset_id FROM asset_dependencies d JOIN down ON d.depends_on_id = down.id
+         ), reach(id) AS (
+           SELECT id FROM down
+           UNION
+           SELECT d.depends_on_id FROM asset_dependencies d JOIN reach ON d.asset_id = reach.id
+         )
+         SELECT id FROM reach`,
+        [id],
+      )
+    ).rows.map((r) => r.id);
+    const [assets, edges, plans] = await Promise.all([
+      this.db.query<AssetRow>('SELECT * FROM assets WHERE id = ANY($1) ORDER BY criticality DESC, tag', [ids]),
+      this.db.query<{ asset_id: string; depends_on_id: string; kind: DependencyKind }>('SELECT asset_id, depends_on_id, kind FROM asset_dependencies WHERE asset_id = ANY($1)', [ids]),
+      this.db.query<PlanRow>('SELECT * FROM maintenance_plans WHERE asset_id = ANY($1) ORDER BY created_at, id', [ids]),
+    ]);
+    return {
+      assets: assets.rows,
+      edges: edges.rows.map((e) => ({ assetId: e.asset_id, dependsOnId: e.depends_on_id, kind: e.kind })),
+      plans: plans.rows,
+    };
+  }
+
   async detail(id: string): Promise<AssetDetail> {
-    const s = await this.snapshot();
+    const s = await this.neighbourhood(id);
     const views = this.build(s.assets, s.edges, s.plans);
     const byId = new Map(views.map((v) => [v.id, v]));
     const asset = byId.get(id);
@@ -159,6 +191,12 @@ export class AssetService {
     const t = this.now();
     await this.db.transaction((q) => this.insertAsset(q, id, input, actor, t));
     return this.detail(id);
+  }
+
+  /** The classification, owner and sharing of the given records: what the access rule needs, without building views. */
+  async accessRows(ids: string[]): Promise<{ id: string; classification: string; owner: string; shared_with: string[] }[]> {
+    if (ids.length === 0) return [];
+    return (await this.db.query<{ id: string; classification: string; owner: string; shared_with: string[] }>('SELECT id, classification, owner, shared_with FROM assets WHERE id = ANY($1)', [ids])).rows;
   }
 
   /** The tags already in the register: an import checks its rows against these before anything is written. */
