@@ -14,6 +14,9 @@ export const PERMISSIONS = {
   // Verifying a report and reviewing a resolved incident are analyst acts: someone other than the person who reported or resolved it.
   'reports.verify': 'analyst',
   'reports.review': 'analyst',
+  'documents.view': 'viewer',
+  'documents.upload': 'operator',
+  'documents.review': 'analyst',
   'copilot.query': 'viewer',
   'reconstruction.run': 'analyst',
   'handoff.search': 'analyst',

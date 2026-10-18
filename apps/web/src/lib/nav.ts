@@ -12,6 +12,7 @@ export const NAV: { group: string; items: NavItem[] }[] = [
       { to: '/cameras', label: 'Camera wall', icon: 'Camera', perm: 'media.view', keys: 'G W', short: 'Cameras' },
       { to: '/incidents', label: 'Incidents', icon: 'Incidents', keys: 'G I' },
       { to: '/reports', label: 'Incident reports', icon: 'Incidents', keys: 'G R' },
+      { to: '/documents', label: 'Documents', icon: 'Incidents', keys: 'G D' },
       { to: '/field', label: 'Field view', icon: 'Field', keys: 'G F' },
     ],
   },
