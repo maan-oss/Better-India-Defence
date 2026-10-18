@@ -37,6 +37,11 @@ export const PERMISSIONS = {
   'ops.dispatch': 'operator',
   'ops.readiness': 'analyst',
   'ops.log': 'operator',
+  // Asset register: viewing, recording maintenance and status changes (operator); the dependency graph and
+  // retirement, which change what the impact analysis reports (analyst).
+  'assets.view': 'viewer',
+  'assets.edit': 'operator',
+  'assets.graph': 'analyst',
 } as const satisfies Record<string, Role>;
 
 export type Permission = keyof typeof PERMISSIONS;
@@ -53,7 +58,7 @@ export function permissionsFor(role: Role): Permission[] {
 
 export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   viewer: 'Read-only access to the world, timeline, evidence and alerts.',
-  operator: 'Viewer + acknowledge/assign alerts, dispatch response teams, duty log, create incidents, upload and enhance evidence, see recognition results.',
-  analyst: 'Operator + identity enrolment and watchlist, face review and search, readiness state, reconstruction jobs, evidence export, audit.',
+  operator: 'Viewer + acknowledge/assign alerts, dispatch response teams, duty log, create incidents, upload and enhance evidence, see recognition results, record asset status and maintenance.',
+  analyst: 'Operator + identity enrolment and watchlist, face review and search, readiness state, reconstruction jobs, evidence export, audit, the asset dependency graph and retirement.',
   administrator: 'Analyst + user/role management, camera and site configuration, failure injection.',
 };
