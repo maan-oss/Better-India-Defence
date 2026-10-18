@@ -1,4 +1,7 @@
-/* Floating controls on the operational picture take their material from glass.css. */
+/* Floating controls on the operational picture take their material from glass.css. glass.css gives every glass surface
+   position: relative, which would drop these into the flow and push the compass under the mode row, so they keep the
+   absolute placement their offsets were written for. */
+.ops .map-modes, .ops .map-dock, .ops .compass, .ops .scalebar { position: absolute; }
 .glass-2 { border: 1px solid var(--line-2); }
 
 .map-modes { position: absolute; top: var(--ops-top); left: 12px; z-index: 7; padding: 3px; border-radius: 12px; max-width: calc(100% - 140px); overflow-x: auto; scrollbar-width: none; }

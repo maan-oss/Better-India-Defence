@@ -168,18 +168,19 @@ tone and spacing rather than from boxes inside boxes.
 - **Light follows the pointer**: on a mouse, a soft highlight on each glass control sits where the cursor is.
 - **The top bar has no surface of its own.** Each control in it is glass at one height (`--tb-ctl`, 36 px). Icon-only
   controls are circles of that size, the search field and status pill are capsules, and the site name is plain text.
+  The bell, the display switch and the account share one glass capsule, so the top right is a single surface.
 - **Status labels** (`span.chip`) are flat. The tint is the only signal, so no second outline appears on them.
 - **Floating bars on a phone**: the top bar floats over the head of the page and the tab bar over its foot. `.page`
   and `.field` reserve both, so no control sits under either bar.
 - The shell is a backdrop with colour in it (`--wallpaper`) so the glass has something to refract. On desktop
   the content is an inset card beneath the floating bars.
-The recipe (fill, sheen, rim, shadow, blur) is in `tokens.css`; the layer that applies it is `glass.css`. Where the browser can bend the backdrop (Chromium), glass uses an SVG displacement lens generated at start-up in `lib/liquidGlass.ts`, which pushes the content near each edge inward. Night
-display keeps the same recipe in red. Apple's own lensing shader is not public, and Safari and Firefox do not bend a backdrop with an SVG filter, so
-those browsers keep the blur, tint and lit edge without the bend. The look is an approximation, not a copy.
+The recipe (fill, sheen, rim, shadow, blur) is in `tokens.css`; the layer that applies it is `glass.css`. Where the browser can bend the backdrop (Chromium), glass uses an SVG lens generated at start-up in `lib/liquidGlass.ts` and defined in `index.html`. The lens has a squircle bezel (a superellipse of exponent 4): content near each edge is pushed inward, most at the wall and none on the flat, and the walls that face the top left take a lit rim. Night display keeps the same recipe in red.
+Safari and Firefox do not bend a backdrop with an SVG filter, so they keep the blur, tint and lit edge without the bend. The lens is turned off on a device with under 4 GB of memory or fewer than 4 cores, when the user asks for less transparency, and after the intro when the page holds less than 30 frames a second in two windows of two seconds. `?lens=always` keeps it on for QA on a slow renderer. Apple's own lensing shader is not public, so this is an approximation, not a copy.
 
 **Interaction.** Every control has the same states, defined once in `interaction.css`:
 - **Hover** (pointers only): the control lightens. A touch screen shows the press and nothing sticks after a tap.
-- **Press**: the control sinks (scale 0.96) and dims while it is held, and springs back on release. Rows press by
+- **Press**: the control sinks (scale 0.96) and springs back on release. A glass control also lights from the point it
+  lands on: a shimmer that settles to a steady glow while it is held, for touch as well as the mouse. Rows press by
   colour, not by scale.
 - **Focus** (keyboard only): one 2 px ring. A pointer never draws an outline. Text fields show focus as a border.
 - **Selected**: a filled shape (a glass capsule, a filled row). Never a line or an underline. A selected option that is also unavailable keeps full strength; only the other options dim.

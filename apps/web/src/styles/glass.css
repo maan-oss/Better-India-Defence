@@ -73,6 +73,13 @@
 .topbar .user-btn span { background: none; }
 .topbar .island-ghost { background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 .topbar .tb-bell-n { box-shadow: none; }
+/* The bell, the display switch and the account are one glass capsule. The three give up their own material and keep
+   only a hover, a circle inside the capsule, so the top right has one surface where it had three. */
+.tb-cluster { position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 2px; height: var(--tb-ctl); padding: 0 3px; border-radius: 999px; background: var(--glass-fill); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-edge); box-shadow: var(--glass-rim), var(--glass-shadow); }
+.tb-cluster::after { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none; background: var(--glass-specular); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.topbar .tb-cluster .tb-bell, .topbar .tb-cluster .tb-night button, .topbar .tb-cluster .user-btn { background: none; border-color: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.topbar .tb-cluster .tb-bell::after, .topbar .tb-cluster .tb-night button::after, .topbar .tb-cluster .user-btn::after { display: none; }
+.topbar .tb-cluster .tb-bell:hover, .topbar .tb-cluster .tb-night button:hover:not(:disabled), .topbar .tb-cluster .user-btn:hover:not(:disabled) { background: var(--glass-fill-strong); box-shadow: var(--glass-rim); }
 .island-panel { border-radius: 22px; }
 .island.has-crit { border-color: var(--st-critical-line); }
 .rail { border-radius: 28px; }
@@ -81,7 +88,7 @@
 
 /* The light follows the pointer: a soft highlight on each glass control, placed where the cursor is (see lib/liquidGlass.ts). */
 @media (hover: hover) and (pointer: fine) {
-  .btn:hover::before, .cmd-trigger:hover::before, .island:hover::before, .tb-bell:hover::before, .user-btn:hover::before {
+  .btn:hover::before, .cmd-trigger:hover::before, .island:hover::before, .tb-bell:hover::before, .tb-night button:hover::before, .user-btn:hover::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -89,6 +96,32 @@
     pointer-events: none;
     background: radial-gradient(120px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.6), transparent 70%);
     mix-blend-mode: soft-light;
+  }
+}
+
+/* A press lights the control from the point it lands on: the glass takes the light at once, then settles to a steady
+   glow while it is held, and lets it go on release. Touch gets it too, since the point is recorded on pointerdown. */
+.btn:not(:disabled):active::before, .cmd-trigger:active::before, .island:active::before, .tb-bell:active::before,
+.tb-night button:not(:disabled):active::before, .user-btn:not(:disabled):active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(180px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.9), transparent 70%);
+  mix-blend-mode: soft-light;
+  animation: glass-press 480ms var(--ease) both;
+}
+@keyframes glass-press {
+  from { opacity: 0; }
+  30% { opacity: 1; }
+  to { opacity: 0.55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn:not(:disabled):active::before, .cmd-trigger:active::before, .island:active::before, .tb-bell:active::before,
+  .tb-night button:not(:disabled):active::before, .user-btn:not(:disabled):active::before {
+    animation: none;
+    opacity: 0.55;
   }
 }
 
@@ -139,7 +172,7 @@ input.input, select.input { border-radius: 999px; padding: 0 14px; }
 
 /* Reduced transparency: the same shapes on a solid surface. */
 @media (prefers-reduced-transparency: reduce) {
-  .btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .rail,
+  .btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .tb-cluster, .rail,
   .inbox-pop, .site-pop, .island-panel, .cmd, .toast, .modal, .glass, .map-modes, .map-dock, .compass, .scalebar {
     background: var(--bg-2);
     -webkit-backdrop-filter: none;

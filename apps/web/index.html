@@ -15,11 +15,15 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- Liquid Glass lens: the displacement map is generated at start-up (lib/liquidGlass.ts). -->
+    <!-- Liquid Glass lens: the map is generated at start-up (lib/liquidGlass.ts). Red and green bend the backdrop toward the
+         rim; blue is the rim light, which becomes a white edge at the same opacity over the bent backdrop. -->
     <svg width="0" height="0" style="position: absolute" aria-hidden="true">
       <filter id="liquid-lens" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
-        <feImage id="liquid-lens-map" preserveAspectRatio="none" x="0" y="0" width="100%" height="100%" result="map" />
-        <feDisplacementMap in="SourceGraphic" in2="map" scale="28" xChannelSelector="R" yChannelSelector="G" />
+        <!-- No size on the image: a percentage would resolve against this 0 x 0 svg, and the map would be empty. -->
+        <feImage id="liquid-lens-map" preserveAspectRatio="none" result="map" />
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="28" xChannelSelector="R" yChannelSelector="G" result="bent" />
+        <feColorMatrix in="map" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 1 0 0" result="rim" />
+        <feComposite in="rim" in2="bent" operator="over" />
       </filter>
     </svg>
     <!-- Night (red-light) display: maps imagery and canvases to luminance carried on the red channel only. -->
