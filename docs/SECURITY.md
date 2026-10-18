@@ -77,8 +77,11 @@ that it is suitable for classified or regulated use without independent assessme
 - **Dependency hygiene.** `npm audit` reports no vulnerabilities after the test runner was upgraded to vitest 5. Before
   that, the audit reported one moderate and two critical advisories, all in the development-only test runner and its
   `tinypool` dependency (a prototype-pollution path to remote code execution, reachable only through the test runner).
-  The production dependency tree reported none at any point. Production deployments should still pin, mirror and scan
-  dependencies, and build images reproducibly.
+  The production dependency tree reported none at any point. The build is gated: `npm run verify` fails on any advisory
+  at moderate or above, or when the audit cannot complete (`scripts/audit-gate.mjs`). A machine without network access
+  cannot run the audit, so it must run where the registry mirror is reachable. The CI workflow references its actions
+  by major version, not commit hash. Production deployments should still pin, mirror and scan dependencies, and build
+  images reproducibly.
 
 ## Reporting
 

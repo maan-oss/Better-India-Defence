@@ -19,6 +19,8 @@
     "start": "node scripts/start.mjs",
     "demo": "STRATA_MODE=demo node scripts/start.mjs",
     "typecheck": "tsc -p packages/domain && tsc -p packages/simulator && tsc -p packages/adapters && tsc -p apps/server && tsc -p apps/web",
+    "audit": "node scripts/audit-gate.mjs moderate",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run build && npm run audit",
     "lint": "eslint .",
     "test": "vitest run",
     "test:e2e": "npm run build && playwright test",

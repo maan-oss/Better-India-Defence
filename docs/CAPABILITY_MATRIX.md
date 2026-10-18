@@ -68,7 +68,7 @@ Defects found and fixed in this pass, recorded so they are not reintroduced:
 | AI assistance | Partial | Deterministic copilot intents answer from the database. Language-model routing is optional and not tested here. No generative output is used as evidence |
 | Performance budgets | Designed, not measured | No budget is set and no repeatable benchmark suite exists yet. Figures in `REALITY_LIMITS.md` come from earlier sessions and were not reproduced in this pass |
 | Visual regression tests | Not implemented | Screenshots were checked by hand in this pass |
-| Dependency scanning | Implemented, not gated | `npm audit` reports no vulnerabilities after the test runner was upgraded to vitest 5 (checked in this pass). No audit runs automatically in a build gate yet |
+| Dependency scanning | Implemented and gated | `npm run audit` fails at moderate or above, and when the audit itself cannot complete. `npm run verify` runs types, lint, unit tests, build and the audit; `.github/workflows/ci.yml` runs it, and the browser suite after it |
 | Signed releases, reproducible builds, software bill of materials | Not implemented | — |
 | Backup, restore and disaster recovery | Not implemented | No tested restore procedure |
 | Multi-tenancy and classification labels | Not implemented | — |
