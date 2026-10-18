@@ -20,10 +20,9 @@ const schema = z.object({
   STRATA_DEMO_USERS: z.enum(['true', 'false']).optional(),
   STRATA_DEMO_PASSWORD: z.string().min(8).default('strata-demo'),
   STRATA_ADMIN_PASSWORD: z.string().min(12).optional(),
-  STORAGE_ENCRYPTION_KEY: z
-    .string()
-    .regex(/^[0-9a-f]{64}$/i, 'must be 32 bytes hex')
-    .optional(),
+  /** 32 bytes hex, or a file holding it (STORAGE_ENCRYPTION_KEY_FILE). Validated with the other keys, in keys/keyring.ts. */
+  STORAGE_ENCRYPTION_KEY: z.string().optional(),
+  STORAGE_ENCRYPTION_KEY_FILE: z.string().optional(),
   /** OpenID Connect identity provider (optional). All of OIDC_ISSUER, OIDC_CLIENT_ID, OIDC_REDIRECT_URI and OIDC_ROLE_MAP are then required. */
   OIDC_ISSUER: z.string().url().optional(),
   OIDC_CLIENT_ID: z.string().min(1).optional(),
@@ -40,11 +39,9 @@ const schema = z.object({
   STRATA_MFA_ISSUER: z.string().min(1).max(64).default('Strata'),
   /** Where the audit chain's head is anchored; keep it on storage the database account cannot rewrite. Default: DATA_DIR. */
   AUDIT_ANCHOR_FILE: z.string().optional(),
-  /** Optional key (hex, 32 bytes or more) for an HMAC on each anchor line. */
-  AUDIT_ANCHOR_KEY: z
-    .string()
-    .regex(/^[0-9a-f]{64,}$/i, 'must be at least 32 bytes hex')
-    .optional(),
+  /** Optional key (hex, 32 bytes or more, or a file holding it) for an HMAC on each anchor line. */
+  AUDIT_ANCHOR_KEY: z.string().optional(),
+  AUDIT_ANCHOR_KEY_FILE: z.string().optional(),
   TLS_CERT_FILE: z.string().optional(),
   TLS_KEY_FILE: z.string().optional(),
   /** Set when TLS is terminated by a reverse proxy in front of this process. */

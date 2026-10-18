@@ -59,7 +59,7 @@ export function registerSite(app: FastifyInstance, p: Platform): void {
   app.get('/api/site/orthophoto', { preHandler: requirePerm('world.view') }, async (req, reply) => {
     const key = (req.query as { key?: string }).key ?? p.site?.orthophoto?.key;
     if (!key || !/^site\/[0-9a-f]{2}\/[0-9a-f]{64}$/.test(key)) return reply.code(404).send({ error: 'no orthophoto' });
-    const bytes = await p.store.get(key, Boolean(p.cfg.STORAGE_ENCRYPTION_KEY)).catch(() => null);
+    const bytes = await p.store.get(key, Boolean(p.keys.storage)).catch(() => null);
     if (!bytes) return reply.code(404).send({ error: 'no orthophoto' });
     return reply.header('content-type', 'image/jpeg').header('cache-control', 'private, max-age=86400').send(Buffer.from(bytes));
   });

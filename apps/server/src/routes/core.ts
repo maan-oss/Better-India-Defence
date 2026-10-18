@@ -4,6 +4,7 @@ import { CLASSIFICATIONS, ORGANISATION_PATTERN, getTerrainMode, FACILITY, passwo
 import type { Platform } from '../platform.ts';
 import type { SignIn } from '../auth/authService.ts';
 import { SESSION_COOKIE, audit, isService, parse, requirePerm } from '../http/guards.ts';
+import { describeKeys } from '../keys/keyring.ts';
 
 /** Auth, ingestion, facility and system routes. */
 export function registerCore(app: FastifyInstance, p: Platform): void {
@@ -40,7 +41,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
   /** Starts enrolling a second factor for the signed-in account. The secret is shown once, as a code and as an address. */
   app.post('/api/auth/mfa/enrol', async (req, reply) => {
     if (!req.user) return reply.code(401).send({ error: 'not signed in' });
-    if (!cfg.STORAGE_ENCRYPTION_KEY) return reply.code(409).send({ error: 'second factors are unavailable: this installation has no storage key (STORAGE_ENCRYPTION_KEY) to protect the secret' });
+    if (!p.keys.storage) return reply.code(409).send({ error: 'second factors are unavailable: this installation has no storage key (STORAGE_ENCRYPTION_KEY or STORAGE_ENCRYPTION_KEY_FILE) to protect the secret' });
     const { secret, uri } = await p.auth.beginSecondFactor(req.user.id, req.user.username);
     await audit(p, req, 'mfa_enrolment_started', req.user.username, {});
     return { secret, uri, issuer: cfg.STRATA_MFA_ISSUER };
@@ -72,7 +73,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
   app.get('/api/auth/me', async (req, reply) => {
     if (!req.user) return reply.code(401).send({ error: 'not signed in', demo: cfg.STRATA_DEMO_USERS === 'true' ? { users: ['viewer', 'operator', 'analyst', 'admin'], password: cfg.NODE_ENV === 'production' ? null : cfg.STRATA_DEMO_PASSWORD } : null });
     const secondFactor = await p.auth.secondFactorState(req.user.id);
-    return { user: req.user, permissions: permissionsFor(req.user.role), secondFactor: { ...secondFactor, required: p.cfg.STRATA_MFA_REQUIRED === 'true', available: Boolean(p.cfg.STORAGE_ENCRYPTION_KEY) } };
+    return { user: req.user, permissions: permissionsFor(req.user.role), secondFactor: { ...secondFactor, required: p.cfg.STRATA_MFA_REQUIRED === 'true', available: Boolean(p.keys.storage) } };
   });
 
   // Pre-sign-in banner: what a terminal shows before authentication (classification, site, use notice).
@@ -167,7 +168,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
         { name: 'Live hub', status: 'ok', detail: `${p.hub.size} WebSocket client(s)` },
       ],
       metrics: p.metrics.snapshot(),
-      storage: { engine: p.db.engine, counts, mediaBytes, encryptedAtRest: Boolean(cfg.STORAGE_ENCRYPTION_KEY), disk: await diskOf(cfg.DATA_DIR) },
+      storage: { engine: p.db.engine, counts, mediaBytes, encryptedAtRest: Boolean(p.keys.storage), disk: await diskOf(cfg.DATA_DIR) },
       jobs,
       clock: { dataClock: p.ingest.dataClock, liveEdge: p.liveEdge(), serverTime: Date.now() },
       sensors: p.sensors.all(),
@@ -279,7 +280,9 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     stored: (await p.db.query('SELECT key, value, updated_by, updated_at FROM config ORDER BY key')).rows,
     effective: {
       database: p.db.engine,
-      storageEncryptionAtRest: Boolean(cfg.STORAGE_ENCRYPTION_KEY),
+      storageEncryptionAtRest: Boolean(p.keys.storage),
+      /** Where each key came from and its fingerprint; never the key itself. */
+      keys: describeKeys(p.keys),
       tls: Boolean(cfg.TLS_CERT_FILE),
       copilot: p.copilot.providerStatus,
       autoIncidents: cfg.AUTO_INCIDENTS === 'true',

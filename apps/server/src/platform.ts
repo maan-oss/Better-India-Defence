@@ -10,6 +10,7 @@ import { LocalObjectStore } from './storage/objectStore.ts';
 import { seedDemoContent } from './demo/demoContent.ts';
 import { AuditLog } from './audit/audit.ts';
 import { AuditAnchor, verifyAnchors, type AnchorCheck } from './audit/anchor.ts';
+import { loadKeys, type KeyRing } from './keys/keyring.ts';
 import { Metrics } from './metrics.ts';
 import { LiveHub } from './live/hub.ts';
 import { SensorMonitor } from './ingest/sensorMonitor.ts';
@@ -44,6 +45,8 @@ export class Platform {
   audit!: AuditLog;
   store!: LocalObjectStore;
   anchor!: AuditAnchor;
+  /** The secret keys this installation runs with, loaded at start; null entries mean the feature needing them is off. */
+  keys!: KeyRing;
   sensors!: SensorMonitor;
   fusion!: FusionService;
   world!: WorldMemory;
@@ -110,6 +113,8 @@ export class Platform {
 
   async start(): Promise<void> {
     const cfg = this.cfg;
+    // Keys first: a missing or unsafe key file stops the start before the database is opened or migrated.
+    this.keys = loadKeys(cfg);
     this.db = await openDb(cfg.DATABASE_URL, cfg.dataDir);
     this.log.info({ engine: this.db.engine }, 'database connected');
     await migrate(this.db, this.log);
@@ -125,8 +130,8 @@ export class Platform {
     }
     // The demo facility's sensors and zones are registered only in demo mode; an operational install starts empty.
     if (this.site || this.demo) await this.seedRegistry();
-    this.store = new LocalObjectStore(join(cfg.dataDir, 'objects'), cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null);
-    this.anchor = new AuditAnchor(cfg.AUDIT_ANCHOR_FILE ?? join(cfg.dataDir, 'audit-anchors.log'), cfg.AUDIT_ANCHOR_KEY ? Buffer.from(cfg.AUDIT_ANCHOR_KEY, 'hex') : null);
+    this.store = new LocalObjectStore(join(cfg.dataDir, 'objects'), this.keys.storage?.bytes ?? null);
+    this.anchor = new AuditAnchor(cfg.AUDIT_ANCHOR_FILE ?? join(cfg.dataDir, 'audit-anchors.log'), this.keys.auditAnchor?.bytes ?? null);
     this.audit = new AuditLog(this.db, this.anchor);
     const anchored = await this.anchoredAudit();
     if (!anchored.ok) this.log.error({ problems: anchored.problems.slice(0, 5) }, 'audit chain anchors do not verify');
@@ -134,7 +139,7 @@ export class Platform {
     this.reports = new IncidentReportService(this.db);
     this.documents = new DocumentService(this.db);
     this.auth = new AuthService(this.db, cfg.SESSION_TTL_HOURS, {
-      mfa: { key: cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null, required: cfg.STRATA_MFA_REQUIRED === 'true', issuer: cfg.STRATA_MFA_ISSUER },
+      mfa: { key: this.keys.storage?.bytes ?? null, required: cfg.STRATA_MFA_REQUIRED === 'true', issuer: cfg.STRATA_MFA_ISSUER },
     });
     await this.auth.ensureUsers(cfg.STRATA_DEMO_USERS === 'true', cfg.STRATA_DEMO_PASSWORD, cfg.STRATA_ADMIN_PASSWORD);
     if (!this.demo && (await this.auth.count()) === 0) await this.issueSetupCode();
@@ -165,7 +170,7 @@ export class Platform {
     void this.evidence.resume();
     const importDir = resolve(cfg.STRATA_IMPORT_DIR ?? join(cfg.dataDir, 'import'));
     await mkdir(importDir, { recursive: true });
-    this.cameras = new CameraService(this.db, this.log, this.ingest, this.vision, this.identity, this.evidence, this.store, cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null, importDir);
+    this.cameras = new CameraService(this.db, this.log, this.ingest, this.vision, this.identity, this.evidence, this.store, this.keys.storage?.bytes ?? null, importDir);
     this.ingest.supersede = (sid, adapter) => this.cameras.superseded(sid, adapter);
     await this.cameras.load();
     this.ops = new OpsService(this.db, this.hub, this.alerts, this.fusion, this.incidents, this.sensors, this.identity, () => this.liveEdge(), this.demo && this.site === null);

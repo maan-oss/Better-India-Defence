@@ -63,8 +63,8 @@ depends on it is designed.
 ## Security and sovereignty requirements
 
 The current controls, their tests and the gaps are in `SECURITY.md` and `CAPABILITY_MATRIX.md`. The gaps that bear on
-the platform direction are: no multi-factor authentication, single sign-on or smartcard login; no hardware-backed key
-management; audit records are hash-chained but not anchored outside the database; releases are not signed and builds are
+the platform direction are: no smartcard login; no hardware-backed key management or key rotation (keys come from the
+environment or an owner-only file); audit records are hash-chained but not anchored outside the database; releases are not signed and builds are
 not reproducible; no software bill of materials is produced; the audit is clean but nothing gates a build on it; there is no backup and restore procedure with a tested recovery; and there is no tenancy or organisational
 boundary inside one deployment. None of these is treated as solved, and none is claimed as compliant.
 
