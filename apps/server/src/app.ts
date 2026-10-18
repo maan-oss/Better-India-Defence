@@ -10,6 +10,7 @@ import { registerOperations } from './routes/operations.ts';
 import { registerVision } from './routes/vision.ts';
 import { registerCameras } from './routes/cameras.ts';
 import { registerOps } from './routes/ops.ts';
+import { registerAssets } from './routes/assets.ts';
 import { registerSite } from './routes/site.ts';
 import { registerInterop } from './routes/interop.ts';
 import { registerSetup } from './routes/setup.ts';
@@ -54,6 +55,7 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
   registerVision(app, p);
   registerCameras(app, p);
   registerOps(app, p);
+  registerAssets(app, p);
   registerSite(app, p);
   registerInterop(app, p);
   registerSetup(app, p);
@@ -70,8 +72,9 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
     await app.register(fastifyStatic, { root: cfg.WEB_DIST, prefix: '/', wildcard: false });
     app.setNotFoundHandler((req, reply) => {
       if (req.url.startsWith('/api') || req.url.startsWith('/ws')) return reply.code(404).send({ error: 'not found' });
-      // A missing build file is a 404, not the app shell: the browser would otherwise try to run HTML as code.
-      if (req.url.startsWith('/assets/')) return reply.code(404).send({ error: 'not found' });
+      // A missing file (a path with an extension, such as a build chunk) is a 404, not the app shell: the browser would
+      // otherwise try to run HTML as code. Application routes have no extension, so /assets/:id still reaches the app.
+      if (/\.[a-z0-9]+(\?.*)?$/i.test(req.url)) return reply.code(404).send({ error: 'not found' });
       return reply.sendFile('index.html');
     });
   }

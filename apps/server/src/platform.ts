@@ -30,6 +30,7 @@ import { IdentityService } from './identity/identityService.ts';
 import { EvidenceService } from './evidence/evidenceService.ts';
 import { CameraService } from './cameras/cameraService.ts';
 import { OpsService } from './ops/opsService.ts';
+import { AssetService } from './assets/assetService.ts';
 
 /** Composition root: constructs and wires every service, restores persisted state, starts timers. */
 export class Platform {
@@ -57,6 +58,7 @@ export class Platform {
   evidence!: EvidenceService;
   cameras!: CameraService;
   ops!: OpsService;
+  assets!: AssetService;
   /** Configured real site (null = demo facility in demo mode, or awaiting setup in operational mode). */
   site: SiteConfig | null = null;
   /** One-time code for the first-run setup wizard (operational mode, no accounts yet). */
@@ -150,8 +152,12 @@ export class Platform {
     this.ops = new OpsService(this.db, this.hub, this.alerts, this.fusion, this.incidents, this.sensors, this.identity, () => this.liveEdge(), this.demo && this.site === null);
     await this.ops.load();
     this.ops.start();
-    if (this.demo && this.site === null && (cfg.STRATA_DEMO_CONTENT ?? (cfg.NODE_ENV === 'test' ? 'false' : 'true')) === 'true')
+    this.assets = new AssetService(this.db);
+    if (this.demo && this.site === null && (cfg.STRATA_DEMO_CONTENT ?? (cfg.NODE_ENV === 'test' ? 'false' : 'true')) === 'true') {
+      // The synthetic asset register is demonstration content, so it follows the same switch as the rest of it.
+      await this.assets.seedDemo().catch((e: unknown) => this.log.warn({ err: e instanceof Error ? e.message : String(e) }, 'demo asset register seeding failed'));
       void seedDemoContent(this, importDir).catch((e: unknown) => this.log.warn({ err: e instanceof Error ? e.message : String(e) }, 'demo content seeding failed'));
+    }
     const cls = (await this.db.query<{ value: { level: string; caveat: string } }>(`SELECT value FROM config WHERE key = 'ui.classification'`)).rows[0];
     if (cls) this.classification = cls.value;
     if (!this.vision.ffmpeg) this.log.warn('ffmpeg not found: video evidence and network cameras are unavailable (images still work)');

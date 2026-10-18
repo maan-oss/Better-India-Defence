@@ -46,6 +46,12 @@ describe('serving the web build', () => {
     expect(asset.headers['content-type']).toMatch(/javascript/);
   });
 
+  it('serves the app shell for an application route under /assets (no file extension)', async () => {
+    const page = await app.inject({ method: 'GET', url: '/assets/ast-demo-ups1' });
+    expect(page.statusCode).toBe(200);
+    expect(String(page.headers['content-type'])).toMatch(/html/);
+  });
+
   it('answers a missing build file with a 404, never with the app shell', async () => {
     const missing = await app.inject({ method: 'GET', url: '/assets/Reconstructions-removed.js' });
     expect(missing.statusCode).toBe(404);
