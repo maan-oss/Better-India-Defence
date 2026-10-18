@@ -14,15 +14,20 @@ an audit trail, a browser check and, where it matters, a measurement. Synthetic 
 - **Designed** — written down in `PLATFORM.md`; no code.
 - **Infeasible / unsupported** — cannot be built as described, or is outside this repository's scope.
 
-## Verification record for this pass
+## Verification record, final pass
 
 | Check | Result |
 |---|---|
 | Typecheck (`npm run typecheck`: domain, simulator, adapters, server, web) | Passes |
 | Lint (`npm run lint`, whole repository) | Passes |
 | Build (`npm run build`) | Passes |
-| Unit and integration tests (`npm test`) | 19 files, 122 tests, all pass. Up from 94 at the start of the pass |
-| Browser suite (`npm run test:e2e`) | 25 tests. In the full run the 23 existing tests passed; one of the two new asset tests failed on an ambiguous selector in the test itself and was fixed. Both asset tests were then rerun on their own and pass. The full suite was not rerun after that fix |
+| Unit and integration tests (`npm test`) | 45 files pass, 1 skipped; 504 tests pass. The skipped file is the PostgreSQL restore test, which runs when `STRATA_TEST_DATABASE_URL` is set; it passed against PostgreSQL 16.14 |
+| Browser suite (`npm run test:e2e`) | 31 of 31 pass on the final build, including the sign-in, asset register, incident report and documents screenshot checks and the offline check |
+| Dependency audit gate (`npm run audit`, moderate and above) | Passes: 0 findings at moderate or above |
+| Reproducible build (`npm run reproducible`) | 215 shipped files identical across two builds |
+| Signed release (`npm run release`, `npm run release:verify`) | 216 files signed and verified with an Ed25519 key held outside the repository |
+| PostgreSQL backup and restore (`backup-postgres.test.ts`) | Passes against PostgreSQL 16.14 |
+| Performance budgets (`npm run bench`) | All budgets met on the final run, on the final tree; figures and ranges in `PERFORMANCE.md`. The entry and initial-load bundle budgets are measured from the page, not matched by file name |
 | Screenshots | Desktop and phone widths checked for the asset register: register, detail, each tab, the dependency editor |
 
 Second round, on the same branch, covering the Content Security Policy and the dependency audit:
