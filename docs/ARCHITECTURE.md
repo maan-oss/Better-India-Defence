@@ -216,6 +216,7 @@ PostgreSQL schema in `apps/server/src/db/migrations` (forward-only, versioned, r
 | `lidar_scans`, `imagery_captures`, `reconstructions` | Spatial capture metadata and analysis jobs |
 | `sensor_status`, `sensor_status_events` | Current and historical sensor health |
 | `alerts`, `incidents`, `test_subjects` | Operations |
+| `assets`, `asset_dependencies`, `maintenance_plans`, `asset_events` | Asset and infrastructure register: equipment, what depends on what, maintenance, append-only history (migration `007_assets.sql`) |
 | `users`, `sessions`, `audit_events`, `config` | Security and administration (audit is append-only by trigger) |
 | `simulation_scenarios`, `system_state` | Simulator schedule and platform state |
 | `evidence_items`, `evidence_products`, `media_detections` | Evidence library (hash, provenance, capture time and its basis), enhancement products with their steps, detections in media |

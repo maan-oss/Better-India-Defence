@@ -165,6 +165,24 @@ it can be disabled with `STRATA_DEMO_CONTENT=false`.
   four cameras at 1 fps, or one at 4 fps. Large camera estates need more hosts or GPU inference (not
   implemented).
 
+### Asset and infrastructure register
+
+- Equipment records (tag, category, criticality, zone, maker, model, serial, warranty), each with a status (in
+  service, degraded, out of service, retired).
+- A dependency graph: an asset states what it needs to operate, and the platform refuses any change that would close a
+  loop, a self-dependency, or a dependency on a retired asset.
+- Effective availability: an asset is *down* when its own status is out of service, *impaired* when it is working but
+  something it needs is down or retired, and *degraded* or *available* otherwise. A degraded upstream asset does not
+  change what depends on it; only down and retired do. The interface names the causes.
+- Impact analysis, read-only: what would change if an asset moved to out of service or degraded, nearest and most
+  critical first.
+- Retirement is final and is refused while active assets still depend on the asset.
+- Maintenance plans with due state (current, due soon, overdue, never recorded). Completing a plan starts the next
+  interval from that moment.
+- Every change is recorded in an append-only history (database trigger) and in the hash-chained audit log.
+- The demonstration site seeds a **synthetic** register (fictional tags, makers and models), labelled as synthetic in the
+  interface. It is not seeded on a configured site.
+
 ### Command and control (decision support)
 
 - Readiness states with logged changes; vital-asset definitions (inferred from restricted zones and
@@ -212,6 +230,9 @@ baseline. It is **not** JPDA, MHT, IMM or a learned tracker, and it is listed as
 These parts of the system are built and work against the simulator, but their real-world quality
 depends entirely on equipment, data and validation that do not exist in this repository.
 
+- **Asset inventories.** The register holds what an operator enters. There is no import from an enterprise asset or
+  maintenance system, no barcode or RFID reading, and no automatic status feed from equipment; a status changes when a
+  person records it. The demonstration register is invented and says so.
 - **Sensors without an adapter.** Cameras (RTSP/HTTP/file), GPS/AVL (NMEA), UAS (MAVLink) and other
   C2 systems (CoT) connect today. Radar (e.g. ASTERIX CAT-048/062), passive RF, LiDAR, fence/PIDS,
   building management and satellite delivery formats still need an adapter per device family that
