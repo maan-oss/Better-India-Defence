@@ -8,6 +8,8 @@ declare module 'fastify' {
   interface FastifyRequest {
     user: UserRecord | null;
     sessionToken: string | null;
+    /** The style nonce of the application shell served for this request, if one was served. */
+    cspNonce: string | null;
   }
 }
 

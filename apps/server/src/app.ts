@@ -1,8 +1,10 @@
-import Fastify, { LogController, type FastifyInstance } from 'fastify';
+import Fastify, { LogController, type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
 import websocket from '@fastify/websocket';
 import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import { existsSync, readFileSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
+import { join } from 'node:path';
 import type { Platform } from './platform.ts';
 import { SESSION_COOKIE, bearer, readCookie } from './http/guards.ts';
 import { registerCore } from './routes/core.ts';
@@ -28,6 +30,7 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
 
   app.decorateRequest('user', null);
   app.decorateRequest('sessionToken', null);
+  app.decorateRequest('cspNonce', null);
   app.addHook('onRequest', async (req) => {
     const token = readCookie(req, SESSION_COOKIE) ?? (req.url.startsWith('/api/ingest') ? null : bearer(req));
     if (token && token !== cfg.STRATA_SERVICE_TOKEN) {
@@ -39,11 +42,11 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
     p.metrics.httpMs.observe(reply.elapsedTime);
     if (reply.statusCode >= 500) p.log.error({ url: req.url, status: reply.statusCode }, 'request failed');
   });
-  app.addHook('onSend', async (_req, reply, payload) => {
+  app.addHook('onSend', async (req, reply, payload) => {
     void reply.header('x-content-type-options', 'nosniff');
     void reply.header('referrer-policy', 'no-referrer');
     void reply.header('x-frame-options', 'DENY');
-    void reply.header('content-security-policy', contentSecurityPolicy(p.site?.basemap?.url));
+    void reply.header('content-security-policy', contentSecurityPolicy(p.site?.basemap?.url, req.cspNonce ?? undefined));
     return payload;
   });
   app.setErrorHandler((err: Error & { statusCode?: number }, req, reply) => {
@@ -71,13 +74,33 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
   });
 
   if (cfg.WEB_DIST && existsSync(cfg.WEB_DIST)) {
-    await app.register(fastifyStatic, { root: cfg.WEB_DIST, prefix: '/', wildcard: false });
+    // The application shell is read once and served from memory with a fresh style nonce for each response, so the
+    // policy can admit the one run-time style element the animation library writes without admitting any other. The
+    // static plugin never serves the shell itself (no index, and /index.html is refused), so every page load goes
+    // through sendShell.
+    const shell = readFileSync(join(cfg.WEB_DIST, 'index.html'), 'utf8');
+    const sendShell = (req: FastifyRequest, reply: FastifyReply) => {
+      const nonce = randomBytes(16).toString('base64');
+      req.cspNonce = nonce;
+      return reply
+        .type('text/html; charset=utf-8')
+        .header('cache-control', 'no-store')
+        .send(shell.replace('__CSP_NONCE__', () => nonce));
+    };
+    await app.register(fastifyStatic, {
+      root: cfg.WEB_DIST,
+      prefix: '/',
+      wildcard: false,
+      index: false,
+      allowedPath: (path) => !/^\/?index\.html$/.test(path),
+    });
+    app.get('/', (req, reply) => sendShell(req, reply));
     app.setNotFoundHandler((req, reply) => {
       if (req.url.startsWith('/api') || req.url.startsWith('/ws')) return reply.code(404).send({ error: 'not found' });
       // A missing file (a path with an extension, such as a build chunk) is a 404, not the app shell: the browser would
       // otherwise try to run HTML as code. Application routes have no extension, so /assets/:id still reaches the app.
       if (/\.[a-z0-9]+(\?.*)?$/i.test(req.url)) return reply.code(404).send({ error: 'not found' });
-      return reply.sendFile('index.html');
+      return sendShell(req, reply);
     });
   }
   return app;

@@ -1,0 +1,16 @@
+/* The hidden SVG filter definitions in index.html (the Liquid Glass lens and the night display). Taking them out of the
+   layout is a class rule rather than a style attribute, so the Content Security Policy needs no inline-style allowance. */
+.svg-defs {
+  position: absolute;
+}
+
+/* The split-flap display's flip animation. These were injected as a style element at run time; the policy refuses
+   that, so they live in a stylesheet like everything else. */
+@keyframes flapTopDown {
+  0% { transform: rotateX(0deg); }
+  100% { transform: rotateX(-90deg); }
+}
+@keyframes flapBottomUp {
+  0% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}

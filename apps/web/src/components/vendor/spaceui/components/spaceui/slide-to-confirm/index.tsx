@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { motion, useMotionValue, useTransform, animate } from 'motion/react'
 import { IconArrowRight, IconCheck } from '@tabler/icons-react'
-import { TextMorph } from 'torph/react'
+import { CrossfadeText } from '../../../../../CrossfadeText'
 import { cn } from '../../../lib/utils'
 
 type SlideToConfirmProps = {
@@ -277,7 +277,7 @@ export function SlideToConfirm({
             className="absolute inset-0 flex items-center justify-center gap-1.5 text-[0.8125rem] font-semibold tracking-tight text-background"
           >
             <IconCheck size={17} strokeWidth={2.8} />
-            <TextMorph>{confirmedLabel}</TextMorph>
+            <CrossfadeText>{confirmedLabel}</CrossfadeText>
           </motion.span>
         </motion.button>
       </motion.div>

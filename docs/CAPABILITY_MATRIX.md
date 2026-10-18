@@ -72,7 +72,7 @@ Defects found and fixed in this pass, recorded so they are not reintroduced:
 | Signed releases, reproducible builds, software bill of materials | Not implemented | — |
 | Backup, restore and disaster recovery | Not implemented | No tested restore procedure |
 | Multi-tenancy and classification labels | Not implemented | — |
-| Content Security Policy | Partial | On every response. Scripts are strict (inline refused, checked with a control); inline styles are allowed because components set `style` attributes at run time. Checked on every application page. See `SECURITY.md` |
+| Content Security Policy | Implemented | On every response. Inline scripts and inline styles are refused. Style elements written at run time carry the shell's per-response nonce. Checked on every application page and the overlays, with a control. See `SECURITY.md` |
 | Hardware-backed key management | Not implemented | Keys come from environment variables |
 
 ## Software categories, and the decision for each
@@ -98,6 +98,6 @@ The inventory is a starting point, not a complete survey. "Not yet assessed" mea
 
 1. Restart the demonstration server and confirm the asset register still seeds once and shows the synthetic label.
 2. Keep the browser suite and the page sweep in the routine: the sweep is what catches Content Security Policy refusals, which the suite does not report.
-3. Decide whether to remove the inline-style allowance. That needs the components that set `style` attributes at run time to be rewritten first.
+3. Keep the page sweep in the routine. Refusals come from the browser's console only, so the sweep must read it.
 4. Gate the build on `npm audit`.
 5. Begin roadmap item 2 (logistics) only after the asset module's behaviour has been reviewed by a person.

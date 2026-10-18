@@ -12,12 +12,14 @@
     <meta name="description" content="Strata: one picture of the installation, and the record behind it." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- The server replaces the placeholder with this response's style nonce (apps/server/src/app.ts). -->
+    <meta name="csp-nonce" content="__CSP_NONCE__" />
   </head>
   <body>
     <div id="root"></div>
     <!-- Liquid Glass lens: the map is generated at start-up (lib/liquidGlass.ts). Red and green bend the backdrop toward the
          rim; blue is the rim light, which becomes a white edge at the same opacity over the bent backdrop. -->
-    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <svg width="0" height="0" class="svg-defs" aria-hidden="true">
       <filter id="liquid-lens" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
         <!-- No size on the image: a percentage would resolve against this 0 x 0 svg, and the map would be empty. -->
         <feImage id="liquid-lens-map" preserveAspectRatio="none" result="map" />
@@ -27,7 +29,7 @@
       </filter>
     </svg>
     <!-- Night (red-light) display: maps imagery and canvases to luminance carried on the red channel only. -->
-    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <svg width="0" height="0" class="svg-defs" aria-hidden="true">
       <filter id="night-red" color-interpolation-filters="sRGB">
         <feColorMatrix type="matrix" values="0.30 0.59 0.11 0 0  0.04 0.08 0.02 0 0  0.02 0.04 0.01 0 0  0 0 0 1 0" />
       </filter>

@@ -36,18 +36,26 @@ describe('content security policy', () => {
   it('refuses inline scripts, framing and plugins, and fetches only from this host without a basemap', () => {
     const d = directives(contentSecurityPolicy(null));
     expect(d['script-src']).toEqual(["'self'"]);
+    expect(d['style-src']).toEqual(["'self'"]);
     expect(d['default-src']).toEqual(["'self'"]);
     expect(d['object-src']).toEqual(["'none'"]);
     expect(d['frame-ancestors']).toEqual(["'none'"]);
     expect(d['img-src']).toEqual(["'self'", 'data:', 'blob:']);
-    expect(d['connect-src']).toEqual(["'self'", 'ws:', 'wss:']);
+    expect(d['connect-src']).toEqual(["'self'", 'ws:', 'wss:', 'blob:']);
+  });
+
+  it('admits a style nonce only when one is given, and never a script nonce', () => {
+    const d = directives(contentSecurityPolicy(null, 'Yx9+ab/cdEFGhIJKLMNOPQ=='));
+    expect(d['style-src']).toEqual(["'self'", "'nonce-Yx9+ab/cdEFGhIJKLMNOPQ=='"]);
+    expect(d['script-src']).toEqual(["'self'"]);
+    expect(directives(contentSecurityPolicy(null))['style-src']).toEqual(["'self'"]);
   });
 
   it('admits the configured basemap origin for images, and nothing else', () => {
     const d = directives(contentSecurityPolicy('https://tiles.example.mil/{z}/{x}/{y}.png'));
     expect(d['img-src']).toEqual(["'self'", 'data:', 'blob:', 'https://tiles.example.mil']);
     expect(d['script-src']).toEqual(["'self'"]);
-    expect(d['connect-src']).toEqual(["'self'", 'ws:', 'wss:']);
+    expect(d['connect-src']).toEqual(["'self'", 'ws:', 'wss:', 'blob:']);
   });
 });
 

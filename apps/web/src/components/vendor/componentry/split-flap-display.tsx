@@ -274,36 +274,6 @@ function FlapRow({
   );
 }
 
-/* ─── Keyframes (injected once) ─────────────────────────────── */
-
-const KEYFRAMES_ID = "split-flap-keyframes";
-
-function useInjectKeyframes() {
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    if (document.getElementById(KEYFRAMES_ID)) return;
-
-    const style = document.createElement("style");
-    style.id = KEYFRAMES_ID;
-    style.textContent = `
-      @keyframes flapTopDown {
-        0%   { transform: rotateX(0deg); }
-        100% { transform: rotateX(-90deg); }
-      }
-      @keyframes flapBottomUp {
-        0%   { transform: rotateX(90deg); }
-        100% { transform: rotateX(0deg); }
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      const el = document.getElementById(KEYFRAMES_ID);
-      if (el) el.remove();
-    };
-  }, []);
-}
-
 /* ─── Main Export ────────────────────────────────────────────── */
 
 export function SplitFlapDisplay({
@@ -317,7 +287,6 @@ export function SplitFlapDisplay({
   flipSpeed = 35,
   className,
 }: SplitFlapDisplayProps) {
-  useInjectKeyframes();
 
   // Simple single-row text mode
   if (text && !rows) {

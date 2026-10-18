@@ -20,7 +20,7 @@ beforeAll(async () => {
   dir = mkdtempSync(join(tmpdir(), 'strata-static-'));
   const web = join(dir, 'web');
   mkdirSync(join(web, 'assets'), { recursive: true });
-  writeFileSync(join(web, 'index.html'), '<!doctype html><title>Strata</title>');
+  writeFileSync(join(web, 'index.html'), '<!doctype html><title>Strata</title><meta name="csp-nonce" content="__CSP_NONCE__" />');
   writeFileSync(join(web, 'assets', 'app.js'), 'console.log("app");');
   const cfg = loadConfig({ NODE_ENV: 'test', DATA_DIR: join(dir, 'data'), WEB_DIST: web, STRATA_SERVICE_TOKEN: 'test-service-token-0123456789', SIM_URL: 'http://127.0.0.1:9', LOG_LEVEL: 'error' });
   platform = new Platform(cfg, createLogger('error', false));
@@ -63,6 +63,27 @@ describe('serving the web build', () => {
     const r = await app.inject({ method: 'GET', url: '/api/no-such-route' });
     expect(r.statusCode).toBe(404);
     expect(r.headers['content-type']).toMatch(/application\/json/);
+  });
+
+  it('serves the shell with a fresh style nonce, and the policy admits exactly that nonce', async () => {
+    const nonceOf = (body: string) => /<meta name="csp-nonce" content="([^"]+)"/.exec(body)?.[1];
+    const first = await app.inject({ method: 'GET', url: '/' });
+    const second = await app.inject({ method: 'GET', url: '/operations' });
+    const n1 = nonceOf(first.body);
+    const n2 = nonceOf(second.body);
+    expect(n1).toMatch(/^[A-Za-z0-9+/]{22}==$/);
+    expect(n1).not.toBe('__CSP_NONCE__');
+    expect(n2).not.toBe(n1);
+    expect(String(first.headers['content-security-policy'])).toContain(`style-src 'self' 'nonce-${n1}'`);
+    expect(String(second.headers['content-security-policy'])).toContain(`style-src 'self' 'nonce-${n2}'`);
+    expect(first.headers['cache-control']).toBe('no-store');
+  });
+
+  it('gives an API response no style nonce, and never serves the raw shell file', async () => {
+    const api = await app.inject({ method: 'GET', url: '/api/no-such-route' });
+    expect(String(api.headers['content-security-policy'])).toContain("style-src 'self';");
+    const raw = await app.inject({ method: 'GET', url: '/index.html' });
+    expect(raw.statusCode).toBe(404);
   });
 
   it('does not rate-limit static files, but does limit the API', async () => {
