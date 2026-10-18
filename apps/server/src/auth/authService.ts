@@ -5,6 +5,8 @@ import { hashPassword, verifyPassword } from './passwords.ts';
 import { openSecret, sealSecret } from './secretBox.ts';
 
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
+/** The password hash of an account that signs in through an identity provider: no password can match it. */
+const FEDERATED_PASSWORD = '!federated';
 
 export interface LockoutPolicy {
   /** Consecutive failures for one username that lock it. */
@@ -211,6 +213,25 @@ export class AuthService {
   }
 
   /** The signed-in account for a session token. `mfaPending` is set while the second factor still has to be enrolled. */
+  /**
+   * Signs in an account the identity provider has authenticated. The local account is created on first use and its name
+   * and role follow the provider on every sign-in. A provider that asserted a second factor counts as one.
+   */
+  async federatedSignIn(input: { username: string; displayName: string; role: Role; providerMfa: boolean; ip: string | null }): Promise<SignIn | { disabled: true }> {
+    const now = Date.now();
+    const existing = (await this.db.query<{ id: string; disabled: boolean }>('SELECT id, disabled FROM users WHERE username = $1', [input.username])).rows[0];
+    let id: string;
+    if (existing) {
+      if (existing.disabled) return { disabled: true };
+      id = existing.id;
+      await this.db.query('UPDATE users SET role = $2, display_name = $3, updated_at = $4 WHERE id = $1', [id, input.role, input.displayName, now]);
+    } else {
+      id = `usr-${randomUUID().slice(0, 8)}`;
+      await this.db.query('INSERT INTO users (id, username, display_name, role, password_hash, disabled, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,false,$6,$6)', [id, input.username, input.displayName, input.role, FEDERATED_PASSWORD, now]);
+    }
+    return this.openSession(id, input.username, input.displayName, input.role, input.ip, now, input.providerMfa || !this.enrolmentPending(input.role));
+  }
+
   async validate(token: string): Promise<(UserRecord & { mfaPending: boolean }) | null> {
     const r = (await this.db.query<{ id: string; username: string; display_name: string; role: Role; disabled: boolean; expires_at: number; mfa_verified: boolean }>(
       'SELECT u.id, u.username, u.display_name, u.role, u.disabled, s.expires_at, s.mfa_verified FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = $1',

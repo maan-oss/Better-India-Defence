@@ -24,6 +24,17 @@ const schema = z.object({
     .string()
     .regex(/^[0-9a-f]{64}$/i, 'must be 32 bytes hex')
     .optional(),
+  /** OpenID Connect identity provider (optional). All of OIDC_ISSUER, OIDC_CLIENT_ID, OIDC_REDIRECT_URI and OIDC_ROLE_MAP are then required. */
+  OIDC_ISSUER: z.string().url().optional(),
+  OIDC_CLIENT_ID: z.string().min(1).optional(),
+  OIDC_CLIENT_SECRET: z.string().min(1).optional(),
+  OIDC_REDIRECT_URI: z.string().url().optional(),
+  OIDC_ROLE_CLAIM: z.string().min(1).default('groups'),
+  /** JSON object mapping a provider group or role value to a Strata role, for example {"strata-analysts":"analyst"}. */
+  OIDC_ROLE_MAP: z.string().optional(),
+  OIDC_NAME: z.string().min(1).max(40).default('Identity provider'),
+  /** Allows http:// addresses for the provider and the callback. For a laboratory only; production uses https. */
+  OIDC_INSECURE_HTTP: z.enum(['true', 'false']).default('false'),
   /** Privileged roles (administrator, analyst) must set up a second factor before using the service. Default: on in operational mode. */
   STRATA_MFA_REQUIRED: z.enum(['true', 'false']).optional(),
   STRATA_MFA_ISSUER: z.string().min(1).max(64).default('Strata'),

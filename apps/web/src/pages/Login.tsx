@@ -8,6 +8,7 @@ import { PasswordField } from '../components/arc/password-field/password-field';
 import { Lockup } from '../brand/Mark';
 
 interface Banner {
+  oidc?: { name: string; start: string } | null;
   classification: { level: string; caveat: string };
   site: string;
   simulated: boolean;
@@ -118,6 +119,11 @@ export function Login() {
               <button type="button" className="btn ghost" style={{ marginTop: 8 }} onClick={() => { cancelChallenge(); setCode(''); }}>
                 Start again
               </button>
+            )}
+            {banner?.oidc && !challenge && (
+              <a className="btn ghost" style={{ marginTop: 8, display: 'flex', justifyContent: 'center' }} href={banner.oidc.start}>
+                Sign in with {banner.oidc.name}
+              </a>
             )}
             <div className="consent" role="note">
               <b>Authorised use only</b>

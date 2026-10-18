@@ -18,6 +18,7 @@ import { registerSite } from './routes/site.ts';
 import { registerInterop } from './routes/interop.ts';
 import { registerSetup } from './routes/setup.ts';
 import { registerBackup } from './routes/backup.ts';
+import { registerOidc } from './routes/oidc.ts';
 
 export async function buildApp(p: Platform): Promise<FastifyInstance> {
   const cfg = p.cfg;
@@ -71,6 +72,7 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
   registerInterop(app, p);
   registerSetup(app, p);
   registerBackup(app, p);
+  registerOidc(app, p);
 
   app.get('/ws', { websocket: true }, (socket, req) => {
     if (!req.user) {

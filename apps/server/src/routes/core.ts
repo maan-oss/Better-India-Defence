@@ -77,6 +77,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
 
   // Pre-sign-in banner: what a terminal shows before authentication (classification, site, use notice).
   app.get('/api/auth/banner', async () => ({
+    oidc: p.oidc ? { name: p.oidc.cfg.name, start: '/api/auth/oidc/start' } : null,
     classification: p.classification,
     site: FACILITY.name,
     simulated: p.simulated,
