@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-10-18T13:38:20.245Z",
+  "measuredAt": "2026-10-18T14:03:59.735Z",
   "node": "v22.22.0",
   "cpus": 4,
   "bundle": {
@@ -9,8 +9,14 @@
       "unit": "KB",
       "ok": true
     },
+    "initialJs": {
+      "measured": 246.4,
+      "limit": 270,
+      "unit": "KB",
+      "ok": true
+    },
     "allJs": {
-      "measured": 860.7,
+      "measured": 861,
       "limit": 950,
       "unit": "KB",
       "ok": true
@@ -25,20 +31,20 @@
   "api": {
     "registerAssets": 4014,
     "assetList": {
-      "p50Ms": 210.4,
-      "p95Ms": 432.1,
+      "p50Ms": 189.7,
+      "p95Ms": 439.4,
       "budget": {
-        "measured": 432.1,
+        "measured": 439.4,
         "limit": 1200,
         "unit": "ms",
         "ok": true
       }
     },
     "assetDetail": {
-      "p50Ms": 13,
-      "p95Ms": 17.4,
+      "p50Ms": 10.3,
+      "p95Ms": 14,
       "budget": {
-        "measured": 17.4,
+        "measured": 14,
         "limit": 300,
         "unit": "ms",
         "ok": true
@@ -47,13 +53,13 @@
   },
   "page": {
     "signInDomContentLoaded": {
-      "measured": 309.4,
+      "measured": 317.6,
       "limit": 3000,
       "unit": "ms",
       "ok": true
     },
     "assetsFirstRows": {
-      "measured": 3000.9,
+      "measured": 2006.5,
       "limit": 8000,
       "unit": "ms",
       "ok": true

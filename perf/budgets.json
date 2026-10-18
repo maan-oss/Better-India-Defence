@@ -2,6 +2,7 @@
   "_comment": "Budgets for scripts/benchmark.mjs. Each limit sits above the value measured on the reference machine (4 CPUs, Node 22; see perf/results.json and docs/PERFORMANCE.md), so a real regression fails the run. Tighten them as the measurements improve.",
   "bundle": {
     "indexJsGzipKb": 250,
+    "initialJsGzipKb": 270,
     "allJsGzipKb": 950,
     "cssGzipKb": 130
   },

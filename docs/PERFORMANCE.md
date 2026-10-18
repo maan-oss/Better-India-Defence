@@ -9,18 +9,19 @@ and a browser.
 
 | Group | Measure | Budget | Measured (4 runs) |
 |---|---|---|---|
-| Bundle (gzip) | Entry script | 250 KB | 228.6 KB |
-| Bundle (gzip) | All JavaScript | 950 KB | 860.7 KB |
+| Bundle (gzip) | Entry script, as `index.html` names it | 250 KB | 228.6 KB |
+| Bundle (gzip) | Initial load: entry plus the chunks it preloads | 270 KB | 246.4 KB |
+| Bundle (gzip) | All JavaScript | 950 KB | 861 KB |
 | Bundle (gzip) | All CSS | 130 KB | 116.5 KB |
 | API, 4,014 assets | Asset list, p95 of 30 requests | 1200 ms | 400–646 ms |
-| API, 4,014 assets | Asset detail, p95 of 30 requests | 300 ms | 17–20 ms |
+| API, 4,014 assets | Asset detail, p95 of 30 requests | 300 ms | 14–20 ms |
 | Page (Chromium) | Sign-in page, DOMContentLoaded | 3000 ms | 309–378 ms |
 | Page (Chromium) | Asset register, first rows shown | 8000 ms | 1.5–4.7 s |
 
-The bundle figures are read from `apps/web/dist/assets` after `npm run build`. The API and page figures come from a
+The bundle figures are read from `apps/web/dist` after `npm run build`: the entry is the script `index.html` names, and the initial load adds the chunks it preloads. The benchmark once matched the entry by file name, which can pick up another `index-*` chunk; the method now reads the page, so the entry it reports is the one a browser loads. The API and page figures come from a
 temporary installation seeded with a synthetic register of 4,000 assets (tags `BENCH-00000` onward), started from the
-built server. Its data directory is removed when the run ends. The measured ranges are the last four runs on the
-reference sandbox after the asset-detail change described below; the committed `perf/results.json` is the last of them.
+built server. Its data directory is removed when the run ends. The measured ranges cover the runs on the reference
+sandbox since the asset-detail change described below. The committed `perf/results.json` holds the final run.
 
 Earlier, before the detail query was narrowed, the same sandbox measured the detail p95 at 538 ms and the list p95 at
 439 ms. The list figure did not change materially; the detail figure fell by about 30 times.
@@ -30,7 +31,7 @@ Earlier, before the detail query was narrowed, the same sandbox measured the det
 A budget is set above the worst value measured on the reference machine, with headroom for variance on a shared
 host. A budget is not a target to aim for.
 
-- **Detail, 300 ms.** Fifteen to eighteen times the measured 17–20 ms. It is set below the 538 ms the detail took when it
+- **Detail, 300 ms.** Fifteen to twenty-one times the measured 14–20 ms. It is set below the 538 ms the detail took when it
   loaded the whole register, so a return to that behaviour fails the run.
 - **List, 1200 ms.** About twice the worst measured p95 (646 ms).
 - **Sign-in, 3000 ms.** About eight times the worst measured value (378 ms).

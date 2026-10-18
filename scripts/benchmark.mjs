@@ -28,19 +28,26 @@ const percentile = (xs, p) => {
 };
 
 // ---- bundle -------------------------------------------------------------------------------------------------------
-const assets = join(root, 'apps', 'web', 'dist', 'assets');
+// The entry is the script the page itself names, not a file matched by name: the build also emits other index-* chunks.
+// The initial load is the entry plus the chunks the page preloads. Everything else is loaded on demand.
+const dist = join(root, 'apps', 'web', 'dist');
+const assets = join(dist, 'assets');
+const html = readFileSync(join(dist, 'index.html'), 'utf8');
+const entry = [...html.matchAll(/<script[^>]*\ssrc="\/assets\/([^"]+\.js)"/g)].map((m) => m[1])[0];
+const preloads = [...html.matchAll(/<link[^>]*rel="modulepreload"[^>]*href="\/assets\/([^"]+\.js)"/g)].map((m) => m[1]);
+if (!entry) throw new Error('index.html names no entry script');
+const gzipOf = (f) => gzipSync(readFileSync(join(assets, f)), { level: 9 }).length;
 let js = 0;
 let css = 0;
-let index = 0;
 for (const f of readdirSync(assets)) {
-  const gz = gzipSync(readFileSync(join(assets, f)), { level: 9 }).length;
-  if (f.endsWith('.js')) {
-    js += gz;
-    if (f.startsWith('index-')) index = gz;
-  } else if (f.endsWith('.css')) css += gz;
+  if (f.endsWith('.js')) js += gzipOf(f);
+  else if (f.endsWith('.css')) css += gzipOf(f);
 }
+const indexGz = gzipOf(entry);
+const initialGz = [entry, ...preloads].reduce((sum, f) => sum + gzipOf(f), 0);
 results.bundle = {
-  indexJs: check('bundle', 'indexJsGzipKb', index / 1024, budgets.bundle.indexJsGzipKb, 'KB'),
+  indexJs: check('bundle', 'indexJsGzipKb', indexGz / 1024, budgets.bundle.indexJsGzipKb, 'KB'),
+  initialJs: check('bundle', 'initialJsGzipKb', initialGz / 1024, budgets.bundle.initialJsGzipKb, 'KB'),
   allJs: check('bundle', 'allJsGzipKb', js / 1024, budgets.bundle.allJsGzipKb, 'KB'),
   css: check('bundle', 'cssGzipKb', css / 1024, budgets.bundle.cssGzipKb, 'KB'),
 };
