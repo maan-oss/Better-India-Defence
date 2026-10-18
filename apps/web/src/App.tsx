@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useSession } from './state/session';
+import { SecondFactor } from './pages/SecondFactor';
 import { useWorld } from './state/world';
 import { useTime } from './state/time';
 import { useData } from './state/data';
@@ -156,6 +157,7 @@ const Boot = ({ label }: { label: string }) => <BootScreen label={label} />;
 
 export function App() {
   const status = useSession((s) => s.status);
+  const mustEnrol = useSession((s) => s.mustEnrol);
   const role = useSession((s) => s.user?.role);
   const refresh = useSession((s) => s.refresh);
   const [setup, setSetup] = useState<SetupStatus | null>(null);
@@ -197,7 +199,7 @@ export function App() {
   // Navigation is a plain update, not a transition: React holds back a transition's Suspense reveal for ~300 ms.
   return (
     <BrowserRouter useTransitions={false}>
-      <ErrorBoundary area="Strata">{status === 'authenticated' ? <Authenticated /> : <Login />}</ErrorBoundary>
+      <ErrorBoundary area="Strata">{status === 'authenticated' ? (mustEnrol ? <SecondFactor /> : <Authenticated />) : <Login />}</ErrorBoundary>
     </BrowserRouter>
   );
 }

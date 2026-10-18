@@ -32,11 +32,16 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
   app.decorateRequest('user', null);
   app.decorateRequest('sessionToken', null);
   app.decorateRequest('cspNonce', null);
-  app.addHook('onRequest', async (req) => {
+  app.addHook('onRequest', async (req, reply) => {
     const token = readCookie(req, SESSION_COOKIE) ?? (req.url.startsWith('/api/ingest') ? null : bearer(req));
     if (token && token !== cfg.STRATA_SERVICE_TOKEN) {
       req.sessionToken = token;
       req.user = await p.auth.validate(token);
+    }
+    // A privileged account that has not yet set up its second factor can reach only the sign-in and enrolment routes.
+    // Checked here, for every route, so no route can forget it; the page itself is static and still loads.
+    if (req.user?.mfaPending && (req.url.startsWith('/api/') || req.url.startsWith('/ws')) && !req.url.startsWith('/api/auth/')) {
+      return reply.code(403).send({ error: 'a second factor must be set up before this account can be used', mfa: 'enrol' });
     }
   });
   app.addHook('onResponse', async (req, reply) => {

@@ -23,6 +23,7 @@ beforeAll(async () => {
   const cfg = loadConfig({
     NODE_ENV: 'test',
     STRATA_MODE: 'operational',
+    STRATA_MFA_REQUIRED: 'false',
     DATA_DIR: dir,
     STRATA_ADMIN_PASSWORD: ADMIN_PASSWORD,
     STRATA_SERVICE_TOKEN: 'test-service-token-0123456789',

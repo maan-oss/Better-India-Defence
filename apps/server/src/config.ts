@@ -24,6 +24,9 @@ const schema = z.object({
     .string()
     .regex(/^[0-9a-f]{64}$/i, 'must be 32 bytes hex')
     .optional(),
+  /** Privileged roles (administrator, analyst) must set up a second factor before using the service. Default: on in operational mode. */
+  STRATA_MFA_REQUIRED: z.enum(['true', 'false']).optional(),
+  STRATA_MFA_ISSUER: z.string().min(1).max(64).default('Strata'),
   /** Where the audit chain's head is anchored; keep it on storage the database account cannot rewrite. Default: DATA_DIR. */
   AUDIT_ANCHOR_FILE: z.string().optional(),
   /** Optional key (hex, 32 bytes or more) for an HMAC on each anchor line. */
@@ -48,10 +51,11 @@ const schema = z.object({
   STRATA_MODELS_DIR: z.string().optional(),
 });
 
-export type Config = Omit<z.infer<typeof schema>, 'STRATA_MODE' | 'STRATA_DEMO_USERS'> & {
+export type Config = Omit<z.infer<typeof schema>, 'STRATA_MODE' | 'STRATA_DEMO_USERS' | 'STRATA_MFA_REQUIRED'> & {
   dataDir: string;
   STRATA_MODE: 'operational' | 'demo';
   STRATA_DEMO_USERS: 'true' | 'false';
+  STRATA_MFA_REQUIRED: 'true' | 'false';
 };
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -62,7 +66,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const raw = parsed.data;
   const mode = raw.STRATA_MODE ?? (raw.NODE_ENV === 'test' ? 'demo' : 'operational');
   // Demo accounts share a published password, so they exist only in demo mode, whatever the environment says.
-  const c = { ...raw, STRATA_MODE: mode, STRATA_DEMO_USERS: mode === 'demo' ? (raw.STRATA_DEMO_USERS ?? 'true') : 'false' } as const;
+  // Demo accounts keep their published password and are not asked for a second factor; the operational install is.
+  const mfa = raw.STRATA_MFA_REQUIRED ?? (mode === 'operational' ? 'true' : 'false');
+  const c = { ...raw, STRATA_MODE: mode, STRATA_DEMO_USERS: mode === 'demo' ? (raw.STRATA_DEMO_USERS ?? 'true') : 'false', STRATA_MFA_REQUIRED: mfa } as const;
   if (mode === 'demo' && c.NODE_ENV === 'production') throw new Error('STRATA_MODE=demo is not allowed with NODE_ENV=production');
   if (c.NODE_ENV === 'production') {
     if (c.STRATA_SERVICE_TOKEN === 'dev-service-token-change-me') throw new Error('STRATA_SERVICE_TOKEN must be set in production');

@@ -4,6 +4,8 @@ export * from './random.ts';
 export * from './provenance.ts';
 export * from './rbac.ts';
 export * from './auth/password.ts';
+export * from './auth/totp.ts';
+export { sha1, hmacSha1 } from './auth/sha1.ts';
 export * from './facility/types.ts';
 export * from './facility/terrain.ts';
 export * from './facility/layout.ts';

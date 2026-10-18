@@ -16,7 +16,7 @@ const WINDOW = 400;
 let dir: string;
 let db: Db;
 const log = createLogger('error', false);
-const service = () => new AuthService(db, 12, { threshold: 3, windowMs: WINDOW });
+const service = () => new AuthService(db, 12, { lockout: { threshold: 3, windowMs: WINDOW } });
 
 beforeAll(async () => {
   dir = mkdtempSync(join(tmpdir(), 'strata-lockout-'));

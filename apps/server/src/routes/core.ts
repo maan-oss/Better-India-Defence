@@ -1,7 +1,8 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { getTerrainMode, FACILITY, passwordProblems, permissionsFor, ROLE_DESCRIPTIONS, type Role } from '@strata/domain';
 import type { Platform } from '../platform.ts';
+import type { SignIn } from '../auth/authService.ts';
 import { SESSION_COOKIE, audit, isService, parse, requirePerm } from '../http/guards.ts';
 
 /** Auth, ingestion, facility and system routes. */
@@ -19,11 +20,47 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
       await p.audit.append({ actor: b.username, role: 'none', action: 'login_failed', target: null, detail: { locked: Boolean(r) }, ip: req.ip });
       return reply.code(r ? 429 : 401).send({ error: r ? 'too many failed attempts; try again in a minute' : 'invalid credentials' });
     }
+    // The password was right, and the account has a second factor: no session until the code is given.
+    if ('mfa' in r && r.mfa === 'required') return { mfa: 'required', challenge: r.challenge, expiresAt: r.expiresAt };
+    return signedIn(req, reply, r);
+  });
+
+  /** The second step of sign-in: the code from the authenticator app for the challenge the password step issued. */
+  app.post('/api/auth/mfa/verify', { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } }, async (req, reply) => {
+    const b = parse(z.object({ challenge: z.string().min(16).max(128), code: z.string().min(6).max(8) }), req.body, reply);
+    if (!b) return;
+    const r = await p.auth.verifySecondFactor(b.challenge, b.code, req.ip);
+    if (!r) {
+      await p.audit.append({ actor: 'unknown', role: 'none', action: 'mfa_failed', target: null, detail: {}, ip: req.ip });
+      return reply.code(401).send({ error: 'that code is not valid, or the sign-in has expired; sign in again' });
+    }
+    return signedIn(req, reply, r);
+  });
+
+  /** Starts enrolling a second factor for the signed-in account. The secret is shown once, as a code and as an address. */
+  app.post('/api/auth/mfa/enrol', async (req, reply) => {
+    if (!req.user) return reply.code(401).send({ error: 'not signed in' });
+    if (!cfg.STORAGE_ENCRYPTION_KEY) return reply.code(409).send({ error: 'second factors are unavailable: this installation has no storage key (STORAGE_ENCRYPTION_KEY) to protect the secret' });
+    const { secret, uri } = await p.auth.beginSecondFactor(req.user.id, req.user.username);
+    await audit(p, req, 'mfa_enrolment_started', req.user.username, {});
+    return { secret, uri, issuer: cfg.STRATA_MFA_ISSUER };
+  });
+
+  app.post('/api/auth/mfa/enrol/confirm', async (req, reply) => {
+    if (!req.user || !req.sessionToken) return reply.code(401).send({ error: 'not signed in' });
+    const b = parse(z.object({ code: z.string().regex(/^\d{6}$/) }), req.body, reply);
+    if (!b) return;
+    if (!(await p.auth.confirmSecondFactor(req.user.id, b.code, req.sessionToken))) return reply.code(400).send({ error: 'that code does not match the new secret; check the time on this device and try the current code' });
+    await audit(p, req, 'mfa_enrolled', req.user.username, {});
+    return { ok: true, mfa: 'ok' };
+  });
+
+  async function signedIn(req: FastifyRequest, reply: FastifyReply, r: SignIn) {
     const secure = Boolean(cfg.TLS_CERT_FILE) || cfg.COOKIE_SECURE === 'true';
     void reply.header('set-cookie', `${SESSION_COOKIE}=${encodeURIComponent(r.token)}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${cfg.SESSION_TTL_HOURS * 3600}${secure ? '; Secure' : ''}`);
-    await p.audit.append({ actor: r.user.username, role: r.user.role, action: 'login', target: null, detail: {}, ip: req.ip });
-    return { user: r.user, permissions: permissionsFor(r.user.role), expiresAt: r.expiresAt, token: r.token };
-  });
+    await p.audit.append({ actor: r.user.username, role: r.user.role, action: 'login', target: null, detail: { mfa: r.mfa }, ip: req.ip });
+    return { user: r.user, permissions: permissionsFor(r.user.role), expiresAt: r.expiresAt, token: r.token, mfa: r.mfa };
+  }
 
   app.post('/api/auth/logout', async (req, reply) => {
     if (req.sessionToken) await p.auth.logout(req.sessionToken);
@@ -34,7 +71,8 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
 
   app.get('/api/auth/me', async (req, reply) => {
     if (!req.user) return reply.code(401).send({ error: 'not signed in', demo: cfg.STRATA_DEMO_USERS === 'true' ? { users: ['viewer', 'operator', 'analyst', 'admin'], password: cfg.NODE_ENV === 'production' ? null : cfg.STRATA_DEMO_PASSWORD } : null });
-    return { user: req.user, permissions: permissionsFor(req.user.role) };
+    const secondFactor = await p.auth.secondFactorState(req.user.id);
+    return { user: req.user, permissions: permissionsFor(req.user.role), secondFactor: { ...secondFactor, required: p.cfg.STRATA_MFA_REQUIRED === 'true', available: Boolean(p.cfg.STORAGE_ENCRYPTION_KEY) } };
   });
 
   // Pre-sign-in banner: what a terminal shows before authentication (classification, site, use notice).
@@ -218,6 +256,16 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     await audit(p, req, 'user_updated', u.username, { role: b.role, disabled: b.disabled, passwordChanged: Boolean(b.password) });
     return u;
   });
+  // A lost second-factor device: the administrator removes the factor, and the account enrols a new one at its next sign-in.
+  app.delete('/api/admin/users/:username/mfa', { preHandler: requirePerm('admin.users') }, async (req, reply) => {
+    const { username } = req.params as { username: string };
+    const u = (await p.auth.list()).find((x) => x.username === username);
+    if (!u) return reply.code(404).send({ error: 'not found' });
+    await p.auth.removeSecondFactor(u.id);
+    await audit(p, req, 'mfa_removed', username, {});
+    return { ok: true };
+  });
+
   // A locked username can be released by an administrator before the lock runs out. Audited.
   app.post('/api/admin/users/:username/unlock', { preHandler: requirePerm('admin.users') }, async (req) => {
     const { username } = req.params as { username: string };

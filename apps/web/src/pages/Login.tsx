@@ -25,7 +25,11 @@ function useZulu(): string {
 
 export function Login() {
   const login = useSession((s) => s.login);
+  const verifyCode = useSession((s) => s.verifyCode);
+  const cancelChallenge = useSession((s) => s.cancelChallenge);
+  const challenge = useSession((s) => s.challenge);
   const demo = useSession((s) => s.demo);
+  const [code, setCode] = useState('');
   const [banner, setBanner] = useState<Banner | null>(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -47,7 +51,8 @@ export function Login() {
     setBusy(true);
     setError(null);
     try {
-      await login(username, password);
+      if (challenge) await verifyCode(code);
+      else await login(username, password);
     } catch (err) {
       setError(err instanceof Error ? err.message : "sign-in failed");
     } finally {
@@ -88,10 +93,16 @@ export function Login() {
               {siteName}
               {siteSub ? ` · ${siteSub}` : ''}
             </p>
-            <div className="login-fields">
-              <Input id="u" label="Username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" spellCheck={false} autoCapitalize="none" />
-              <PasswordField id="p" label="Password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" autoFocus />
-            </div>
+            {challenge ? (
+              <div className="login-fields">
+                <Input id="code" label="Code from your authenticator app" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" autoFocus />
+              </div>
+            ) : (
+              <div className="login-fields">
+                <Input id="u" label="Username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" spellCheck={false} autoCapitalize="none" />
+                <PasswordField id="p" label="Password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" autoFocus />
+              </div>
+            )}
             {error && (
               <div style={{ marginTop: 12 }}>
                 <Alert tone="danger" title="Sign-in failed">
@@ -99,10 +110,15 @@ export function Login() {
                 </Alert>
               </div>
             )}
-            <button className="btn primary" disabled={busy || !username || !password}>
+            <button className="btn primary" disabled={busy || (challenge ? code.length !== 6 : !username || !password)}>
               {busy ? <span className="spinner" style={{ width: 14, height: 14, borderTopColor: '#ffffff' }} /> : null}
-              {busy ? 'Signing in…' : 'Sign in'}
+              {busy ? 'Signing in…' : challenge ? 'Verify code' : 'Sign in'}
             </button>
+            {challenge && (
+              <button type="button" className="btn ghost" style={{ marginTop: 8 }} onClick={() => { cancelChallenge(); setCode(''); }}>
+                Start again
+              </button>
+            )}
             <div className="consent" role="note">
               <b>Authorised use only</b>
               {banner?.notice ?? 'This system is for authorised use only. Activity is monitored and recorded.'} By signing in you acknowledge this notice.

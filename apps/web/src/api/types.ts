@@ -17,7 +17,7 @@ import type {
 export type { AlertRecord, EvidenceRef, FacilityDef, IncidentRecord, SensorDef, SensorStatusRecord, SurfacePatch, TrackSnapshot, UserRecord, Vec3, EpistemicState };
 
 export interface Me {
-  user: UserRecord;
+  user: UserRecord & { mfaPending?: boolean };
   permissions: string[];
 }
 

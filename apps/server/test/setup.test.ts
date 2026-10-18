@@ -15,7 +15,8 @@ import { buildApp } from '../src/app.ts';
 const dir = mkdtempSync(join(tmpdir(), 'strata-setup-'));
 
 describe('operational first run', () => {
-  const env = { NODE_ENV: 'test', STRATA_MODE: 'operational', DATA_DIR: dir, STRATA_SERVICE_TOKEN: 'test-service-token-0123456789', SIM_URL: 'http://127.0.0.1:9', LOG_LEVEL: 'error' };
+  // The first-run flow is what is under test; the second factor for the new administrator has its own tests (mfa.test.ts).
+  const env = { NODE_ENV: 'test', STRATA_MODE: 'operational', STRATA_MFA_REQUIRED: 'false', DATA_DIR: dir, STRATA_SERVICE_TOKEN: 'test-service-token-0123456789', SIM_URL: 'http://127.0.0.1:9', LOG_LEVEL: 'error' };
   let p: Platform;
 
   afterAll(async () => {

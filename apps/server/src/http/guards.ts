@@ -6,7 +6,8 @@ import type { Platform } from '../platform.ts';
 
 declare module 'fastify' {
   interface FastifyRequest {
-    user: UserRecord | null;
+    /** The signed-in account; `mfaPending` while a privileged account still has to set up its second factor. */
+    user: (UserRecord & { mfaPending: boolean }) | null;
     sessionToken: string | null;
     /** The style nonce of the application shell served for this request, if one was served. */
     cspNonce: string | null;

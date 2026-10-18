@@ -121,7 +121,9 @@ export class Platform {
     this.audit = new AuditLog(this.db, this.anchor);
     const anchored = await this.anchoredAudit();
     if (!anchored.ok) this.log.error({ problems: anchored.problems.slice(0, 5) }, 'audit chain anchors do not verify');
-    this.auth = new AuthService(this.db, cfg.SESSION_TTL_HOURS);
+    this.auth = new AuthService(this.db, cfg.SESSION_TTL_HOURS, {
+      mfa: { key: cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null, required: cfg.STRATA_MFA_REQUIRED === 'true', issuer: cfg.STRATA_MFA_ISSUER },
+    });
     await this.auth.ensureUsers(cfg.STRATA_DEMO_USERS === 'true', cfg.STRATA_DEMO_PASSWORD, cfg.STRATA_ADMIN_PASSWORD);
     if (!this.demo && (await this.auth.count()) === 0) await this.issueSetupCode();
     this.sensors = new SensorMonitor(this.db, this.hub);

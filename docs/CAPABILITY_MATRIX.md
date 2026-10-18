@@ -72,6 +72,7 @@ Defects found and fixed in this pass, recorded so they are not reintroduced:
 | Signed releases, reproducible builds, software bill of materials | Implemented, key held by the operator | `npm run release` writes a CycloneDX SBOM and a manifest of every shipped file's SHA-256, signed with Ed25519; `npm run release:verify` checks the signature and every digest. `npm run reproducible` builds twice from one checkout and compares every shipped file. Not shown: that two different machines give the same bytes |
 | Backup, restore and disaster recovery | Implemented, tested on the demonstration data | Whole-database and object-store backup with a manifest of digests; restore refuses a changed backup, a rewritten audit chain and a non-empty target. Procedure in `RECOVERY.md`. Not shown: restore on PostgreSQL, off-site copies, retention policy |
 | Multi-tenancy and classification labels | Not implemented | — |
+| Second factor (TOTP) | Implemented for privileged roles in operational mode | RFC 4226 and RFC 6238 vectors in tests; enrolment and sign-in in the console; `STRATA_MFA_REQUIRED`. Not shown: an authenticator app on a real device, a hardware token, or smartcard login (not available here) |
 | Content Security Policy | Implemented | On every response. Inline scripts and inline styles are refused. Style elements written at run time carry the shell's per-response nonce. Checked on every application page and the overlays, with a control. See `SECURITY.md` |
 | Hardware-backed key management | Not implemented | Keys come from environment variables |
 
