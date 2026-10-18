@@ -40,6 +40,7 @@ that it is suitable for classified or regulated use without independent assessme
 | Camera credentials | Stream URLs (which carry credentials) encrypted with AES-256-GCM when `STORAGE_ENCRYPTION_KEY` is set, and masked in every API response | `cameras/cameraService.ts` |
 | Interop parsing | CoT XML parsed without DTD/entity processing (declarations refused); NMEA checksums and MAVLink CRC_EXTRA verified; the MAVLink adapter never transmits | `interop/cot.ts`, `packages/adapters` |
 | Least privilege | Container runs as a non-root user; failure injection is administrator-only | `Dockerfile`, `rbac.ts` |
+| Release integrity | Each release has a CycloneDX SBOM and a manifest of SHA-256 digests for every shipped file, signed with Ed25519 (the private key is read from `STRATA_RELEASE_KEY_FILE` or `STRATA_RELEASE_KEY`, never stored in the repository); verification refuses a bad signature and names every changed file. Reproducibility is checked by building twice from one checkout | `scripts/release.mjs`, `scripts/lib/release.mjs`, `scripts/reproducible-check.mjs` |
 
 ## Not implemented / required before real use
 
@@ -74,6 +75,8 @@ that it is suitable for classified or regulated use without independent assessme
   strong tamper evidence.
 - **Key management.** Keys come from environment variables; there is no HSM/KMS integration or
   rotation tooling.
+- **Release signing key.** The Ed25519 key is an operator file or environment variable. It is not in hardware, and
+  there is no rotation or revocation list. Keep it off the build host where possible.
 - **Dependency hygiene.** `npm audit` reports no vulnerabilities after the test runner was upgraded to vitest 5. Before
   that, the audit reported one moderate and two critical advisories, all in the development-only test runner and its
   `tinypool` dependency (a prototype-pollution path to remote code execution, reachable only through the test runner).
