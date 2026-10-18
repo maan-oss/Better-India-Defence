@@ -108,7 +108,12 @@ export function Assets() {
                 <li key={a.id}>
                   <button type="button" className="as-row" aria-current={a.tag === id ? 'true' : undefined} onClick={() => nav(`/assets/${a.tag}`)}>
                     <span className="mono as-tag">{a.tag}</span>
-                    <span className="as-name">{a.name}</span>
+                    <span className="as-name">
+                      {a.name}
+                      <span className="muted" style={{ display: 'block', fontSize: 'var(--fs-caption)' }}>
+                        {titleCase(a.classification)} · {a.owner}
+                      </span>
+                    </span>
                     <span className={`chip ${AVAIL_TONE[a.availability.state]}`}>{AVAIL_LABEL[a.availability.state]}</span>
                     <span className="mono as-crit" title={`Criticality ${a.criticality} of 5`}>
                       C{a.criticality}
