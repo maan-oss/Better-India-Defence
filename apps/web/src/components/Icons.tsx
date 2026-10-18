@@ -17,6 +17,12 @@ export const Icon = {
       <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
     </svg>
   ),
+  Assets: () => (
+    <svg {...p}>
+      <path d="M12 3.5 20 7.5v9L12 20.5 4 16.5v-9z" />
+      <path d="M4 7.5 12 11.5l8-4M12 11.5v9" />
+    </svg>
+  ),
   Sensors: () => (
     <svg {...p}>
       <path d="M5 19a10 10 0 0 1 0-14M19 5a10 10 0 0 1 0 14M8.5 15.5a5 5 0 0 1 0-7M15.5 8.5a5 5 0 0 1 0 7" />

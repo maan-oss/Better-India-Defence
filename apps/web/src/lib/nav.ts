@@ -27,6 +27,7 @@ export const NAV: { group: string; items: NavItem[] }[] = [
     group: 'Systems',
     items: [
       { to: '/sensors', label: 'Sensors', icon: 'Sensors', keys: 'G S' },
+      { to: '/assets', label: 'Assets & maintenance', icon: 'Assets', perm: 'assets.view', keys: 'G A', short: 'Assets' },
       { to: '/system', label: 'System health', icon: 'Health', perm: 'system.view' },
       { to: '/simulation', label: 'Simulation lab', icon: 'Sim', perm: 'simulation.control', simulated: true },
       { to: '/audit', label: 'Audit', icon: 'Audit', perm: 'audit.view' },

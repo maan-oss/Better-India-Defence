@@ -23,6 +23,7 @@ import { lazyPage, warmCorePages } from './routes';
 const Operations = lazyPage('operations');
 const Incidents = lazyPage('incidents');
 const Sensors = lazyPage('sensors');
+const Assets = lazyPage('assets');
 const Reconstructions = lazyPage('reconstructions');
 const Evidence = lazyPage('evidence');
 const SimulationLab = lazyPage('simulationLab');
@@ -125,6 +126,8 @@ function Authenticated() {
             <Route path="/incidents/:id" element={<Incidents />} />
             <Route path="/sensors" element={<Sensors />} />
             <Route path="/sensors/:id" element={<Sensors />} />
+            <Route path="/assets" element={<Assets />} />
+            <Route path="/assets/:id" element={<Assets />} />
             <Route path="/reconstructions" element={<Reconstructions />} />
             <Route path="/reconstructions/:id" element={<Reconstructions />} />
             <Route path="/evidence" element={<Evidence />} />
