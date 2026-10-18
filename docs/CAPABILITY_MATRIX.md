@@ -25,6 +25,16 @@ an audit trail, a browser check and, where it matters, a measurement. Synthetic 
 | Browser suite (`npm run test:e2e`) | 25 tests. In the full run the 23 existing tests passed; one of the two new asset tests failed on an ambiguous selector in the test itself and was fixed. Both asset tests were then rerun on their own and pass. The full suite was not rerun after that fix |
 | Screenshots | Desktop and phone widths checked for the asset register: register, detail, each tab, the dependency editor |
 
+Second round, on the same branch, covering the Content Security Policy and the dependency audit:
+
+| Check | Result |
+|---|---|
+| Unit and integration tests (`npm test`) on vitest 5 | 20 files, 127 tests, all pass |
+| Browser suite (`npm run test:e2e`) on the final build, policy active | 25 of 25 pass in one full run |
+| Content Security Policy sweep (18 application pages, analyst session) | 0 refusals, 0 page errors |
+| Positive control for the sweep (injected inline script) | Refused by the policy and reported by the check, so a clean sweep means something |
+| Dependency audit (`npm audit`) | 0 vulnerabilities. Before the upgrade: 1 moderate and 2 critical, development-only |
+
 Defects found and fixed in this pass, recorded so they are not reintroduced:
 
 - A direct load of `/assets/:id` returned a JSON 404. The static-file rule blocked every path under `/assets/`, which is also where the build puts its chunks. The rule now targets paths with a file extension, and a test covers both sides.
@@ -58,11 +68,11 @@ Defects found and fixed in this pass, recorded so they are not reintroduced:
 | AI assistance | Partial | Deterministic copilot intents answer from the database. Language-model routing is optional and not tested here. No generative output is used as evidence |
 | Performance budgets | Designed, not measured | No budget is set and no repeatable benchmark suite exists yet. Figures in `REALITY_LIMITS.md` come from earlier sessions and were not reproduced in this pass |
 | Visual regression tests | Not implemented | Screenshots were checked by hand in this pass |
-| Dependency scanning | Partial | One moderate advisory in a development-only test dependency, recorded in `SECURITY.md`. Not re-run in this pass |
+| Dependency scanning | Implemented, not gated | `npm audit` reports no vulnerabilities after the test runner was upgraded to vitest 5 (checked in this pass). No audit runs automatically in a build gate yet |
 | Signed releases, reproducible builds, software bill of materials | Not implemented | — |
 | Backup, restore and disaster recovery | Not implemented | No tested restore procedure |
 | Multi-tenancy and classification labels | Not implemented | — |
-| Content Security Policy | Not implemented | `SECURITY.md` says the client uses no inline scripts, so a strict policy should be achievable; not yet added |
+| Content Security Policy | Partial | On every response. Scripts are strict (inline refused, checked with a control); inline styles are allowed because components set `style` attributes at run time. Checked on every application page. See `SECURITY.md` |
 | Hardware-backed key management | Not implemented | Keys come from environment variables |
 
 ## Software categories, and the decision for each
@@ -87,6 +97,7 @@ The inventory is a starting point, not a complete survey. "Not yet assessed" mea
 ## What the next session should check first
 
 1. Restart the demonstration server and confirm the asset register still seeds once and shows the synthetic label.
-2. Rerun the full browser suite, so the fixed selector is covered by a complete run.
-3. Decide, with the user, whether the Content Security Policy and the dependency advisory are the next hardening items.
-4. Begin roadmap item 2 (logistics) only after the asset module's behaviour has been reviewed by a person.
+2. Keep the browser suite and the page sweep in the routine: the sweep is what catches Content Security Policy refusals, which the suite does not report.
+3. Decide whether to remove the inline-style allowance. That needs the components that set `style` attributes at run time to be rewritten first.
+4. Gate the build on `npm audit`.
+5. Begin roadmap item 2 (logistics) only after the asset module's behaviour has been reviewed by a person.

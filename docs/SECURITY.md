@@ -31,7 +31,7 @@ that it is suitable for classified or regulated use without independent assessme
 | First run | With no user accounts, the service issues a one-time 8-character setup code (32-symbol alphabet, about 40 bits) from the OS CSPRNG, logs it and writes it to `<DATA_DIR>/setup-code.txt` (mode 600). The setup endpoints compare it in constant time, are rate-limited (10 per minute), refuse administrator passwords under 12 characters (the wizard also requires a strength rating of at least “fair”), delete the code once the administrator exists, and audit the account creation. Restarting the API from the console requires `admin.config` and is audited | `platform.ts`, `routes/setup.ts` |
 | Device cameras and positions | Browser-streamed camera frames and phone positions are accepted only from signed-in users with `ops.log`, for camera sources configured as device cameras and for existing teams; frames must be JPEG (SOI checked), size-limited and rate-limited; positions are range-checked and enter through the same ingest pipeline as any sensor | `routes/cameras.ts`, `routes/ops.ts` |
 | Ground imagery | Tile templates must be http(s) XYZ; tiles are fetched by each browser, so the template reveals the site's area to the tile server. The setup wizard warns before choosing a public server (OPSEC); use your own tile server on a closed network | `packages/domain/src/facility/site.ts`, `pages/Setup.tsx` |
-| HTTP hardening | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`; generic 500 messages (details only in logs) | `app.ts` |
+| HTTP hardening | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, a Content-Security-Policy (scripts from this host only; inline styles allowed, see below); generic 500 messages (details only in logs) | `app.ts`, `http/csp.ts` |
 | Logging | Structured JSON logs (pino); authorization headers, cookies and passwords redacted | `logger.ts` |
 | Biometric governance | Recognition only against deliberately enrolled people; watch-list entries require a recorded basis; enrolment, watch list, review and search are analyst-only; searches require a stated purpose; every enrolment, search, review and template change is audited; unmatched sightings purged after a configurable retention period (default 30 days, hourly job); quality gates (UNUSABLE faces never matched, POOR never STRONG); AI-enhanced images never matched; thresholds are settings to be set from the site's own measurements | `identity/identityService.ts`, `routes/vision.ts` |
 | Evidence integrity | Uploads streamed to storage with SHA-256 computed on the way in (de-duplicated by hash); every enhancement step records input and output hashes and parameters; evidence reports include the chain of custody from the audit log | `evidence/evidenceService.ts`, `vision/worker.ts` |
@@ -47,8 +47,13 @@ that it is suitable for classified or regulated use without independent assessme
   or certification (Common Criteria, ISO/IEC 27001, SOC 2, national accreditation) has been performed.
 - **No multi-factor authentication, SSO (SAML/OIDC) or smartcard login.** Passwords only.
 - **Lockout is basic**: in-memory, per username, 60 s after 5 failures — it resets on restart and is not shared between instances. No password-complexity policy beyond minimum length.
-- **No Content-Security-Policy header** yet (the client uses no inline scripts, so a strict CSP is
-  achievable).
+- **Content-Security-Policy is partial.** Every response carries a policy: scripts and fonts only from this host,
+  no plugins, no framing, WebSockets to this host, and images from this host, `data:`/`blob:` and the origin of the
+  configured basemap tile template only. Inline scripts are refused. **Inline styles are allowed** (`style-src
+  'unsafe-inline'`): several components set `style` attributes at run time, and with inline styles refused the
+  browser blocked them on eight pages, so removing the allowance needs those components rewritten first. Checked by
+  visiting every application page and recording refusals, with a control that proves an injected inline script is
+  refused and reported.
 - **Service token is a shared secret**, not per-device mutual TLS. Real sensor networks should use
   mTLS with per-device certificates and network segmentation. The field adapters speak plain UDP/TCP
   on the sensor side (as NMEA, MAVLink and CoT normally do): keep them on an isolated network segment,
@@ -67,9 +72,11 @@ that it is suitable for classified or regulated use without independent assessme
   strong tamper evidence.
 - **Key management.** Keys come from environment variables; there is no HSM/KMS integration or
   rotation tooling.
-- **Dependency hygiene.** `npm audit` currently reports a moderate advisory in the development-only
-  test runner (vitest). Production deployments should pin, mirror and scan dependencies, and build
-  images reproducibly.
+- **Dependency hygiene.** `npm audit` reports no vulnerabilities after the test runner was upgraded to vitest 5. Before
+  that, the audit reported one moderate and two critical advisories, all in the development-only test runner and its
+  `tinypool` dependency (a prototype-pollution path to remote code execution, reachable only through the test runner).
+  The production dependency tree reported none at any point. Production deployments should still pin, mirror and scan
+  dependencies, and build images reproducibly.
 
 ## Reporting
 

@@ -339,6 +339,6 @@ anyone, with current physics and technology. The answer to each is **no**.
   ffmpeg, the vision models and the adapters), but the development environment had no Docker daemon, so
   the image has not been built or run. `npm run build && npm start`, the bundled vision worker and the
   bundled adapter (the same artefacts the image runs) were verified.
-- **Dependency advisory.** `npm audit` reports a moderate advisory in the test runner (vitest
-  `@vitest/mocker`), a development-only dependency not shipped in the build. Fixing it requires a
-  major-version upgrade that has not been done.
+- **Dependency advisories.** The test runner had one moderate and two critical advisories (vitest and its `tinypool`
+  dependency), development-only and not shipped in the build. The test runner is now vitest 5, and `npm audit` reports
+  no vulnerabilities. Nothing gates a build on the audit yet.

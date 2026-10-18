@@ -65,8 +65,7 @@ depends on it is designed.
 The current controls, their tests and the gaps are in `SECURITY.md` and `CAPABILITY_MATRIX.md`. The gaps that bear on
 the platform direction are: no multi-factor authentication, single sign-on or smartcard login; no hardware-backed key
 management; audit records are hash-chained but not anchored outside the database; releases are not signed and builds are
-not reproducible; no software bill of materials is produced; one moderate advisory remains in a development-only
-dependency; there is no backup and restore procedure with a tested recovery; and there is no tenancy or organisational
+not reproducible; no software bill of materials is produced; the audit is clean but nothing gates a build on it; there is no backup and restore procedure with a tested recovery; and there is no tenancy or organisational
 boundary inside one deployment. None of these is treated as solved, and none is claimed as compliant.
 
 ## Roadmap, in dependency order
@@ -86,7 +85,7 @@ boundary inside one deployment. None of these is treated as solved, and none is 
 6. **Administration and governance.** Partly built (role-based access, audit verification, configuration). Missing:
    organisational boundaries inside one deployment, data classification on records, and policy objects that the
    permission checks read.
-7. **Security hardening.** Content Security Policy, multi-factor authentication design, audit anchoring, a software
+7. **Security hardening.** Removing the inline-style allowance from the Content Security Policy, multi-factor authentication design, audit anchoring, a software
    bill of materials and a dependency gate in the build, and a restore test.
 8. **Performance budgets.** Set and measure before optimising. No budget is claimed until a repeatable benchmark exists.
 
