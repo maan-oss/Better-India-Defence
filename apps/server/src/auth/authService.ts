@@ -103,7 +103,7 @@ export class AuthService {
   }
 
   async list(): Promise<UserRecord[]> {
-    return (await this.db.query<{ id: string; username: string; display_name: string; role: Role; disabled: boolean; clearance: Classification; organisation: string }>('SELECT id, username, display_name, role, disabled, clearance, organisation FROM users ORDER BY username')).rows.map((r) => ({ id: r.id, username: r.username, displayName: r.display_name, role: r.role, disabled: r.disabled, clearance: r.clearance, organisation: r.organisation }));
+    return (await this.db.query<{ id: string; username: string; display_name: string; role: Role; disabled: boolean; clearance: Classification; organisation: string; totp_enabled: boolean }>('SELECT id, username, display_name, role, disabled, clearance, organisation, totp_enabled FROM users ORDER BY username')).rows.map((r) => ({ id: r.id, username: r.username, displayName: r.display_name, role: r.role, disabled: r.disabled, secondFactor: r.totp_enabled, clearance: r.clearance, organisation: r.organisation }));
   }
 
   /** Forgets the failures for a username, so it can sign in again at once (an administrator's action, audited by the route). */

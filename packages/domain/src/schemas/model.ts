@@ -194,6 +194,8 @@ export interface UserRecord {
   clearance?: 'UNCLASSIFIED' | 'RESTRICTED' | 'CONFIDENTIAL' | 'SECRET';
   /** The organisation the person belongs to. */
   organisation?: string;
+  /** Whether the account has an enrolled second factor (an authenticator-app code). */
+  secondFactor?: boolean;
 }
 
 export interface SensorStatusRecord {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Role } from '@strata/domain/client';
-import { get, patch, post } from '../api/client';
+import { del, get, patch, post } from '../api/client';
 import type { UserRecord } from '../api/types';
 import { ErrorNote, Loading, Modal, useAsync } from '../components/common';
 import { useOnWatch } from '../components/ops/OnWatch';
@@ -117,6 +117,20 @@ export function Admin() {
                             onSelect: () => void update(u, { role: r }, `${u.displayName} is now ${r === 'viewer' ? 'a' : 'an'} ${r}`),
                           })),
                           { label: 'Reset password…', icon: <KeyRound size={14} />, separatorBefore: true, onSelect: () => setResetFor(u) },
+                          {
+                            label: u.secondFactor ? 'Remove second factor…' : 'No second factor enrolled',
+                            disabled: !u.secondFactor,
+                            onSelect: () => {
+                              // The account signs out and enrols a new factor at its next sign-in, so confirm first.
+                              if (!window.confirm(`Remove the second factor for ${u.displayName}? They will be signed out and must enrol a new one.`)) return;
+                              void del(`/api/admin/users/${encodeURIComponent(u.username)}/mfa`)
+                                .then(() => {
+                                  toast({ type: 'success', title: `Second factor removed for ${u.displayName}`, description: 'Recorded in the audit log' });
+                                  users.reload();
+                                })
+                                .catch((e: unknown) => toast({ type: 'error', title: 'Not removed', description: e instanceof Error ? e.message : String(e) }));
+                            },
+                          },
                           { label: 'Copy username', icon: <Copy size={14} />, onSelect: () => void navigator.clipboard.writeText(u.username).then(() => toast({ type: 'success', title: 'Username copied', description: u.username })) },
                           ...(u.disabled ? [{ label: 'Enable account', icon: <UserCheck size={14} />, separatorBefore: true, onSelect: () => void update(u, { disabled: false }, `${u.displayName} can sign in again`) }] : []),
                         ]}
