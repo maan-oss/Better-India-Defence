@@ -17,6 +17,7 @@ import { contentSecurityPolicy } from './http/csp.ts';
 import { registerSite } from './routes/site.ts';
 import { registerInterop } from './routes/interop.ts';
 import { registerSetup } from './routes/setup.ts';
+import { registerBackup } from './routes/backup.ts';
 
 export async function buildApp(p: Platform): Promise<FastifyInstance> {
   const cfg = p.cfg;
@@ -64,6 +65,7 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
   registerSite(app, p);
   registerInterop(app, p);
   registerSetup(app, p);
+  registerBackup(app, p);
 
   app.get('/ws', { websocket: true }, (socket, req) => {
     if (!req.user) {

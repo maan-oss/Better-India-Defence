@@ -15,7 +15,7 @@ interface AuditInput {
   ip?: string | null;
 }
 
-interface AuditRecord extends Required<Omit<AuditInput, 'detail'>> {
+export interface AuditRecord extends Required<Omit<AuditInput, 'detail'>> {
   seq: number;
   t: number;
   detail: Record<string, unknown>;
@@ -72,14 +72,28 @@ export class AuditLog {
     return next;
   }
 
-  async verify(): Promise<{ ok: boolean; checked: number; brokenAt: number | null }> {
+  async verify(): Promise<ChainCheck> {
     const rows = (await this.db.query<AuditRecord>('SELECT seq, t, actor, role, action, target, detail, ip, prev_hash, hash FROM audit_events ORDER BY seq')).rows;
-    let prev = 'GENESIS';
-    for (const r of rows) {
-      const h = createHash('sha256').update(prev).update(canonical(r)).digest('hex');
-      if (r.prev_hash !== prev || r.hash !== h) return { ok: false, checked: rows.length, brokenAt: r.seq };
-      prev = r.hash;
-    }
-    return { ok: true, checked: rows.length, brokenAt: null };
+    return verifyChain(rows);
   }
+}
+
+export interface ChainCheck {
+  ok: boolean;
+  checked: number;
+  brokenAt: number | null;
+  /** The hash of the last record that verified: the head of the chain. */
+  head: string | null;
+}
+
+/** Recomputes the chain over records in sequence order. Used on the live table and on a backup before it is loaded. */
+export function verifyChain(records: AuditRecord[]): ChainCheck {
+  const rows = [...records].sort((a, b) => a.seq - b.seq);
+  let prev = 'GENESIS';
+  for (const r of rows) {
+    const h = createHash('sha256').update(prev).update(canonical(r)).digest('hex');
+    if (r.prev_hash !== prev || r.hash !== h) return { ok: false, checked: rows.length, brokenAt: r.seq, head: prev === 'GENESIS' ? null : prev };
+    prev = r.hash;
+  }
+  return { ok: true, checked: rows.length, brokenAt: null, head: prev === 'GENESIS' ? null : prev };
 }

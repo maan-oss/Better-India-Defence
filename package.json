@@ -23,6 +23,8 @@
     "release": "node scripts/release.mjs sign",
     "release:verify": "node scripts/release.mjs verify",
     "reproducible": "node scripts/reproducible-check.mjs",
+    "backup": "node apps/server/dist/backup.js backup",
+    "restore": "node apps/server/dist/backup.js restore",
     "verify": "npm run typecheck && npm run lint && npm run test && npm run build && npm run audit",
     "lint": "eslint .",
     "test": "vitest run",

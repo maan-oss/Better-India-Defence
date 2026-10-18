@@ -7,6 +7,7 @@ await build({ ...common, entryPoints: ['src/main.ts'], outfile: 'dist/main.js' }
 await build({ ...common, entryPoints: ['src/reconstruction/worker.ts'], outfile: 'dist/worker.js' });
 await build({ ...common, entryPoints: ['src/vision/worker.ts'], outfile: 'dist/visionWorker.js' });
 await build({ ...common, entryPoints: ['src/seed.ts'], outfile: 'dist/seed.js' });
+await build({ ...common, entryPoints: ['src/backup/cli.ts'], outfile: 'dist/backup.js' });
 mkdirSync('dist/migrations', { recursive: true });
 cpSync('src/db/migrations', 'dist/migrations', { recursive: true });
 console.log('server build complete');
