@@ -157,16 +157,37 @@ export class AssetService {
     if (clash.rows.length) throw new AssetError(`tag ${input.tag} is already in use`, 409);
     const id = `ast-${randomUUID().slice(0, 12)}`;
     const t = this.now();
-    if (input.stock && input.category !== 'supply') throw new AssetError('stock applies only to a supply item', 400);
-    await this.db.transaction(async (q) => {
-      await q.query(
-        `INSERT INTO assets (id, tag, name, category, status, criticality, zone_id, manufacturer, model, serial, commissioned_at, warranty_until, notes, source, created_by, updated_by, updated_at, classification, owner, shared_with, stock_quantity, reorder_level, stock_unit)
-         VALUES ($1,$2,$3,$4,'in_service',$5,$6,$7,$8,$9,$10,$11,$12,'operator',$13,$13,$14,$15,$16,$17,$18,$19,$20)`,
-        [id, input.tag, input.name, input.category, input.criticality, input.zoneId ?? null, input.manufacturer ?? null, input.model ?? null, input.serial ?? null, input.commissionedAt ?? null, input.warrantyUntil ?? null, input.notes ?? null, actor, t, input.classification ?? 'UNCLASSIFIED', input.owner ?? 'site', input.sharedWith ?? [], input.stock?.quantity ?? null, input.stock?.reorderLevel ?? null, input.stock?.unit ?? null],
-      );
-      await event(q, id, 'created', { tag: input.tag, name: input.name, category: input.category, criticality: input.criticality, classification: input.classification ?? 'UNCLASSIFIED', owner: input.owner ?? 'site' }, actor, t);
-    });
+    await this.db.transaction((q) => this.insertAsset(q, id, input, actor, t));
     return this.detail(id);
+  }
+
+  /** The tags already in the register: an import checks its rows against these before anything is written. */
+  async tags(): Promise<Set<string>> {
+    return new Set((await this.db.query<{ tag: string }>('SELECT tag FROM assets')).rows.map((r) => r.tag));
+  }
+
+  /**
+   * Writes a checked import in one transaction: either every row is added or none is. A tag that was taken after the file
+   * was checked refuses the whole import.
+   */
+  async importAssets(inputs: AssetInput[], actor: string): Promise<number> {
+    const t = this.now();
+    await this.db.transaction(async (q) => {
+      const clash = await q.query<{ tag: string }>('SELECT tag FROM assets WHERE tag = ANY($1)', [inputs.map((i) => i.tag)]);
+      if (clash.rows.length) throw new AssetError(`tag ${clash.rows[0]!.tag} is already in use`, 409);
+      for (const input of inputs) await this.insertAsset(q, `ast-${randomUUID().slice(0, 12)}`, input, actor, t);
+    });
+    return inputs.length;
+  }
+
+  private async insertAsset(q: Queryable, id: string, input: AssetInput, actor: string, t: number): Promise<void> {
+    if (input.stock && input.category !== 'supply') throw new AssetError('stock applies only to a supply item', 400);
+    await q.query(
+      `INSERT INTO assets (id, tag, name, category, status, criticality, zone_id, manufacturer, model, serial, commissioned_at, warranty_until, notes, source, created_by, updated_by, updated_at, classification, owner, shared_with, stock_quantity, reorder_level, stock_unit)
+       VALUES ($1,$2,$3,$4,'in_service',$5,$6,$7,$8,$9,$10,$11,$12,'operator',$13,$13,$14,$15,$16,$17,$18,$19,$20)`,
+      [id, input.tag, input.name, input.category, input.criticality, input.zoneId ?? null, input.manufacturer ?? null, input.model ?? null, input.serial ?? null, input.commissionedAt ?? null, input.warrantyUntil ?? null, input.notes ?? null, actor, t, input.classification ?? 'UNCLASSIFIED', input.owner ?? 'site', input.sharedWith ?? [], input.stock?.quantity ?? null, input.stock?.reorderLevel ?? null, input.stock?.unit ?? null],
+    );
+    await event(q, id, 'created', { tag: input.tag, name: input.name, category: input.category, criticality: input.criticality, classification: input.classification ?? 'UNCLASSIFIED', owner: input.owner ?? 'site' }, actor, t);
   }
 
   async update(id: string, patch: AssetPatch, actor: string): Promise<AssetDetail> {

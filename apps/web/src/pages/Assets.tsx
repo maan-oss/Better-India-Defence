@@ -37,6 +37,8 @@ const byTag = (a: { tag: string }, b: { tag: string }) => a.tag.localeCompare(b.
 
 /** ASSETS — equipment and infrastructure: what depends on what, what a fault would take down, and maintenance due. */
 export function Assets() {
+  const [importing, setImporting] = useState(false);
+  const can = useSession((st) => st.can);
   const { id } = useParams();
   const nav = useNavigate();
   const [version, setVersion] = useState(0);
@@ -69,6 +71,11 @@ export function Assets() {
         <div className="as-search">
           <SearchField label="Find asset" placeholder="Tag, name or category" value={filter} onValueChange={setFilter} />
         </div>
+        {can('assets.edit') && (
+          <Button variant="secondary" onClick={() => setImporting((v) => !v)}>
+            {importing ? 'Close import' : 'Import CSV'}
+          </Button>
+        )}
         <Button variant="secondary" onClick={list.reload}>
           Refresh
         </Button>
@@ -83,6 +90,14 @@ export function Assets() {
       )}
       <div className="page-body split">
         <div className="scroll as-list-pane">
+          {importing && (
+            <ImportAssets
+              onDone={() => {
+                setImporting(false);
+                changed();
+              }}
+            />
+          )}
           {list.error && <ErrorNote error={list.error} />}
           {!list.data && !list.error && <Loading />}
           {list.data && rows.length === 0 && <p className="muted">The register is empty. Assets are added by an operator with assets.edit rights.</p>}
@@ -109,6 +124,99 @@ export function Assets() {
         </div>
       </div>
     </div>
+  );
+}
+
+interface ImportResult {
+  committed: boolean;
+  rows: number;
+  problems: { row: number; column?: string; message: string }[];
+  preview: { row: number; tag: string; name: string; category: string; classification: string; owner: string }[];
+}
+
+/**
+ * Loads assets from a CSV file. The file is checked first and nothing is written: the problems are listed by row and
+ * column. Only a file with no problems can be imported, and the import is all or nothing.
+ */
+function ImportAssets({ onDone }: { onDone: () => void }) {
+  const [csv, setCsv] = useState('');
+  const [result, setResult] = useState<ImportResult | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const load = async (file: File | undefined) => {
+    if (file) setCsv(await file.text());
+  };
+  const check = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      setResult(await post<ImportResult>('/api/assets/import', { csv, commit: false }));
+    } catch (x) {
+      setErr(message(x));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const commit = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      await post('/api/assets/import', { csv, commit: true });
+      onDone();
+    } catch (x) {
+      setErr(message(x));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const clean = result !== null && result.problems.length === 0 && result.rows > 0;
+  return (
+    <section className="as-form" aria-label="Import assets from CSV" style={{ margin: '0 12px 12px' }}>
+      <h3>Import assets</h3>
+      <p className="muted">
+        One asset per row. Columns: tag, name, category, criticality, and optionally zone_id, manufacturer, model, serial, commissioned_at, warranty_until,
+        notes, classification, owner, shared_with (separated by semicolons), stock_quantity, reorder_level, stock_unit.
+      </p>
+      <input type="file" accept=".csv,text/csv" aria-label="CSV file" onChange={(e) => void load(e.target.files?.[0])} />
+      <Textarea label="Or paste the CSV" value={csv} maxLength={1000000} onChange={(e) => {
+        setCsv(e.target.value);
+        setResult(null);
+      }} />
+      <div className="as-actions">
+        <Button variant="secondary" disabled={busy || csv.trim() === ''} onClick={() => void check()}>
+          Check the file
+        </Button>
+        <Button disabled={busy || !clean} onClick={() => void commit()}>
+          {result ? `Import ${result.rows} assets` : 'Import'}
+        </Button>
+      </div>
+      {result && result.problems.length > 0 && (
+        <table className="table" aria-label="Problems in the file">
+          <thead>
+            <tr>
+              <th>Row</th>
+              <th>Column</th>
+              <th>Problem</th>
+            </tr>
+          </thead>
+          <tbody>
+            {result.problems.map((p, i) => (
+              <tr key={i}>
+                <td>{p.row === 0 ? 'File' : p.row}</td>
+                <td className="mono">{p.column ?? '—'}</td>
+                <td>{p.message}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      {result && result.problems.length === 0 && <p className="note">{result.rows} rows check. Importing writes all of them, or none.</p>}
+      {err && (
+        <p className="as-error" role="alert">
+          {err}
+        </p>
+      )}
+    </section>
   );
 }
 

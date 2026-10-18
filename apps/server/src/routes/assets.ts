@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
-import { AssetInput, AssetPatch, CompleteInput, DependencyInput, ImpactQuery, PlanInput, RetireInput, ReorderDecisionInput, ReorderInput, StatusInput, StockChangeInput, access, mayCreateAt, type AssetView, type Action, type Subject } from '@strata/domain';
+import { AssetInput, AssetPatch, planAssetImport, CompleteInput, DependencyInput, ImpactQuery, PlanInput, RetireInput, ReorderDecisionInput, ReorderInput, StatusInput, StockChangeInput, access, mayCreateAt, type AssetView, type Action, type Subject } from '@strata/domain';
 import type { Platform } from '../platform.ts';
 import { audit, parse, requirePerm } from '../http/guards.ts';
 import { AssetError } from '../assets/assetService.ts';
@@ -124,6 +124,27 @@ export function registerAssets(app: FastifyInstance, p: Platform): void {
       const d = await a.create(input, req.user!.username);
       await audit(p, req, 'asset_created', d.asset.id, { tag: b.tag, category: b.category, criticality: b.criticality, classification: input.classification, owner: input.owner });
       return d;
+    });
+  });
+
+  /**
+   * Asset register import from CSV. A dry run (the default) checks every row and returns the problems by row and column;
+   * the commit writes all rows in one transaction, and only when the whole file checks. Both are recorded in the audit log.
+   */
+  app.post('/api/assets/import', { preHandler: requirePerm('assets.edit') }, async (req, reply) => {
+    const b = parse(z.object({ csv: z.string().min(1).max(1_000_000), commit: z.boolean().default(false) }), req.body, reply);
+    if (!b) return;
+    const plan = planAssetImport(b.csv, { existingTags: await a.tags(), subject: subjectOf(req) });
+    const preview = plan.rows.slice(0, 20).map((r) => ({ row: r.row, tag: r.input.tag, name: r.input.name, category: r.input.category, classification: r.input.classification ?? 'UNCLASSIFIED', owner: r.input.owner ?? req.user!.organisation }));
+    if (!b.commit) return { committed: false, rows: plan.rows.length, problems: plan.problems, preview };
+    if (plan.problems.length) {
+      await audit(p, req, 'asset_import_refused', null, { problems: plan.problems.length });
+      return reply.code(400).send({ error: 'the import was refused and nothing was written; correct the rows and import again', problems: plan.problems });
+    }
+    return run(reply, async () => {
+      const imported = await a.importAssets(plan.rows.map((r) => r.input), req.user!.username);
+      await audit(p, req, 'asset_import', null, { imported });
+      return reply.code(201).send({ committed: true, imported });
     });
   });
 

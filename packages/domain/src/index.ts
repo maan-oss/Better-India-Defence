@@ -21,6 +21,7 @@ export * from './schemas/ingest.ts';
 export * from './schemas/assets.ts';
 export * from './assets/model.ts';
 export * from './assets/views.ts';
+export * from './assets/import.ts';
 export * from './schemas/model.ts';
 export * from './fusion/kalman.ts';
 export * from './fusion/engine.ts';
