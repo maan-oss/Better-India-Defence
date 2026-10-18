@@ -69,8 +69,6 @@
 .topbar .user-btn span { background: none; }
 .topbar .island-ghost { background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 .topbar .tb-bell-n { box-shadow: none; }
-/* Content that scrolls beneath the bar is softened by a blur that fades out below the controls, so the site name stays legible. */
-.topbar::before { content: ''; position: absolute; inset: -8px 0 -28px; z-index: -1; pointer-events: none; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); -webkit-mask: linear-gradient(#000 55%, transparent); mask: linear-gradient(#000 55%, transparent); }
 .island-panel { border-radius: 22px; }
 .island.has-crit { border-color: var(--st-critical-line); }
 .rail { border-radius: 28px; }
@@ -124,7 +122,6 @@ input.input, select.input { border-radius: 999px; padding: 0 14px; }
 
 /* Reduced transparency: the same shapes on a solid surface. */
 @media (prefers-reduced-transparency: reduce) {
-  .topbar::before { -webkit-backdrop-filter: none; backdrop-filter: none; -webkit-mask: none; mask: none; background: var(--bg-1); }
   .btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .rail,
   .inbox-pop, .site-pop, .island-panel, .cmd, .toast, .modal, .glass, .map-modes, .map-dock, .compass, .scalebar {
     background: var(--bg-2);

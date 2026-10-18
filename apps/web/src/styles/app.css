@@ -165,7 +165,7 @@ h1, h2, h3, h4, h5 { text-wrap: balance; }
 .btn.ghost:hover { background: var(--bg-3); color: var(--text-0); }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
-.btn.small { height: 24px; padding: 0 8px; font-size: var(--fs-caption); border-radius: 5px; }
+.btn.small { height: 24px; padding: 0 8px; font-size: var(--fs-caption); border-radius: 999px; }
 .btn.large { height: 36px; padding: 0 14px; font-size: var(--fs-body-lg); }
 .btn.icon { width: 28px; padding: 0; }
 .btn.small.icon { width: 24px; }
@@ -188,10 +188,10 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .input::placeholder { color: var(--text-3); }
 
 /* Segmented control (Radix ToggleGroup) and plain button groups. */
-.seg { display: inline-flex; align-items: center; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--bg-0); flex: none; padding: 2px; gap: 2px; }
+.seg { display: inline-flex; align-items: center; border: 1px solid var(--line-2); border-radius: 999px; background: var(--bg-0); flex: none; padding: 2px; gap: 2px; }
 .seg.fill { display: flex; }
 .seg.fill > * { flex: 1; }
-.seg > button { height: 22px; padding: 0 10px; background: transparent; border: 0; border-radius: 4px; color: var(--text-2); cursor: pointer; font-size: var(--fs-caption); font-weight: 500; white-space: nowrap; transition: color var(--t-fast), background var(--t-fast); }
+.seg > button { height: 22px; padding: 0 10px; background: transparent; border: 0; border-radius: 999px; color: var(--text-2); cursor: pointer; font-size: var(--fs-caption); font-weight: 500; white-space: nowrap; transition: color var(--t-fast), background var(--t-fast); }
 .seg.sm > button { height: 20px; padding: 0 8px; }
 .seg > button:hover:not(:disabled) { color: var(--text-0); }
 .seg > button[data-state='on'], .seg > button.on { color: var(--text-0); background: var(--bg-4); box-shadow: 0 0 0 1px var(--line-2); }
@@ -207,7 +207,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .tab { height: 30px; align-self: center; padding: 0 14px; border-radius: 999px; }
 .tab[data-state='active'] { background: var(--bg-4); color: var(--text-0); }
 
-.kbd { font-family: var(--font-sans); font-size: var(--fs-micro); font-weight: 500; border: 1px solid var(--line-2); border-radius: 4px; padding: 0 5px; height: 18px; line-height: 16px; color: var(--text-2); background: var(--bg-2); }
+.kbd { font-family: var(--font-sans); font-size: var(--fs-micro); font-weight: 500; border: 1px solid var(--line-2); border-radius: 999px; padding: 0 5px; height: 18px; line-height: 16px; color: var(--text-2); background: var(--bg-2); }
 .check { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 4px 0; color: var(--text-1); user-select: none; transition: color var(--t-fast); }
 .check input { appearance: none; width: 14px; height: 14px; border: 1px solid var(--line-3); border-radius: 4px; margin: 0; display: grid; place-content: center; transition: background var(--t-fast), border-color var(--t-fast); flex: none; background: var(--bg-0); cursor: pointer; }
 .check input:checked { background: var(--text-0); border-color: var(--text-0); }
@@ -244,7 +244,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .note.ok { border-color: var(--st-normal-line); background: var(--st-normal-tint); }
 
 /* State chips: shape + text + colour (Radix tint / border / text steps). */
-.chip { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 7px; border-radius: var(--radius-sm); font-size: var(--fs-micro); letter-spacing: 0.04em; font-weight: 600; text-transform: uppercase; border: 1px solid var(--line-2); color: var(--text-1); white-space: nowrap; background: var(--bg-2); }
+.chip { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 7px; border-radius: 999px; font-size: var(--fs-micro); letter-spacing: 0.04em; font-weight: 600; text-transform: uppercase; border: 1px solid var(--line-2); color: var(--text-1); white-space: nowrap; background: var(--bg-2); }
 .chip i { width: 7px; height: 7px; display: inline-block; flex: none; }
 .chip.CAPTURED i { background: var(--captured); border-radius: 50%; }
 .chip.CAPTURED { color: var(--captured); }

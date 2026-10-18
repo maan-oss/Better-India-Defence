@@ -167,7 +167,6 @@ tone and spacing rather than from boxes inside boxes.
 - **Plain** buttons carry no material until hovered or pressed.
 - **The top bar has no surface of its own.** Each control in it is glass at one height (`--tb-ctl`, 36 px). Icon-only
   controls are circles of that size, the search field and status pill are capsules, and the site name is plain text.
-  Content scrolling beneath the bar is softened by a blur that fades out below the controls.
 - **Status labels** (`span.chip`) are flat. The tint is the only signal, so no second outline appears on them.
 - **Floating bars on a phone**: the top bar floats over the head of the page and the tab bar over its foot. `.page`
   and `.field` reserve both, so no control sits under either bar.
