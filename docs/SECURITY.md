@@ -51,7 +51,7 @@ that it is suitable for classified or regulated use without independent assessme
   no plugins, no framing, WebSockets to this host, and images from this host, `data:`/`blob:` and the origin of the
   configured basemap tile template only. Inline scripts are refused. **Inline styles are allowed** (`style-src
   'unsafe-inline'`): several components set `style` attributes at run time, and with inline styles refused the
-  browser blocked them on eight pages, so removing the allowance needs those components rewritten first. Checked by
+  browser blocked them on several pages, so removing the allowance needs those components rewritten first. Checked by
   visiting every application page and recording refusals, with a control that proves an injected inline script is
   refused and reported.
 - **Service token is a shared secret**, not per-device mutual TLS. Real sensor networks should use
