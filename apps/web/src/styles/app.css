@@ -19,6 +19,8 @@ button, input, select, textarea { font: inherit; color: inherit; letter-spacing:
 a { color: var(--text-0); text-underline-offset: 2px; text-decoration-color: var(--line-3); }
 a:hover { text-decoration-color: var(--text-1); }
 h1, h2, h3, h4, h5 { text-wrap: balance; }
+/* One style for every section heading: sentence case, the body size, semibold, primary text. Classes below may refine it. */
+h4 { font-size: var(--fs-body); font-weight: 600; color: var(--text-1); }
 ::selection { background: rgba(240, 238, 230, 0.2); color: var(--text-0); }
 :focus { outline: none; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
@@ -223,10 +225,10 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
    separated by spacing and by the inset hairlines inside tables. */
 .panel { --panel: var(--bg-2); background: var(--panel); border-radius: var(--radius-xl); }
 .panel-h { display: flex; align-items: center; gap: var(--sp-2); min-height: 48px; padding: 0 var(--sp-4); }
-.panel-h h3 { margin: 0; font-size: var(--fs-body); font-weight: 600; color: var(--text-0); }
+.panel-h h3 { margin: 0; font-size: var(--fs-lead); font-weight: 600; letter-spacing: -0.01em; color: var(--text-0); }
 .section { padding: var(--sp-4); border-bottom: 1px solid var(--line); }
 .section:last-child { border-bottom: 0; }
-.section h4 { margin: 0 0 var(--sp-3); font-size: var(--fs-caption); font-weight: 600; color: var(--text-1); }
+.section h4 { margin: 0 0 var(--sp-3); }
 .kv { display: grid; grid-template-columns: minmax(132px, max-content) 1fr; gap: 6px var(--sp-6); font-size: var(--fs-body); }
 .kv dt { color: var(--text-2); }
 .kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
@@ -275,7 +277,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 
 /* Tables */
 .table { width: 100%; border-collapse: collapse; font-size: var(--fs-body); }
-.table th { text-align: left; font-weight: 500; color: var(--text-2); font-size: var(--fs-caption); padding: 0 var(--sp-3); height: 36px; border-bottom: 1px solid var(--line-2); position: sticky; top: 0; background: var(--panel, var(--bg-1)); z-index: 1; white-space: nowrap; }
+.table th { text-align: left; font-weight: 500; color: var(--text-2); font-size: var(--fs-caption); padding: 0 var(--sp-3); height: 36px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel, var(--bg-1)); z-index: 1; white-space: nowrap; }
 .table th:first-child, .table td:first-child { padding-left: var(--sp-5); }
 .table th:last-child, .table td:last-child { padding-right: var(--sp-5); }
 .table td { padding: 9px var(--sp-3); border-bottom: 1px solid var(--line); vertical-align: top; }
