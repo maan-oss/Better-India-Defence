@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 /**
  * Visual regression for the screens whose layout matters most. Live areas (the animated globe, the status island, the
@@ -8,7 +8,7 @@ import { expect, test } from '@playwright/test';
  */
 const LIVE = ['canvas', 'button.island', '.hero-clock', '.as-metrics', '.live-dot'];
 
-async function signInAs(page: import('@playwright/test').Page, username: string) {
+async function signInAs(page: Page, username: string) {
   await page.goto('/');
   await page.fill('#u', username);
   await page.fill('#p', 'strata-demo');
