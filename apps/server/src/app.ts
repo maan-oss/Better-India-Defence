@@ -11,6 +11,7 @@ import { registerVision } from './routes/vision.ts';
 import { registerCameras } from './routes/cameras.ts';
 import { registerOps } from './routes/ops.ts';
 import { registerAssets } from './routes/assets.ts';
+import { contentSecurityPolicy } from './http/csp.ts';
 import { registerSite } from './routes/site.ts';
 import { registerInterop } from './routes/interop.ts';
 import { registerSetup } from './routes/setup.ts';
@@ -42,6 +43,7 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
     void reply.header('x-content-type-options', 'nosniff');
     void reply.header('referrer-policy', 'no-referrer');
     void reply.header('x-frame-options', 'DENY');
+    void reply.header('content-security-policy', contentSecurityPolicy(p.site?.basemap?.url));
     return payload;
   });
   app.setErrorHandler((err: Error & { statusCode?: number }, req, reply) => {
