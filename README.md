@@ -153,8 +153,11 @@ How an installation uses each screen day to day: **[docs/OPERATIONS.md](docs/OPE
 | `npm run vision:eval -w @strata/server -- --pairs <dir>` | Measure face-verification accuracy on your own labelled pairs |
 | `npm run typecheck` | Strict TypeScript across all projects |
 | `npm run lint` | ESLint (no `any`, consistent type imports, React hooks rules) |
-| `npm test` | Unit + integration tests (embedded database) |
+| `npm test` | Unit + integration tests (embedded database). Set `STRATA_TEST_DATABASE_URL` to a PostgreSQL server the tests may create databases on, to also run the restore test there |
 | `npm run test:e2e` | Production build + Playwright browser tests on isolated ports |
+| `npm run verify` | The gate: typecheck, lint, tests, build and the dependency audit |
+| `npm run bench` | Performance budgets: bundle sizes, API latency and page timings ([docs/PERFORMANCE.md](docs/PERFORMANCE.md)) |
+| `npm run release` / `npm run release:verify` | Signed SBOM and file manifest, and its check ([docs/SECURITY.md](docs/SECURITY.md)) |
 | `npm run build` | Typecheck, bundle server, vision worker, simulator and adapters, build web client |
 | `node packages/adapters/dist/cli.js adapters.json` | Field adapters: NMEA, MAVLink, CoT ([docs/INTEROP.md](docs/INTEROP.md)) |
 | `scripts/stop-dev.sh` | Stop processes started by `npm run dev` / `npm start` |

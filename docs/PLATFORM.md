@@ -62,32 +62,40 @@ depends on it is designed.
 
 ## Security and sovereignty requirements
 
-The current controls, their tests and the gaps are in `SECURITY.md` and `CAPABILITY_MATRIX.md`. The gaps that bear on
-the platform direction are: no smartcard login; no hardware-backed key management or key rotation (keys come from the
-environment or an owner-only file); audit records are hash-chained but not anchored outside the database; releases are not signed and builds are
-not reproducible; no software bill of materials is produced; the audit is clean but nothing gates a build on it; there is no backup and restore procedure with a tested recovery; and there is no tenancy or organisational
-boundary inside one deployment. None of these is treated as solved, and none is claimed as compliant.
+The current controls, their tests and the gaps are in `SECURITY.md` and `CAPABILITY_MATRIX.md`. Built and tested: the
+second factor for privileged roles, single sign-on with OpenID Connect, audit anchoring, signed releases, a software bill
+of materials, a build gate on the dependency audit, backup and restore on both database engines, and organisation and
+clearance checks on the asset register, incidents and documents. The gaps that remain: no smartcard login; no hardware-
+backed key management and no key rotation (keys come from the environment or an owner-only file); single sign-on and
+reproducible builds are not shown against a real provider or on a second machine; and the classification rule is applied
+to three record types, not to every one. None of these is treated as solved, and none is claimed as compliant.
 
 ## Roadmap, in dependency order
 
 1. **Assets and maintenance.** Built in this pass: register, dependency graph with loop refusal, effective availability,
    impact analysis, retirement guarded by dependents, maintenance plans with due state, append-only history.
-2. **Logistics and readiness.** Depends on (1): stock lines reference asset tags, supply dependencies are edges in the
-   same graph, and reorder thresholds raise a recommendation that a person approves. Acceptance: the impact analysis
-   reports a stock-out that would impair a dependent asset.
-3. **Incident and emergency coordination.** Partly built (incidents as space-time windows, teams, tasks, checklists,
-   duty log). Missing: structured reporting with verification states, escalation rules and a post-incident review.
-   Depends on (1) to link affected assets.
-4. **Information and evidence.** Partly built (evidence library, provenance, chain of custody). Missing: ingestion and
-   search over documents with source attribution, access control applied to search results, and confidence labels.
-5. **Interoperability.** Partly built (versioned ingest, field adapters, Cursor-on-Target). Missing: schema documents
-   generated from the zod schemas, contract tests for each adapter, and an integration monitoring view.
-6. **Administration and governance.** Partly built (role-based access, audit verification, configuration). Missing:
-   organisational boundaries inside one deployment, data classification on records, and policy objects that the
-   permission checks read.
-7. **Security hardening.** Removing the inline-style allowance from the Content Security Policy, multi-factor authentication design, audit anchoring, a software
-   bill of materials and a dependency gate in the build, and a restore test.
-8. **Performance budgets.** Set and measure before optimising. No budget is claimed until a repeatable benchmark exists.
+2. **Logistics and readiness. Built.** Stock lines reference asset tags and sit on the same dependency graph. A stock-out
+   impairs the dependent asset in its availability, and a reorder request needs approval by a different analyst
+   (`stock.test.ts`). Not built: procurement or supplier integration.
+3. **Incident and emergency coordination. Built.** Incident reports move through verification, escalation and a
+   post-incident review, and the reporter cannot verify nor the resolver review their own material
+   (`incident-reports.test.ts`). Reports link to affected assets. Not built: delivery to external reporting channels.
+4. **Information and evidence. Built.** Documents are ingested as text, Markdown or CSV with source attribution, owner
+   and classification; search results are filtered by the same access rule as the record; an analyst assigns a
+   confidence label (`documents.test.ts`). Not built: text extraction from PDF or images.
+5. **Interoperability. Built.** Versioned ingest, field adapters and Cursor-on-Target; JSON Schema documents generated
+   from the zod schemas and checked for drift; contract tests for each adapter; an integration monitor
+   (`interop-monitor.test.ts`).
+6. **Administration and governance. Partly built.** Role-based access on every route, audit verification, configuration,
+   organisation and classification checks on three record types, and an administrator's removal of a lost second
+   factor. Missing: policy objects that administrators can edit (the rules are in code, `policy/access.ts`), and the
+   same organisation and classification checks on every other record type.
+7. **Security hardening. Built.** Content Security Policy without inline styles; TOTP second factor; OpenID Connect
+   sign-in; persistent sign-in lockout and a password policy; audit anchoring; a software bill of materials and signed
+   releases; the dependency gate in the build; backup and restore on both engines; key files with owner-only checks.
+   Missing: key rotation and hardware-backed keys.
+8. **Performance budgets. Built.** `npm run bench` measures bundle sizes, asset list and detail latency, and two browser
+   timings against `perf/budgets.json`, and fails on an overrun. Figures, ranges and limits are in `PERFORMANCE.md`.
 
 ## Principles carried forward
 
