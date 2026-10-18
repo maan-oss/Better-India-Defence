@@ -34,6 +34,7 @@ import { Mark } from '../brand/Mark';
  */
 export function Shell({ children }: { children: ReactNode }) {
   const loc = useLocation();
+  const theme = useUi((s) => s.theme);
   const [cmd, setCmd] = useState(false);
   const [keys, setKeys] = useState(false);
   const area = loc.pathname.split('/')[1] ?? '';
@@ -44,7 +45,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <Rail onShortcuts={() => setKeys(true)} />
         <TopBar onCommand={() => setCmd(true)} onShortcuts={() => setKeys(true)} />
         <main className="main">
-          <div className="route" key={area}>
+          <div className="route" key={`${area}-${theme}`}>
             {children}
           </div>
         </main>

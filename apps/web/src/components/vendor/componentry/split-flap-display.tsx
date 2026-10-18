@@ -127,12 +127,12 @@ function FlapCell({
       <div
         className="absolute inset-x-0 top-0 h-1/2 overflow-hidden rounded-t-[3px]"
         style={{
-          background: "linear-gradient(180deg, #1e1e1e 0%, #181818 100%)",
+          background: "linear-gradient(180deg, var(--flap-top) 0%, var(--flap-bottom) 100%)",
           borderBottom: "none",
         }}
       >
         <span
-          className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-[48%] text-[#e8e6e3] drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]"
+          className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-[48%] text-[color:var(--flap-ink)] drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]"
           style={{ fontFamily: "'SF Mono', 'Fira Code', 'Courier New', monospace" }}
         >
           {displayChar}
@@ -143,11 +143,11 @@ function FlapCell({
       <div
         className="absolute inset-x-0 bottom-0 h-1/2 overflow-hidden rounded-b-[3px]"
         style={{
-          background: "linear-gradient(180deg, #151515 0%, #111111 100%)",
+          background: "linear-gradient(180deg, var(--flap-top) 0%, var(--flap-bottom) 100%)",
         }}
       >
         <span
-          className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[48%] text-[#d4d2cf] drop-shadow-[0_-1px_1px_rgba(0,0,0,0.6)]"
+          className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[48%] text-[color:var(--flap-ink-dim)] drop-shadow-[0_-1px_1px_rgba(0,0,0,0.6)]"
           style={{ fontFamily: "'SF Mono', 'Fira Code', 'Courier New', monospace" }}
         >
           {displayChar}
@@ -159,13 +159,13 @@ function FlapCell({
         <div
           className="absolute inset-x-0 top-0 h-1/2 overflow-hidden rounded-t-[3px] z-10"
           style={{
-            background: "linear-gradient(180deg, #222 0%, #1a1a1a 100%)",
+            background: "linear-gradient(180deg, var(--flap-top) 0%, var(--flap-bottom) 100%)",
             transformOrigin: "bottom center",
             animation: `flapTopDown ${flipSpeed * 0.4}ms ease-in forwards`,
           }}
         >
           <span
-            className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-[48%] text-[#e8e6e3]"
+            className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-[48%] text-[color:var(--flap-ink)]"
             style={{ fontFamily: "'SF Mono', 'Fira Code', 'Courier New', monospace" }}
           >
             {prevCharRef.current}
@@ -178,13 +178,13 @@ function FlapCell({
         <div
           className="absolute inset-x-0 bottom-0 h-1/2 overflow-hidden rounded-b-[3px] z-10"
           style={{
-            background: "linear-gradient(180deg, #181818 0%, #111 100%)",
+            background: "linear-gradient(180deg, var(--flap-top) 0%, var(--flap-bottom) 100%)",
             transformOrigin: "top center",
             animation: `flapBottomUp ${flipSpeed * 0.4}ms ease-out forwards`,
           }}
         >
           <span
-            className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[48%] text-[#d4d2cf]"
+            className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[48%] text-[color:var(--flap-ink-dim)]"
             style={{ fontFamily: "'SF Mono', 'Fira Code', 'Courier New', monospace" }}
           >
             {displayChar}
@@ -328,7 +328,7 @@ export function SplitFlapDisplay({
           className
         )}
         style={{
-          background: "linear-gradient(145deg, #0c0c0c 0%, #080808 50%, #0a0a0a 100%)",
+          background: "linear-gradient(145deg, var(--flap-bottom) 0%, var(--flap-bottom) 50%, var(--flap-bottom) 100%)",
           border: "1px solid rgba(255,255,255,0.06)",
           boxShadow:
             "0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.04)",
@@ -355,7 +355,7 @@ export function SplitFlapDisplay({
         className
       )}
       style={{
-        background: "linear-gradient(145deg, #0c0c0c 0%, #080808 50%, #0a0a0a 100%)",
+        background: "linear-gradient(145deg, var(--flap-bottom) 0%, var(--flap-bottom) 50%, var(--flap-bottom) 100%)",
         border: "1px solid rgba(255,255,255,0.06)",
         boxShadow:
           "0 25px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.04)",

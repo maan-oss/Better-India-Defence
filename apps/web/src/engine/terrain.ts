@@ -115,6 +115,10 @@ const frag = /* glsl */ `
       }
     }
 
+    // The plane is finite: its border fades into the page colour, so no edge shows against the horizon.
+    float rim = smoothstep(uHalf * 0.8, uHalf * 0.999, max(abs(vWorld.x), abs(vWorld.y)));
+    col = mix(col, uFogColor, rim);
+
     float d = length(vWorld - cameraPosition);
     float fog = 1.0 - exp(-pow(d * uFogDensity, 1.6));
     gl_FragColor = vec4(mix(col, uFogColor, clamp(fog, 0.0, 1.0)), 1.0);

@@ -38,13 +38,7 @@ export const useUi = create<UiState>((set, get) => ({
   theme: read('strata.theme', ['light', 'night'] as const, 'light'),
   railOpen: read('strata.rail', ['open', 'closed'] as const, 'closed') === 'open',
   setTheme(t) {
-    const changed = t !== get().theme;
     write('strata.theme', t);
-    if (changed) {
-      // WebGL and canvas painters take their colours once, so a display change reloads the console.
-      window.location.reload();
-      return;
-    }
     applyTheme(t);
     set({ theme: t });
   },

@@ -16,6 +16,28 @@ function shift(u: number): number {
   return u < 0.5 ? 0.5 - push : 0.5 + push;
 }
 
+const LIT_CONTROLS = '.btn, .cmd-trigger, .island, .tb-bell, .user-btn';
+
+/** Records the pointer inside each glass control, so its highlight can sit where the cursor is. */
+export function trackGlassLight(): void {
+  let frame = 0;
+  document.addEventListener(
+    'pointermove',
+    (e) => {
+      if (e.pointerType !== 'mouse') return;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const el = (e.target as Element | null)?.closest?.(LIT_CONTROLS) as HTMLElement | null | undefined;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        el.style.setProperty('--gx', `${e.clientX - r.left}px`);
+        el.style.setProperty('--gy', `${e.clientY - r.top}px`);
+      });
+    },
+    { passive: true },
+  );
+}
+
 export function enableLensing(): void {
   if (!/Chrome\//.test(navigator.userAgent)) return;
   const canvas = document.createElement('canvas');

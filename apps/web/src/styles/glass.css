@@ -79,6 +79,19 @@
 .rail-item:hover, .rail-more:hover { background: var(--glass-hover); }
 .rail-item.active { background: var(--glass-fill-strong); box-shadow: var(--glass-rim); }
 
+/* The light follows the pointer: a soft highlight on each glass control, placed where the cursor is (see lib/liquidGlass.ts). */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover::before, .cmd-trigger:hover::before, .island:hover::before, .tb-bell:hover::before, .user-btn:hover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(120px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.6), transparent 70%);
+    mix-blend-mode: soft-light;
+  }
+}
+
 /* ---------------------------------------------------------------- overlays */
 .cmd { border-radius: 22px; }
 .toast { border-radius: 16px; }

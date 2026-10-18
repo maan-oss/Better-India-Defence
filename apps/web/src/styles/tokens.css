@@ -171,6 +171,18 @@
   --friend-tint: #0d2847;
   --friend-line: #205d9e;
 
+  /* Split-flap clock. */
+  --flap-top: #ffffff;
+  --flap-bottom: #ececf0;
+  --flap-ink: #1d1d1f;
+  --flap-ink-dim: #6e6e73;
+
+  /* Split-flap clock. */
+  --flap-top: #1c0606;
+  --flap-bottom: #0c0202;
+  --flap-ink: #ff5a46;
+  --flap-ink-dim: #a33224;
+
   /* Arc layer: each theme sets these. */
   --thumb: #ffffff;
   --track-hover: #d1d1d6;

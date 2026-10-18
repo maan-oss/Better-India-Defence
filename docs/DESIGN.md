@@ -146,8 +146,8 @@ Generated-UI habits that were removed, and are not to be reintroduced:
 - **Lines as selection marks**: no white bar beside the selected rail item or list row, no underline under a
   selected tab, no line above a selected tab-bar item. Selection is a filled shape: a grey circle behind an
   icon, a filled pill for a tab, a filled row.
-- **Ticking numbers**: the status pill shows state, not a running clock. Digits that change every second
-  (split-flap clocks, counters that roll) are not used in the chrome.
+- **Ticking numbers**: the status pill shows state, not a running clock. The split-flap Zulu clock appears only in
+  the status island's detail panel, never in the pill, and counters that roll are not used in the chrome.
 
 **Shape language.** Icon-only controls, avatars, count badges, status dots and face thumbnails are circles.
 Text buttons, chips, tabs, segmented controls, search fields and single-line inputs are pills. Panels and cards
@@ -165,6 +165,7 @@ tone and spacing rather than from boxes inside boxes.
   stays the subject.
 - **Prominent** glass is the one primary action in a view: ink, tinted with the accent.
 - **Plain** buttons carry no material until hovered or pressed.
+- **Light follows the pointer**: on a mouse, a soft highlight on each glass control sits where the cursor is.
 - **The top bar has no surface of its own.** Each control in it is glass at one height (`--tb-ctl`, 36 px). Icon-only
   controls are circles of that size, the search field and status pill are capsules, and the site name is plain text.
 - **Status labels** (`span.chip`) are flat. The tint is the only signal, so no second outline appears on them.
@@ -222,7 +223,7 @@ router does not run navigation as a transition, which would hold back the reveal
 
 ## Night (red-light) mode
 
-The standard display is light. User menu → *Night display* switches to the dark, monochrome red ladder. Changing the display reloads the console, because the 3-D view and canvases take their colours once. Imagery, video and the
+The standard display is light. User menu → *Night display* switches to the dark, monochrome red ladder. Changing the display remounts the page, so the 3-D view and canvases repaint with the new palette without a reload. Imagery, video and the
 3-D view pass through an SVG colour matrix (`#night-red` in `index.html`) that carries luminance on the
 red channel only, so no green or blue light reaches the operator. Status and affiliation are also shown
 by shape and text, so nothing is lost when hue is removed.
