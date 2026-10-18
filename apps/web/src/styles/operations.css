@@ -21,7 +21,7 @@
 .wlabel b { font-weight: 500; font-family: var(--font-mono); font-size: var(--fs-micro); color: var(--text-0); }
 .wlabel span { color: var(--text-2); font-size: var(--fs-micro); }
 .wlabel[data-tone='amber'] b { color: var(--text-0); }
-.wlabel[data-tone='red'] b { color: #ff6b6b; }
+.wlabel[data-tone='red'] b { color: var(--st-critical-text); }
 .wlabel[data-tone='inferred'] b { color: var(--inferred); }
 .wlabel[data-tone='inferred'] span { color: var(--inferred); opacity: 0.85; }
 .wlabel[data-tone='muted'] b { color: var(--text-1); font-weight: 400; }

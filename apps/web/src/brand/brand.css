@@ -17,9 +17,9 @@
 .bb-marks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
 .bb-marks figure { margin: 0; background: var(--bg-1); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 40px 16px 24px; color: var(--accent); min-height: 280px; }
 .bb-marks figcaption, .bb-art figcaption { font-size: var(--fs-caption); color: var(--text-2); }
-.bb-cream { background: var(--accent) !important; }
-.bb-on-cream { color: #1f1e1d; --brand-ink: var(--accent); }
-.bb-cream figcaption { color: #6e6c66 !important; }
+.bb-cream { background: var(--bg-2) !important; }
+.bb-on-cream { color: var(--text-0); --brand-ink: var(--text-0); }
+.bb-cream figcaption { color: var(--text-3) !important; }
 .bb-sizes { display: flex; align-items: flex-end; gap: 18px; height: 160px; }
 .bb-rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .bb-rules div { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line-3); padding-top: 12px; font-size: var(--fs-body); }

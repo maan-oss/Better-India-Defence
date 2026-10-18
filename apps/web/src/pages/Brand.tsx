@@ -8,12 +8,12 @@ import { TextReveal } from '../components/arc/text-reveal/text-reveal';
 
 const ART: ArtName[] = ['empty', 'site', 'cameras', 'incidents', 'evidence', 'identity', 'tasks', 'sensors', 'search', 'offline', 'audit', 'reconstructions'];
 const SWATCHES = [
-  ['Graphite 950', '#171717', 'Chrome: rail, top bar, panels'],
-  ['Graphite 900', '#212121', 'Surfaces: pages'],
-  ['Graphite 800', '#2a2a2a', 'Raised: cards, inputs'],
-  ['Cream', '#f0eee6', 'The one accent: mark, primary action, focus'],
-  ['Cream text', '#c9c6bd', 'Secondary text'],
-  ['Ash', '#9b988f', 'Labels, captions'],
+  ['White', '#ffffff', 'Raised: cards, panels, inputs'],
+  ['Grey 50', '#f5f5f7', 'Surfaces: pages'],
+  ['Grey 100', '#e6e6eb', 'Selected, wells'],
+  ['Ink', '#1d1d1f', 'The one accent: mark, primary action, focus'],
+  ['Ink 70', '#3a3a3c', 'Secondary text'],
+  ['Ink 60', '#6e6e73', 'Labels, captions'],
 ];
 
 export function Brand() {
@@ -45,7 +45,7 @@ export function Brand() {
           </figure>
           <figure className="bb-cream">
             <Mark size={160} className="bb-on-cream" />
-            <figcaption>On cream</figcaption>
+            <figcaption>On light</figcaption>
           </figure>
           <figure>
             <div className="bb-sizes">
@@ -83,7 +83,7 @@ export function Brand() {
             <div>
               <span className="bb-k">Interface</span>
               <b className="bb-geist">Geist</b>
-              <span className="muted">Every label, heading and body line. Neutral, compact, legible at 12 px on a dark console.</span>
+              <span className="muted">Every label, heading and body line. Neutral, compact, legible at 12 px on a light console.</span>
             </div>
             <div>
               <span className="bb-k">Data</span>
@@ -96,7 +96,7 @@ export function Brand() {
 
       <section className="bb-sec">
         <InViewTitle as="h2" variant="blur" text="Colour" />
-        <p className="bb-lead">Graphite and cream only. Colour beyond that belongs to meaning — status, affiliation, provenance — never to the brand.</p>
+        <p className="bb-lead">Ink and white only; the night display is the red variant. Colour beyond that belongs to meaning — status, affiliation, provenance — never to the brand.</p>
         <div className="bb-swatches">
           {SWATCHES.map(([n, hex, use]) => (
             <div key={n} className="bb-sw">

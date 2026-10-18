@@ -15,7 +15,7 @@
 .wl-flag { color: var(--st-serious-text); background: var(--st-serious-tint); border: 1px solid var(--st-serious-line); padding: 0 5px; border-radius: 3px; font-size: var(--fs-micro); font-weight: 500; }
 .cls { font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.04em; padding: 1px 7px; border: 1px solid var(--line-3); color: var(--text-1); border-radius: 999px; flex: none; }
 .cls.SECRET { border-color: var(--st-critical-line); color: var(--st-critical-text); background: var(--st-critical-tint); }
-.cls.CONFIDENTIAL { border-color: #205d9e; color: #70b8ff; }
+.cls.CONFIDENTIAL { border-color: var(--friend-line); color: var(--friend); }
 .err-inline { color: var(--st-critical-text); }
 
 .ws { display: flex; flex-direction: column; min-height: 0; height: 100%; }

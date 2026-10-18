@@ -176,7 +176,7 @@ h4 { font-size: var(--fs-body); font-weight: 600; color: var(--text-1); }
 .btn.icon, .btn.small.icon { border-radius: 50%; }
 .btn.on { border-color: var(--line-3); background: var(--bg-4); color: var(--text-0); }
 .btn.danger { border-color: var(--st-critical-line); color: var(--st-critical-text); background: var(--st-critical-tint); }
-.btn.danger:hover { background: #500f1c; }
+.btn.danger:hover { background: var(--st-critical-tint); }
 .btn.critical { background: var(--st-critical); border-color: var(--st-critical); color: #fff; }
 .btn.critical:hover { background: #ec5d5e; }
 .input, select.input, textarea.input {
@@ -242,7 +242,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .empty-state p { margin: 0; max-width: 400px; font-size: var(--fs-body); }
 .err { padding: var(--sp-3); color: var(--st-critical-text); border: 1px solid var(--st-critical-line); background: var(--st-critical-tint); border-radius: var(--radius); margin: var(--sp-3); font-size: var(--fs-body); }
 .note { padding: 10px var(--sp-3); border: 1px solid var(--line-2); color: var(--text-1); background: var(--bg-2); font-size: var(--fs-body); border-radius: var(--radius); }
-.note.warn { border-color: var(--st-serious-line); background: var(--st-serious-tint); color: #ffd9bd; }
+.note.warn { border-color: var(--st-serious-line); background: var(--st-serious-tint); color: var(--st-serious-text); }
 .note.ok { border-color: var(--st-normal-line); background: var(--st-normal-tint); }
 
 /* State chips: shape + text + colour (Radix tint / border / text steps). */
@@ -251,9 +251,9 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .chip.CAPTURED i { background: var(--captured); border-radius: 50%; }
 .chip.CAPTURED { color: var(--captured); }
 .chip.RECONSTRUCTED i { border-radius: 50%; background: linear-gradient(90deg, var(--reconstructed) 50%, transparent 50%); border: 1px solid var(--reconstructed); }
-.chip.RECONSTRUCTED { color: var(--reconstructed); border-color: #145750; background: #0d2d2a; }
+.chip.RECONSTRUCTED { color: var(--reconstructed); border-color: var(--reconstructed-line); background: var(--reconstructed-tint); }
 .chip.INFERRED i { border-radius: 50%; border: 1px dashed var(--inferred); }
-.chip.INFERRED { color: var(--inferred); border-color: #473876; border-style: dashed; background: #1b1525; }
+.chip.INFERRED { color: var(--inferred); border-color: var(--inferred-line); border-style: dashed; background: var(--inferred-tint); }
 .chip.PRIOR i { border: 1px solid var(--prior); transform: rotate(45deg); width: 6px; height: 6px; }
 .chip.PRIOR { color: var(--text-2); }
 .chip.red { color: var(--st-critical-text); border-color: var(--st-critical-line); background: var(--st-critical-tint); }
@@ -261,7 +261,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .chip.caution { color: var(--st-caution-text); border-color: var(--st-caution-line); background: var(--st-caution-tint); }
 .chip.ok { color: var(--st-normal-text); border-color: var(--st-normal-line); background: var(--st-normal-tint); }
 .chip.info { color: var(--st-standby-text); border-color: var(--st-standby-line); background: var(--st-standby-tint); }
-.chip.friend { color: var(--friend); border-color: #205d9e; background: #0d2847; }
+.chip.friend { color: var(--friend); border-color: var(--friend-line); background: var(--friend-tint); }
 .chip.hostile { color: var(--hostile); border-color: var(--st-critical-line); background: var(--st-critical-tint); }
 .chip.UNKNOWN i { background: repeating-linear-gradient(45deg, var(--text-3) 0 1px, transparent 1px 3px); border: 1px solid var(--text-3); }
 .chip.UNKNOWN { color: var(--text-2); }

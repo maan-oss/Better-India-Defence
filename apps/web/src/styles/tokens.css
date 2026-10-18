@@ -155,6 +155,22 @@
   --top-h: 48px;
   --tb-ctl: 36px;   /* one height for every control in the top bar; icon-only controls are circles of this size */
   --timeline-h: 128px;
+  /* Chip tints for epistemic and affiliation tags. */
+  --reconstructed-tint: #e3f6f1;
+  --reconstructed-line: #9ddfd0;
+  --inferred-tint: #efeafd;
+  --inferred-line: #c9bbf2;
+  --friend-tint: #e6f1fc;
+  --friend-line: #a9cdf3;
+
+  /* Chip tints for epistemic and affiliation tags. */
+  --reconstructed-tint: #0d2d2a;
+  --reconstructed-line: #145750;
+  --inferred-tint: #1b1525;
+  --inferred-line: #473876;
+  --friend-tint: #0d2847;
+  --friend-line: #205d9e;
+
   /* Arc layer: each theme sets these. */
   --thumb: #ffffff;
   --track-hover: #d1d1d6;
