@@ -15,6 +15,9 @@ import {
   availabilityOf,
   dependentsOf,
   impactIf,
+  effectiveStatus,
+  isLowStock,
+  isStockOut,
   planState,
   wouldCycle,
 } from '@strata/domain';
@@ -38,6 +41,9 @@ interface AssetRow {
   classification: string;
   owner: string;
   shared_with: string[];
+  stock_quantity: number | null;
+  reorder_level: number | null;
+  stock_unit: string | null;
   category: string;
   status: string;
   criticality: number;
@@ -70,6 +76,21 @@ const EVENT_LIMIT = 200;
  * as a cause of impairment for anything that still depends on it. Every change is written to the append-only
  * `asset_events` table in the same transaction as the change itself.
  */
+export interface ReorderView {
+  id: string;
+  assetId: string;
+  tag: string;
+  name: string;
+  quantity: number;
+  reason: string;
+  status: 'requested' | 'approved' | 'rejected';
+  requestedBy: string;
+  requestedAt: number;
+  decidedBy: string | null;
+  decidedAt: number | null;
+  decisionNote: string | null;
+}
+
 export class AssetService {
   constructor(
     private readonly db: Db,
@@ -136,11 +157,12 @@ export class AssetService {
     if (clash.rows.length) throw new AssetError(`tag ${input.tag} is already in use`, 409);
     const id = `ast-${randomUUID().slice(0, 12)}`;
     const t = this.now();
+    if (input.stock && input.category !== 'supply') throw new AssetError('stock applies only to a supply item', 400);
     await this.db.transaction(async (q) => {
       await q.query(
-        `INSERT INTO assets (id, tag, name, category, status, criticality, zone_id, manufacturer, model, serial, commissioned_at, warranty_until, notes, source, created_by, updated_by, updated_at, classification, owner, shared_with)
-         VALUES ($1,$2,$3,$4,'in_service',$5,$6,$7,$8,$9,$10,$11,$12,'operator',$13,$13,$14,$15,$16,$17)`,
-        [id, input.tag, input.name, input.category, input.criticality, input.zoneId ?? null, input.manufacturer ?? null, input.model ?? null, input.serial ?? null, input.commissionedAt ?? null, input.warrantyUntil ?? null, input.notes ?? null, actor, t, input.classification ?? 'UNCLASSIFIED', input.owner ?? 'site', input.sharedWith ?? []],
+        `INSERT INTO assets (id, tag, name, category, status, criticality, zone_id, manufacturer, model, serial, commissioned_at, warranty_until, notes, source, created_by, updated_by, updated_at, classification, owner, shared_with, stock_quantity, reorder_level, stock_unit)
+         VALUES ($1,$2,$3,$4,'in_service',$5,$6,$7,$8,$9,$10,$11,$12,'operator',$13,$13,$14,$15,$16,$17,$18,$19,$20)`,
+        [id, input.tag, input.name, input.category, input.criticality, input.zoneId ?? null, input.manufacturer ?? null, input.model ?? null, input.serial ?? null, input.commissionedAt ?? null, input.warrantyUntil ?? null, input.notes ?? null, actor, t, input.classification ?? 'UNCLASSIFIED', input.owner ?? 'site', input.sharedWith ?? [], input.stock?.quantity ?? null, input.stock?.reorderLevel ?? null, input.stock?.unit ?? null],
       );
       await event(q, id, 'created', { tag: input.tag, name: input.name, category: input.category, criticality: input.criticality, classification: input.classification ?? 'UNCLASSIFIED', owner: input.owner ?? 'site' }, actor, t);
     });
@@ -285,9 +307,9 @@ export class AssetService {
     await this.db.transaction(async (q) => {
       for (const a of DEMO_REGISTER.assets) {
         await q.query(
-          `INSERT INTO assets (id, tag, name, category, status, criticality, zone_id, manufacturer, model, serial, commissioned_at, warranty_until, notes, source, created_by, updated_by, updated_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NULL,$10,$11,NULL,'demo','demo-seed','demo-seed',$12)`,
-          [a.id, a.tag, a.name, a.category, a.status, a.criticality, a.zoneId, a.manufacturer, a.model, t - 900 * DAY_MS, t + 540 * DAY_MS, t],
+          `INSERT INTO assets (id, tag, name, category, status, criticality, zone_id, manufacturer, model, serial, commissioned_at, warranty_until, notes, source, created_by, updated_by, updated_at, stock_quantity, reorder_level, stock_unit)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NULL,$10,$11,NULL,'demo','demo-seed','demo-seed',$12,$13,$14,$15)`,
+          [a.id, a.tag, a.name, a.category, a.status, a.criticality, a.zoneId, a.manufacturer, a.model, t - 900 * DAY_MS, t + 540 * DAY_MS, t, a.stock?.quantity ?? null, a.stock?.reorderLevel ?? null, a.stock?.unit ?? null],
         );
         await event(q, a.id, 'created', { tag: a.tag, name: a.name, source: 'demo' }, 'demo-seed', t);
       }
@@ -305,6 +327,79 @@ export class AssetService {
     const row = r.rows[0];
     if (!row) throw new AssetError('unknown asset', 404);
     return row;
+  }
+
+  /** A receipt (positive) or an issue (negative) of a stock item. The quantity never goes below zero. */
+  async changeStock(id: string, change: number, reason: string, actor: string): Promise<AssetDetail> {
+    const row = await this.requireAsset(id);
+    assertEditable(row);
+    if (row.category !== 'supply' || row.stock_quantity === null) throw new AssetError('this is not a stock item', 400);
+    const from = Number(row.stock_quantity);
+    const to = from + change;
+    if (to < 0) throw new AssetError(`only ${from} ${row.stock_unit ?? 'each'} on hand; cannot issue ${-change}`, 409);
+    const t = this.now();
+    await this.db.transaction(async (q) => {
+      await q.query('UPDATE assets SET stock_quantity = $2, updated_by = $3, updated_at = $4 WHERE id = $1', [id, to, actor, t]);
+      await event(q, id, change > 0 ? 'stock_received' : 'stock_issued', { from, to, change, reason }, actor, t);
+    });
+    return this.detail(id);
+  }
+
+  /** A request to reorder a stock item. It takes no effect until a different person approves it. */
+  async requestReorder(id: string, quantity: number, reason: string, actor: string): Promise<AssetDetail> {
+    const row = await this.requireAsset(id);
+    assertEditable(row);
+    if (row.category !== 'supply' || row.stock_quantity === null) throw new AssetError('reorders apply to stock items only', 400);
+    const requestId = `reo-${randomUUID().slice(0, 12)}`;
+    const t = this.now();
+    await this.db.transaction(async (q) => {
+      await q.query('INSERT INTO reorder_requests (id, asset_id, quantity, reason, status, requested_by, requested_at) VALUES ($1,$2,$3,$4,$5,$6,$7)', [requestId, id, quantity, reason, 'requested', actor, t]);
+      await event(q, id, 'reorder_requested', { requestId, quantity, reason }, actor, t);
+    });
+    return this.detail(id);
+  }
+
+  /** Approves or rejects a reorder. The person who asked cannot decide it. */
+  async decideReorder(requestId: string, decision: 'approve' | 'reject', note: string | null, actor: string): Promise<ReorderView> {
+    const r = (await this.db.query<{ id: string; asset_id: string; quantity: number; status: string; requested_by: string }>('SELECT id, asset_id, quantity, status, requested_by FROM reorder_requests WHERE id = $1', [requestId])).rows[0];
+    if (!r) throw new AssetError('unknown reorder request', 404);
+    if (r.status !== 'requested') throw new AssetError(`this reorder is already ${r.status}`, 409);
+    if (r.requested_by === actor) throw new AssetError('a reorder must be decided by someone other than the person who requested it', 403);
+    const status = decision === 'approve' ? 'approved' : 'rejected';
+    const t = this.now();
+    await this.db.transaction(async (q) => {
+      await q.query('UPDATE reorder_requests SET status = $2, decided_by = $3, decided_at = $4, decision_note = $5 WHERE id = $1', [requestId, status, actor, t, note]);
+      await event(q, r.asset_id, `reorder_${status}`, { requestId, quantity: Number(r.quantity), note }, actor, t);
+    });
+    return (await this.reorders(undefined, requestId))[0]!;
+  }
+
+  /** Reorder requests, newest first, with the asset each is for. */
+  async reorders(status?: string, id?: string): Promise<ReorderView[]> {
+    const params = [status, id].filter((v): v is string => v !== undefined);
+    const clauses = [status ? `r.status = $${params.indexOf(status) + 1}` : null, id ? `r.id = $${params.indexOf(id) + 1}` : null].filter(Boolean);
+    const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+    const rows = (
+      await this.db.query<{ id: string; asset_id: string; tag: string; name: string; quantity: number; reason: string; status: ReorderView['status']; requested_by: string; requested_at: number; decided_by: string | null; decided_at: number | null; decision_note: string | null }>(
+        `SELECT r.id, r.asset_id, a.tag, a.name, r.quantity, r.reason, r.status, r.requested_by, r.requested_at, r.decided_by, r.decided_at, r.decision_note
+         FROM reorder_requests r JOIN assets a ON a.id = r.asset_id ${where} ORDER BY r.requested_at DESC, r.id DESC LIMIT 200`,
+        params,
+      )
+    ).rows;
+    return rows.map((r) => ({
+      id: r.id,
+      assetId: r.asset_id,
+      tag: r.tag,
+      name: r.name,
+      quantity: Number(r.quantity),
+      reason: r.reason,
+      status: r.status,
+      requestedBy: r.requested_by,
+      requestedAt: Number(r.requested_at),
+      decidedBy: r.decided_by,
+      decidedAt: r.decided_at === null ? null : Number(r.decided_at),
+      decisionNote: r.decision_note,
+    }));
   }
 
   private async snapshot(): Promise<{ assets: AssetRow[]; edges: DependencyEdge[]; plans: PlanRow[] }> {
@@ -344,6 +439,7 @@ export class AssetService {
       commissionedAt: r.commissioned_at === null ? null : Number(r.commissioned_at),
       warrantyUntil: r.warranty_until === null ? null : Number(r.warranty_until),
       notes: r.notes,
+      stock: r.stock_quantity === null ? null : stockView(r),
       classification: r.classification as AssetView['classification'],
       owner: r.owner,
       sharedWith: [...(r.shared_with ?? [])],
@@ -356,11 +452,19 @@ export class AssetService {
   }
 }
 
+const stockView = (r: AssetRow) => {
+  const quantity = Number(r.stock_quantity);
+  const reorderLevel = Number(r.reorder_level ?? 0);
+  return { quantity, reorderLevel, unit: r.stock_unit ?? 'each', lowStock: isLowStock(quantity, reorderLevel), outOfStock: isStockOut(r.category, quantity) };
+};
+
 const DAY_MS = 86_400_000;
 
 function nodes(rows: AssetRow[]): AssetNode[] {
-  return rows.map((r) => ({ id: r.id, status: r.status as AssetStatus, criticality: Number(r.criticality) }));
+  return rows.map((r) => ({ id: r.id, status: effectiveStatus(r.status as AssetStatus, r.category, quantityOf(r)), criticality: Number(r.criticality) }));
 }
+
+const quantityOf = (r: AssetRow): number | null => (r.stock_quantity === null ? null : Number(r.stock_quantity));
 
 function assertEditable(row: AssetRow): void {
   if (row.status === 'retired') throw new AssetError('a retired asset is read-only', 409);

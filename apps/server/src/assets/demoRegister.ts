@@ -19,6 +19,8 @@ export interface DemoAsset {
   zoneId: string | null;
   manufacturer: string;
   model: string;
+  /** Stock on hand, for a supply item. */
+  stock?: { quantity: number; reorderLevel: number; unit: string };
 }
 
 export interface DemoDependency {
@@ -43,6 +45,7 @@ export const DEMO_REGISTER: { assets: DemoAsset[]; dependencies: DemoDependency[
     { id: 'ast-demo-mains', tag: 'MAINS-A', name: 'Mains supply feeder A', category: 'power', status: 'in_service', criticality: 5, zoneId: null, manufacturer: MAKER, model: 'Feeder (synthetic)' },
     { id: 'ast-demo-gen1', tag: 'GEN-1', name: 'Standby generator 1', category: 'power', status: 'in_service', criticality: 5, zoneId: null, manufacturer: MAKER, model: 'DG-500 (synthetic)' },
     { id: 'ast-demo-fuel1', tag: 'FUEL-1', name: 'Diesel day tank', category: 'facilities', status: 'in_service', criticality: 4, zoneId: null, manufacturer: MAKER, model: 'Tank (synthetic)' },
+    { id: 'ast-demo-diesel', tag: 'DIESEL-STK', name: 'Diesel stock, site store', category: 'supply', status: 'in_service', criticality: 4, zoneId: null, manufacturer: MAKER, model: 'Bulk store (synthetic)', stock: { quantity: 1400, reorderLevel: 800, unit: 'litres' } },
     { id: 'ast-demo-ups1', tag: 'UPS-1', name: 'UPS, server room', category: 'power', status: 'in_service', criticality: 5, zoneId: null, manufacturer: MAKER, model: 'UPS-30 (synthetic)' },
     { id: 'ast-demo-core', tag: 'CORE-SW', name: 'Core network switch', category: 'it', status: 'in_service', criticality: 5, zoneId: null, manufacturer: MAKER, model: 'Switch (synthetic)' },
     { id: 'ast-demo-nvr1', tag: 'NVR-1', name: 'CCTV recorder NVR-1', category: 'security', status: 'degraded', criticality: 4, zoneId: null, manufacturer: MAKER, model: 'NVR (synthetic)' },
@@ -57,6 +60,7 @@ export const DEMO_REGISTER: { assets: DemoAsset[]; dependencies: DemoDependency[
   dependencies: [
     { assetId: 'ast-demo-ups1', dependsOnId: 'ast-demo-mains', kind: 'power' },
     { assetId: 'ast-demo-gen1', dependsOnId: 'ast-demo-fuel1', kind: 'fuel' },
+    { assetId: 'ast-demo-fuel1', dependsOnId: 'ast-demo-diesel', kind: 'fuel' },
     { assetId: 'ast-demo-core', dependsOnId: 'ast-demo-ups1', kind: 'power' },
     { assetId: 'ast-demo-nvr1', dependsOnId: 'ast-demo-core', kind: 'network' },
     { assetId: 'ast-demo-nvr1', dependsOnId: 'ast-demo-ups1', kind: 'power' },

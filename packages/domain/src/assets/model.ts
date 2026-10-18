@@ -15,7 +15,7 @@ export type AssetStatus = (typeof ASSET_STATUSES)[number];
 export const SETTABLE_STATUSES = ['in_service', 'degraded', 'out_of_service'] as const;
 export type SettableStatus = (typeof SETTABLE_STATUSES)[number];
 
-export const ASSET_CATEGORIES = ['power', 'comms', 'it', 'access', 'security', 'facilities', 'vehicle', 'other'] as const;
+export const ASSET_CATEGORIES = ['power', 'comms', 'it', 'access', 'security', 'facilities', 'vehicle', 'supply', 'other'] as const;
 export type AssetCategory = (typeof ASSET_CATEGORIES)[number];
 
 export const DEPENDENCY_KINDS = ['power', 'data', 'network', 'fuel', 'water', 'access', 'other'] as const;
@@ -30,6 +30,20 @@ export interface AssetNode {
   status: AssetStatus;
   criticality: number;
 }
+
+/**
+ * A stock item with nothing left is out of service for everything that depends on it: its dependents are impaired by
+ * the stock-out exactly as by a broken generator. Quantity is null for every other asset.
+ */
+export const isStockOut = (category: string, quantity: number | null): boolean => category === 'supply' && quantity !== null && quantity <= 0;
+
+/** At or below the reorder level (and not yet out). */
+export const isLowStock = (quantity: number | null, reorderLevel: number | null): boolean =>
+  quantity !== null && reorderLevel !== null && quantity > 0 && quantity <= reorderLevel;
+
+/** The status the availability rules use: a stock-out counts as out of service, whatever status the record holds. */
+export const effectiveStatus = (status: AssetStatus, category: string, quantity: number | null): AssetStatus =>
+  isStockOut(category, quantity) && status !== 'retired' ? 'out_of_service' : status;
 
 /** `assetId` needs `dependsOnId` to operate. */
 export interface DependencyEdge {

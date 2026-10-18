@@ -17,6 +17,8 @@ export interface AssetView {
   id: string;
   tag: string;
   name: string;
+  /** Stock on hand for a supply item; null for every other asset. */
+  stock: { quantity: number; reorderLevel: number; unit: string; lowStock: boolean; outOfStock: boolean } | null;
   classification: Classification;
   owner: string;
   sharedWith: string[];

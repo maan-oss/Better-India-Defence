@@ -63,7 +63,9 @@ describe('asset register', () => {
   it('seeds a synthetic register once, with degraded, impaired and due states present', async () => {
     expect(await platform.assets.seedDemo()).toBe(0);
     const assets = await list();
-    expect(assets).toHaveLength(13);
+    expect(assets).toHaveLength(14);
+    // The store that feeds the day tank is a stock item, and is not low at the start.
+    expect((await byTag('DIESEL-STK') as Asset & { stock: unknown }).stock).toMatchObject({ quantity: 1400, reorderLevel: 800, lowStock: false, outOfStock: false });
     expect(assets.every((a) => (a as Asset & { source: string }).source === 'demo')).toBe(true);
     expect((await byTag('NVR-1')).availability.state).toBe('degraded');
     expect((await byTag('CAM-GATE')).availability.state).toBe('available');

@@ -28,6 +28,14 @@ export const AssetInput = z.object({
   owner: z.string().trim().regex(ORGANISATION_PATTERN, 'a lower-case organisation name').nullish(),
   /** Organisations that may view the record. Sharing never grants change. */
   sharedWith: z.array(z.string().trim().regex(ORGANISATION_PATTERN, 'a lower-case organisation name')).max(8).optional(),
+  /** Stock on hand, for a supply item only: the quantity, the level at which to reorder, and the unit it is counted in. */
+  stock: z
+    .object({
+      quantity: z.number().finite().min(0).max(1_000_000_000),
+      reorderLevel: z.number().finite().min(0).max(1_000_000_000),
+      unit: text(16),
+    })
+    .optional(),
 });
 export type AssetInput = z.infer<typeof AssetInput>;
 
@@ -67,3 +75,23 @@ export const RetireInput = z.object({
 export const ImpactQuery = z.object({
   status: z.enum(['degraded', 'out_of_service']).default('out_of_service'),
 });
+
+/** A receipt (positive) or an issue (negative) of stock. Zero is not a change. */
+export const StockChangeInput = z.object({
+  change: z.number().finite().min(-1_000_000_000).max(1_000_000_000).refine((v) => v !== 0, 'a stock change cannot be zero'),
+  reason: text(200),
+});
+export type StockChangeInput = z.infer<typeof StockChangeInput>;
+
+/** A request to reorder a supply item. It takes effect only when a different person approves it. */
+export const ReorderInput = z.object({
+  quantity: z.number().finite().positive().max(1_000_000_000),
+  reason: text(300),
+});
+export type ReorderInput = z.infer<typeof ReorderInput>;
+
+export const ReorderDecisionInput = z.object({
+  decision: z.enum(['approve', 'reject']),
+  note: optionalText(300),
+});
+export type ReorderDecisionInput = z.infer<typeof ReorderDecisionInput>;

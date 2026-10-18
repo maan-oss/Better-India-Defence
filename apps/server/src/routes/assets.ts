@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
-import { AssetInput, AssetPatch, CompleteInput, DependencyInput, ImpactQuery, PlanInput, RetireInput, StatusInput, access, mayCreateAt, type AssetView, type Action, type Subject } from '@strata/domain';
+import { AssetInput, AssetPatch, CompleteInput, DependencyInput, ImpactQuery, PlanInput, RetireInput, ReorderDecisionInput, ReorderInput, StatusInput, StockChangeInput, access, mayCreateAt, type AssetView, type Action, type Subject } from '@strata/domain';
 import type { Platform } from '../platform.ts';
 import { audit, parse, requirePerm } from '../http/guards.ts';
 import { AssetError } from '../assets/assetService.ts';
@@ -212,6 +212,57 @@ export function registerAssets(app: FastifyInstance, p: Platform): void {
     return run(reply, async () => {
       const d = await a.retire(id, b.reason, req.user!.username);
       await audit(p, req, 'asset_retired', id, { reason: b.reason });
+      return d;
+    });
+  });
+
+  // ------------------------------------------------------------------ stock and reorders
+
+  /** A receipt or an issue of a stock item, by the owning organisation. */
+  app.post('/api/assets/:id/stock', { preHandler: requirePerm('assets.edit') }, async (req, reply) => {
+    const id = await assetId(req, reply, a);
+    if (!id) return;
+    const b = parse(StockChangeInput, req.body, reply);
+    if (!b) return;
+    if (!(await authorised(req, reply, a, id, 'change'))) return;
+    return run(reply, async () => {
+      const d = await a.changeStock(id, b.change, b.reason, req.user!.username);
+      await audit(p, req, b.change > 0 ? 'stock_received' : 'stock_issued', id, { change: b.change, reason: b.reason });
+      return d;
+    });
+  });
+
+  /** A request to reorder. It takes effect only when an analyst who did not request it approves. */
+  app.post('/api/assets/:id/reorders', { preHandler: requirePerm('assets.edit') }, async (req, reply) => {
+    const id = await assetId(req, reply, a);
+    if (!id) return;
+    const b = parse(ReorderInput, req.body, reply);
+    if (!b) return;
+    if (!(await authorised(req, reply, a, id, 'change'))) return;
+    return run(reply, async () => {
+      const d = await a.requestReorder(id, b.quantity, b.reason, req.user!.username);
+      await audit(p, req, 'reorder_requested', id, { quantity: b.quantity, reason: b.reason });
+      return d;
+    });
+  });
+
+  /** Reorder requests the person may see: those for records they can see. */
+  app.get('/api/reorders', { preHandler: requirePerm('assets.view') }, async (req) => {
+    const visible = await visibleById(req, a);
+    return (await a.reorders()).filter((r) => visible.has(r.assetId));
+  });
+
+  /** Approval or rejection. Analyst rights, and never by the person who asked: the request is then refused. */
+  app.post('/api/reorders/:requestId/decision', { preHandler: requirePerm('assets.graph') }, async (req, reply) => {
+    const { requestId } = z.object({ requestId: z.string().min(1).max(40) }).parse(req.params);
+    const b = parse(ReorderDecisionInput, req.body, reply);
+    if (!b) return;
+    const current = (await a.reorders(undefined, requestId))[0];
+    if (!current) return reply.code(404).send({ error: 'unknown reorder request' });
+    if (!access(subjectOf(req), (await a.detail(current.assetId)).asset, 'view').allowed) return reply.code(404).send({ error: 'unknown reorder request' });
+    return run(reply, async () => {
+      const d = await a.decideReorder(requestId, b.decision, b.note ?? null, req.user!.username);
+      await audit(p, req, 'reorder_decided', d.assetId, { requestId, decision: b.decision, quantity: d.quantity });
       return d;
     });
   });

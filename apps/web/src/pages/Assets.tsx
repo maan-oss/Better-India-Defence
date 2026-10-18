@@ -208,11 +208,146 @@ function OverviewTab({ d, changed }: { d: AssetDetail; changed: () => void }) {
           {dateTime(a.updatedAt)} by {a.updatedBy}
         </dd>
       </dl>
+      {a.stock && <StockPanel id={a.id} stock={a.stock} live={live} onDone={changed} />}
       {live && can('assets.edit') && <StatusForm id={a.id} current={a.status} onDone={changed} />}
       {live && can('assets.edit') && <NotesForm id={a.id} notes={a.notes} onDone={changed} />}
       {live && can('assets.graph') && <RetireForm id={a.id} onDone={changed} />}
       {!live && <p className="note">This asset is retired. Its record is kept and cannot be changed.</p>}
     </div>
+  );
+}
+
+interface ReorderRow {
+  id: string;
+  assetId: string;
+  quantity: number;
+  reason: string;
+  status: 'requested' | 'approved' | 'rejected';
+  requestedBy: string;
+  decidedBy: string | null;
+  decisionNote: string | null;
+}
+
+/**
+ * Stock on hand, the reorder level, receipts and issues, and reorder requests. A request takes effect only when an
+ * analyst other than the requester approves it, so the approve and reject controls are not offered to the requester.
+ */
+function StockPanel({ id, stock, live, onDone }: { id: string; stock: NonNullable<AssetView['stock']>; live: boolean; onDone: () => void }) {
+  const can = useSession((s) => s.can);
+  const me = useSession((s) => s.user?.username);
+  const [version, setVersion] = useState(0);
+  const reorders = useAsync((s) => get<ReorderRow[]>('/api/reorders', s), [id, version]);
+  const [change, setChange] = useState('');
+  const [direction, setDirection] = useState<'receipt' | 'issue'>('receipt');
+  const [reason, setReason] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [orderReason, setOrderReason] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const refresh = () => {
+    setVersion((v) => v + 1);
+    onDone();
+  };
+  const run = async (fn: () => Promise<unknown>, after: () => void) => {
+    setBusy(true);
+    setErr(null);
+    try {
+      await fn();
+      after();
+      refresh();
+    } catch (x) {
+      setErr(message(x));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const mine = (reorders.data ?? []).filter((r) => r.assetId === id);
+  const state = stock.outOfStock ? 'Out of stock' : stock.lowStock ? 'Low stock' : 'In stock';
+  const tone = stock.outOfStock ? 'red' : stock.lowStock ? 'amber' : 'ok';
+  return (
+    <section className="as-form" aria-label="Stock">
+      <h3>Stock</h3>
+      <p>
+        <span className={`as-badge ${tone}`}>{state}</span> {stock.quantity} {stock.unit} on hand · reorder at {stock.reorderLevel} {stock.unit}
+      </p>
+      {live && can('assets.edit') && (
+        <form
+          onSubmit={(e: FormEvent) => {
+            e.preventDefault();
+            const n = Math.abs(Number(change));
+            const delta = direction === 'issue' ? -n : n;
+            void run(() => post(`/api/assets/${id}/stock`, { change: delta, reason: reason.trim() }), () => {
+              setChange('');
+              setReason('');
+            });
+          }}
+          aria-label="Record a receipt or an issue"
+        >
+          <div className="as-field">
+            <span>Movement</span>
+            <select className="input" value={direction} onChange={(e) => setDirection(e.target.value as 'receipt' | 'issue')}>
+              <option value="receipt">Receipt</option>
+              <option value="issue">Issue</option>
+            </select>
+          </div>
+          <Input label={`Quantity (${stock.unit})`} inputMode="decimal" value={change} onChange={(e) => setChange(e.target.value)} />
+          <Input label="Reason" value={reason} maxLength={200} onChange={(e) => setReason(e.target.value)} />
+          <div className="as-actions">
+            <Button type="submit" disabled={busy || !(Number(change) > 0) || !reason.trim()}>
+              Record movement
+            </Button>
+          </div>
+        </form>
+      )}
+      {live && can('assets.edit') && (
+        <form
+          onSubmit={(e: FormEvent) => {
+            e.preventDefault();
+            void run(() => post(`/api/assets/${id}/reorders`, { quantity: Number(quantity), reason: orderReason.trim() }), () => {
+              setQuantity('');
+              setOrderReason('');
+            });
+          }}
+          aria-label="Request a reorder"
+        >
+          <h3>Request a reorder</h3>
+          <Input label={`Quantity (${stock.unit})`} inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+          <Input label="Reason" value={orderReason} maxLength={300} onChange={(e) => setOrderReason(e.target.value)} />
+          <div className="as-actions">
+            <Button type="submit" disabled={busy || !(Number(quantity) > 0) || !orderReason.trim()}>
+              Request reorder
+            </Button>
+          </div>
+        </form>
+      )}
+      {mine.length > 0 && (
+        <ul aria-label="Reorder requests">
+          {mine.map((r) => (
+            <li key={r.id}>
+              {r.quantity} {stock.unit} · <b>{r.status}</b> · requested by {r.requestedBy}
+              {r.decidedBy ? ` · decided by ${r.decidedBy}` : ''}
+              {r.reason ? ` · ${r.reason}` : ''}
+              {r.status === 'requested' && can('assets.graph') && r.requestedBy !== me && (
+                <span className="as-actions">
+                  {' '}
+                  <Button size="sm" disabled={busy} onClick={() => void run(() => post(`/api/reorders/${r.id}/decision`, { decision: 'approve' }), () => undefined)}>
+                    Approve
+                  </Button>{' '}
+                  <Button size="sm" variant="ghost" disabled={busy} onClick={() => void run(() => post(`/api/reorders/${r.id}/decision`, { decision: 'reject' }), () => undefined)}>
+                    Reject
+                  </Button>
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {err && (
+        <p className="as-error" role="alert">
+          {err}
+        </p>
+      )}
+    </section>
   );
 }
 
