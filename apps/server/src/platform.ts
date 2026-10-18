@@ -26,6 +26,7 @@ import { ReplayQueries } from './replay/queries.ts';
 import { CopilotService } from './copilot/copilot.ts';
 import { AuthService } from './auth/authService.ts';
 import { oidcFromConfig, type OidcClient } from './auth/oidc.ts';
+import { IncidentReportService } from './incidentReports/reportService.ts';
 import { HandoffService } from './handoff/handoffService.ts';
 import { VisionService } from './vision/visionService.ts';
 import { IdentityService } from './identity/identityService.ts';
@@ -57,6 +58,8 @@ export class Platform {
   auth!: AuthService;
   /** The configured identity provider for sign-in, or null. */
   oidc: OidcClient | null = null;
+  /** Incident reports: the lifecycle, linked equipment and the history of each step. */
+  reports!: IncidentReportService;
   handoff!: HandoffService;
   vision!: VisionService;
   identity!: IdentityService;
@@ -125,6 +128,7 @@ export class Platform {
     const anchored = await this.anchoredAudit();
     if (!anchored.ok) this.log.error({ problems: anchored.problems.slice(0, 5) }, 'audit chain anchors do not verify');
     this.oidc = oidcFromConfig(cfg);
+    this.reports = new IncidentReportService(this.db);
     this.auth = new AuthService(this.db, cfg.SESSION_TTL_HOURS, {
       mfa: { key: cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null, required: cfg.STRATA_MFA_REQUIRED === 'true', issuer: cfg.STRATA_MFA_ISSUER },
     });

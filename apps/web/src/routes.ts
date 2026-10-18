@@ -8,6 +8,7 @@ import { createElement, type ComponentType } from 'react';
 const pageLoaders = {
   operations: () => import('./pages/Operations').then((m) => ({ default: m.Operations })),
   incidents: () => import('./pages/Incidents').then((m) => ({ default: m.Incidents })),
+  incidentReports: () => import('./pages/IncidentReports').then((m) => ({ default: m.IncidentReports })),
   sensors: () => import('./pages/Sensors').then((m) => ({ default: m.Sensors })),
   assets: () => import('./pages/Assets').then((m) => ({ default: m.Assets })),
   reconstructions: () => import('./pages/Reconstructions').then((m) => ({ default: m.Reconstructions })),
@@ -96,6 +97,8 @@ export function warmCorePages(): void {
 const routePage: Record<string, PageKey> = {
   '/operations': 'operations',
   '/incidents': 'incidents',
+  '/reports': 'incidentReports',
+  '/reports/:id': 'incidentReports',
   '/sensors': 'sensors',
   '/assets': 'assets',
   '/reconstructions': 'reconstructions',

@@ -87,7 +87,7 @@ The inventory is a starting point, not a complete survey. "Not yet assessed" mea
 | Geospatial situational awareness | Build on existing; reassess the renderer for large data | Three.js retained; 3D Tiles noted in `PLATFORM.md` as an option |
 | Asset and infrastructure management | Build (done in this pass) | Verified slice; integration with enterprise systems is a later decision |
 | Logistics and readiness | Partly built: stock lines and approved reorders on the dependency graph | A supply item carries stock and a reorder level; a stock-out impairs what depends on it; reorders take effect only when another analyst approves them; both are in the history. Readiness planning and supplier integration are not built |
-| Incident and emergency coordination | Build on existing | Roadmap item 3 |
+| Incident and emergency coordination | Build on existing; incident reports built | Incident reports move through reported, verified, escalated, responding, resolved and reviewed. A duty or command incident (from the criticality of the equipment it touches) is escalated before response. The reporter cannot verify, the resolver cannot review, and every step is in an append-only history. The sensor and area incidents are unchanged. Not built: paging or notification to people, and shift handover
 | Document management and search | Not yet assessed | Needs research before design |
 | Personnel administration, training, HR | Not yet assessed | Outside the current scope |
 | Cybersecurity operations, network monitoring | Integrate, do not build | Interop with existing tools is the intended path |
