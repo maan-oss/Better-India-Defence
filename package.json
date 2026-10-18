@@ -25,6 +25,7 @@
     "reproducible": "node scripts/reproducible-check.mjs",
     "backup": "node apps/server/dist/backup.js backup",
     "restore": "node apps/server/dist/backup.js restore",
+    "schemas": "tsx scripts/generate-schemas.ts",
     "verify": "npm run typecheck && npm run lint && npm run test && npm run build && npm run audit",
     "lint": "eslint .",
     "test": "vitest run",

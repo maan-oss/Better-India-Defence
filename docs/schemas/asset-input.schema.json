@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://strata.local/schemas/asset-input.schema.json",
+  "title": "asset-input",
+  "type": "object",
+  "properties": {
+    "tag": {
+      "type": "string",
+      "pattern": "^[A-Z0-9][A-Z0-9-]{1,23}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "power",
+        "comms",
+        "it",
+        "access",
+        "security",
+        "facilities",
+        "vehicle",
+        "supply",
+        "other"
+      ]
+    },
+    "criticality": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "zoneId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 60
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "manufacturer": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 80
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 80
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "serial": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 80
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "commissionedAt": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "warrantyUntil": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "notes": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 1000
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "UNCLASSIFIED",
+        "RESTRICTED",
+        "CONFIDENTIAL",
+        "SECRET"
+      ]
+    },
+    "owner": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,39}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sharedWith": {
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]{0,39}$"
+      }
+    },
+    "stock": {
+      "type": "object",
+      "properties": {
+        "quantity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "reorderLevel": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16
+        }
+      },
+      "required": [
+        "quantity",
+        "reorderLevel",
+        "unit"
+      ]
+    }
+  },
+  "required": [
+    "tag",
+    "name",
+    "category",
+    "criticality"
+  ]
+}

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { get } from '../api/client';
+import { useAsync } from '../components/common';
+import { dateTime } from '../lib/format';
 import { ErrorNote, Loading } from '../components/common';
 import { bytes, hms } from '../lib/format';
 import { AnimatedCounter } from '../components/arc/animated-counter/animated-counter';
@@ -67,6 +69,7 @@ export function SystemHealth() {
           Refreshed every 3 s · up {Math.floor(m.uptimeS / 3600)} h {Math.round((m.uptimeS % 3600) / 60)} min
         </span>
       </div>
+      <IntegrationsPanel />
       <div className="cards cards-4">
         <Stat v={m.ingestPerSecond} unit="/s" l="Ingest rate" spark={hist.ingest} />
         <Stat v={m.batchProcessMs.p95} unit=" ms" l="Batch processing p95" spark={hist.batch} />
@@ -222,6 +225,99 @@ export function SystemHealth() {
         </div>
       </div>
     </div>
+  );
+}
+
+interface Monitor {
+  windowHours: number;
+  totals: { messages: number; deadLetters: number };
+  sensors: { sensorId: string; messages: number; lastSeen: number }[];
+  deadLettersByReason: { reason: string; count: number; lastSeen: number }[];
+  deadLettersBySensor: { sensorId: string; count: number }[];
+}
+
+/**
+ * Integrations: what each sensor delivered in the last day, and what was refused, by reason and by sensor. A refusal is
+ * kept with its raw text in the dead-letter table; this panel is the count, so a failing feed is visible at a glance.
+ */
+function IntegrationsPanel() {
+  const monitor = useAsync((s) => get<Monitor>('/api/interop/monitor?hours=24', s), []);
+  if (monitor.error) return <p className="muted">Integration activity is unavailable to this account.</p>;
+  if (!monitor.data) return <Loading what="integrations" />;
+  const m = monitor.data;
+  return (
+    <section className="cards" aria-label="Integrations" style={{ gridTemplateColumns: '1fr 1fr', alignItems: 'start' }}>
+      <div>
+        <h2>Integrations, last {m.windowHours} h</h2>
+        <p className="muted">
+          {m.totals.messages.toLocaleString()} messages accepted · {m.totals.deadLetters.toLocaleString()} refused
+        </p>
+        <table className="table" aria-label="Activity by sensor">
+          <thead>
+            <tr>
+              <th>Sensor</th>
+              <th>Messages</th>
+              <th>Last seen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {m.sensors.map((s) => (
+              <tr key={s.sensorId}>
+                <td className="mono">{s.sensorId}</td>
+                <td>{s.messages.toLocaleString()}</td>
+                <td>{dateTime(s.lastSeen)}</td>
+              </tr>
+            ))}
+            {m.sensors.length === 0 && (
+              <tr>
+                <td colSpan={3} className="muted">
+                  No messages in this window.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h2>Refused, by reason</h2>
+        <table className="table" aria-label="Refused messages by reason">
+          <thead>
+            <tr>
+              <th>Reason</th>
+              <th>Count</th>
+              <th>Last seen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {m.deadLettersByReason.map((r) => (
+              <tr key={r.reason}>
+                <td>{r.reason}</td>
+                <td>{r.count.toLocaleString()}</td>
+                <td>{dateTime(r.lastSeen)}</td>
+              </tr>
+            ))}
+            {m.deadLettersByReason.length === 0 && (
+              <tr>
+                <td colSpan={3} className="muted">
+                  Nothing refused in this window.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        <h2 style={{ marginTop: 16 }}>Refused, by sensor</h2>
+        <table className="table" aria-label="Refused messages by sensor">
+          <tbody>
+            {m.deadLettersBySensor.map((s) => (
+              <tr key={s.sensorId}>
+                <td className="mono">{s.sensorId}</td>
+                <td>{s.count.toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 

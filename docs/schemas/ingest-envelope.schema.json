@@ -1,0 +1,1526 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://strata.local/schemas/ingest-envelope.schema.json",
+  "title": "ingest-envelope",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "strata.ingest/v1"
+        },
+        "messageId": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 96
+        },
+        "sensorId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9-]{1,23}$"
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sentAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kind": {
+          "type": "string",
+          "const": "radar.track"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "scanId": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "plots": {
+              "maxItems": 512,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "localTrackId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32
+                  },
+                  "position": {
+                    "type": "object",
+                    "properties": {
+                      "lat": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90
+                      },
+                      "lon": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
+                      },
+                      "alt": {
+                        "type": "number",
+                        "minimum": -500,
+                        "maximum": 60000
+                      }
+                    },
+                    "required": [
+                      "lat",
+                      "lon",
+                      "alt"
+                    ]
+                  },
+                  "velocity": {
+                    "type": "object",
+                    "properties": {
+                      "ve": {
+                        "type": "number"
+                      },
+                      "vn": {
+                        "type": "number"
+                      },
+                      "vu": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "ve",
+                      "vn",
+                      "vu"
+                    ]
+                  },
+                  "rangeM": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "azimuthDeg": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                  },
+                  "elevationDeg": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "rcsDbsm": {
+                    "type": "number",
+                    "minimum": -60,
+                    "maximum": 60
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "sigma": {
+                    "type": "object",
+                    "properties": {
+                      "rangeM": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "azDeg": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "elDeg": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      }
+                    },
+                    "required": [
+                      "rangeM",
+                      "azDeg",
+                      "elDeg"
+                    ]
+                  }
+                },
+                "required": [
+                  "localTrackId",
+                  "position",
+                  "velocity",
+                  "rangeM",
+                  "azimuthDeg",
+                  "elevationDeg",
+                  "rcsDbsm",
+                  "confidence",
+                  "sigma"
+                ]
+              }
+            }
+          },
+          "required": [
+            "scanId",
+            "plots"
+          ]
+        }
+      },
+      "required": [
+        "schema",
+        "messageId",
+        "sensorId",
+        "adapter",
+        "seq",
+        "observedAt",
+        "sentAt",
+        "kind",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "strata.ingest/v1"
+        },
+        "messageId": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 96
+        },
+        "sensorId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9-]{1,23}$"
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sentAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kind": {
+          "type": "string",
+          "const": "rf.detection"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "emissions": {
+              "maxItems": 64,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "emitterId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32
+                  },
+                  "centerFrequencyMHz": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 100000
+                  },
+                  "bandwidthMHz": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 1000
+                  },
+                  "rssiDbm": {
+                    "type": "number",
+                    "minimum": -160,
+                    "maximum": 30
+                  },
+                  "modulation": {
+                    "type": "string",
+                    "maxLength": 32
+                  },
+                  "protocolClass": {
+                    "type": "string",
+                    "maxLength": 64
+                  },
+                  "region": {
+                    "type": "object",
+                    "properties": {
+                      "center": {
+                        "type": "object",
+                        "properties": {
+                          "lat": {
+                            "type": "number",
+                            "minimum": -90,
+                            "maximum": 90
+                          },
+                          "lon": {
+                            "type": "number",
+                            "minimum": -180,
+                            "maximum": 180
+                          },
+                          "alt": {
+                            "type": "number",
+                            "minimum": -500,
+                            "maximum": 60000
+                          }
+                        },
+                        "required": [
+                          "lat",
+                          "lon",
+                          "alt"
+                        ]
+                      },
+                      "radiusM": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 10000
+                      }
+                    },
+                    "required": [
+                      "center",
+                      "radiusM"
+                    ]
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "required": [
+                  "emitterId",
+                  "centerFrequencyMHz",
+                  "bandwidthMHz",
+                  "rssiDbm",
+                  "modulation",
+                  "protocolClass",
+                  "region",
+                  "confidence"
+                ]
+              }
+            }
+          },
+          "required": [
+            "emissions"
+          ]
+        }
+      },
+      "required": [
+        "schema",
+        "messageId",
+        "sensorId",
+        "adapter",
+        "seq",
+        "observedAt",
+        "sentAt",
+        "kind",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "strata.ingest/v1"
+        },
+        "messageId": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 96
+        },
+        "sensorId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9-]{1,23}$"
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sentAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kind": {
+          "type": "string",
+          "const": "camera.detections"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "frameId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 96
+            },
+            "pose": {
+              "type": "object",
+              "properties": {
+                "position": {
+                  "type": "object",
+                  "properties": {
+                    "lat": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "lon": {
+                      "type": "number",
+                      "minimum": -180,
+                      "maximum": 180
+                    },
+                    "alt": {
+                      "type": "number",
+                      "minimum": -500,
+                      "maximum": 60000
+                    }
+                  },
+                  "required": [
+                    "lat",
+                    "lon",
+                    "alt"
+                  ]
+                },
+                "headingDeg": {
+                  "type": "number",
+                  "minimum": -360,
+                  "maximum": 720
+                },
+                "pitchDeg": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "hfovDeg": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 179
+                },
+                "widthPx": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 16384
+                },
+                "heightPx": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 16384
+                }
+              },
+              "required": [
+                "position",
+                "headingDeg",
+                "pitchDeg",
+                "hfovDeg",
+                "widthPx",
+                "heightPx"
+              ]
+            },
+            "detections": {
+              "maxItems": 256,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "localTrackId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32
+                  },
+                  "cls": {
+                    "type": "string",
+                    "enum": [
+                      "person",
+                      "vehicle",
+                      "drone",
+                      "bird",
+                      "aircraft",
+                      "debris",
+                      "unknown"
+                    ]
+                  },
+                  "bbox": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 4,
+                    "maxItems": 4
+                  },
+                  "score": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "appearance": {
+                    "minItems": 16,
+                    "maxItems": 16,
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "faceQuality": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "sharpness": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "isStatic": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "localTrackId",
+                  "cls",
+                  "bbox",
+                  "score",
+                  "sharpness"
+                ]
+              }
+            }
+          },
+          "required": [
+            "frameId",
+            "pose",
+            "detections"
+          ]
+        }
+      },
+      "required": [
+        "schema",
+        "messageId",
+        "sensorId",
+        "adapter",
+        "seq",
+        "observedAt",
+        "sentAt",
+        "kind",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "strata.ingest/v1"
+        },
+        "messageId": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 96
+        },
+        "sensorId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9-]{1,23}$"
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sentAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kind": {
+          "type": "string",
+          "const": "drone.telemetry"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "callsign": {
+              "type": "string",
+              "maxLength": 32
+            },
+            "position": {
+              "type": "object",
+              "properties": {
+                "lat": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "lon": {
+                  "type": "number",
+                  "minimum": -180,
+                  "maximum": 180
+                },
+                "alt": {
+                  "type": "number",
+                  "minimum": -500,
+                  "maximum": 60000
+                }
+              },
+              "required": [
+                "lat",
+                "lon",
+                "alt"
+              ]
+            },
+            "velocity": {
+              "type": "object",
+              "properties": {
+                "ve": {
+                  "type": "number"
+                },
+                "vn": {
+                  "type": "number"
+                },
+                "vu": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "ve",
+                "vn",
+                "vu"
+              ]
+            },
+            "attitude": {
+              "type": "object",
+              "properties": {
+                "headingDeg": {
+                  "type": "number"
+                },
+                "pitchDeg": {
+                  "type": "number"
+                },
+                "rollDeg": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "headingDeg",
+                "pitchDeg",
+                "rollDeg"
+              ]
+            },
+            "gimbal": {
+              "type": "object",
+              "properties": {
+                "headingDeg": {
+                  "type": "number"
+                },
+                "pitchDeg": {
+                  "type": "number"
+                },
+                "hfovDeg": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 179
+                }
+              },
+              "required": [
+                "headingDeg",
+                "pitchDeg",
+                "hfovDeg"
+              ]
+            },
+            "batteryPct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "docked",
+                "patrol",
+                "transit",
+                "loiter",
+                "survey",
+                "rtb"
+              ]
+            },
+            "linkQuality": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "callsign",
+            "position",
+            "velocity",
+            "attitude",
+            "gimbal",
+            "mode",
+            "linkQuality"
+          ]
+        }
+      },
+      "required": [
+        "schema",
+        "messageId",
+        "sensorId",
+        "adapter",
+        "seq",
+        "observedAt",
+        "sentAt",
+        "kind",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "strata.ingest/v1"
+        },
+        "messageId": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 96
+        },
+        "sensorId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9-]{1,23}$"
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sentAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kind": {
+          "type": "string",
+          "const": "gps.position"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "entityId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32
+            },
+            "entityKind": {
+              "type": "string",
+              "enum": [
+                "person",
+                "vehicle"
+              ]
+            },
+            "callsign": {
+              "type": "string",
+              "maxLength": 48
+            },
+            "role": {
+              "type": "string",
+              "maxLength": 48
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "available",
+                "busy",
+                "responding",
+                "off_duty",
+                "sos"
+              ]
+            },
+            "position": {
+              "type": "object",
+              "properties": {
+                "lat": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "lon": {
+                  "type": "number",
+                  "minimum": -180,
+                  "maximum": 180
+                },
+                "alt": {
+                  "type": "number",
+                  "minimum": -500,
+                  "maximum": 60000
+                }
+              },
+              "required": [
+                "lat",
+                "lon",
+                "alt"
+              ]
+            },
+            "accuracyM": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1000
+            },
+            "speedMps": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 200
+            },
+            "headingDeg": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            }
+          },
+          "required": [
+            "entityId",
+            "entityKind",
+            "callsign",
+            "role",
+            "status",
+            "position",
+            "accuracyM"
+          ]
+        }
+      },
+      "required": [
+        "schema",
+        "messageId",
+        "sensorId",
+        "adapter",
+        "seq",
+        "observedAt",
+        "sentAt",
+        "kind",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "strata.ingest/v1"
+        },
+        "messageId": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 96
+        },
+        "sensorId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9-]{1,23}$"
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sentAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kind": {
+          "type": "string",
+          "const": "lidar.scan"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "scanId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "sensorPosition": {
+              "type": "object",
+              "properties": {
+                "lat": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "lon": {
+                  "type": "number",
+                  "minimum": -180,
+                  "maximum": 180
+                },
+                "alt": {
+                  "type": "number",
+                  "minimum": -500,
+                  "maximum": 60000
+                }
+              },
+              "required": [
+                "lat",
+                "lon",
+                "alt"
+              ]
+            },
+            "mediaId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 96
+            },
+            "pointCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "rangeM": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "durationMs": {
+              "type": "number",
+              "minimum": 0
+            },
+            "frame": {
+              "type": "string",
+              "enum": [
+                "site-enu"
+              ]
+            }
+          },
+          "required": [
+            "scanId",
+            "sensorPosition",
+            "mediaId",
+            "pointCount",
+            "rangeM",
+            "durationMs",
+            "frame"
+          ]
+        }
+      },
+      "required": [
+        "schema",
+        "messageId",
+        "sensorId",
+        "adapter",
+        "seq",
+        "observedAt",
+        "sentAt",
+        "kind",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "strata.ingest/v1"
+        },
+        "messageId": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 96
+        },
+        "sensorId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9-]{1,23}$"
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sentAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kind": {
+          "type": "string",
+          "const": "imagery.capture"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "captureId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "mediaId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 96
+            },
+            "acquiredAt": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "gsdM": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "footprint": {
+              "type": "object",
+              "properties": {
+                "sw": {
+                  "type": "object",
+                  "properties": {
+                    "lat": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "lon": {
+                      "type": "number",
+                      "minimum": -180,
+                      "maximum": 180
+                    },
+                    "alt": {
+                      "type": "number",
+                      "minimum": -500,
+                      "maximum": 60000
+                    }
+                  },
+                  "required": [
+                    "lat",
+                    "lon",
+                    "alt"
+                  ]
+                },
+                "ne": {
+                  "type": "object",
+                  "properties": {
+                    "lat": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "lon": {
+                      "type": "number",
+                      "minimum": -180,
+                      "maximum": 180
+                    },
+                    "alt": {
+                      "type": "number",
+                      "minimum": -500,
+                      "maximum": 60000
+                    }
+                  },
+                  "required": [
+                    "lat",
+                    "lon",
+                    "alt"
+                  ]
+                }
+              },
+              "required": [
+                "sw",
+                "ne"
+              ]
+            },
+            "widthPx": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "heightPx": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "cloudCoverPct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "sunElevationDeg": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "processingLevel": {
+              "type": "string",
+              "enum": [
+                "L1",
+                "L2",
+                "L3"
+              ]
+            }
+          },
+          "required": [
+            "captureId",
+            "mediaId",
+            "acquiredAt",
+            "gsdM",
+            "footprint",
+            "widthPx",
+            "heightPx",
+            "cloudCoverPct",
+            "sunElevationDeg",
+            "processingLevel"
+          ]
+        }
+      },
+      "required": [
+        "schema",
+        "messageId",
+        "sensorId",
+        "adapter",
+        "seq",
+        "observedAt",
+        "sentAt",
+        "kind",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "strata.ingest/v1"
+        },
+        "messageId": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 96
+        },
+        "sensorId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9-]{1,23}$"
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sentAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kind": {
+          "type": "string",
+          "const": "sensor.health"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "ok",
+                "degraded",
+                "fault",
+                "offline"
+              ]
+            },
+            "uptimeS": {
+              "type": "number",
+              "minimum": 0
+            },
+            "temperatureC": {
+              "type": "number"
+            },
+            "message": {
+              "type": "string",
+              "maxLength": 240
+            },
+            "metrics": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string",
+                "maxLength": 48
+              },
+              "additionalProperties": {
+                "type": "number"
+              }
+            }
+          },
+          "required": [
+            "status",
+            "uptimeS"
+          ]
+        }
+      },
+      "required": [
+        "schema",
+        "messageId",
+        "sensorId",
+        "adapter",
+        "seq",
+        "observedAt",
+        "sentAt",
+        "kind",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "strata.ingest/v1"
+        },
+        "messageId": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 96
+        },
+        "sensorId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9-]{1,23}$"
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sentAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kind": {
+          "type": "string",
+          "const": "infrastructure.state"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "assetId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 48
+            },
+            "assetKind": {
+              "type": "string",
+              "enum": [
+                "gate",
+                "fence",
+                "power",
+                "network",
+                "lighting"
+              ]
+            },
+            "state": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32
+            },
+            "alarm": {
+              "type": "boolean"
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 240
+            },
+            "position": {
+              "type": "object",
+              "properties": {
+                "lat": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "lon": {
+                  "type": "number",
+                  "minimum": -180,
+                  "maximum": 180
+                },
+                "alt": {
+                  "type": "number",
+                  "minimum": -500,
+                  "maximum": 60000
+                }
+              },
+              "required": [
+                "lat",
+                "lon",
+                "alt"
+              ]
+            }
+          },
+          "required": [
+            "assetId",
+            "assetKind",
+            "state",
+            "alarm"
+          ]
+        }
+      },
+      "required": [
+        "schema",
+        "messageId",
+        "sensorId",
+        "adapter",
+        "seq",
+        "observedAt",
+        "sentAt",
+        "kind",
+        "payload"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "strata.ingest/v1"
+        },
+        "messageId": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 96
+        },
+        "sensorId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9-]{1,23}$"
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sentAt": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kind": {
+          "type": "string",
+          "const": "external.track"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "system": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32
+            },
+            "uid": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 96
+            },
+            "callsign": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "affiliation": {
+              "type": "string",
+              "enum": [
+                "friend",
+                "hostile",
+                "suspect",
+                "neutral",
+                "unknown",
+                "pending"
+              ]
+            },
+            "category": {
+              "type": "string",
+              "enum": [
+                "person",
+                "vehicle",
+                "aircraft",
+                "drone",
+                "vessel",
+                "unknown"
+              ]
+            },
+            "position": {
+              "type": "object",
+              "properties": {
+                "lat": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "lon": {
+                  "type": "number",
+                  "minimum": -180,
+                  "maximum": 180
+                },
+                "alt": {
+                  "type": "number",
+                  "minimum": -500,
+                  "maximum": 60000
+                }
+              },
+              "required": [
+                "lat",
+                "lon",
+                "alt"
+              ]
+            },
+            "ceM": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 100000
+            },
+            "courseDeg": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            },
+            "speedMps": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "type": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "staleAt": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "remarks": {
+              "type": "string",
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "system",
+            "uid",
+            "affiliation",
+            "category",
+            "position",
+            "ceM"
+          ]
+        }
+      },
+      "required": [
+        "schema",
+        "messageId",
+        "sensorId",
+        "adapter",
+        "seq",
+        "observedAt",
+        "sentAt",
+        "kind",
+        "payload"
+      ]
+    }
+  ]
+}

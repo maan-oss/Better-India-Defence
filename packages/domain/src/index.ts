@@ -8,6 +8,7 @@ export * from './auth/totp.ts';
 export * from './policy/access.ts';
 export * from './incidents/reports.ts';
 export * from './documents/ingest.ts';
+export * from './schemas/contracts.ts';
 export { sha1, hmacSha1 } from './auth/sha1.ts';
 export * from './facility/types.ts';
 export * from './facility/terrain.ts';

@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { buildCot, can, cotToExternal, cotTypeForTrack, CotStreamSplitter, FACILITY, findSensor, INGEST_SCHEMA_VERSION, parseCot, type TrackSnapshot } from '@strata/domain';
 import type { Platform } from '../platform.ts';
-import { isService, parse } from '../http/guards.ts';
+import { isService, parse, requirePerm } from '../http/guards.ts';
 
 /**
  * C2 interop over Cursor-on-Target.
@@ -10,6 +10,31 @@ import { isService, parse } from '../http/guards.ts';
  *  POST /api/interop/cot   — CoT XML pushed by another system (service token), as reports of an external feed.
  */
 export function registerInterop(app: FastifyInstance, p: Platform): void {
+  /**
+   * The integration monitor: what each sensor has delivered in the window, and the messages that were refused, by reason
+   * and by sensor. A refused message is kept in the dead-letter table with its raw text; this counts them.
+   */
+  app.get('/api/interop/monitor', { preHandler: requirePerm('system.view') }, async (req, reply) => {
+    const q = parse(z.object({ hours: z.coerce.number().min(1).max(168).default(24) }), req.query ?? {}, reply);
+    if (!q) return;
+    const since = Date.now() - q.hours * 3_600_000;
+    const [sensors, reasons, bySensor, totals] = await Promise.all([
+      p.db.query<{ sensor_id: string; messages: number; last_seen: number }>('SELECT sensor_id, count(*)::int AS messages, max(received_at)::bigint AS last_seen FROM ingest_messages WHERE received_at >= $1 GROUP BY sensor_id ORDER BY messages DESC LIMIT 100', [since]),
+      p.db.query<{ reason: string; count: number; last_seen: number }>('SELECT reason, count(*)::int AS count, max(received_at)::bigint AS last_seen FROM dead_letters WHERE received_at >= $1 GROUP BY reason ORDER BY count DESC LIMIT 50', [since]),
+      p.db.query<{ sensor_id: string; count: number }>("SELECT coalesce(sensor_id, '(none)') AS sensor_id, count(*)::int AS count FROM dead_letters WHERE received_at >= $1 GROUP BY coalesce(sensor_id, '(none)') ORDER BY count DESC LIMIT 50", [since]),
+      p.db.query<{ messages: number; dead: number }>('SELECT (SELECT count(*)::int FROM ingest_messages WHERE received_at >= $1) AS messages, (SELECT count(*)::int FROM dead_letters WHERE received_at >= $1) AS dead', [since]),
+    ]);
+    const t = totals.rows[0]!;
+    return {
+      windowHours: q.hours,
+      since,
+      totals: { messages: Number(t.messages), deadLetters: Number(t.dead) },
+      sensors: sensors.rows.map((r) => ({ sensorId: r.sensor_id, messages: Number(r.messages), lastSeen: Number(r.last_seen) })),
+      deadLettersByReason: reasons.rows.map((r) => ({ reason: r.reason, count: Number(r.count), lastSeen: Number(r.last_seen) })),
+      deadLettersBySensor: bySensor.rows.map((r) => ({ sensorId: r.sensor_id, count: Number(r.count) })),
+    };
+  });
+
   app.addContentTypeParser(['application/xml', 'text/xml', 'application/cot+xml'], { parseAs: 'string', bodyLimit: 2 * 1024 * 1024 }, (_req, body, done) => done(null, body));
 
   const allowed = (req: FastifyRequest) => isService(req, p.cfg.STRATA_SERVICE_TOKEN) || (req.user && can(req.user.role, 'world.view'));
