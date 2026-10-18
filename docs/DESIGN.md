@@ -20,7 +20,7 @@ component and colour libraries rather than hand-picked values.
 
 | Library | Used for |
 |---|---|
-| [Radix Colors](https://www.radix-ui.com/colors) | Status, affiliation and provenance colours. 12-step dark scales: steps 3 tint, 6 border, 9 solid fill, 11 text. Red / orange / amber / grass / cyan for status; blue / teal / violet for affiliation and provenance. |
+| [Radix Colors](https://www.radix-ui.com/colors) | Status, affiliation and provenance colours. 12-step scales for light and dark: steps 3 tint, 6 border, 9 solid fill, 11 text. Red / orange / amber / grass / cyan for status; blue / teal / violet for affiliation and provenance. |
 | [Radix Primitives](https://www.radix-ui.com/primitives) | Dialogs, tabs, tooltips and the toggle-group fallback for segmented controls with rich labels, in `apps/web/src/components/ui.tsx`; Arc builds on Radix too. Focus trapping, keyboard navigation, collision-aware placement and ARIA roles come from the library. |
 | [Arc](https://uiarc.dev/components) (MIT, free tier) | The main component kit, vendored in `apps/web/src/components/arc/` (CSS modules + Motion), imported straight from each component folder (there is no barrel file, so routes stay code-split), tokens mapped in `styles/arc-theme.css`. Where each is used: see *Component inventory* below. |
 | [Space UI](https://www.spaceui.one/components) (MIT) | Vendored in `components/vendor/spaceui/`: kanban (Command tasks), timeline (incident chronology), notification list (status island), status badge, loading orb (copilot), member selector (handover), user presence avatars (on watch), tick slider (camera analysis rate), slide to confirm (field task status), interactive checklist (arrival drills), pin list (camera wall order). Tailwind utilities, mapped to our tokens in `styles/tw.css`. |
@@ -96,9 +96,9 @@ Each colour family has one job.
 
 | Role | Values | Used for | Never used for |
 |---|---|---|---|
-| Chrome | ChatGPT-style true greys: `#171717` rail, top bar and side panels; `#212121` pages; `#2a2a2a` / `#2f2f2f` / `#383838` raised, hover and selected; hairlines at 6–18 % white | Surfaces, borders, depth | Meaning |
-| Text | Claude-style warm cream: `#f3f1ea` / `#c9c6bd` / `#9b988f` / `#6e6c66` (contrast on `#212121`: 14.9 / 9.3 / 5.4 / 3.1) | Primary, secondary, labels, disabled | — |
-| Interaction | Cream (`#f0eee6`, hover `#faf9f5`): cream primary button with dark ink, a lighter grey surface plus a cream bar for selection, cream focus ring | Buttons, selection, focus, active tab and nav | Status |
+| Chrome | Apple-style light greys: `#fbfbfd` rail and side panels; `#f5f5f7` pages; `#ffffff` raised surfaces (cards, panels, inputs); `#f0f0f3` hover and `#e6e6eb` selected; hairlines at 6–20 % black | Surfaces, borders, depth | Meaning |
+| Text | Ink: `#1d1d1f` / `#3a3a3c` / `#5a5a5f` / `#6e6e73` (contrast on `#f5f5f7`: about 17 / 11 / 6.6 / 4.6). The night display uses the red ladder | Primary, secondary, labels, disabled | — |
+| Interaction | Ink: `#1d1d1f` primary button with white text; selection is a deeper grey; focus ring `#0071e3` | Buttons, selection, focus, active tab and nav | Status |
 | Status | Critical red `#e5484d`, serious orange `#f76b15`, caution amber `#ffc53d`, normal green `#46a758`, standby cyan `#00a2c7` (with tint, border and text steps) | Alerts, priorities, readiness, sensor and team states | Decoration |
 | Affiliation | Friend `#70b8ff`, hostile `#ff6369`, suspect `#ffa057`, neutral `#71d083`, unknown `#f5e147` | Track symbols (APP-6 frames carry the meaning) | Interface |
 | Provenance | Captured white, reconstructed teal `#0bd8b6`, inferred violet `#baa7ff` (dashed) | How a piece of the picture is known | Status |
@@ -163,7 +163,7 @@ tone and spacing rather than from boxes inside boxes.
 - **Regular** glass (the default) blurs and tints what is behind it, for text.
 - **Clear** glass is for controls over the map (layers, compass, scale, mode bar). Less tint, so the picture
   stays the subject.
-- **Prominent** glass is the one primary action in a view: cream, tinted with the accent.
+- **Prominent** glass is the one primary action in a view: ink, tinted with the accent.
 - **Plain** buttons carry no material until hovered or pressed.
 - **The top bar has no surface of its own.** Each control in it is glass at one height (`--tb-ctl`, 36 px). Icon-only
   controls are circles of that size, the search field and status pill are capsules, and the site name is plain text.
@@ -172,9 +172,9 @@ tone and spacing rather than from boxes inside boxes.
   and `.field` reserve both, so no control sits under either bar.
 - The shell is a backdrop with colour in it (`--wallpaper`) so the glass has something to refract. On desktop
   the content is an inset card beneath the floating bars.
-The recipe (fill, sheen, rim, shadow, blur) is in `tokens.css`; the layer that applies it is `glass.css`. Night
-display keeps the same recipe in red. CSS cannot reproduce Apple's lensing shader, so the rendering is an
-approximation of its look, not a copy.
+The recipe (fill, sheen, rim, shadow, blur) is in `tokens.css`; the layer that applies it is `glass.css`. Where the browser can bend the backdrop (Chromium), glass uses an SVG displacement lens generated at start-up in `lib/liquidGlass.ts`, which pushes the content near each edge inward. Night
+display keeps the same recipe in red. Apple's own lensing shader is not public, and Safari and Firefox do not bend a backdrop with an SVG filter, so
+those browsers keep the blur, tint and lit edge without the bend. The look is an approximation, not a copy.
 
 **Interaction.** Every control has the same states, defined once in `interaction.css`:
 - **Hover** (pointers only): the control lightens. A touch screen shows the press and nothing sticks after a tap.
@@ -222,7 +222,7 @@ router does not run navigation as a transition, which would hold back the reveal
 
 ## Night (red-light) mode
 
-User menu → *Night display*. The UI tokens switch to a monochrome red ladder. Imagery, video and the
+The standard display is light. User menu → *Night display* switches to the dark, monochrome red ladder. Changing the display reloads the console, because the 3-D view and canvases take their colours once. Imagery, video and the
 3-D view pass through an SVG colour matrix (`#night-red` in `index.html`) that carries luminance on the
 red channel only, so no green or blue light reaches the operator. Status and affiliation are also shown
 by shape and text, so nothing is lost when hue is removed.

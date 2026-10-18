@@ -1,7 +1,8 @@
 import { create } from 'zustand';
+import { applyPalette } from '../lib/palette';
 
 /** Per-console display preferences (kept in this browser only). */
-type Theme = 'dark' | 'night';
+type Theme = 'light' | 'night';
 
 interface UiState {
   theme: Theme;
@@ -28,15 +29,22 @@ function write(key: string, v: string): void {
 }
 
 function applyTheme(t: Theme): void {
-  if (t === 'dark') delete document.documentElement.dataset.theme;
+  if (t === 'light') delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = t;
+  applyPalette(t);
 }
 
 export const useUi = create<UiState>((set, get) => ({
-  theme: read('strata.theme', ['dark', 'night'] as const, 'dark'),
+  theme: read('strata.theme', ['light', 'night'] as const, 'light'),
   railOpen: read('strata.rail', ['open', 'closed'] as const, 'closed') === 'open',
   setTheme(t) {
+    const changed = t !== get().theme;
     write('strata.theme', t);
+    if (changed) {
+      // WebGL and canvas painters take their colours once, so a display change reloads the console.
+      window.location.reload();
+      return;
+    }
     applyTheme(t);
     set({ theme: t });
   },

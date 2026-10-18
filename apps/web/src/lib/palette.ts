@@ -1,8 +1,11 @@
 /**
  * The colour system for code that cannot read CSS variables (WebGL, canvas). Mirrors styles/tokens.css —
- * change both together. Night mode is applied to canvases by a CSS filter, so these stay as defined.
+ * change both together. The standard display is light; the night display uses the dark set, and its red tint is
+ * applied to canvases by a CSS filter.
  */
-export const P = {
+type Palette = Record<keyof typeof DARK, string>;
+
+const DARK = {
   // Surfaces (ChatGPT-style neutral greys)
   bg0: '#171717',
   bg1: '#212121',
@@ -43,7 +46,58 @@ export const P = {
   zone: '#c9c6bd',
   fence: '#9b988f',
   grid: '#a8a59d',
-} as const;
+};
+
+const LIGHT: Palette = {
+  // Surfaces (Apple-style light greys: a grey page with white raised surfaces)
+  bg0: '#e9e9ee',
+  bg1: '#f5f5f7',
+  bg2: '#ffffff',
+  bg3: '#f0f0f3',
+  // Text (ink)
+  text0: '#1d1d1f',
+  text1: '#3a3a3c',
+  text2: '#5a5a5f',
+  text3: '#6e6e73',
+  // Interaction (ink; selection is the next step down)
+  accent: '#1d1d1f',
+  accent2: '#000000',
+  // Status (Radix step 9; the darker text steps live in the CSS tokens)
+  critical: '#e5484d',
+  serious: '#f76b15',
+  caution: '#ffc53d',
+  normal: '#46a758',
+  standby: '#00a2c7',
+  off: '#8e8e93',
+  // Affiliation (APP-6)
+  friend: '#0071e3',
+  hostile: '#d70015',
+  suspect: '#c93400',
+  neutral: '#248a3d',
+  unknownAff: '#a16a00',
+  // Epistemic
+  captured: '#1d1d1f',
+  reconstructed: '#00806f',
+  inferred: '#6e46c8',
+  prior: '#6e6e73',
+  // Static map context (neutral by design)
+  terrain: '#ececf0',
+  road: '#d8d8de',
+  roadMark: '#8e8e93',
+  building: '#dcdce2',
+  buildingEdge: '#6e6e73',
+  zone: '#3a3a3c',
+  fence: '#5a5a5f',
+  grid: '#8e8e93',
+};
+
+/** The live palette. The standard display is light; components read it when they draw. */
+export const P: Palette = { ...LIGHT };
+
+/** Select the palette for a display: the light set, or the dark set behind the night display. */
+export function applyPalette(theme: 'light' | 'night'): void {
+  Object.assign(P, theme === 'night' ? DARK : LIGHT);
+}
 
 /** `rgba()` from a palette hex. */
 export function alpha(hex: string, a: number): string {

@@ -9,12 +9,14 @@ import './styles/app.css';
 import './styles/operations.css';
 import './brand/brand.css';
 import './state/ui';
+import { enableLensing } from './lib/liquidGlass';
 import { App } from './App';
 import { TooltipProvider } from './components/ui';
 // Last: the glass layer wins over the surface rules of the component stylesheets it follows.
 import './styles/glass.css';
 import './styles/interaction.css';
 
+enableLensing();
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <TooltipProvider>

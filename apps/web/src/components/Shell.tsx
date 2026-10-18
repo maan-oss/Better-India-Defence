@@ -249,7 +249,7 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
         <Inbox />
         <StatusIsland />
         <span className="tb-night">
-          <ThemeSwitch iconOnly variant="eclipse" theme={theme === 'night' ? 'dark' : 'light'} label={theme === 'night' ? 'Standard display' : 'Night display (red light)'} onThemeChange={(next) => setTheme(next === 'dark' ? 'night' : 'dark')} />
+          <ThemeSwitch iconOnly variant="eclipse" theme={theme === 'night' ? 'dark' : 'light'} label={theme === 'night' ? 'Standard display' : 'Night display (red light)'} onThemeChange={(next) => setTheme(next === 'dark' ? 'night' : 'light')} />
         </span>
         {user && (
           <UserMenu
@@ -257,7 +257,7 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
             user={{ name: user.displayName, email: `${user.username} · ${role}` }}
             showTheme={false}
             items={[
-              { label: theme === 'night' ? 'Standard display' : 'Night display (red light)', icon: theme === 'night' ? <Sun size={16} strokeWidth={1.75} /> : <Moon size={16} strokeWidth={1.75} />, onSelect: () => setTheme(theme === 'night' ? 'dark' : 'night') },
+              { label: theme === 'night' ? 'Standard display' : 'Night display (red light)', icon: theme === 'night' ? <Sun size={16} strokeWidth={1.75} /> : <Moon size={16} strokeWidth={1.75} />, onSelect: () => setTheme(theme === 'night' ? 'light' : 'night') },
               { label: sound ? 'Mute alarm sound' : 'Enable alarm sound', icon: sound ? <BellOff size={16} strokeWidth={1.75} /> : <Bell size={16} strokeWidth={1.75} />, onSelect: () => setSound(!sound) },
               { label: 'Keyboard shortcuts', icon: <Keyboard size={16} strokeWidth={1.75} />, keys: ['?'], onSelect: onShortcuts },
               ...(can('admin.users') ? [{ label: 'Users & settings', icon: <Settings2 size={16} strokeWidth={1.75} />, onSelect: () => nav('/admin') }] : []),

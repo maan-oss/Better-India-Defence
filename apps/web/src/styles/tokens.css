@@ -1,16 +1,173 @@
 /*
  * STRATA design tokens. See docs/DESIGN.md.
  *
- * Built on Radix Colors (radix-ui.com/colors): 12-step scales tuned for dark UIs, where steps 1–2 are
+ * Built on Radix Colors (radix-ui.com/colors): 12-step scales tuned for light and dark UIs, where steps 1–2 are
  * backgrounds, 3–5 component states, 6–8 borders, 9–10 solid fills and 11–12 text. Using a calibrated
  * system rather than hand-picked hex values keeps contrast and tint consistent everywhere.
  *
- * The chrome is monochrome: ChatGPT-style neutral greys with Claude's warm cream for text and the primary
+ * The chrome is monochrome: ChatGPT-style neutral greys with ink text and the primary
  * action. As on operational consoles such as Anduril Lattice and
  * Palantir Gotham: colour on screen is reserved for meaning — status, affiliation, provenance — so it is
- * never spent on buttons or decoration (ISA-101). Primary actions and selection use the brightest neutral.
+ * never spent on buttons or decoration (ISA-101). Primary actions are ink; selection is the next step down.
  */
 :root {
+  color-scheme: light;
+
+  /* Neutral ladder — ChatGPT-style true greys (no blue tint). */
+  --bg-chrome: #fbfbfd; /* rail, top bar, side panels (ChatGPT sidebar) */
+  --bg-0: #e9e9ee;   /* map frame, wells, inputs' surround */
+  --bg-1: #f5f5f7;   /* app surface: pages, panels (ChatGPT main) */
+  --bg-2: #ffffff;   /* raised: cards, inputs, headers */
+  --bg-3: #f0f0f3;   /* hover / pressed (ChatGPT composer) */
+  --bg-4: #e6e6eb;   /* selected, menus */
+  --bg-hover: #ededf1;
+  --line: rgba(0, 0, 0, 0.06);    /* hairline */
+  --line-2: rgba(0, 0, 0, 0.1);   /* default border */
+  --line-3: rgba(0, 0, 0, 0.2);  /* strong border, hover */
+
+  /* Text — Claude's warm cream instead of cold white. Contrast on --bg-1: 14.9, 9.3, 5.4, 3.1. */
+  --text-0: #1d1d1f;
+  --text-1: #3a3a3c;
+  --text-2: #5a5a5f;
+  --text-3: #6e6e73;   /* tertiary: >=4.5:1 on --bg-1 and --bg-2 */
+
+  /* Interaction — cream. The one primary action is a cream fill (Claude ivory); selection is a lighter grey. */
+  --accent: #1d1d1f;
+  --accent-2: #000000;
+  --accent-ink: #ffffff;
+  --accent-dim: rgba(0, 0, 0, 0.06);
+  --accent-line: rgba(0, 0, 0, 0.3);
+  --focus: rgba(0, 113, 227, 0.75);
+
+  /* Status — Radix scales: solid (9), text (11), tint (3), border (6). */
+  --st-critical: #e5484d;  --st-critical-text: #cd2b31; --st-critical-tint: #fff0ef; --st-critical-line: #f3bcbc;
+  --st-serious: #f76b15;   --st-serious-text: #bd4b0b;  --st-serious-tint: #fff1e6;  --st-serious-line: #f5c59c;
+  --st-caution: #ffc53d;   --st-caution-text: #8f6200;  --st-caution-tint: #fff7d6;  --st-caution-line: #ecd27a;
+  --st-normal: #46a758;    --st-normal-text: #1f7a3d;   --st-normal-tint: #eaf6ec;   --st-normal-line: #b5dcbf;
+  --st-standby: #00a2c7;   --st-standby-text: #00718a;  --st-standby-tint: #e4f7fc;  --st-standby-line: #9ad8e8;
+  --st-off: #8e8e93;
+  /* Legacy names mapped onto the scale. */
+  --red: var(--st-critical);
+  --red-dim: var(--st-critical-tint);
+  --amber: var(--st-serious);
+  --amber-dim: var(--st-serious-tint);
+  --caution: var(--st-caution);
+  --caution-dim: var(--st-caution-tint);
+  --ok: var(--st-normal);
+  --ok-dim: var(--st-normal-tint);
+  --info: var(--st-standby);
+  --info-dim: var(--st-standby-tint);
+
+  /* Data (charts, sparklines): neutral so measures never read as status. */
+  --data: #6e6e73;
+
+  /* Affiliation (APP-6 / MIL-STD-2525) — map symbology only. Radix blue/red/orange/grass/yellow 11. */
+  --friend: #0071e3;
+  --hostile: #d70015;
+  --suspect: #c93400;
+  --neutral: #248a3d;
+  --unknown-aff: #a16a00;
+
+  /* Epistemic state — paired with pattern everywhere (solid / half / dashed). Radix teal 11, violet 11. */
+  --captured: #1d1d1f;
+  --reconstructed: #00806f;
+  --inferred: #6e46c8;
+  --prior: #6e6e73;
+  --unknown: #aeaeb2;
+
+  /* Classification markings. */
+  --cls-unclassified: #007a33;
+  --cls-restricted: #502b85;
+  --cls-confidential: #0033a0;
+  --cls-secret: #c8102e;
+  --cls-topsecret: #ff8c00;
+
+  /* Type scale: six sizes, one line height each. Every font-size in the app is one of these. */
+  --fs-micro: 11px;    --lh-micro: 16px;   /* labels, chips, banners, dense mono timestamps (minimum for operators) */
+  --fs-caption: 12px;  --lh-caption: 16px; /* secondary text, table meta */
+  --fs-body: 13px;     --lh-body: 20px;    /* default UI, tables, controls */
+  --fs-body-lg: 14px;  --lh-body-lg: 22px; /* forms, reading text */
+  --fs-lead: 16px;     --lh-lead: 24px;    /* section and card titles */
+  --fs-title: 20px;    --lh-title: 28px;   /* page titles */
+  --fs-display: 28px;  --lh-display: 32px; /* metric values */
+  --fs-hero: 40px;     --lh-hero: 44px;    /* sign-in and brand pages only */
+
+  --font-sans: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Spacing — 4 px base. Use these, not ad-hoc values. */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+
+  /* Radius — controls 6, containers 8, overlays 10. */
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --t-fast: 120ms;
+  --t-med: 200ms;
+  --t-slow: 420ms;
+
+  /* Dark UI separates with hairlines; shadow only for things that float. */
+  --shadow-1: none;
+  --shadow-2: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 16px 40px -12px rgba(0, 0, 0, 0.2), 0 4px 12px -4px rgba(0, 0, 0, 0.1);
+  --glow-accent: 0 0 0 1px var(--bg-1), 0 0 0 3px var(--focus);
+
+  /*
+   * Liquid Glass. Apple's material bends the light behind it with a lensing shader; CSS can approximate that with a
+   * blurred, saturated backdrop, a sheen that falls off down the surface and a lit edge (glass.css draws the edge).
+   * Glass needs colour behind it to read as glass, so the backdrop carries a few soft light sources.
+   */
+  --glass-tint: rgba(255, 255, 255, 0.5);
+  --glass-tint-strong: rgba(255, 255, 255, 0.74);
+  --glass-tint-clear: rgba(255, 255, 255, 0.22);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.2) 46%, rgba(255, 255, 255, 0.08) 60%, rgba(255, 255, 255, 0.32) 100%);
+  --glass-sheen-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.42) 46%, rgba(255, 255, 255, 0.22) 60%, rgba(255, 255, 255, 0.55) 100%);
+  --glass-fill: var(--glass-sheen), var(--glass-tint);
+  --glass-fill-strong: var(--glass-sheen-strong), var(--glass-tint-strong);
+  --glass-fill-clear: var(--glass-sheen), var(--glass-tint-clear);
+  --glass-danger: linear-gradient(180deg, rgba(255, 120, 120, 0.3), rgba(255, 120, 120, 0.08)), rgba(255, 236, 236, 0.72);
+  --glass-prominent: linear-gradient(180deg, #4a4a4e 0%, #1d1d1f 55%, #000000 100%);
+  --glass-prominent-hover: linear-gradient(180deg, #5a5a5e 0%, #2c2c2e 100%);
+  --glass-prominent-rim: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  --glass-edge: rgba(255, 255, 255, 0.9);
+  /* The lit edge: brightest where light would strike the top-left, a faint line along the bottom-right. */
+  --glass-specular: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.35) 30%, rgba(255, 255, 255, 0.08) 56%, rgba(255, 255, 255, 0.7) 100%);
+  --glass-rim: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -10px 18px -14px rgba(0, 0, 0, 0.06);
+  --glass-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 14px 32px -12px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --glass-blur: blur(24px) saturate(180%) brightness(1.04);
+  --glass-hover: rgba(255, 255, 255, 0.5);
+  --wallpaper: radial-gradient(70% 60% at 0% 0%, rgba(120, 168, 255, 0.5), transparent 62%), radial-gradient(60% 55% at 100% 0%, rgba(206, 160, 255, 0.4), transparent 60%), radial-gradient(70% 60% at 100% 100%, rgba(110, 220, 200, 0.4), transparent 62%), radial-gradient(50% 50% at 0% 100%, rgba(255, 190, 140, 0.36), transparent 60%), #eef1f8;
+
+  --rail-w: 56px;
+  --rail-w-open: 216px;
+  --left-w: 272px;
+  --right-w: 384px;
+  --top-h: 48px;
+  --tb-ctl: 36px;   /* one height for every control in the top bar; icon-only controls are circles of this size */
+  --timeline-h: 128px;
+  /* Arc layer: each theme sets these. */
+  --thumb: #ffffff;
+  --track-hover: #d1d1d6;
+  --neutral-5: #d2d2d7;
+  --neutral-6: #aeaeb2;
+  --neutral-9: #3a3a3c;
+  --series-1: #1d1d1f;
+  --series-2: #0071e3;
+  --series-3: #8944ab;
+  --series-4: #248a3d;
+}
+
+:root[data-theme='night'] {
   color-scheme: dark;
 
   /* Neutral ladder — ChatGPT-style true greys (no blue tint). */
@@ -155,6 +312,16 @@
   --top-h: 48px;
   --tb-ctl: 36px;   /* one height for every control in the top bar; icon-only controls are circles of this size */
   --timeline-h: 128px;
+  /* Arc layer: each theme sets these. */
+  --thumb: #f3f1ea;
+  --track-hover: #444444;
+  --neutral-5: #4a4a4a;
+  --neutral-6: #6e6c66;
+  --neutral-9: #dcd9d0;
+  --series-1: #d6d3ca;
+  --series-2: #7aa2c8;
+  --series-3: #b39ddb;
+  --series-4: #8fbf9f;
 }
 
 /*

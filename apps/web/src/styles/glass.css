@@ -7,6 +7,10 @@
  * Shapes: text controls are capsules, icon-only controls are circles, overlays are 20-22 px with pills nested inside.
  */
 
+/* ---------------------------------------------------------------- lensing */
+/* Where the browser can bend the backdrop (see lib/liquidGlass.ts), every glass surface uses the lens. */
+:root.lens { --glass-blur: url(#liquid-lens) blur(20px) saturate(180%) brightness(1.04); }
+
 /* ---------------------------------------------------------------- material */
 /* Every glass surface gets the same three things: a translucent fill, a backdrop blur, and a lit edge. The lit edge is
    the ::after rim, a 1 px gradient brightest at the top-left, which is what makes the glass read as an object. */

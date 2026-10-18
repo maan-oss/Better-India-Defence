@@ -32,6 +32,11 @@ const frag = /* glsl */ `
   uniform sampler2D uOrtho;
   uniform float uOrthoOn;
   uniform vec4 uOrthoRect;
+  uniform vec3 uBase;
+  uniform vec3 uContour;
+  uniform vec3 uGridMinor;
+  uniform vec3 uGridMajor;
+  uniform vec3 uHatch;
   uniform float uGridOn;
   uniform vec4 uGridM;
   uniform vec2 uGridO;
@@ -49,11 +54,11 @@ const frag = /* glsl */ `
     float shade = 0.62 + 0.38 * max(dot(n, normalize(uSun)), 0.0);
     // Very slight albedo variation keeps large flat areas from looking synthetic.
     float grain = fract(sin(dot(floor(vWorld.xy / 7.0), vec2(12.9898, 78.233))) * 43758.5453);
-    vec3 base = mix(vec3(0.088, 0.088, 0.088), vec3(0.098, 0.098, 0.097), grain * 0.6);
-    vec3 col = base * shade * 1.35;
+    vec3 base = uBase * mix(1.0, 1.1, grain * 0.6);
+    vec3 col = base * shade;
     float c1 = contour(vWorld.z, 2.0, 1.0) * 0.07;
     float c2 = contour(vWorld.z, 10.0, 1.2) * 0.12;
-    col = mix(col, vec3(0.95, 0.94, 0.91), c1 + c2);
+    col = mix(col, uContour, c1 + c2);
 
     if (uOrthoOn > 0.5) {
       vec2 ouv = (vWorld.xy - uOrthoRect.xy) / (uOrthoRect.zw - uOrthoRect.xy);
@@ -74,8 +79,8 @@ const frag = /* glsl */ `
       float minor = 1.0 - clamp(min(m1.x, m1.y) / 1.0, 0.0, 1.0);
       float major = 1.0 - clamp(min(m2.x, m2.y) / 1.4, 0.0, 1.0);
       float fadeMinor = clamp(1.0 - length(vWorld - cameraPosition) / 3500.0, 0.0, 1.0);
-      col = mix(col, vec3(0.79, 0.78, 0.74), minor * 0.07 * fadeMinor);
-      col = mix(col, vec3(0.94, 0.93, 0.90), major * 0.2);
+      col = mix(col, uGridMinor, minor * 0.07 * fadeMinor);
+      col = mix(col, uGridMajor, major * 0.2);
     }
 
     if (uCoverageOn > 0.5) {
@@ -91,7 +96,7 @@ const frag = /* glsl */ `
       if (observed < 0.5) {
         // Never observed: diagonal hatching, not colour fill. Unknown is not "zero".
         float hatch = step(0.82, fract((vWorld.x + vWorld.y) / 14.0));
-        col = mix(col, vec3(0.44, 0.43, 0.41), hatch * 0.55);
+        col = mix(col, uHatch, hatch * 0.55);
       } else {
         col = mix(col, tint, 0.38);
       }
@@ -116,6 +121,14 @@ const frag = /* glsl */ `
   }
 `;
 
+/**
+ * The terrain shader writes its colour straight to the framebuffer, so its colours are sRGB values as they are
+ * (not the linear values THREE.Color would hold).
+ */
+function srgb(hex: string): THREE.Vector3 {
+  return new THREE.Vector3(parseInt(hex.slice(1, 3), 16) / 255, parseInt(hex.slice(3, 5), 16) / 255, parseInt(hex.slice(5, 7), 16) / 255);
+}
+
 export function createTerrain(halfExtent: number, segments = 256): { mesh: THREE.Mesh; material: THREE.ShaderMaterial; coverageTex: THREE.DataTexture } {
   const geom = new THREE.PlaneGeometry(halfExtent * 2, halfExtent * 2, segments, segments);
   const pos = geom.attributes.position as THREE.BufferAttribute;
@@ -130,7 +143,12 @@ export function createTerrain(halfExtent: number, segments = 256): { mesh: THREE
     fragmentShader: frag,
     uniforms: {
       uSun: { value: new THREE.Vector3(0.45, -0.55, 0.7) },
-      uFogColor: { value: new THREE.Color(P.bg0) },
+      uFogColor: { value: srgb(P.bg0) },
+      uBase: { value: srgb(P.terrain) },
+      uContour: { value: srgb(P.zone) },
+      uGridMinor: { value: srgb(P.grid) },
+      uGridMajor: { value: srgb(P.fence) },
+      uHatch: { value: srgb(P.roadMark) },
       uFogDensity: { value: 1 / 9000 },
       uHalf: { value: halfExtent },
       uCoverage: { value: coverageTex },

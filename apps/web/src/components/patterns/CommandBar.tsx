@@ -110,7 +110,7 @@ export function CommandBar({ open, onOpenChange, onShortcuts }: { open: boolean;
     const sound = useOps.getState().sound;
     const actions: Result[] = [
       { id: 'live', group: 'Actions', label: 'Return to live', icon: <Icon.Play />, keys: 'L', run: () => (useTime.getState().goLive(), nav('/operations')) },
-      { id: 'night', group: 'Actions', label: theme === 'night' ? 'Standard display' : 'Night display (red light)', icon: theme === 'night' ? <Icon.Sun /> : <Icon.Moon />, run: () => useUi.getState().setTheme(theme === 'night' ? 'dark' : 'night') },
+      { id: 'night', group: 'Actions', label: theme === 'night' ? 'Standard display' : 'Night display (red light)', icon: theme === 'night' ? <Icon.Sun /> : <Icon.Moon />, run: () => useUi.getState().setTheme(theme === 'night' ? 'light' : 'night') },
       { id: 'sound', group: 'Actions', label: sound ? 'Mute alarm sound' : 'Enable alarm sound', icon: sound ? <Icon.BellOff /> : <Icon.Bell />, run: () => useOps.getState().setSound(!sound) },
       { id: 'keys', group: 'Actions', label: 'Keyboard shortcuts', icon: <Icon.Command />, keys: '?', run: onShortcuts },
       { id: 'brand', group: 'Actions', label: 'Brand guidelines', detail: 'The STRATA identity', icon: <Icon.Logo />, run: () => nav('/brand') },
