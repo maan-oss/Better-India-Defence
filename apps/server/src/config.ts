@@ -24,6 +24,13 @@ const schema = z.object({
     .string()
     .regex(/^[0-9a-f]{64}$/i, 'must be 32 bytes hex')
     .optional(),
+  /** Where the audit chain's head is anchored; keep it on storage the database account cannot rewrite. Default: DATA_DIR. */
+  AUDIT_ANCHOR_FILE: z.string().optional(),
+  /** Optional key (hex, 32 bytes or more) for an HMAC on each anchor line. */
+  AUDIT_ANCHOR_KEY: z
+    .string()
+    .regex(/^[0-9a-f]{64,}$/i, 'must be at least 32 bytes hex')
+    .optional(),
   TLS_CERT_FILE: z.string().optional(),
   TLS_KEY_FILE: z.string().optional(),
   /** Set when TLS is terminated by a reverse proxy in front of this process. */

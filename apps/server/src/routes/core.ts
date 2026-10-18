@@ -182,7 +182,10 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     params.push(q.limit);
     return (await p.db.query(`SELECT * FROM audit_events ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY seq DESC LIMIT $${params.length}`, params)).rows;
   });
-  app.get('/api/audit/verify', { preHandler: requirePerm('audit.view') }, async () => p.audit.verify());
+  app.get('/api/audit/verify', { preHandler: requirePerm('audit.view') }, async () => {
+    const chain = await p.audit.verify();
+    return { ...chain, anchored: await p.anchoredAudit() };
+  });
 
   // ------------------------------------------------------------------ admin
   app.get('/api/admin/users', { preHandler: requirePerm('admin.users') }, async () => p.auth.list());

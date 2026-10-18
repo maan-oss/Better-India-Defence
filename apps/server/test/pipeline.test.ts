@@ -55,7 +55,15 @@ describe('ingestion → fusion → persistence', () => {
     const rows = (await platform.db.query<{ id: string; contributors: { sensorId: string }[]; cooperative: boolean; category: string }>(`SELECT id, contributors, cooperative, category FROM tracks WHERE category = 'aerial' AND NOT cooperative`)).rows;
     const fused = rows.find((r) => r.contributors.some((c) => c.sensorId.startsWith('R0')) && r.contributors.some((c) => c.sensorId.startsWith('RF')));
     expect(fused).toBeDefined();
-    const alerts = (await platform.db.query<{ rule: string }>(`SELECT rule FROM alerts`)).rows.map((r) => r.rule);
+    // Alerts are evaluated after ingestion on its own schedule; under a loaded test run the rule can land a little later
+    // than the track, so the test waits for it (bounded) rather than sampling once.
+    const deadline = Date.now() + 20_000;
+    let alerts: string[] = [];
+    while (Date.now() < deadline) {
+      alerts = (await platform.db.query<{ rule: string }>(`SELECT rule FROM alerts`)).rows.map((r) => r.rule);
+      if (alerts.includes('UNIDENTIFIED_AERIAL')) break;
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
     expect(alerts).toContain('UNIDENTIFIED_AERIAL');
   });
 

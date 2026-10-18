@@ -5,6 +5,7 @@ import { join, relative, sep } from 'node:path';
 import type { Db, Queryable } from '../db/client.ts';
 import { migrate } from '../db/migrate.ts';
 import { AuditLog, verifyChain, type AuditRecord } from '../audit/audit.ts';
+import { verifyAnchors, type AnchorLine } from '../audit/anchor.ts';
 import type { Logger } from '../logger.ts';
 
 /**
@@ -16,6 +17,7 @@ import type { Logger } from '../logger.ts';
  */
 export const BACKUP_FORMAT = 'strata-backup/1';
 export const BACKUP_MANIFEST = 'manifest.json';
+const ANCHOR_FILE = 'audit-anchors.log';
 /** Rows written per INSERT on restore. */
 const CHUNK = 500;
 
@@ -99,11 +101,14 @@ async function restoreOrder(q: Queryable, tables: string[]): Promise<string[]> {
 }
 
 /** Writes a backup of the database and the object store into `outDir`. */
-export async function createBackup(db: Db, dataDir: string, outDir: string): Promise<BackupManifest> {
+export async function createBackup(db: Db, dataDir: string, outDir: string, anchorFile = join(dataDir, ANCHOR_FILE)): Promise<BackupManifest> {
   if (await access(outDir).then(() => true, () => false)) {
     if ((await readdir(outDir)).length > 0) throw new Error(`the backup directory is not empty: ${outDir}`);
   }
   await mkdir(join(outDir, 'db'), { recursive: true });
+  // The anchors are copied before the snapshot: an anchor is written after its row commits, so every anchor copied
+  // names a record the snapshot contains.
+  if (await access(anchorFile).then(() => true, () => false)) await cp(anchorFile, join(outDir, ANCHOR_FILE));
   const snapshot = await db.transaction(async (q) => {
     const tables = await listTables(q);
     // The row as text, exactly as PostgreSQL prints the JSON, so every engine writes the same bytes.
@@ -186,7 +191,7 @@ export interface RestoreSummary {
  * end at the head recorded in the manifest, checked before any row is written. Afterwards the live chain is verified
  * again. A failure after rows were written leaves them in place: discard that data directory and restore again.
  */
-export async function restoreBackup(dir: string, db: Db, dataDir: string, log: Logger): Promise<RestoreSummary> {
+export async function restoreBackup(dir: string, db: Db, dataDir: string, log: Logger, anchorFile = join(dataDir, ANCHOR_FILE)): Promise<RestoreSummary> {
   const { manifest, problems } = await verifyBackup(dir);
   if (problems.length) throw new Error(`backup failed verification (${problems.length}): ${problems.slice(0, 5).join('; ')}`);
   const audit = (await readFile(join(dir, 'db', 'audit_events.jsonl'), 'utf8').catch(() => '')).split('\n').filter(Boolean).map((l) => JSON.parse(l) as AuditRecord);
@@ -202,6 +207,7 @@ export async function restoreBackup(dir: string, db: Db, dataDir: string, log: L
     throw new Error(`the backup was made with migrations [${manifest.migrations.join(', ')}] and this build has [${schema.join(', ')}]`);
   }
   await assertEmpty(db, tables, dataDir);
+  if (await access(anchorFile).then(() => true, () => false)) throw new Error(`the target already has an audit anchor file: ${anchorFile}`);
 
   const order = (await restoreOrder(db, backupTables)).filter((t) => t !== 'schema_migrations');
   let rows = 0;
@@ -234,6 +240,17 @@ export async function restoreBackup(dir: string, db: Db, dataDir: string, log: L
   }
   const live = await new AuditLog(db).verify();
   if (!live.ok) throw new Error(`the restored audit chain does not verify at record ${live.brokenAt}; discard this data directory`);
+  // The backup's anchors go with it, so the restored chain is checked against the head that was anchored, not only
+  // against itself.
+  const anchorsInBackup = join(dir, ANCHOR_FILE);
+  if (await access(anchorsInBackup).then(() => true, () => false)) {
+    await cp(anchorsInBackup, anchorFile);
+    const raw = (await readFile(anchorsInBackup, 'utf8')).split('\n');
+    const lines = raw.filter(Boolean).map((l) => JSON.parse(l) as AnchorLine);
+    const records = (await db.query<{ seq: number; hash: string }>('SELECT seq, hash FROM audit_events ORDER BY seq')).rows;
+    const anchored = verifyAnchors(records, { lines, malformed: [] }, () => true);
+    if (!anchored.ok) throw new Error(`the restored chain does not match its anchors: ${anchored.problems.slice(0, 3).join('; ')}`);
+  }
   log.info({ tables: order.length, rows, objects, auditRecords: chain.checked }, 'backup restored');
   return { tables: order.length, rows, objects, auditRecords: chain.checked };
 }

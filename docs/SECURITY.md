@@ -25,7 +25,7 @@ that it is suitable for classified or regulated use without independent assessme
 | Machine access | Sensor adapters authenticate with a service token (`STRATA_SERVICE_TOKEN`) accepted only on `/api/ingest/*`, `/api/interop/cot` and media fetches; ingest only from sensor ids registered for the site | `routes/core.ts`, `routes/interop.ts` |
 | Input validation | Every request body/query and every ingest envelope is validated with zod schemas; body size limits; unknown sensors and out-of-bounds timestamps are rejected to a dead-letter table | `schemas/*`, `ingest/pipeline.ts` |
 | Rate limiting | Global API limit; stricter login limit (20/min/IP); ingestion exempt (authenticated by token) | `app.ts`, `routes/core.ts` |
-| Audit | Append-only `audit_events` table: a database trigger rejects UPDATE/DELETE; each record holds the SHA-256 of its predecessor; `GET /api/audit/verify` recomputes the chain. Logged: sign-in/out, failed sign-in, timeline and evidence access, alert actions, incident creation/changes/exports, copilot queries, hand-off searches, reconstruction requests, scenario triggers and failure injection, user and configuration changes | `audit/audit.ts`, migration `001_core.sql` |
+| Audit | Append-only `audit_events` table: a database trigger rejects UPDATE/DELETE; each record holds the SHA-256 of its predecessor; `GET /api/audit/verify` recomputes the chain and checks it against the anchor file (`audit/anchor.ts`). Logged: sign-in/out, failed sign-in, timeline and evidence access, alert actions, incident creation/changes/exports, copilot queries, hand-off searches, reconstruction requests, scenario triggers and failure injection, user and configuration changes | `audit/audit.ts`, migration `001_core.sql` |
 | Data at rest | Media / object storage encrypted with AES-256-GCM when `STORAGE_ENCRYPTION_KEY` is set. Database encryption at rest is delegated to the host (LUKS/dm-crypt or the database platform) | `storage/objectStore.ts` |
 | Secrets | Only from environment variables; production mode refuses to start with the development service token; demo mode (shared demo passwords, simulator) cannot run with `NODE_ENV=production`, and demo accounts are never created outside demo mode | `config.ts` |
 | First run | With no user accounts, the service issues a one-time 8-character setup code (32-symbol alphabet, about 40 bits) from the OS CSPRNG, logs it and writes it to `<DATA_DIR>/setup-code.txt` (mode 600). The setup endpoints compare it in constant time, are rate-limited (10 per minute), refuse administrator passwords under 12 characters (the wizard also requires a strength rating of at least “fair”), delete the code once the administrator exists, and audit the account creation. Restarting the API from the console requires `admin.config` and is audited | `platform.ts`, `routes/setup.ts` |
@@ -70,10 +70,12 @@ that it is suitable for classified or regulated use without independent assessme
   data-protection impact assessment are the operating organisation's responsibility.
 - **Database encryption at rest is not done by Strata** (see above); database connections to an
   external PostgreSQL do not enforce TLS unless configured in `DATABASE_URL` (`sslmode=require`).
-- **Audit chain anchoring.** The hash chain detects modification *after* the fact by anyone who cannot
-  also rewrite every later record. A database superuser can rewrite the whole chain. Anchoring the head
-  hash externally (WORM storage, a separate log host, or a signing key in an HSM) is required for
-  strong tamper evidence.
+- **Audit chain anchoring.** Each committed audit record's sequence number and hash are appended to an anchor file
+  (`AUDIT_ANCHOR_FILE`, default in `DATA_DIR`), with an HMAC when `AUDIT_ANCHOR_KEY` is set. `GET /api/audit/verify`
+  reports a rewritten, missing or truncated anchored record, and a bad MAC. The anchor closes the gap only where it is
+  kept out of the database administrator's reach: on a write-once volume, or on a host that only receives the lines.
+  On the same disk with the same administrator it detects a rewrite but does not prevent one. Records written after
+  the last anchor cannot be checked against it until the next one is written.
 - **Key management.** Keys come from environment variables; there is no HSM/KMS integration or
   rotation tooling.
 - **Release signing key.** The Ed25519 key is an operator file or environment variable. It is not in hardware, and

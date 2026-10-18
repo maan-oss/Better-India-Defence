@@ -61,7 +61,7 @@ Defects found and fixed in this pass, recorded so they are not reintroduced:
 |---|---|---|
 | Offline operation (no runtime network dependency) | Implemented, partially verified | The runtime makes no external calls unless the optional language-model copilot is configured. Not tested on an isolated network in this pass |
 | Air-gapped installation | Designed | Documented in `SECURITY.md`; not installed on an isolated network |
-| Audit integrity | Verified for detection | Hash chain and verify endpoint tested; append-only triggers tested. Not anchored outside the database, so a database administrator can rewrite the whole chain |
+| Audit integrity | Implemented, anchored outside the database | Hash chain and verify endpoint tested; append-only triggers tested. Each committed record's sequence and hash are appended to an anchor file (`AUDIT_ANCHOR_FILE`), optionally HMAC-keyed (`AUDIT_ANCHOR_KEY`). `/api/audit/verify` reports rewrites, truncations and bad MACs. The anchor must be kept on storage the database account cannot write |
 | Access control | Verified | Permission checks on every route, tested by role in asset, operations and other suites |
 | Input validation | Verified | zod schemas on every request body and ingest envelope; asset-specific refusals tested |
 | Vision and face recognition | Verified for the measured cases | Real CPU inference tests; measured figures in `REALITY_LIMITS.md` are bench results, not field performance |

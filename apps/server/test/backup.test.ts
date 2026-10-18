@@ -69,6 +69,9 @@ describe('backup', () => {
       expect(n, table).toBe(count);
     }
     expect(await new AuditLog(db).verify()).toMatchObject({ ok: true, brokenAt: null });
+    // The anchors travel with the backup and are checked against the restored chain.
+    const anchors = readFileSync(join(target, 'audit-anchors.log'), 'utf8').split('\n').filter(Boolean);
+    expect(anchors).toHaveLength(manifest.tables.audit_events ?? -1);
     const restoredObject = manifest.files.find((f) => f.path.startsWith('objects/evidence/'))!;
     expect(sha(readFileSync(join(target, 'objects', restoredObject.path.replace(/^objects\//, ''))))).toBe(restoredObject.sha256);
     // A restored sequence continues after the highest restored audit number.

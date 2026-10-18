@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import type { Db } from '../db/client.ts';
+import type { AuditAnchor } from './anchor.ts';
 
 /**
  * Tamper-evident audit log. Each record includes the SHA-256 of the previous record, so any modification
@@ -42,7 +43,10 @@ export class AuditLog {
   private chain: Promise<unknown> = Promise.resolve();
   private lastHash: string | null = null;
 
-  constructor(private readonly db: Db) {}
+  constructor(
+    private readonly db: Db,
+    private readonly anchor: AuditAnchor | null = null,
+  ) {}
 
   append(input: AuditInput): Promise<void> {
     const run = async () => {
@@ -54,7 +58,7 @@ export class AuditLog {
       const detail = JSON.parse(JSON.stringify(input.detail ?? {})) as Record<string, unknown>;
       const rec = { t: Date.now(), actor: input.actor, role: input.role, action: input.action, target: input.target ?? null, detail, ip: input.ip ?? null };
       const hash = createHash('sha256').update(this.lastHash).update(canonical(rec)).digest('hex');
-      await this.db.query('INSERT INTO audit_events (t, actor, role, action, target, detail, ip, prev_hash, hash) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9)', [
+      const inserted = await this.db.query<{ seq: number }>('INSERT INTO audit_events (t, actor, role, action, target, detail, ip, prev_hash, hash) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9) RETURNING seq', [
         rec.t,
         rec.actor,
         rec.role,
@@ -66,6 +70,8 @@ export class AuditLog {
         hash,
       ]);
       this.lastHash = hash;
+      // After the row is committed: the anchor names a record that exists, and a failure here fails this write.
+      if (this.anchor) await this.anchor.record(Number(inserted.rows[0]!.seq), hash, rec.t);
     };
     const next = this.chain.then(run, run);
     this.chain = next.catch(() => undefined);

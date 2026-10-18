@@ -9,6 +9,7 @@ import { migrate } from './db/migrate.ts';
 import { LocalObjectStore } from './storage/objectStore.ts';
 import { seedDemoContent } from './demo/demoContent.ts';
 import { AuditLog } from './audit/audit.ts';
+import { AuditAnchor, verifyAnchors, type AnchorCheck } from './audit/anchor.ts';
 import { Metrics } from './metrics.ts';
 import { LiveHub } from './live/hub.ts';
 import { SensorMonitor } from './ingest/sensorMonitor.ts';
@@ -39,6 +40,7 @@ export class Platform {
   db!: Db;
   audit!: AuditLog;
   store!: LocalObjectStore;
+  anchor!: AuditAnchor;
   sensors!: SensorMonitor;
   fusion!: FusionService;
   world!: WorldMemory;
@@ -115,7 +117,10 @@ export class Platform {
     // The demo facility's sensors and zones are registered only in demo mode; an operational install starts empty.
     if (this.site || this.demo) await this.seedRegistry();
     this.store = new LocalObjectStore(join(cfg.dataDir, 'objects'), cfg.STORAGE_ENCRYPTION_KEY ? Buffer.from(cfg.STORAGE_ENCRYPTION_KEY, 'hex') : null);
-    this.audit = new AuditLog(this.db);
+    this.anchor = new AuditAnchor(cfg.AUDIT_ANCHOR_FILE ?? join(cfg.dataDir, 'audit-anchors.log'), cfg.AUDIT_ANCHOR_KEY ? Buffer.from(cfg.AUDIT_ANCHOR_KEY, 'hex') : null);
+    this.audit = new AuditLog(this.db, this.anchor);
+    const anchored = await this.anchoredAudit();
+    if (!anchored.ok) this.log.error({ problems: anchored.problems.slice(0, 5) }, 'audit chain anchors do not verify');
     this.auth = new AuthService(this.db, cfg.SESSION_TTL_HOURS);
     await this.auth.ensureUsers(cfg.STRATA_DEMO_USERS === 'true', cfg.STRATA_DEMO_PASSWORD, cfg.STRATA_ADMIN_PASSWORD);
     if (!this.demo && (await this.auth.count()) === 0) await this.issueSetupCode();
@@ -223,6 +228,14 @@ export class Platform {
       await this.db.query('INSERT INTO sensors (id, facility_id, kind, name, segment, definition, registered_at) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7) ON CONFLICT (id) DO UPDATE SET definition = EXCLUDED.definition', [s.id, f.id, s.kind, s.name, s.segment, JSON.stringify(s), now]);
     for (const s of SCENARIO_INFO)
       await this.db.query('INSERT INTO simulation_scenarios (key, name, description, duration_min, exercises) VALUES ($1,$2,$3,$4,$5::jsonb) ON CONFLICT (key) DO UPDATE SET description = EXCLUDED.description', [s.key, s.name, s.description, s.durationMin, JSON.stringify(s.exercises)]);
+  }
+
+  /** The chain as it stands, checked against the anchor file: records past the last anchor are not yet anchored. */
+  async anchoredAudit(): Promise<AnchorCheck & { unanchoredRecords: number }> {
+    const records = (await this.db.query<{ seq: number; hash: string }>('SELECT seq, hash FROM audit_events ORDER BY seq')).rows;
+    const check = verifyAnchors(records, await this.anchor.read(), (l) => this.anchor.macMatches(l));
+    const anchoredUpTo = check.lastSeq ?? 0;
+    return { ...check, unanchoredRecords: records.filter((r) => r.seq > anchoredUpTo).length };
   }
 
   async stop(): Promise<void> {
