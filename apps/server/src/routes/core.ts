@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { getTerrainMode, FACILITY, permissionsFor, ROLE_DESCRIPTIONS, type Role } from '@strata/domain';
+import { getTerrainMode, FACILITY, passwordProblems, permissionsFor, ROLE_DESCRIPTIONS, type Role } from '@strata/domain';
 import type { Platform } from '../platform.ts';
 import { SESSION_COOKIE, audit, isService, parse, requirePerm } from '../http/guards.ts';
 
@@ -193,6 +193,8 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
   app.post('/api/admin/users', { preHandler: requirePerm('admin.users') }, async (req, reply) => {
     const b = parse(z.object({ username: z.string().regex(/^[a-z0-9._-]{3,32}$/), displayName: z.string().min(1).max(64), role: z.enum(['viewer', 'operator', 'analyst', 'administrator']), password: z.string().min(12).max(256) }), req.body, reply);
     if (!b) return;
+    const problems = passwordProblems(b.password, b.username);
+    if (problems.length) return reply.code(400).send({ error: 'password does not meet the password policy', problems });
     try {
       const u = await p.auth.create(b.username, b.displayName, b.role, b.password);
       await audit(p, req, 'user_created', u.username, { role: u.role });
@@ -206,10 +208,22 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     const b = parse(z.object({ role: z.enum(['viewer', 'operator', 'analyst', 'administrator']).optional(), disabled: z.boolean().optional(), displayName: z.string().min(1).max(64).optional(), password: z.string().min(12).max(256).optional() }), req.body, reply);
     if (!b) return;
     if (id === req.user!.id && (b.disabled || (b.role && b.role !== 'administrator'))) return reply.code(400).send({ error: 'you cannot demote or disable your own account' });
+    if (b.password) {
+      const existing = (await p.auth.list()).find((x) => x.id === id);
+      const problems = passwordProblems(b.password, existing?.username);
+      if (problems.length) return reply.code(400).send({ error: 'password does not meet the password policy', problems });
+    }
     const u = await p.auth.update(id, b);
     if (!u) return reply.code(404).send({ error: 'not found' });
     await audit(p, req, 'user_updated', u.username, { role: b.role, disabled: b.disabled, passwordChanged: Boolean(b.password) });
     return u;
+  });
+  // A locked username can be released by an administrator before the lock runs out. Audited.
+  app.post('/api/admin/users/:username/unlock', { preHandler: requirePerm('admin.users') }, async (req) => {
+    const { username } = req.params as { username: string };
+    await p.auth.clearLockout(username);
+    await audit(p, req, 'lockout_cleared', username, {});
+    return { ok: true };
   });
   app.get('/api/admin/config', { preHandler: requirePerm('admin.config') }, async () => ({
     mode: p.cfg.STRATA_MODE,

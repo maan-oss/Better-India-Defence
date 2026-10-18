@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { timingSafeEqual } from 'node:crypto';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { FACILITY } from '@strata/domain';
+import { FACILITY, passwordProblems } from '@strata/domain';
 import type { Platform } from '../platform.ts';
 import { audit, parse, requirePerm } from '../http/guards.ts';
 
@@ -54,6 +54,8 @@ export function registerSetup(app: FastifyInstance, p: Platform): void {
     if (!b) return;
     if (!p.setupCode || (await p.auth.count()) > 0) return reply.code(409).send({ error: 'setup is already complete' });
     if (!codeMatches(p.setupCode, b.code)) return reply.code(403).send({ error: 'that code does not match the one in the service log' });
+    const problems = passwordProblems(b.password, b.username);
+    if (problems.length) return reply.code(400).send({ error: 'password does not meet the password policy', problems });
     const user = await p.auth.create(b.username, b.displayName, 'administrator', b.password);
     p.setupCode = null;
     await rm(join(p.cfg.dataDir, 'setup-code.txt'), { force: true });

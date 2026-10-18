@@ -3,6 +3,7 @@ export * from './geo/geodesy.ts';
 export * from './random.ts';
 export * from './provenance.ts';
 export * from './rbac.ts';
+export * from './auth/password.ts';
 export * from './facility/types.ts';
 export * from './facility/terrain.ts';
 export * from './facility/layout.ts';

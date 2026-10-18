@@ -1,17 +1,24 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { ROLE_ORDER, type Role, type UserRecord } from '@strata/domain';
+import { ROLE_ORDER, passwordProblems, type Role, type UserRecord } from '@strata/domain';
 import type { Db } from '../db/client.ts';
 import { hashPassword, verifyPassword } from './passwords.ts';
 
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 
+export interface LockoutPolicy {
+  /** Consecutive failures for one username that lock it. */
+  threshold: number;
+  /** How long the username stays locked, in milliseconds. */
+  windowMs: number;
+}
+export const DEFAULT_LOCKOUT: LockoutPolicy = { threshold: 5, windowMs: 60_000 };
+
 /** Local identity: users with scrypt hashes, opaque session tokens stored only as SHA-256. */
 export class AuthService {
-  private failures = new Map<string, { n: number; until: number }>();
-
   constructor(
     private readonly db: Db,
     private readonly ttlHours: number,
+    private readonly lockout: LockoutPolicy = DEFAULT_LOCKOUT,
   ) {}
 
   async ensureUsers(demo: boolean, demoPassword: string, adminPassword: string | undefined): Promise<void> {
@@ -25,7 +32,12 @@ export class AuthService {
         ['admin', 'Demo Administrator', 'administrator'],
       ];
       for (const [u, d, r] of users) await this.create(u, d, r, demoPassword);
-    } else if (adminPassword) await this.create('admin', 'Administrator', 'administrator', adminPassword);
+    } else if (adminPassword) {
+      // An administrator-set password is held to the same policy as one set in the console.
+      const problems = passwordProblems(adminPassword, 'admin');
+      if (problems.length) throw new Error(`STRATA_ADMIN_PASSWORD does not meet the password policy: ${problems.join(', ')}`);
+      await this.create('admin', 'Administrator', 'administrator', adminPassword);
+    }
   }
 
   async count(): Promise<number> {
@@ -53,18 +65,35 @@ export class AuthService {
     return (await this.db.query<{ id: string; username: string; display_name: string; role: Role; disabled: boolean }>('SELECT id, username, display_name, role, disabled FROM users ORDER BY username')).rows.map((r) => ({ id: r.id, username: r.username, displayName: r.display_name, role: r.role, disabled: r.disabled }));
   }
 
-  /** Returns a session token or null. Repeated failures lock the username for 60 s. */
+  /** Forgets the failures for a username, so it can sign in again at once (an administrator's action, audited by the route). */
+  async clearLockout(username: string): Promise<void> {
+    await this.db.query('DELETE FROM login_lockouts WHERE username = $1', [username]);
+  }
+
+  /**
+   * Returns a session token, or null for a wrong username or password, or { locked } while the username is locked. The
+   * failures are in the database, so a restart does not clear a lock, and every instance sharing the database sees it.
+   * Unknown usernames are counted too, so the lock does not reveal which names exist.
+   */
   async login(username: string, password: string, ip: string | null): Promise<{ token: string; user: UserRecord; expiresAt: number } | { locked: true } | null> {
-    const f = this.failures.get(username);
-    if (f && f.until > Date.now()) return { locked: true };
+    const now = Date.now();
+    const prior = (await this.db.query<{ failures: number; locked_until: number }>('SELECT failures, locked_until FROM login_lockouts WHERE username = $1', [username])).rows[0];
+    const lockedUntil = prior ? Number(prior.locked_until) : 0;
+    if (lockedUntil > now) return { locked: true };
     const r = (await this.db.query<{ id: string; username: string; display_name: string; role: Role; disabled: boolean; password_hash: string }>('SELECT * FROM users WHERE username = $1', [username])).rows[0];
     const ok = r && !r.disabled && (await verifyPassword(password, r.password_hash));
     if (!ok || !r) {
-      const n = (f?.n ?? 0) + 1;
-      this.failures.set(username, { n, until: n >= 5 ? Date.now() + 60_000 : 0 });
+      // A lock that has run out starts the count again.
+      const expired = lockedUntil > 0;
+      const failures = (expired ? 0 : (prior?.failures ?? 0)) + 1;
+      const until = failures >= this.lockout.threshold ? now + this.lockout.windowMs : 0;
+      await this.db.query(
+        'INSERT INTO login_lockouts (username, failures, locked_until, updated_at) VALUES ($1,$2,$3,$4) ON CONFLICT (username) DO UPDATE SET failures = EXCLUDED.failures, locked_until = EXCLUDED.locked_until, updated_at = EXCLUDED.updated_at',
+        [username, failures, until, now],
+      );
       return null;
     }
-    this.failures.delete(username);
+    await this.clearLockout(username);
     const token = randomBytes(32).toString('base64url');
     const expiresAt = Date.now() + this.ttlHours * 3600_000;
     await this.db.query('INSERT INTO sessions (token_hash, user_id, created_at, expires_at, ip) VALUES ($1,$2,$3,$4,$5)', [sha(token), r.id, Date.now(), expiresAt, ip]);

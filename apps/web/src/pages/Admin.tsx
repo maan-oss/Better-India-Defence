@@ -160,7 +160,7 @@ export function Admin() {
             )}
             <div className="row">
               <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
-                At least 12 characters. The user should change it at first sign-in.
+                At least 12 characters, not a common word, and not containing the account name. The user should change it at first sign-in.
               </span>
               <span className="spacer" />
               <Button variant="primary" disabled={form.username.length < 3 || form.displayName.trim().length < 2 || form.password.length < 12 || strength < 2} onClick={() => void create()}>

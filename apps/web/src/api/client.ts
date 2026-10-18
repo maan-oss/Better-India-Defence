@@ -30,7 +30,9 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!res.ok) {
     if (res.status === 401 && onUnauthorized && !path.startsWith('/api/auth')) onUnauthorized();
     const msg = (body && typeof body === 'object' && 'error' in body ? String((body as { error: unknown }).error) : null) ?? `${res.status} ${res.statusText}`;
-    throw new ApiError(msg, res.status, body);
+    // A refusal can name each reason (the password policy does): the reasons are part of the message.
+    const reasons = body && typeof body === 'object' && 'problems' in body && Array.isArray((body as { problems: unknown }).problems) ? (body as { problems: unknown[] }).problems.map(String) : [];
+    throw new ApiError(reasons.length ? `${msg}: ${reasons.join('; ')}` : msg, res.status, body);
   }
   return body as T;
 }
