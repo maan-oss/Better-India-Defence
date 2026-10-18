@@ -57,6 +57,7 @@ live directory.
 - The manifest proves that a backup has not changed since it was written and that its audit chain is internally
   consistent. It does not prove that the chain is the one the installation wrote: an administrator with database
   access can rewrite the whole chain. The external anchor of the audit head (see `SECURITY.md`) is what closes that.
-- The restore test runs on an embedded database. A PostgreSQL restore uses the same SQL path, and is not separately
-  tested here.
-- Restores have been run here only into a fresh directory on the same host.
+- The restore is tested on the embedded engine and on PostgreSQL 16: `apps/server/test/backup-postgres.test.ts` runs
+  when `STRATA_TEST_DATABASE_URL` names a PostgreSQL server the test may create databases on, and is skipped otherwise.
+- Restores have been run here only into a fresh directory or database on the same host. Restore onto a separate host,
+  and onto a PostgreSQL server other than the one that wrote the backup, has not been run.
