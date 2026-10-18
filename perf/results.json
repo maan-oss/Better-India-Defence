@@ -1,0 +1,62 @@
+{
+  "measuredAt": "2026-10-18T13:38:20.245Z",
+  "node": "v22.22.0",
+  "cpus": 4,
+  "bundle": {
+    "indexJs": {
+      "measured": 228.6,
+      "limit": 250,
+      "unit": "KB",
+      "ok": true
+    },
+    "allJs": {
+      "measured": 860.7,
+      "limit": 950,
+      "unit": "KB",
+      "ok": true
+    },
+    "css": {
+      "measured": 116.5,
+      "limit": 130,
+      "unit": "KB",
+      "ok": true
+    }
+  },
+  "api": {
+    "registerAssets": 4014,
+    "assetList": {
+      "p50Ms": 210.4,
+      "p95Ms": 432.1,
+      "budget": {
+        "measured": 432.1,
+        "limit": 1200,
+        "unit": "ms",
+        "ok": true
+      }
+    },
+    "assetDetail": {
+      "p50Ms": 13,
+      "p95Ms": 17.4,
+      "budget": {
+        "measured": 17.4,
+        "limit": 300,
+        "unit": "ms",
+        "ok": true
+      }
+    }
+  },
+  "page": {
+    "signInDomContentLoaded": {
+      "measured": 309.4,
+      "limit": 3000,
+      "unit": "ms",
+      "ok": true
+    },
+    "assetsFirstRows": {
+      "measured": 3000.9,
+      "limit": 8000,
+      "unit": "ms",
+      "ok": true
+    }
+  }
+}
