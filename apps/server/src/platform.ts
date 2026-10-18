@@ -11,6 +11,7 @@ import { seedDemoContent } from './demo/demoContent.ts';
 import { AuditLog } from './audit/audit.ts';
 import { AuditAnchor, verifyAnchors, type AnchorCheck } from './audit/anchor.ts';
 import { loadKeys, type KeyRing } from './keys/keyring.ts';
+import { startHealthWatch } from './ops/healthWatch.ts';
 import { Metrics } from './metrics.ts';
 import { LiveHub } from './live/hub.ts';
 import { SensorMonitor } from './ingest/sensorMonitor.ts';
@@ -47,6 +48,7 @@ export class Platform {
   anchor!: AuditAnchor;
   /** The secret keys this installation runs with, loaded at start; null entries mean the feature needing them is off. */
   keys!: KeyRing;
+  private stopHealthWatch: (() => void) | null = null;
   sensors!: SensorMonitor;
   fusion!: FusionService;
   world!: WorldMemory;
@@ -176,6 +178,7 @@ export class Platform {
     this.ops = new OpsService(this.db, this.hub, this.alerts, this.fusion, this.incidents, this.sensors, this.identity, () => this.liveEdge(), this.demo && this.site === null);
     await this.ops.load();
     this.ops.start();
+    this.stopHealthWatch = startHealthWatch(this);
     this.assets = new AssetService(this.db);
     if (this.demo && this.site === null && (cfg.STRATA_DEMO_CONTENT ?? (cfg.NODE_ENV === 'test' ? 'false' : 'true')) === 'true') {
       // The synthetic asset register is demonstration content, so it follows the same switch as the rest of it.
@@ -260,6 +263,7 @@ export class Platform {
   async stop(): Promise<void> {
     for (const t of this.timers) clearInterval(t);
     this.cameras?.stopAll();
+    this.stopHealthWatch?.();
     this.ops?.stop();
     this.hub.close();
     await this.pool?.close();
