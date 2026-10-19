@@ -179,6 +179,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
       `strata_batch_process_p95_ms ${m.batchProcessMs.p95}`,
       `strata_event_loop_lag_p99_ms ${m.eventLoopLagMs.p99}`,
       `strata_ws_clients ${p.hub.size}`,
+      ...Object.entries(m.phasesMs).map(([k, v]) => `strata_ingest_phase_p95_ms{phase="${k}"} ${v.p95}`),
       ...Object.entries(m.counters).map(([k, v]) => `strata_${k}_total ${v}`),
     ];
     return reply.type('text/plain').send(`${lines.join('\n')}\n`);

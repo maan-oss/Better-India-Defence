@@ -1,20 +1,31 @@
 import { monitorEventLoopDelay } from 'node:perf_hooks';
 
-/** In-process performance instrumentation (exposed on /api/system/health and /metrics). */
+/**
+ * Quantiles over the last two minutes, so a figure describes the present. A count-based window would keep
+ * whatever happened at start-up (replayed history, a backlog) until enough newer samples pushed it out.
+ */
 class Histogram {
-  private values: number[] = [];
-  constructor(private readonly max = 2000) {}
+  private samples: { t: number; v: number }[] = [];
+  constructor(private readonly windowMs = 120_000, private readonly max = 5000) {}
   observe(v: number): void {
-    this.values.push(v);
-    if (this.values.length > this.max) this.values.shift();
+    this.samples.push({ t: Date.now(), v });
+    this.prune();
+  }
+  private prune(): void {
+    const cut = Date.now() - this.windowMs;
+    let i = 0;
+    while (i < this.samples.length && (this.samples[i]!.t < cut || this.samples.length - i > this.max)) i++;
+    if (i) this.samples.splice(0, i);
   }
   quantile(q: number): number {
-    if (!this.values.length) return 0;
-    const s = [...this.values].sort((a, b) => a - b);
+    this.prune();
+    if (!this.samples.length) return 0;
+    const s = this.samples.map((x) => x.v).sort((a, b) => a - b);
     return s[Math.min(s.length - 1, Math.floor(q * s.length))]!;
   }
   get count(): number {
-    return this.values.length;
+    this.prune();
+    return this.samples.length;
   }
 }
 
@@ -33,11 +44,14 @@ class Rate {
   }
 }
 
+/** In-process performance instrumentation (exposed on /api/system/health and /metrics). */
 export class Metrics {
   readonly ingestLatencyMs = new Histogram();
   readonly batchProcessMs = new Histogram();
   readonly fusionMs = new Histogram();
   readonly httpMs = new Histogram();
+  /** Time spent in each stage of the ingest path, so the slow stage is measured rather than guessed. */
+  readonly phases = new Map<string, Histogram>();
   readonly ingestRate = new Rate();
   readonly rejectRate = new Rate();
   counters: Record<string, number> = {
@@ -61,6 +75,12 @@ export class Metrics {
     this.counters[name] = (this.counters[name] ?? 0) + n;
   }
 
+  observePhase(name: string, ms: number): void {
+    let h = this.phases.get(name);
+    if (!h) this.phases.set(name, (h = new Histogram()));
+    h.observe(ms);
+  }
+
   snapshot() {
     return {
       uptimeS: Math.round((Date.now() - this.startedAt) / 1000),
@@ -70,6 +90,7 @@ export class Metrics {
       batchProcessMs: { p50: this.batchProcessMs.quantile(0.5), p95: this.batchProcessMs.quantile(0.95) },
       fusionMs: { p50: this.fusionMs.quantile(0.5), p95: this.fusionMs.quantile(0.95) },
       httpMs: { p50: this.httpMs.quantile(0.5), p95: this.httpMs.quantile(0.95) },
+      phasesMs: Object.fromEntries([...this.phases].map(([k, h]) => [k, { p50: Math.round(h.quantile(0.5) * 10) / 10, p95: Math.round(h.quantile(0.95) * 10) / 10 }])),
       eventLoopLagMs: { p50: Math.round(this.loop.percentile(50) / 1e6), p99: Math.round(this.loop.percentile(99) / 1e6) },
       memoryMb: Math.round(process.memoryUsage().rss / 1e6),
       counters: { ...this.counters },
