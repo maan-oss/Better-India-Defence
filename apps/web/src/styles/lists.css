@@ -1,0 +1,172 @@
+/* Lists of records beside a detail pane: the list, each row, the empty states and the text in a pane. Every page that
+   lists records uses these, so bullets, borders, gutters and row spacing are the same everywhere. Colours, type and
+   spacing come from tokens.css. */
+
+.as-list,
+.as-list-plain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.as-list {
+  padding: 0;
+}
+.as-list > li {
+  margin: 0;
+  padding: 0;
+}
+
+.as-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-1);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.as-row:hover {
+  background: var(--bg-2);
+  color: var(--text-0);
+}
+.as-row[aria-current='true'] {
+  background: var(--bg-3);
+  color: var(--text-0);
+}
+
+/* A row whose content is stacked: the title, where it came from, the excerpt and the status badge, one per line. */
+.as-row-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-1);
+}
+.as-row-title {
+  font-weight: 600;
+  color: var(--text-0);
+  overflow-wrap: anywhere;
+}
+.as-row-meta {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-2);
+}
+.as-row-excerpt {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-1);
+  overflow-wrap: anywhere;
+}
+.as-mark {
+  background: var(--amber-soft, #fde68a);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.as-tag {
+  font-weight: 600;
+  color: var(--text-0);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.as-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.as-crit {
+  color: var(--text-2);
+  font-size: var(--fs-micro);
+}
+
+/* Empty states and plain text in a pane sit inside the pane's gutter, never against its edge or the divider. */
+.as-empty {
+  margin: 0;
+  padding: var(--sp-4);
+  color: var(--text-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.as-body {
+  margin: 0;
+  padding: var(--sp-4);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  white-space: pre-wrap;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-1);
+}
+
+.as-pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+}
+
+/* A search line: the field takes the width, the action sits beside it with the same height. */
+.as-search-line {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+}
+.as-search-line > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Forms inside a pane: the add and assess forms of the documents library and the asset forms. */
+.as-section h3, .as-form h3 { margin: var(--sp-2) 0 0; font-size: var(--fs-body); font-weight: 600; color: var(--text-0); }
+.as-form { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg-1); }
+.as-field { display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-caption); color: var(--text-2); }
+.as-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); justify-content: flex-end; }
+.as-error { margin: 0; color: var(--st-critical-text); font-size: var(--fs-caption); }
+.as-doc-title {
+  margin: 0;
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  color: var(--text-0);
+  overflow-wrap: anywhere;
+}
+/* The add form sits inside the list pane, on the same gutter as the rows. */
+.as-add {
+  margin: 0 var(--sp-3) var(--sp-3);
+}
+/* Text in a pane: no default paragraph margins, so the pane's gap alone sets the rhythm between its parts. */
+.as-pane p {
+  margin: 0;
+}
+/* The assessment of a document: the label, who made it, and the reason on its own line. */
+.as-assessment {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.as-assessment > .as-row-excerpt {
+  flex-basis: 100%;
+}
+/* A document's text reads as prose. A browser sets <pre> to monospace by default; only CSV bodies keep it. */
+.as-body:not(.mono) {
+  font-family: inherit;
+}
+.as-row-meta {
+  display: block;
+}

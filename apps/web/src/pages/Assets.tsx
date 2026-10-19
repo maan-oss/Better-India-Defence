@@ -100,8 +100,8 @@ export function Assets() {
           )}
           {list.error && <ErrorNote error={list.error} />}
           {!list.data && !list.error && <Loading />}
-          {list.data && rows.length === 0 && <p className="muted">The register is empty. Assets are added by an operator with assets.edit rights.</p>}
-          {rows.length > 0 && shown.length === 0 && <p className="muted">No asset matches the search.</p>}
+          {list.data && rows.length === 0 && <p className="as-empty">The register is empty. Assets are added by an operator with assets.edit rights.</p>}
+          {rows.length > 0 && shown.length === 0 && <p className="as-empty">No asset matches the search.</p>}
           {shown.length > 0 && (
             <ul className="as-list" aria-label="Assets">
               {shown.map((a) => (
@@ -110,7 +110,7 @@ export function Assets() {
                     <span className="mono as-tag">{a.tag}</span>
                     <span className="as-name">
                       {a.name}
-                      <span className="muted" style={{ display: 'block', fontSize: 'var(--fs-caption)' }}>
+                      <span className="as-row-meta">
                         {titleCase(a.classification)} · {a.owner}
                       </span>
                     </span>
@@ -125,7 +125,7 @@ export function Assets() {
           )}
         </div>
         <div className="scroll as-detail-pane">
-          {id ? <AssetPane id={id} rows={rows} version={version} changed={changed} /> : <p className="muted">Choose an asset to see its status, dependencies, impact and maintenance.</p>}
+          {id ? <AssetPane id={id} rows={rows} version={version} changed={changed} /> : <p className="as-empty">Choose an asset to see its status, dependencies, impact and maintenance.</p>}
         </div>
       </div>
     </div>

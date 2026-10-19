@@ -85,7 +85,7 @@ export function IncidentReports() {
           )}
           {list.error && <ErrorNote error={list.error} />}
           {!list.data && !list.error && <Loading />}
-          {list.data && list.data.length === 0 && <p className="muted">No reports you can see.</p>}
+          {list.data && list.data.length === 0 && <p className="as-empty">No reports you can see.</p>}
           {(list.data ?? []).length > 0 && (
             <ul className="as-list" aria-label="Incident reports">
               {(list.data ?? []).map((r) => (
@@ -104,7 +104,7 @@ export function IncidentReports() {
           )}
         </div>
         <div className="scroll as-detail-pane">
-          {id ? <ReportDetail id={id} onChanged={changed} version={version} /> : <p className="muted">Choose a report to see its steps, equipment and history.</p>}
+          {id ? <ReportDetail id={id} onChanged={changed} version={version} /> : <p className="as-empty">Choose a report to see its steps, equipment and history.</p>}
         </div>
       </div>
     </div>

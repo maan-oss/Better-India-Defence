@@ -45,7 +45,7 @@ function Excerpt({ text }: { text: string }) {
     <>
       {parts.map((p, i) =>
         p.startsWith('[[') && p.endsWith(']]') ? (
-          <mark key={i} style={{ background: 'var(--amber-soft, #fde68a)', color: 'inherit', borderRadius: 3, padding: '0 2px' }}>
+          <mark key={i} className="as-mark">
             {p.slice(2, -2)}
           </mark>
         ) : (
@@ -81,7 +81,7 @@ export function Documents() {
       </div>
       <div className="page-body split">
         <div className="scroll as-list-pane">
-          <div style={{ padding: 12 }}>
+          <div className="as-search-line">
             <SearchField
               label="Search documents"
               placeholder="Words to find"
@@ -91,11 +91,9 @@ export function Documents() {
                 if (e.key === 'Enter') setQuery(filter.trim());
               }}
             />
-            <div style={{ marginTop: 8 }}>
-              <Button size="sm" variant="secondary" onClick={() => setQuery(filter.trim())}>
-                Search
-              </Button>
-            </div>
+            <Button variant="secondary" onClick={() => setQuery(filter.trim())}>
+              Search
+            </Button>
           </div>
           {adding && (
             <AddDocument
@@ -108,20 +106,22 @@ export function Documents() {
           )}
           {hits.error && <ErrorNote error={hits.error} />}
           {!hits.data && !hits.error && <Loading />}
-          {hits.data && hits.data.length === 0 && <p className="muted">{query ? 'Nothing you can see matches those words.' : 'No documents you can see yet.'}</p>}
+          {hits.data && hits.data.length === 0 && <p className="as-empty">{query ? 'Nothing you can see matches those words.' : 'No documents you can see yet.'}</p>}
           {(hits.data ?? []).length > 0 && (
             <ul className="as-list" aria-label="Documents">
               {(hits.data ?? []).map((d) => (
-                <li key={d.id} style={{ padding: '8px 0' }}>
-                  <button type="button" className="as-row" style={{ gridTemplateColumns: 'minmax(0, 1fr)', alignItems: 'start', textAlign: 'left', width: '100%', whiteSpace: 'normal' }} aria-current={d.id === id ? 'true' : undefined} onClick={() => nav(`/documents/${d.id}`)}>
-                    <b>{d.title}</b>
-                    <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
+                <li key={d.id}>
+                  <button type="button" className="as-row as-row-stack" aria-current={d.id === id ? 'true' : undefined} onClick={() => nav(`/documents/${d.id}`)}>
+                    <span className="as-row-title">{d.title}</span>
+                    <span className="as-row-meta">
                       {d.source} · {d.uploadedBy} · {dateTime(d.uploadedAt)}
                     </span>
-                    {d.excerpt && <span style={{ fontSize: 'var(--fs-body)' }}>{<Excerpt text={d.excerpt} />}</span>}
-                    <span className={`chip ${CONFIDENCE_TONE[d.confidence]}`} style={{ justifySelf: 'start' }}>
-                      {CONFIDENCE_LABEL[d.confidence]}
-                    </span>
+                    {d.excerpt && (
+                      <span className="as-row-excerpt">
+                        <Excerpt text={d.excerpt} />
+                      </span>
+                    )}
+                    <span className={`chip ${CONFIDENCE_TONE[d.confidence]}`}>{CONFIDENCE_LABEL[d.confidence]}</span>
                   </button>
                 </li>
               ))}
@@ -129,7 +129,7 @@ export function Documents() {
           )}
         </div>
         <div className="scroll as-detail-pane">
-          {id ? <DocumentPane id={id} onChanged={changed} version={version} /> : <p className="muted">Choose a document to read it and see its assessment.</p>}
+          {id ? <DocumentPane id={id} onChanged={changed} version={version} /> : <p className="as-empty">Choose a document to read it and see its assessment.</p>}
         </div>
       </div>
     </div>
@@ -162,7 +162,7 @@ function AddDocument({ onDone }: { onDone: (d: DocumentDetail) => void }) {
     }
   };
   return (
-    <form className="as-form" onSubmit={submit} aria-label="Add a document" style={{ margin: '0 12px' }}>
+    <form className="as-form as-add" onSubmit={submit} aria-label="Add a document">
       <Input label="Title" value={title} maxLength={200} onChange={(e) => setTitle(e.target.value)} />
       <Input label="Where it came from" value={source} maxLength={200} onChange={(e) => setSource(e.target.value)} />
       <label className="as-field">
@@ -229,19 +229,19 @@ function DocumentPane({ id, onChanged, version }: { id: string; onChanged: () =>
     }
   };
   return (
-    <article aria-label={`Document ${d.title}`}>
-      <h2 style={{ margin: '4px 0' }}>{d.title}</h2>
-      <p className="note">
+    <article className="as-pane" aria-label={`Document ${d.title}`}>
+      <h2 className="as-doc-title">{d.title}</h2>
+      <p className="as-row-meta">
         From {d.source} · loaded by {d.uploadedBy}, {dateTime(d.uploadedAt)}
         {d.documentDate ? ` · source dated ${dateTime(d.documentDate)}` : ''} · {titleCase(d.kind)}
         {d.rows !== null ? ` · ${d.rows} rows` : ''} · {titleCase(d.classification)}
       </p>
-      <p>
+      <div className="as-assessment">
         <span className={`chip ${CONFIDENCE_TONE[d.confidence]}`}>{CONFIDENCE_LABEL[d.confidence]}</span>
-        {d.confidenceBy ? ` · assessed by ${d.confidenceBy}` : ''}
-      </p>
-      {d.confidenceNote && <p className="note">{d.confidenceNote}</p>}
-      <pre className="mono" style={{ whiteSpace: 'pre-wrap', fontSize: 'var(--fs-body)', background: 'var(--bg-2, #f5f5f5)', padding: 12, borderRadius: 8 }}>
+        {d.confidenceBy && <span className="as-row-meta">assessed by {d.confidenceBy}</span>}
+        {d.confidenceNote && <p className="as-row-excerpt">{d.confidenceNote}</p>}
+      </div>
+      <pre className={d.kind === 'csv' ? 'as-body mono' : 'as-body'}>
         {d.body}
       </pre>
       {can('documents.review') && me !== d.uploadedBy && (
@@ -265,7 +265,7 @@ function DocumentPane({ id, onChanged, version }: { id: string; onChanged: () =>
           </div>
         </form>
       )}
-      {can('documents.review') && me === d.uploadedBy && <p className="note">You loaded this document, so someone else must assess it.</p>}
+      {can('documents.review') && me === d.uploadedBy && <p className="as-row-meta">You loaded this document, so someone else must assess it.</p>}
       {err && (
         <p className="as-error" role="alert">
           {err}

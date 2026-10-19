@@ -9,6 +9,7 @@ import './styles/tw.css';
 import './styles/defs.css';
 import './styles/arc-theme.css';
 import './styles/app.css';
+import './styles/lists.css';
 import './styles/operations.css';
 import './brand/brand.css';
 import './state/ui';
