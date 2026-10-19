@@ -1,3 +1,4 @@
+import { Empty } from '../brand/Boot';
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { get, post } from '../api/client';
@@ -85,7 +86,7 @@ export function IncidentReports() {
           )}
           {list.error && <ErrorNote error={list.error} />}
           {!list.data && !list.error && <Loading />}
-          {list.data && list.data.length === 0 && <p className="as-empty">No reports you can see.</p>}
+          {list.data && list.data.length === 0 && <Empty compact art="evidence" title="No reports you can see" description="Reports you are allowed to see are listed here." />}
           {(list.data ?? []).length > 0 && (
             <ul className="as-list" aria-label="Incident reports">
               {(list.data ?? []).map((r) => (
@@ -104,7 +105,7 @@ export function IncidentReports() {
           )}
         </div>
         <div className="scroll as-detail-pane">
-          {id ? <ReportDetail id={id} onChanged={changed} version={version} /> : <p className="as-empty">Choose a report to see its steps, equipment and history.</p>}
+          {id ? <ReportDetail id={id} onChanged={changed} version={version} /> : <Empty art="evidence" title="Choose a report" description="Its steps, equipment and history are shown here." />}
         </div>
       </div>
     </div>

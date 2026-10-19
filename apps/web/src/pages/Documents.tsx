@@ -1,3 +1,4 @@
+import { Empty } from '../brand/Boot';
 import { Fragment, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { get, post, patch } from '../api/client';
@@ -106,7 +107,7 @@ export function Documents() {
           )}
           {hits.error && <ErrorNote error={hits.error} />}
           {!hits.data && !hits.error && <Loading />}
-          {hits.data && hits.data.length === 0 && <p className="as-empty">{query ? 'Nothing you can see matches those words.' : 'No documents you can see yet.'}</p>}
+          {hits.data && hits.data.length === 0 && <Empty compact art="search" title={query ? 'Nothing matches those words' : 'No documents yet'} description={query ? 'Try other words, or clear the search.' : 'Documents you can see appear here once they are loaded.'} />}
           {(hits.data ?? []).length > 0 && (
             <ul className="as-list" aria-label="Documents">
               {(hits.data ?? []).map((d) => (
@@ -129,7 +130,7 @@ export function Documents() {
           )}
         </div>
         <div className="scroll as-detail-pane">
-          {id ? <DocumentPane id={id} onChanged={changed} version={version} /> : <p className="as-empty">Choose a document to read it and see its assessment.</p>}
+          {id ? <DocumentPane id={id} onChanged={changed} version={version} /> : <Empty art="evidence" title="Choose a document" description="Read it here, and see its assessment." />}
         </div>
       </div>
     </div>

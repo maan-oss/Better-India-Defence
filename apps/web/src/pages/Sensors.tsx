@@ -121,7 +121,7 @@ export function Sensors() {
           <SensorStates counts={counts} />
         </div>
       )}
-      <div className="page-body split">
+      <div className="page-body split sn-split">
         <div className="scroll">
           {error && <ErrorNote error={error} />}
           {!data && !error && <Loading />}

@@ -1,3 +1,4 @@
+import { Empty } from '../brand/Boot';
 import { useMemo, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -100,8 +101,8 @@ export function Assets() {
           )}
           {list.error && <ErrorNote error={list.error} />}
           {!list.data && !list.error && <Loading />}
-          {list.data && rows.length === 0 && <p className="as-empty">The register is empty. Assets are added by an operator with assets.edit rights.</p>}
-          {rows.length > 0 && shown.length === 0 && <p className="as-empty">No asset matches the search.</p>}
+          {list.data && rows.length === 0 && <Empty compact art="site" title="The register is empty" description="Assets are added by an operator with asset edit rights." />}
+          {rows.length > 0 && shown.length === 0 && <Empty compact art="search" title="No asset matches the search" description="Clear the search to see the whole register." />}
           {shown.length > 0 && (
             <ul className="as-list" aria-label="Assets">
               {shown.map((a) => (
@@ -125,7 +126,7 @@ export function Assets() {
           )}
         </div>
         <div className="scroll as-detail-pane">
-          {id ? <AssetPane id={id} rows={rows} version={version} changed={changed} /> : <p className="as-empty">Choose an asset to see its status, dependencies, impact and maintenance.</p>}
+          {id ? <AssetPane id={id} rows={rows} version={version} changed={changed} /> : <Empty art="site" title="Choose an asset" description="Its status, dependencies, impact and maintenance are shown here." />}
         </div>
       </div>
     </div>

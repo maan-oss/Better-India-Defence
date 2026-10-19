@@ -1,7 +1,7 @@
 /* Asset register: the list, the detail pane and its forms. Colours, spacing and type come from tokens.css. */
 .as-search { width: 260px; }
 
-.as-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); padding: 0 var(--sp-4) var(--sp-3); }
+.as-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); padding: var(--sp-3) var(--gutter); }
 @media (max-width: 760px) {
   .as-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -46,4 +46,11 @@
   .page[data-view] .as-list-pane,
   .page[data-view] .as-detail-pane { height: auto; overflow: visible; }
   .as-back { display: inline-flex; align-self: flex-start; }
+}
+/* The header's search is named by its placeholder and its aria label; its visible label would push the field off the buttons' centre line. */
+.as-search label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.as-search { display: flex; align-items: center; width: 320px; max-width: 100%; }
+.as-search > * { width: 100%; }
+@media (max-width: 760px) {
+  .page-h .as-search { order: 3; flex: 1 1 100%; width: auto; }
 }
