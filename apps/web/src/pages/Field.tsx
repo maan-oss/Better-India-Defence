@@ -164,6 +164,7 @@ export function Field() {
 
           {team && (
             <>
+              <div className="field-main">
               {task ? (
                 <section className={`ftask p-${task.priority}`}>
                   <div className="ftask-h">
@@ -218,7 +219,8 @@ export function Field() {
                 </section>
               )}
               {err && <ErrorNote error={err} />}
-
+              </div>
+              <div className="field-side">
               <div id="field-picture">
                 <LocalPicture centre={team.position} target={task?.target ?? null} />
               </div>
@@ -262,6 +264,7 @@ export function Field() {
                   </Button>
                 )}
                 {can('ops.log') && <AssistButton teamId={team.id} />}
+              </div>
               </div>
             </>
           )}
