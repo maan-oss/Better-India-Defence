@@ -7,7 +7,7 @@ import { AnimatedCounter } from './arc/animated-counter/animated-counter';
 export function Tally({ value, cap, className }: { value: number; cap?: number; className?: string }) {
   const over = cap !== undefined && value > cap;
   return (
-    <span className={className}>
+    <span className={`tally ${className ?? ''}`}>
       <AnimatedCounter value={over ? cap : value} suffix={over ? '+' : ''} />
     </span>
   );

@@ -79,7 +79,7 @@ export function SecondFactor() {
                 </Alert>
               </div>
             )}
-            <button className="btn primary" disabled={busy || code.length !== 6 || !setup}>
+            <button className="btn primary" disabled={busy || code.length !== 6 || !setup} aria-busy={busy || undefined}>
               {busy ? 'Checking…' : 'Confirm and continue'}
             </button>
             <div className="login-foot">

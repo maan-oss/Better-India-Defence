@@ -107,7 +107,7 @@ export function Login() {
                 </Alert>
               </div>
             )}
-            <button className="btn primary" disabled={busy || (challenge ? code.length !== 6 : !username || !password)}>
+            <button className="btn primary" disabled={busy || (challenge ? code.length !== 6 : !username || !password)} aria-busy={busy || undefined}>
               {busy ? <span className="spinner" style={{ width: 14, height: 14, borderTopColor: '#ffffff' }} /> : null}
               {busy ? 'Signing in…' : challenge ? 'Verify code' : 'Sign in'}
             </button>

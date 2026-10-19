@@ -172,7 +172,7 @@ export function Workbench({ item, t, roi, onProduct }: { item: EvidenceItem; t: 
         </label>
         <textarea className="input" rows={2} placeholder="Notes for the processing record (purpose, request reference)…" value={notes} onChange={(e) => setNotes(e.target.value)} />
         <div className="row">
-          <button className="btn primary" disabled={busy || (!ops.length && !roi && !ai) || !can('evidence.enhance')} onClick={() => void run()}>
+          <button className="btn primary" disabled={busy || (!ops.length && !roi && !ai) || !can('evidence.enhance')} aria-busy={busy || undefined} onClick={() => void run()}>
             {busy ? 'Processing…' : 'Create enhanced product'}
           </button>
           <span className="muted">The original is never changed. Each run creates a new hashed product.</span>

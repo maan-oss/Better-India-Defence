@@ -226,10 +226,10 @@ function ReviewDetail({ id, onDone }: { id: string; onDone: () => void }) {
         <div className="col">
           <textarea className="input" rows={3} placeholder="Basis for your decision (required, recorded in the audit trail)" value={note} onChange={(x) => setNote(x.target.value)} />
           <div className="row">
-            <button className="btn primary" disabled={busy || note.trim().length < 3} onClick={() => void decide('CONFIRMED')}>
+            <button className="btn primary" disabled={busy || note.trim().length < 3} aria-busy={busy || undefined} onClick={() => void decide('CONFIRMED')}>
               Confirm identity
             </button>
-            <button className="btn danger" disabled={busy || note.trim().length < 3} onClick={() => void decide('REJECTED')}>
+            <button className="btn danger" disabled={busy || note.trim().length < 3} aria-busy={busy || undefined} onClick={() => void decide('REJECTED')}>
               Reject — not this person
             </button>
           </div>
@@ -766,7 +766,7 @@ function Search({ faceId, identityId }: { faceId: string | null; identityId: str
               <input className="input" type="number" step={0.01} min={0.1} max={0.95} placeholder="default: possible threshold" value={minScore ?? ''} onChange={(e) => setMinScore(e.target.value ? Number(e.target.value) : null)} />
             </div>
             <div className="row">
-              <button className="btn primary" disabled={!probe || purpose.trim().length < 5 || busy} onClick={() => void run()}>
+              <button className="btn primary" disabled={!probe || purpose.trim().length < 5 || busy} aria-busy={busy || undefined} onClick={() => void run()}>
                 {busy ? 'Searching…' : 'Search archive'}
               </button>
             </div>

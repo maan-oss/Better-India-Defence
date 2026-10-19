@@ -518,17 +518,17 @@ export function AlertInspector({ id }: { id: string }) {
             </button>
           )}
           {can('alerts.acknowledge') && alert.status === 'open' && (
-            <button className="btn small primary" disabled={busy} onClick={() => void act('ack')}>
+            <button className="btn small primary" disabled={busy} aria-busy={busy || undefined} onClick={() => void act('ack')}>
               Acknowledge
             </button>
           )}
           {can('alerts.assign') && (
-            <button className="btn small" disabled={busy} onClick={() => void act('assign', { assignee: user?.username })}>
+            <button className="btn small" disabled={busy} aria-busy={busy || undefined} onClick={() => void act('assign', { assignee: user?.username })}>
               Assign to me
             </button>
           )}
           {can('alerts.acknowledge') && alert.status !== 'resolved' && (
-            <button className="btn small" disabled={busy} onClick={() => void act('resolve')}>
+            <button className="btn small" disabled={busy} aria-busy={busy || undefined} onClick={() => void act('resolve')}>
               Resolve
             </button>
           )}
@@ -688,7 +688,7 @@ export function PointInspector({ x, y, z }: { x: number; y: number; z: number })
             Ground evidence
           </button>
           {can('incidents.create') && (
-            <button className="btn small" disabled={busy} onClick={() => void create()}>
+            <button className="btn small" disabled={busy} aria-busy={busy || undefined} onClick={() => void create()}>
               Create incident here
             </button>
           )}

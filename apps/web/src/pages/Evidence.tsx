@@ -292,7 +292,7 @@ function Handoff() {
             ))}
           </select>
           <input className="input grow" value={purpose} onChange={(e) => setPurpose(e.target.value)} aria-label="Purpose" />
-          <button className="btn primary" disabled={busy || !subjects?.length} onClick={() => void run()}>
+          <button className="btn primary" disabled={busy || !subjects?.length} aria-busy={busy || undefined} onClick={() => void run()}>
             {busy ? 'Searching…' : 'Search recorded observations (last 3 h)'}
           </button>
         </div>
