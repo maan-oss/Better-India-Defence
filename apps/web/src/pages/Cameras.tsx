@@ -121,6 +121,24 @@ export function Cameras() {
   const [page, setPage] = useState(0);
   const [tour, setTour] = useState(false);
   const [arrange, setArrange] = useState(false);
+  // A manual order, set by dragging a tile onto another. It sorts after alerts; the pinned order is the fallback.
+  const [order, setOrderState] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("strata.wall.order") ?? "[]") as string[];
+    } catch {
+      return [];
+    }
+  });
+  const setOrder = (next: string[]) => {
+    setOrderState(next);
+    try {
+      localStorage.setItem("strata.wall.order", JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  };
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropId, setDropId] = useState<string | null>(null);
   const [pins, setPinsState] = useState<string[]>(() => {
     try {
       return JSON.parse(
@@ -198,10 +216,16 @@ export function Cameras() {
           ? c.kind === "site"
           : alerting.has(c.id)),
   );
-  // Alerting cameras first, so nothing that matters sits on a later page; then the operator's pinned cameras.
+  // Alerting cameras first, so nothing that matters sits on a later page; then the order the operator dragged into;
+  // then the pinned cameras.
+  const rank = (id: string) => {
+    const i = order.indexOf(id);
+    return i < 0 ? Number.MAX_SAFE_INTEGER : i;
+  };
   shown.sort(
     (a, b) =>
       Number(alerting.has(b.id)) - Number(alerting.has(a.id)) ||
+      rank(a.id) - rank(b.id) ||
       Number(pins.includes(b.id)) - Number(pins.includes(a.id)) ||
       pins.indexOf(a.id) - pins.indexOf(b.id),
   );
@@ -222,6 +246,16 @@ export function Cameras() {
     }
   };
   const tiles = shown.slice(pg * layout, pg * layout + layout);
+  const moveTile = (from: string, to: string) => {
+    if (from === to) return;
+    const ids = shown.map((c) => c.id);
+    const a = ids.indexOf(from);
+    const b = ids.indexOf(to);
+    if (a < 0 || b < 0) return;
+    ids.splice(a, 1);
+    ids.splice(b, 0, from);
+    setOrder(ids);
+  };
   const cols = Math.sqrt(layout);
   const focused = cams.find((c) => c.id === focus) ?? null;
   return (
@@ -322,8 +356,14 @@ export function Cameras() {
           />
         </div>
         <Button variant="ghost" size="sm" onClick={() => setArrange(true)}>
-          <Pin size={14} /> Arrange
+          <Pin size={14} /> Pins
         </Button>
+        <span className="wall-hint">Drag a camera onto another to move it</span>
+        {order.length > 0 && (
+          <Button variant="ghost" size="sm" onClick={() => setOrder([])}>
+            Reset order
+          </Button>
+        )}
         <div className="wall-tour" title="Cycle through pages every 12 s">
           <Switch
             label="Guard tour"
@@ -384,6 +424,19 @@ export function Cameras() {
                 alert={alerting.get(c.id) ?? null}
                 selected={focus === c.id}
                 onSelect={() => setFocus(focus === c.id ? null : c.id)}
+                dragging={dragId === c.id}
+                dropTarget={dropId === c.id && dragId !== null && dragId !== c.id}
+                onDragStart={() => setDragId(c.id)}
+                onDragEnter={() => setDropId(c.id)}
+                onDragEnd={() => {
+                  setDragId(null);
+                  setDropId(null);
+                }}
+                onDrop={() => {
+                  if (dragId) moveTile(dragId, c.id);
+                  setDragId(null);
+                  setDropId(null);
+                }}
               />
             ))}
           </div>
@@ -411,7 +464,7 @@ export function Cameras() {
       <Drawer open={arrange} onOpenChange={setArrange}>
         <DrawerContent
           side="right"
-          title="Arrange the wall"
+          title="Pinned cameras"
           description="Pinned cameras come first, after any camera with an active alert. Kept on this device."
         >
           <PinList
@@ -452,23 +505,54 @@ function WallTile({
   alert,
   selected,
   onSelect,
+  dragging,
+  dropTarget,
+  onDragStart,
+  onDragEnter,
+  onDragEnd,
+  onDrop,
 }: {
   c: WallCam;
   t: number;
   alert: AlertRecord | null;
   selected: boolean;
   onSelect: () => void;
+  dragging: boolean;
+  dropTarget: boolean;
+  onDragStart: () => void;
+  onDragEnter: () => void;
+  onDragEnd: () => void;
+  onDrop: () => void;
 }) {
   const st = c.source?.status;
   const live = c.kind === "site" || st?.state === "live";
   return (
     <div
-      className={`wtile ${alert ? `alerting p-${alert.priority}` : ""} ${selected ? "sel" : ""}`}
+      className={`wtile ${alert ? `alerting p-${alert.priority}` : ""} ${selected ? "sel" : ""} ${dragging ? "dragging" : ""} ${dropTarget ? "drop-target" : ""}`}
       onClick={onSelect}
       role="button"
       tabIndex={0}
       aria-label={`${c.id} ${c.name}`}
       onKeyDown={(e) => e.key === "Enter" && onSelect()}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", c.id);
+        onDragStart();
+      }}
+      onDragEnter={(e) => {
+        e.preventDefault();
+        onDragEnter();
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDrop();
+      }}
+      onDragEnd={onDragEnd}
     >
       <div className="wtile-v">
         {c.kind === "site" ? (

@@ -1,29 +1,35 @@
 .wall-wrap { position: relative; display: flex; flex-direction: column; min-height: 0; padding: 10px; gap: 8px; background: var(--bg-0); }
 .wall { flex: 1; min-height: 0; display: grid; gap: 6px; }
-.wtile { position: relative; background: #000; border: 1px solid var(--line-2); border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; min-height: 0; min-width: 0; transition: border-color var(--t-fast), box-shadow var(--t-fast); animation: reveal 360ms var(--ease) both; }
+/* Camera tiles. The picture is the content. Everything written on it has one place: the camera's state, ID and name
+   along the top; the time at the bottom left and its zone at the bottom right; an alert as one pill above the time.
+   Colours come from the theme's status tokens. The only fixed colour is the dark scrim behind the text, so the text
+   stays readable on any picture. */
+.wtile { position: relative; background: #0e0f11; border: 1px solid var(--line-2); border-radius: var(--radius-lg); overflow: hidden; cursor: grab; min-height: 0; min-width: 0; transition: border-color var(--t-fast), box-shadow var(--t-fast), opacity var(--t-fast); }
 .wtile:hover { border-color: var(--line-3); }
-.wtile.sel { border-color: var(--accent); }
-.wtile.alerting { border-color: var(--red); }
-.wtile.alerting.p-high, .wtile.alerting.p-medium { border-color: var(--amber); }
-/* The alert cue is the border colour alone: no glow, and no shadow repaint on every frame. */
+.wtile.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.wtile.alerting { border-color: var(--st-critical); box-shadow: inset 0 0 0 1px var(--st-critical); }
+.wtile.alerting.p-high, .wtile.alerting.p-medium { border-color: var(--st-serious); box-shadow: inset 0 0 0 1px var(--st-serious); }
+.wtile.dragging { opacity: 0.45; cursor: grabbing; }
+.wtile.drop-target { border-color: var(--focus); box-shadow: 0 0 0 2px var(--focus); }
 .wtile-v { position: absolute; inset: 0; display: grid; }
 .wtile-v img, .wtile-v .feed { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto; border: 0; }
 .wtile-v .feed img { object-fit: cover; }
-.feed.compact .feed-empty { font-size: var(--fs-micro); }
-/* Opaque header so it never fights a camera's own burned-in OSD text. */
-.wtile-top { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: rgba(23, 23, 23, 0.88); border-bottom: 1px solid rgba(255, 255, 255, 0.06); font-size: var(--fs-caption); color: #f3f1ea; pointer-events: none; }
-.wtile-top b { font-size: var(--fs-caption); color: #fff; white-space: nowrap; }
-.wt-state { display: inline-flex; align-items: center; gap: 5px; font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.05em; padding: 1px 6px; border-radius: var(--radius-sm); background: rgba(0, 0, 0, 0.55); color: var(--text-1); border: 1px solid rgba(255, 255, 255, 0.12); flex: none; }
-.wt-state.live { color: #f3f1ea; }
-.wt-state.error { color: var(--red); }
-.wtile-bot { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 10px; align-items: center; padding: 5px 8px; font-size: var(--fs-micro); color: #c9c6bd; background: linear-gradient(transparent, rgba(0, 0, 0, 0.75)); pointer-events: none; }
-.wt-zone { color: #f3f1ea; border: 1px solid rgba(243, 241, 234, 0.35); padding: 0 5px; border-radius: 3px; font-size: var(--fs-micro); }
-.wtile-alert { position: absolute; left: 8px; right: 8px; bottom: 28px; display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(229, 72, 77, 0.88); color: #fff; font-size: var(--fs-caption); font-weight: 600; border-radius: var(--radius); pointer-events: none; animation: popIn 300ms var(--ease-out) both; }
-.wtile.alerting.p-high .wtile-alert, .wtile.alerting.p-medium .wtile-alert { background: var(--st-serious); color: #1a0a00; }
-/* Small phone tiles: the alert keeps clear of the timestamp row, and the analysis time (secondary) steps aside. */
-@media (max-width: 520px) { .wtile-alert { left: 6px; right: 6px; bottom: 26px; padding: 3px 6px; font-size: 11px; } .wtile-bot > .dim { display: none; } }
-.wtile .camtile-off { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; color: var(--text-2); font-size: var(--fs-caption); padding: 12px; text-align: center; background: var(--bg-1); }
+.wtile-top { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 8px; min-width: 0; padding: 8px 10px; background: linear-gradient(rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0)); color: #fff; font-size: var(--fs-caption); }
+.wtile-top b { flex: none; font-size: var(--fs-caption); font-weight: 600; color: #fff; white-space: nowrap; }
+.wtile-top .ellipsis { min-width: 0; color: rgba(255, 255, 255, 0.85); }
+.wt-state { display: inline-flex; flex: none; align-items: center; gap: 5px; height: 18px; padding: 0 7px; border-radius: 999px; background: rgba(0, 0, 0, 0.55); color: rgba(255, 255, 255, 0.9); font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.05em; }
+.wt-state.live { color: #fff; }
+.wt-state.error { color: var(--st-critical); }
+.wtile-bot { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.72)); color: rgba(255, 255, 255, 0.85); font-size: var(--fs-micro); }
+.wtile-bot > span:first-child { font-variant-numeric: tabular-nums; }
+.wtile-alert { position: absolute; left: 10px; right: 10px; bottom: 34px; display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--st-critical); color: #fff; font-size: var(--fs-caption); font-weight: 600; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); }
+.wtile-alert svg { flex: none; }
+.wtile-alert .ellipsis { min-width: 0; }
+.wtile.alerting.p-high .wtile-alert, .wtile.alerting.p-medium .wtile-alert { background: var(--st-serious); }
+@media (max-width: 520px) { .wtile-alert { left: 6px; right: 6px; bottom: 30px; height: 24px; font-size: 11px; } .wtile-bot > .dim { display: none; } }
+.wtile .camtile-off { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; background: #0e0f11; color: rgba(255, 255, 255, 0.62); font-size: var(--fs-caption); padding: 12px; text-align: center; }
 .wtile .camtile-off.error { color: var(--st-critical-text); }
+.wall-hint { font-size: var(--fs-caption); color: var(--text-2); }
 .wall-pager { display: flex; justify-content: center; align-items: center; gap: 6px; }
 .wall-pager .dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--line-3); background: transparent; padding: 0; cursor: pointer; transition: background var(--t-fast), transform var(--t-fast); }
 .wall-pager .dot.on { background: var(--accent); border-color: var(--accent); transform: scale(1.25); }
@@ -64,3 +70,9 @@
 .wall-toolbar { display: flex; align-items: center; gap: 12px; padding: 8px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; min-height: 52px; }
 .wall-find { width: 300px; display: flex; justify-content: flex-end; position: relative; } .wall-find > * { width: 100%; }
 @media (max-width: 760px) { .wall-find { width: auto; } }
+/* A camera with no picture yet is a dark tile with a quiet label, the same as a camera with one. */
+.wtile .feed,
+.wtile .feed-empty {
+  background: #0e0f11;
+  color: rgba(255, 255, 255, 0.62);
+}
