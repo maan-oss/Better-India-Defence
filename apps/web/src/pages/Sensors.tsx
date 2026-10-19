@@ -300,6 +300,42 @@ function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: stri
   const H = facility.perimeterHalfM * 1.2;
   const placed = rows.filter((r) => 'position' in r.definition) as (SensorListItem & { definition: { position: { x: number; y: number } } })[];
   const color = (st: string | undefined) => (st === 'ok' ? 'var(--text-1)' : st === 'degraded' ? 'var(--st-caution)' : 'var(--st-critical)');
+  const s = H / 56;
+  // Sensors that sit on the same spot are drawn as one marker with a count, so none is hidden under another.
+  const reach = s * 3;
+  const clusters: { key: string; x: number; y: number; members: (typeof placed)[number][] }[] = [];
+  for (const r of placed) {
+    const { x, y } = r.definition.position;
+    const hit = clusters.find((c) => Math.hypot(c.x - x, c.y - y) < reach);
+    if (hit) hit.members.push(r);
+    else clusters.push({ key: r.definition.id, x, y, members: [r] });
+  }
+  const clusterStatus = (members: (typeof placed)[number][]) => {
+    const sts = members.map((m) => m.status?.status);
+    if (sts.some((st) => st !== 'ok' && st !== 'degraded')) return 'down';
+    return sts.some((st) => st === 'degraded') ? 'degraded' : 'ok';
+  };
+  const renderSensor = (r: (typeof placed)[number]) => {
+    const d = r.definition as SensorListItem['definition'] & { position: { x: number; y: number }; rangeM?: number; headingDeg?: number; hfovDeg?: number };
+    const st = r.status?.status;
+    const sel = hover === d.id;
+    const s = H / 56;
+    return (
+      <g key={d.id} transform={`translate(${d.position.x} ${d.position.y})`} onMouseEnter={() => setHover(d.id)} onMouseLeave={() => setHover(null)} onClick={() => onPick(d.id)} style={{ cursor: 'pointer' }}>
+        {d.kind === 'camera' && d.headingDeg !== undefined && d.hfovDeg !== undefined && (
+          <path d={wedge(d.headingDeg, d.hfovDeg, Math.min(d.rangeM ?? 300, H / 3))} fill={sel ? 'rgba(77,172,255,0.2)' : 'rgba(169,187,207,0.05)'} stroke="none" />
+        )}
+        {(d.kind === 'radar' || d.kind === 'rf') && d.rangeM && <circle r={Math.min(d.rangeM, H * 2)} fill="none" stroke={color(st)} strokeOpacity={sel ? 0.5 : 0.12} strokeWidth={H / 500} strokeDasharray={`${H / 80} ${H / 80}`} />}
+        <circle r={s * 1.25} fill="var(--bg-1)" stroke={color(st)} strokeWidth={s / 4} />
+        <path d={KIND_GLYPH[d.kind] ?? 'M-3 0h6'} transform={`scale(${s / 7}, ${-s / 7})`} fill="none" stroke={color(st)} strokeWidth={1.4} />
+        {sel && (
+          <text transform={`scale(1,-1)`} x={s * 1.8} y={s * 0.5} fontSize={s * 1.6} fill="var(--text-0)" fontFamily="var(--font-mono)">
+            {d.id}
+          </text>
+        )}
+      </g>
+    );
+  };
   return (
     <div className="sensor-map reveal">
       <div className="section">
@@ -319,27 +355,23 @@ function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: stri
           {facility.fence.map((f) => (
             <line key={f.id} x1={f.a.x} y1={f.a.y} x2={f.b.x} y2={f.b.y} stroke="rgba(143,162,184,0.7)" strokeWidth={H / 300} strokeDasharray={`${H / 60} ${H / 90}`} />
           ))}
-          {placed.map((r) => {
-            const d = r.definition as SensorListItem['definition'] & { position: { x: number; y: number }; rangeM?: number; headingDeg?: number; hfovDeg?: number };
-            const st = r.status?.status;
-            const sel = hover === d.id;
-            const s = H / 56;
-            return (
-              <g key={d.id} transform={`translate(${d.position.x} ${d.position.y})`} onMouseEnter={() => setHover(d.id)} onMouseLeave={() => setHover(null)} onClick={() => onPick(d.id)} style={{ cursor: 'pointer' }}>
-                {d.kind === 'camera' && d.headingDeg !== undefined && d.hfovDeg !== undefined && (
-                  <path d={wedge(d.headingDeg, d.hfovDeg, Math.min(d.rangeM ?? 300, H / 3))} fill={sel ? 'rgba(77,172,255,0.2)' : 'rgba(169,187,207,0.05)'} stroke="none" />
-                )}
-                {(d.kind === 'radar' || d.kind === 'rf') && d.rangeM && <circle r={Math.min(d.rangeM, H * 2)} fill="none" stroke={color(st)} strokeOpacity={sel ? 0.5 : 0.12} strokeWidth={H / 500} strokeDasharray={`${H / 80} ${H / 80}`} />}
-                <circle r={s * 1.25} fill="var(--bg-1)" stroke={color(st)} strokeWidth={s / 4} />
-                <path d={KIND_GLYPH[d.kind] ?? 'M-3 0h6'} transform={`scale(${s / 7}, ${-s / 7})`} fill="none" stroke={color(st)} strokeWidth={1.4} />
-                {sel && (
-                  <text transform={`scale(1,-1)`} x={s * 1.8} y={s * 0.5} fontSize={s * 1.6} fill="var(--text-0)" fontFamily="var(--font-mono)">
-                    {d.id}
+          {clusters.map((cl) =>
+            cl.members.length === 1 ? (
+              renderSensor(cl.members[0]!)
+            ) : (
+              <g key={`cluster-${cl.key}`} transform={`translate(${cl.x} ${cl.y})`} onMouseEnter={() => setHover(cl.key)} onMouseLeave={() => setHover(null)} onClick={() => onPick(cl.members[0]!.definition.id)} style={{ cursor: 'pointer' }}>
+                <circle r={s * 1.7} fill="var(--bg-1)" stroke={color(clusterStatus(cl.members))} strokeWidth={s / 3} />
+                <text transform="scale(1,-1)" x={0} y={s * 0.5} textAnchor="middle" fontSize={s * 1.5} fill="var(--text-0)" fontFamily="var(--font-mono)">
+                  {cl.members.length}
+                </text>
+                {hover === cl.key && (
+                  <text transform="scale(1,-1)" x={s * 2.2} y={s * 0.5} fontSize={s * 1.4} fill="var(--text-0)" fontFamily="var(--font-mono)">
+                    {cl.members.map((m) => m.definition.id).join(' ')}
                   </text>
                 )}
               </g>
-            );
-          })}
+            ),
+          )}
         </g>
       </svg>
       <div className="row smap-legend">
