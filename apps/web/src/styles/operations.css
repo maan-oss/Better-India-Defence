@@ -118,9 +118,18 @@
 .cursor-ref.on { opacity: 1; }
 .cursor-ref b { color: var(--text-0); font-weight: 500; }
 
-.alert-row.p-critical.s-open { box-shadow: inset 2px 0 0 var(--st-critical); }
-.alert-row.p-critical.s-open::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--st-critical); }
-.alert-row.p-high.s-open::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--st-serious); }
+/* Alert rows: the priority dot, the title and its facts on two lines, and the acknowledge action, each with its own
+   space. No side stripes; the row keeps its bottom hairline. Critical open alerts are set in a heavier title instead. */
+.alert-row {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4);
+}
+.alert-row > .grow { min-width: 0; }
+.alert-row > .btn { flex: none; }
+.alert-row.p-critical.s-open .ellipsis { font-weight: 600; }
 .alert-row.s-resolved, .alert-row.s-dismissed { opacity: 0.5; }
 .al-status { margin-left: var(--sp-2); padding: 0 6px; border: 1px solid var(--line-2); border-radius: var(--radius-sm); font-size: var(--fs-micro); }
 .al-status.acknowledged { color: var(--text-1); border-color: var(--line-3); }
