@@ -237,7 +237,10 @@ export function Timeline() {
       g.fillStyle = alpha(P.normal, 0.85);
       g.fillRect(xe - 0.5, 0, 1, H - 16);
       g.font = '600 9.5px "Geist Variable"';
-      g.fillText('NOW', xe + 3, 10);
+      // At the right edge the label turns to the left of the line, so it is never cut off.
+      const nowW = g.measureText('NOW').width;
+      if (xe + 3 + nowW <= W) g.fillText('NOW', xe + 3, 10);
+      else g.fillText('NOW', xe - 3 - nowW, 10);
       const xp = xOf(time.mode === 'live' ? edge : time.t, W, v);
       g.fillStyle = P.text0;
       g.fillRect(xp - 1, 0, 2, H - 16);
@@ -390,6 +393,15 @@ export function Timeline() {
           </div>
         )}
       </div>
+      {open && (
+        <ul className="tl-legend" aria-label="Timeline key">
+          <li><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0 10 5 5 10 0 5z" fill={P.caution} /></svg>Change</li>
+          <li><svg viewBox="0 0 10 10" aria-hidden="true"><rect x="4" y="0" width="2" height="10" fill={P.critical} /></svg>Alert, by priority</li>
+          <li><svg viewBox="0 0 10 10" aria-hidden="true"><rect x="2" y="2" width="6" height="6" fill="none" stroke={P.text0} strokeWidth="1.2" /></svg>Overhead imagery</li>
+          <li><svg viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="2.5" fill={P.reconstructed} /></svg>LiDAR scan</li>
+          <li><svg viewBox="0 0 10 10" aria-hidden="true"><rect x="0" y="3.5" width="10" height="3" fill={P.critical} opacity="0.55" /></svg>Sensor not reporting</li>
+        </ul>
+      )}
     </div>
   );
 }

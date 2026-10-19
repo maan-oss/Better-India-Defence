@@ -52,6 +52,16 @@ export function TacticalScope() {
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
+      // Labels: a name is drawn only where no other name is, so the crowded picture stays readable. Assets are placed
+      // first, since they are the fixed points a reader orients by.
+      const placed: [number, number, number, number][] = [];
+      const label = (text: string, x: number, y: number) => {
+        const tw = ctx.measureText(text).width;
+        const box: [number, number, number, number] = [x - 2, y - 11, x + tw + 2, y + 3];
+        if (placed.some(([a, b, c, d]) => box[0] < c && a < box[2] && box[1] < d && b < box[3])) return;
+        placed.push(box);
+        ctx.fillText(text, x, y);
+      };
       const cx = w / 2;
       const cy = h / 2;
       const rad = Math.min(w, h) / 2 - 14;
@@ -143,7 +153,7 @@ export function TacticalScope() {
         ctx.setLineDash([]);
         ctx.fillStyle = v.priority === 1 ? text1 : text2;
         ctx.font = '9.5px "Geist Variable", sans-serif';
-        ctx.fillText(v.name.toUpperCase(), x + Math.max(4, v.radiusM * k) + 3, y + 3);
+        label(v.name.toUpperCase(), x + Math.max(4, v.radiusM * k) + 3, y + 3);
       }
       // Threat vectors.
       for (const th of ops.threats) {
@@ -203,7 +213,7 @@ export function TacticalScope() {
         if (!tr.cooperative) {
           ctx.fillStyle = alpha(C.text0, 0.8);
           ctx.font = '9.5px "Geist Mono Variable", monospace';
-          ctx.fillText(tr.id, x + s / 2 + 2, y + 3);
+          label(tr.id, x + s / 2 + 2, y + 3);
         }
         hitList.push({ x, y, tr });
       }

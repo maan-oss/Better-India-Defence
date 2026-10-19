@@ -151,7 +151,9 @@ export function Ridgeline({ series, label, unit = "", formatValue, domain, overl
   const [cursor, setCursor] = useState<{ value: number; pointerY: number | null } | null>(null);
 
   const narrow = width > 0 && width < 420;
-  const gutter = narrow ? 36 : 52;
+  // The label gutter fits the longest name, within a cap, so no name is cut to an ellipsis.
+  const longest = series.reduce((n, entry) => Math.max(n, entry.label.length), 0);
+  const gutter = Math.max(narrow ? 36 : 52, Math.min(narrow ? 96 : 132, Math.ceil(longest * 6.2) + 10));
   const top = Math.ceil((overlap - 1) * rowHeight) + LIFT + 8;
   const height = top + series.length * rowHeight + AXIS;
   const plotWidth = Math.max(40, width - gutter - 4);

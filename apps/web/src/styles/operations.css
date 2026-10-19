@@ -61,7 +61,7 @@
 .bbox span { position: absolute; top: -15px; left: -1.5px; font-size: var(--fs-micro); font-weight: 600; background: #0bd8b6; color: #00201a; padding: 0 4px; border-radius: 2px 2px 2px 0; white-space: nowrap; }
 
 /* timeline */
-.timeline { height: 100%; display: grid; grid-template-rows: 40px 1fr; }
+.timeline { height: 100%; display: grid; grid-template-rows: 40px minmax(0, 1fr) auto; }
 .timeline.compact .tl-canvas { display: none; }
 .timeline.compact .tl-controls { border-bottom: 0; }
 .tl-toggle svg { transform: rotate(90deg); transition: transform var(--t-med) var(--ease-out); }
@@ -135,3 +135,11 @@
 .al-status.acknowledged { color: var(--text-1); border-color: var(--line-3); }
 .cp-thinking { display: flex; align-items: center; gap: 10px; padding: 4px 0 4px 2px; color: var(--text-2); font-size: var(--fs-body); }
 .cp-orb { color: var(--text-1); flex: none; }
+/* The timeline's marks need a key: what each shape on the lanes means, in one row under the canvas. */
+.tl-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px var(--sp-4); margin: 0; padding: 4px var(--sp-3) 6px; border-top: 1px solid var(--line); list-style: none; font-size: var(--fs-micro); color: var(--text-2); }
+.tl-legend li { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.tl-legend svg { width: 10px; height: 10px; flex: none; }
+/* An alert's facts stay on one line; a long rule name is cut, never pushed into the next row. */
+.alert-row .alert-meta { font-size: var(--fs-micro); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Phones: the six map modes fit one row; the row is never cut at its right edge. */
+.ops.narrow .map-modes button { padding: 0 7px; font-size: 12px; }

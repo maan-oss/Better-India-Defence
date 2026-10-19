@@ -495,11 +495,11 @@ export function Overview() {
             rowHeight={56}
             empty={scope === 'active' ? 'No active alerts. All clear.' : 'No alerts.'}
             render={(a) => (
-              <div className={`list-row alert-row p-${a.priority} s-${a.status}`} style={{ height: 56 }} onClick={() => (select({ kind: 'alert', id: a.id }), a.position && flyTo(a.position, 260), useTime.getState().seek(a.t))}>
+              <div className={`list-row alert-row p-${a.priority} s-${a.status}`} style={{ minHeight: 56 }} onClick={() => (select({ kind: 'alert', id: a.id }), a.position && flyTo(a.position, 260), useTime.getState().seek(a.t))}>
                 <Prio p={a.priority} />
                 <div className="grow" style={{ minWidth: 0 }}>
                   <div className="ellipsis">{a.title}</div>
-                  <div className="muted mono" style={{ fontSize: 'var(--fs-micro)' }}>
+                  <div className="muted mono alert-meta">
                     {hms(a.t)}Z · {ago(a.t)} · {a.rule.replace(/_/g, ' ').toLowerCase()}
                     {a.status !== 'open' && <span className={`al-status ${a.status}`}>{a.status}</span>}
                   </div>
