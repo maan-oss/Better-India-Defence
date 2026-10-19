@@ -36,6 +36,7 @@ const STATUS_FILTERS = [
 export function Incidents() {
   const { id } = useParams();
   const incidents = useData((s) => s.incidents);
+  const loaded = useData((s) => s.loaded);
   const nav = useNavigate();
   const can = useSession((s) => s.can);
   const [creating, setCreating] = useState(false);
@@ -72,7 +73,8 @@ export function Incidents() {
               <ChipGroup label="Status" options={STATUS_FILTERS} value={statuses} onValueChange={setStatuses} />
             </div>
           )}
-          {incidents.length === 0 && (
+          {!loaded && incidents.length === 0 && <Loading what="incidents" />}
+          {loaded && incidents.length === 0 && (
             <Empty compact art="incidents" title="No incidents recorded" description="Critical alerts open an incident automatically. Operators can also open one for any place and time window." />
           )}
           {incidents.length > 0 && shown.length === 0 && <Empty compact art="search" title="No incident matches" description="Clear the search or the status filter." />}
@@ -96,7 +98,10 @@ export function Incidents() {
             </button>
           ))}
         </div>
-        <div className="scroll">{creating ? <CreateIncident onDone={(nid) => (setCreating(false), nid && nav(`/incidents/${nid}`))} /> : id ? <IncidentFile id={id} /> : <Empty art="incidents" title="Select an incident" description="Its file holds the window, the evidence gathered from every sensor, the tracks, alerts, chronology and pinned items." />}</div>
+        {/* On a phone the file pane shows only when there is a file or a form to show; with no incidents, the list says it all. */}
+        <div className={`scroll inc-detail${creating || id ? ' open' : ''}`}>
+          {creating ? <CreateIncident onDone={(nid) => (setCreating(false), nid && nav(`/incidents/${nid}`))} /> : id ? <IncidentFile id={id} /> : incidents.length > 0 ? <Empty art="incidents" title="Select an incident" description="Its file holds the window, the evidence gathered from every sensor, the tracks, alerts, chronology and pinned items." /> : null}
+        </div>
       </div>
     </div>
   );

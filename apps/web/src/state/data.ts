@@ -7,6 +7,8 @@ import type { Coverage, ReplayState, TimelineData, WorldChangeRow } from '../api
 interface DataState {
   alerts: AlertRecord[];
   incidents: IncidentRecord[];
+  /** True once the first load has answered, so an empty list is never shown while the page is still loading. */
+  loaded: boolean;
   sensors: Record<string, SensorStatusRecord>;
   changes: WorldChangeRow[];
   infra: Record<string, { state: string; alarm: boolean; t: number }>;
@@ -43,6 +45,7 @@ const changeRow = (c: WorldChange): WorldChangeRow => ({
 export const useData = create<DataState>((set, getState) => ({
   alerts: [],
   incidents: [],
+  loaded: false,
   sensors: {},
   changes: [],
   infra: {},
@@ -58,7 +61,7 @@ export const useData = create<DataState>((set, getState) => ({
       get<{ definition: { id: string }; status: SensorStatusRecord | null }[]>('/api/sensors'),
     ]);
     const sensors = Object.fromEntries(sensorRows.filter((r) => r.status).map((r) => [r.definition.id, r.status as SensorStatusRecord]));
-    set({ alerts, incidents, sensors: { ...getState().sensors, ...sensors } });
+    set({ alerts, incidents, loaded: true, sensors: { ...getState().sensors, ...sensors } });
   },
   onLive(m) {
     switch (m.type) {
