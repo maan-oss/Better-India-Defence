@@ -219,12 +219,21 @@ export function Streamgraph({ data, series, label, unit = "", height = 260, offs
       const held = spots.current.get(line.key);
       const j = held !== undefined && upper[i][held] - lower[i][held] >= (upper[i][best] - lower[i][best]) * .8 ? held : best;
       spots.current.set(line.key, j);
-      const thickness = (upper[i][j] - lower[i][j]) / span * (height - PAD * 2) * s;
       const room = text.getComputedTextLength?.() ?? 60;
       const x = clamp(xs[j], room / 2 + 6, w - room / 2 - 6);
+      // The label is shown only where its layer is thick across the whole width of the text, so it never straddles an edge.
+      const perStep = w / (N - 1);
+      const from = Math.max(0, Math.floor((x - room / 2) / perStep));
+      const to = Math.min(N - 1, Math.ceil((x + room / 2) / perStep));
+      let thinnest = Infinity;
+      let middle = 0;
+      for (let k = from; k <= to; k++) {
+        thinnest = Math.min(thinnest, (upper[i][k] - lower[i][k]) / span * (height - PAD * 2) * s);
+        middle += (upper[i][k] + lower[i][k]) / 2;
+      }
       text.setAttribute("x", x.toFixed(1));
-      text.setAttribute("y", yAt((upper[i][j] + lower[i][j]) / 2, j).toFixed(1));
-      text.style.opacity = thickness >= 19 && room + 16 < w ? "1" : "0";
+      text.setAttribute("y", yAt(middle / (to - from + 1), j).toFixed(1));
+      text.style.opacity = thinnest >= 17 && room + 16 < w ? "1" : "0";
     });
   }, [grow, height]);
 
