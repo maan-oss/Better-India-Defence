@@ -27,7 +27,7 @@
   width: 100%;
   min-height: 44px;
   margin: 0;
-  padding: 8px var(--sp-5);
+  padding: 8px var(--gutter);
   border: 0;
   border-radius: var(--radius);
   background: none;
@@ -96,7 +96,7 @@
 /* Empty states and plain text in a pane sit inside the pane's gutter, never against its edge or the divider. */
 .as-empty {
   margin: 0;
-  padding: var(--sp-4) var(--sp-5);
+  padding: var(--sp-4) var(--gutter);
   color: var(--text-2);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
@@ -117,7 +117,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
-  padding: var(--sp-5);
+  padding: var(--gutter);
 }
 
 /* A search line: the field takes the width, the action sits beside it with the same height. */
@@ -125,7 +125,7 @@
   display: flex;
   align-items: flex-end;
   gap: var(--sp-2);
-  padding: var(--sp-3) var(--sp-5);
+  padding: var(--sp-3) var(--gutter);
 }
 .as-search-line > :first-child {
   flex: 1;
@@ -147,7 +147,7 @@
 }
 /* The add form sits inside the list pane, on the same gutter as the rows. */
 .as-add {
-  margin: 0 var(--sp-5) var(--sp-3);
+  margin: 0 var(--gutter) var(--sp-3);
 }
 /* Text in a pane: no default paragraph margins, so the pane's gap alone sets the rhythm between its parts. */
 .as-pane p {
@@ -175,9 +175,9 @@
 .lp-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--sp-5);
+  gap: var(--gutter);
   align-items: start;
-  padding: var(--sp-5);
+  padding: var(--gutter);
 }
 @media (max-width: 900px) {
   .lp-grid {
@@ -286,7 +286,12 @@
 
 /* A gauge keeps to a readable size in its cell instead of filling the band it sits in. */
 .health-gauge-cell {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  width: 100%;
+}
+.health-gauge-cell > * {
   width: 100%;
   max-width: 200px;
-  justify-self: center;
 }

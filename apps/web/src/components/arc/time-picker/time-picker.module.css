@@ -2,7 +2,7 @@
 .label { font-size: var(--text-sm); font-weight: 500; line-height: var(--leading-body); }
 .anchor { position: relative; min-width: 0; }
 /* The trigger anchors the menu, so press feedback stays in color; it never scales. */
-.trigger { position: relative; display: flex; width: 100%; min-height: var(--control-height-md); align-items: center; gap: 9px; border: 1px solid var(--border); border-radius: var(--radius-control); padding: 0 12px; background: var(--surface); color: var(--foreground); font: inherit; font-size: var(--text-sm); text-align: left; cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard); }
+.trigger { position: relative; display: flex; width: 100%; min-height: var(--control-height-md); align-items: center; gap: 9px; border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 0 12px; background: var(--surface); color: var(--foreground); font: inherit; font-size: var(--text-sm); text-align: left; cursor: pointer; transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard); }
 @media (hover: hover) and (pointer: fine) { .trigger:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface-muted); } }
 .trigger:active:not(:disabled), .trigger[aria-expanded="true"] { border-color: var(--border-strong); background: var(--surface-muted); }
 .trigger:disabled { opacity: .5; cursor: not-allowed; }

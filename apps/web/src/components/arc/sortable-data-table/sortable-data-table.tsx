@@ -145,7 +145,7 @@ export function SortableDataTable<T extends Record<string, unknown>>({ rows, col
     }).map(entry => entry.row);
   }, [rows, sort]);
 
-  const numeric = useMemo(() => new Set(columns.filter(column => column.numeric ?? (rows.some(row => typeof row[column.key] === "number") && rows.every(row => typeof row[column.key] === "number" || isEmpty(row[column.key])))).map(column => column.key)), [columns, rows]);
+  const numeric = useMemo(() => new Set(columns.filter(column => column.numeric ?? (!column.render && rows.some(row => typeof row[column.key] === "number") && rows.every(row => typeof row[column.key] === "number" || isEmpty(row[column.key])))).map(column => column.key)), [columns, rows]);
   const getRowKey = (row: T) => String(typeof rowKey === "function" ? rowKey(row) : row[rowKey]);
   const keys = sortedRows.map(getRowKey);
   const order = keys.join("\u0000");

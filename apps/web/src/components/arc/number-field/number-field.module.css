@@ -12,7 +12,7 @@
 .label[data-scrub] { cursor: ew-resize; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 /* A hairline shell. Focus darkens the border only (the library draws no rings); a typed value past a limit tints it with the warning
    role instead, calm rather than alarming. Set --number-field-width to resize the shell. */
-.control { display: flex; align-items: center; width: min(100%, var(--nf-width)); min-height: var(--nf-height); gap: 2px; border: 1px solid var(--border); border-radius: var(--radius-control); padding: var(--nf-inset); background: var(--surface); transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-standard) var(--ease-standard), opacity var(--duration-fast) var(--ease-standard); }
+.control { display: flex; align-items: center; width: min(100%, var(--nf-width)); min-height: var(--nf-height); gap: 2px; border: 1px solid var(--border); border-radius: var(--radius-pill); padding: var(--nf-inset); background: var(--surface); transition: border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-standard) var(--ease-standard), opacity var(--duration-fast) var(--ease-standard); }
 @media (hover: hover) and (pointer: fine) { .control:hover, .field:has(.label[data-scrub]:hover) .control { border-color: var(--border-strong); } }
 .control[data-scrubbing] { border-color: var(--foreground); }
 .control:has(input:focus) { border-color: var(--foreground); }
@@ -20,7 +20,7 @@
 .control[data-warn]:has(input:focus) { border-color: color-mix(in oklab, var(--warning) 80%, var(--border)); }
 .control[data-disabled] { opacity: .5; background: var(--surface-muted); }
 /* Radius steps in by the shell's inset, so the pressed fill sits concentric with the shell. */
-.step { display: grid; width: var(--nf-step); height: var(--nf-step); flex: 0 0 var(--nf-step); place-items: center; border: 0; border-radius: calc(var(--radius-control) - var(--nf-inset) - 1px); padding: 0; background: transparent; color: var(--text-secondary); cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), opacity var(--duration-standard) var(--ease-standard); }
+.step { display: grid; width: var(--nf-step); height: var(--nf-step); flex: 0 0 var(--nf-step); place-items: center; border: 0; border-radius: var(--radius-pill); padding: 0; background: transparent; color: var(--text-secondary); cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), opacity var(--duration-standard) var(--ease-standard); }
 .icon { display: grid; place-items: center; }
 .icon svg { transition: transform var(--duration-spring) var(--ease-spring); }
 @media (hover: hover) and (pointer: fine) { .step:hover:not(:disabled, [aria-disabled="true"]) { background: var(--surface-muted); color: var(--foreground); } }

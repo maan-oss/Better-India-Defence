@@ -14,9 +14,13 @@
 /* ---------------------------------------------------------------- material */
 /* Every glass surface gets the same three things: a translucent fill, a backdrop blur, and a lit edge. The lit edge is
    the ::after rim, a 1 px gradient brightest at the top-left, which is what makes the glass read as an object. */
+/* Relative is a default, not a rule: a component that places one of these itself (the palette, the map toolbars) wins. */
+:where(.btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .rail,
+.inbox-pop, .site-pop, .island-panel, .cmd, .toast, .glass, .map-modes, .map-dock, .compass, .scalebar) {
+  position: relative;
+}
 .btn, .chip, .seg, .cmd-trigger, .island, .tb-bell, .tb-night button, .user-btn, .rail,
 .inbox-pop, .site-pop, .island-panel, .cmd, .toast, .glass, .map-modes, .map-dock, .compass, .scalebar {
-  position: relative;
   background: var(--glass-fill);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
