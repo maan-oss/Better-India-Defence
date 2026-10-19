@@ -8,13 +8,15 @@
 .brandbook { overflow: auto; display: block; }
 .bb-hero { position: relative; min-height: 520px; overflow: hidden; border-bottom: 1px solid var(--line); display: flex; align-items: flex-end; }
 .bb-hero-art { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--text-1); opacity: 0.9; }
-.bb-hero-copy { position: relative; padding: 0 56px 56px; max-width: 760px; display: flex; flex-direction: column; gap: 20px; }
+.bb-hero-copy { position: relative; isolation: isolate; padding: 0 56px 56px; max-width: 760px; display: flex; flex-direction: column; gap: 20px; }
+/* The field fades out behind the copy, so no line runs through a headline. */
+.bb-hero-copy::before { content: ""; position: absolute; inset: -72px -88px -48px -72px; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, color-mix(in srgb, var(--bg-0) 92%, transparent), transparent); }
 .bb-hero-copy h1 { margin: 12px 0 0; font-size: var(--fs-hero); line-height: 1.06; font-weight: 600; letter-spacing: -0.03em; text-wrap: balance; }
 .bb-hero-copy p { margin: 0; color: var(--text-1); font-size: var(--fs-lead); line-height: 25px; max-width: 600px; }
 .bb-sec { padding: 56px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 20px; }
 .bb-sec h2 { margin: 0; font-size: var(--fs-display); font-weight: 600; letter-spacing: -0.02em; }
 .bb-lead { margin: -8px 0 8px; color: var(--text-1); font-size: var(--fs-body-lg); line-height: 23px; max-width: 680px; }
-.bb-marks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
+.bb-marks { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
 .bb-marks figure { margin: 0; background: var(--bg-1); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 40px 16px 24px; color: var(--accent); min-height: 280px; }
 .bb-marks figcaption, .bb-art figcaption { font-size: var(--fs-caption); color: var(--text-2); }
 .bb-cream { background: var(--bg-2) !important; }
