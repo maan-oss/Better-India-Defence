@@ -1,4 +1,4 @@
-.wall-wrap { position: relative; display: flex; flex-direction: column; min-height: 0; padding: 10px; gap: 8px; background: var(--bg-0); }
+.wall-wrap { position: relative; display: flex; flex-direction: column; min-height: 0; padding: 10px var(--gutter); gap: 8px; background: var(--bg-0); }
 .wall { flex: 1; min-height: 0; display: grid; gap: 6px; }
 /* Camera tiles. The picture is the content. Everything written on it has one place: the camera's state, ID and name
    along the top; the time at the bottom left and its zone at the bottom right; an alert as one pill above the time.
@@ -14,7 +14,7 @@
 .wtile-v { position: absolute; inset: 0; display: grid; }
 .wtile-v img, .wtile-v .feed { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto; border: 0; }
 .wtile-v .feed img { object-fit: cover; }
-.wtile-top { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 8px; min-width: 0; padding: 8px 10px; background: linear-gradient(rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0)); color: #fff; font-size: var(--fs-caption); }
+.wtile-top { position: absolute; left: 0; right: 0; top: 0; height: 28px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; min-width: 0; padding: 0 10px; background: rgba(8, 9, 10, 0.82); color: #fff; font-size: var(--fs-caption); }
 .wtile-top b { flex: none; font-size: var(--fs-caption); font-weight: 600; color: #fff; white-space: nowrap; }
 .wtile-top .ellipsis { min-width: 0; color: rgba(255, 255, 255, 0.85); }
 .wt-state { display: inline-flex; flex: none; align-items: center; gap: 5px; height: 18px; padding: 0 7px; border-radius: 999px; background: rgba(0, 0, 0, 0.55); color: rgba(255, 255, 255, 0.9); font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.05em; }
@@ -67,7 +67,7 @@
 .wall-tour { display: flex; align-items: center; }
 @media (max-width: 760px) { .camform-two, .camform-grid, .camform-switches { grid-template-columns: 1fr; } }
 .wall-pins { width: 100%; } :where(.wall-pins) button { background: transparent; border: 0; color: inherit; }
-.wall-toolbar { display: flex; align-items: center; gap: 12px; padding: 8px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; min-height: 52px; }
+.wall-toolbar { display: flex; align-items: center; gap: 12px; padding: 8px var(--gutter); border-bottom: 1px solid var(--line); flex-wrap: wrap; min-height: 52px; }
 .wall-find { width: 300px; display: flex; justify-content: flex-end; position: relative; } .wall-find > * { width: 100%; }
 @media (max-width: 760px) { .wall-find { width: auto; } }
 /* A camera with no picture yet is a dark tile with a quiet label, the same as a camera with one. */
@@ -76,3 +76,4 @@
   background: #0e0f11;
   color: rgba(255, 255, 255, 0.62);
 }
+@media (pointer: coarse) { .wall-hint { display: none; } }
