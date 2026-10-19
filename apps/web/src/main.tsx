@@ -19,6 +19,7 @@ import { TooltipProvider } from './components/ui';
 // Last: the glass layer wins over the surface rules of the component stylesheets it follows.
 import './styles/glass.css';
 import './styles/interaction.css';
+import './styles/chrome.css';
 
 enableLensing();
 trackGlassLight();

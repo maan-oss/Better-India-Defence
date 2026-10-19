@@ -115,28 +115,21 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
                 const I = Icon[n.icon] as () => ReactNode;
                 const badge = badgeOf(n.to);
                 return (
-                  <Tip
+                  <NavLink
                     key={n.to}
-                    side="right"
-                    content={
-                      <span className="tip-nav">
-                        {n.label}
-                        {n.keys && <span className="tip-keys">{n.keys.split(' ').map((k) => <kbd key={k}>{k}</kbd>)}</span>}
-                      </span>
-                    }
+                    to={n.to}
+                    className={`rail-item${PHONE_PRIMARY.includes(n.to) ? '' : ' rail-secondary'}`}
+                    aria-label={n.label}
+                    title={n.label}
+                    onPointerEnter={() => prefetchRoute(n.to)}
+                    onFocus={() => prefetchRoute(n.to)}
                   >
-                    <NavLink
-                      to={n.to}
-                      className={`rail-item${PHONE_PRIMARY.includes(n.to) ? '' : ' rail-secondary'}`}
-                      aria-label={n.label}
-                      onPointerEnter={() => prefetchRoute(n.to)}
-                      onFocus={() => prefetchRoute(n.to)}
-                    >
-                      <I />
-                      <span className="rail-label">{n.short ?? n.label}</span>
-                      {badge > 0 && <span className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`}>{badge > 99 ? '99+' : badge}</span>}
-                    </NavLink>
-                  </Tip>
+                    <I />
+                    <span className="rail-label">{n.short ?? n.label}</span>
+                    <span className="rail-name">{n.label}</span>
+                    {n.keys && <span className="rail-keys">{n.keys.split(' ').map((k) => <kbd key={k}>{k}</kbd>)}</span>}
+                    {badge > 0 && <span className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`}>{badge > 99 ? '99+' : badge}</span>}
+                  </NavLink>
                 );
               })}
             </div>
@@ -242,9 +235,6 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
       <button className="cmd-trigger" onClick={onCommand} aria-label="Open command bar">
         <Search size={15} strokeWidth={2} />
         <span className="cmd-trigger-text">Search or run a command</span>
-        <span className="cmd-trigger-keys">
-          <ShortcutKeys shortcut="mod+k" size="sm" />
-        </span>
       </button>
       <div className="tb-right">
         <StatusIsland />

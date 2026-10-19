@@ -149,7 +149,7 @@
   --wallpaper: radial-gradient(70% 60% at 0% 0%, rgba(120, 168, 255, 0.5), transparent 62%), radial-gradient(60% 55% at 100% 0%, rgba(206, 160, 255, 0.4), transparent 60%), radial-gradient(70% 60% at 100% 100%, rgba(110, 220, 200, 0.4), transparent 62%), radial-gradient(50% 50% at 0% 100%, rgba(255, 190, 140, 0.36), transparent 60%), #eef1f8;
 
   --rail-w: 56px;
-  --rail-w-open: 216px;
+  --rail-w-open: 240px;
   --left-w: 272px;
   --right-w: 384px;
   --top-h: 48px;
@@ -334,7 +334,7 @@
   --wallpaper: radial-gradient(70% 60% at 0% 0%, rgba(74, 104, 190, 0.45), transparent 62%), radial-gradient(60% 55% at 100% 0%, rgba(134, 86, 190, 0.32), transparent 60%), radial-gradient(70% 60% at 100% 100%, rgba(40, 150, 150, 0.3), transparent 62%), radial-gradient(50% 50% at 0% 100%, rgba(230, 140, 90, 0.18), transparent 60%), #0b0c10;
 
   --rail-w: 56px;
-  --rail-w-open: 216px;
+  --rail-w-open: 240px;
   --left-w: 272px;
   --right-w: 384px;
   --top-h: 48px;

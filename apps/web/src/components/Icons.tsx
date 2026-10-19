@@ -12,9 +12,20 @@ export const Icon = {
   ),
   Incidents: () => (
     <svg {...p}>
-      <circle cx="12" cy="12" r="8" />
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+      <path d="M12 3.5 21.5 20h-19z" />
+      <path d="M12 10v4.5M12 16.8v.2" />
+    </svg>
+  ),
+  Reports: () => (
+    <svg {...p}>
+      <rect x="5" y="4" width="14" height="17" rx="2" />
+      <path d="M9 4V3h6v1M8.5 10h7M8.5 14h7M8.5 18h4" />
+    </svg>
+  ),
+  Docs: () => (
+    <svg {...p}>
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+      <path d="M14 3v5h5M9 13h6M9 17h6" />
     </svg>
   ),
   Assets: () => (
@@ -86,8 +97,8 @@ export const Icon = {
   ),
   Camera: () => (
     <svg {...p}>
-      <path d="M3 8h11l3-2v10l-3-2H3z" />
-      <path d="M7 14v5M5 19h4" />
+      <rect x="3" y="7" width="13" height="10" rx="2" />
+      <path d="M16 11.2 21 8.5v7l-5-2.7" />
     </svg>
   ),
   Upload: () => (

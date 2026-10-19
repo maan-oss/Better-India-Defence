@@ -1,0 +1,363 @@
+/* The top bar and the rail: the desktop geometry, above 760px. Loaded last, so it wins over app.css and glass.css,
+   which keep the base rules and the phone layout. On a phone (760px and under) app.css turns the rail into the bottom
+   tab bar and nothing in this file applies. */
+
+/* The names and key hints of the rail show only when the rail is open (desktop); the phone bar shows short labels. */
+.rail-name,
+.rail-keys {
+  display: none;
+}
+
+@media (min-width: 761px) {
+  /* ---------------------------------------------------------------- top bar */
+  .topbar {
+    grid-column: 2;
+    grid-row: 1;
+    height: var(--top-h);
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(200px, 1fr) minmax(0, auto);
+    align-items: center;
+    gap: var(--sp-4);
+    padding: 0 var(--sp-3) 0 var(--sp-4);
+    position: relative;
+    z-index: 20;
+    min-width: 0;
+  }
+  .tb-left,
+  .tb-right {
+    height: var(--tb-ctl);
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+  .tb-left {
+    gap: var(--sp-2);
+  }
+  .tb-right {
+    justify-content: flex-end;
+    gap: var(--sp-2);
+  }
+
+  /* The site name is the first thing on the bar: the size of a lead line, on the same centre line as everything else. */
+  .tb-crumbs {
+    min-width: 0;
+    height: var(--tb-ctl);
+    display: flex;
+    align-items: center;
+    font-size: var(--fs-body);
+  }
+  .tb-crumbs ol {
+    height: 100%;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+  .tb-crumbs li {
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .tb-crumbs li:first-child,
+  .tb-crumbs li:first-child button {
+    font-size: var(--fs-lead);
+    font-weight: 600;
+    color: var(--text-0);
+  }
+
+  /* Search: one pill, centred in the bar, with no key hint. */
+  .cmd-trigger {
+    box-sizing: border-box;
+    justify-self: center;
+    width: 100%;
+    max-width: 440px;
+    height: var(--tb-ctl);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 0 var(--sp-3);
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+    background: var(--bg-2);
+    color: var(--text-2);
+    font: inherit;
+    cursor: pointer;
+    transition: border-color var(--t-fast), color var(--t-fast);
+  }
+  .cmd-trigger:hover {
+    border-color: var(--line-3);
+    color: var(--text-1);
+  }
+  .cmd-trigger-text {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    font-size: var(--fs-body);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  @media (max-width: 1180px) {
+    .cmd-trigger {
+      width: var(--tb-ctl);
+      max-width: none;
+      padding: 0;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    .cmd-trigger-text {
+      display: none;
+    }
+  }
+
+  /* Status island: the same height and centre line as the search, in normal flow, not pinned to the top edge. */
+  .island-wrap {
+    position: relative;
+    height: var(--tb-ctl);
+    display: flex;
+    align-items: center;
+    flex: none;
+    min-width: 0;
+  }
+  .island {
+    box-sizing: border-box;
+    height: var(--tb-ctl);
+    border-radius: 999px;
+  }
+  .island:not(.island-ghost) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    height: auto;
+  }
+
+  /* Bell, display switch and account: one capsule of three circles, each on the capsule's centre line. */
+  .tb-cluster {
+    box-sizing: border-box;
+    height: var(--tb-ctl);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 999px;
+  }
+  .tb-cluster .tb-bell,
+  .tb-cluster .tb-night button,
+  .tb-cluster .user-btn {
+    box-sizing: border-box;
+    width: 30px;
+    height: 30px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+  }
+  .tb-cluster .tb-bell {
+    width: auto;
+    min-width: 30px;
+    padding: 0 7px;
+    gap: 4px;
+  }
+  .tb-cluster .tb-night {
+    display: inline-flex;
+    align-items: center;
+  }
+  .tb-cluster .tb-bell:hover,
+  .tb-cluster .tb-night button:hover,
+  .tb-cluster .user-btn:hover {
+    background: var(--glass-fill-strong);
+  }
+  /* The count sits inside the bell's own capsule, never over its edge. */
+  .tb-bell-n {
+    position: static;
+    top: auto;
+    right: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--st-critical);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    box-shadow: none;
+  }
+
+  /* ---------------------------------------------------------------- rail */
+  .rail {
+    position: relative;
+    grid-column: 1;
+    grid-row: 1 / 3;
+    width: var(--rail-w);
+  }
+  .rail-logo {
+    width: 100%;
+    height: var(--top-h);
+    flex: none;
+  }
+  /* The items float over the page when the rail is open, so the page keeps its width. */
+  .rail-items {
+    position: absolute;
+    top: var(--top-h);
+    bottom: 64px;
+    left: 0;
+    width: var(--rail-w);
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: var(--sp-2) 8px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+    transition: width 180ms var(--ease), box-shadow 180ms var(--ease), background-color 180ms var(--ease);
+  }
+  .rail:hover .rail-items,
+  .rail:focus-within .rail-items {
+    width: var(--rail-w-open);
+    background: var(--bg-chrome);
+    box-shadow: 10px 0 28px -10px rgba(0, 0, 0, 0.28);
+  }
+  .rail-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .rail-sep {
+    width: 40px;
+    height: 1px;
+    margin: 6px 0;
+    background: var(--line-2);
+  }
+  .rail-item {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 9px;
+    border-radius: 12px;
+    color: var(--text-2);
+    white-space: nowrap;
+    transition: color var(--t-fast), background var(--t-fast), width 180ms var(--ease);
+  }
+  .rail:hover .rail-item,
+  .rail:focus-within .rail-item {
+    width: calc(var(--rail-w-open) - 16px);
+  }
+  .rail-item svg {
+    width: 22px;
+    height: 22px;
+    flex: none;
+  }
+  .rail-item:hover {
+    color: var(--text-0);
+    background: var(--glass-hover);
+  }
+  .rail-item.active {
+    color: var(--text-0);
+    background: var(--glass-fill-strong);
+  }
+  .rail-label {
+    display: none;
+  }
+  .rail-name {
+    display: none;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    font-size: var(--fs-body);
+    font-weight: 500;
+  }
+  .rail:hover .rail-name,
+  .rail:focus-within .rail-name {
+    display: block;
+  }
+  .rail-keys {
+    display: none;
+    margin-left: auto;
+    gap: 3px;
+  }
+  .rail:hover .rail-keys,
+  .rail:focus-within .rail-keys {
+    display: inline-flex;
+  }
+  .rail-keys kbd {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border: 1px solid var(--line-2);
+    border-radius: 4px;
+    background: var(--bg-3);
+    color: var(--text-2);
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+  }
+  .rail-more {
+    display: none;
+  }
+  /* Collapsed: a dot marks an area with something waiting. Open: the count appears beside the name. */
+  .rail-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    min-width: 0;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--bg-4);
+    box-shadow: 0 0 0 2px var(--bg-chrome);
+    color: transparent;
+    font-size: 0;
+    line-height: 0;
+  }
+  .rail-badge.red {
+    background: var(--st-critical);
+  }
+  .rail:hover .rail-badge,
+  .rail:focus-within .rail-badge {
+    position: static;
+    width: auto;
+    height: 18px;
+    min-width: 18px;
+    padding: 0 6px;
+    margin-left: auto;
+    border-radius: 9px;
+    box-shadow: none;
+    background: var(--bg-4);
+    color: var(--text-0);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .rail:hover .rail-badge.red,
+  .rail:focus-within .rail-badge.red {
+    background: var(--st-critical);
+    color: #fff;
+  }
+  .rail .rail-foot.rail-item {
+    width: 40px;
+    margin: auto 0 var(--sp-3) 8px;
+    padding: 0;
+    justify-content: center;
+  }
+}
