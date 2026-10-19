@@ -117,7 +117,7 @@ export class Platform {
     const cfg = this.cfg;
     // Keys first: a missing or unsafe key file stops the start before the database is opened or migrated.
     this.keys = loadKeys(cfg);
-    this.db = await openDb(cfg.DATABASE_URL, cfg.dataDir);
+    this.db = await openDb(cfg.DATABASE_URL, cfg.dataDir, (name, ms) => this.metrics.observePhase(name, ms));
     this.log.info({ engine: this.db.engine }, 'database connected');
     await migrate(this.db, this.log);
     // A configured real site replaces the demo facility before any service reads the model.

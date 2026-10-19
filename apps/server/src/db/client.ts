@@ -19,7 +19,10 @@ export interface Db extends Queryable {
   close(): Promise<void>;
 }
 
-export async function openDb(databaseUrl: string | undefined, dataDir: string): Promise<Db> {
+/** Optional timing hook: how long each database call waited for the connection, and how long it ran. */
+export type DbTimer = (name: 'dbWait' | 'dbRun' | 'dbTxBody' | 'dbTxCommit', ms: number) => void;
+
+export async function openDb(databaseUrl: string | undefined, dataDir: string, timer?: DbTimer): Promise<Db> {
   if (databaseUrl) {
     const pg = await import('pg');
     const Pool = pg.default.Pool;
@@ -67,7 +70,17 @@ export async function openDb(databaseUrl: string | undefined, dataDir: string): 
   let chain: Promise<unknown> = Promise.resolve();
   // PGlite is single-connection: serialise transactions so concurrent requests cannot interleave inside one.
   const serial = <T>(fn: () => Promise<T>): Promise<T> => {
-    const next = chain.then(fn, fn);
+    const queued = performance.now();
+    const run = async () => {
+      const started = performance.now();
+      timer?.('dbWait', started - queued);
+      try {
+        return await fn();
+      } finally {
+        timer?.('dbRun', performance.now() - started);
+      }
+    };
+    const next = chain.then(run, run);
     chain = next.catch(() => undefined);
     return next;
   };
@@ -79,16 +92,27 @@ export async function openDb(databaseUrl: string | undefined, dataDir: string): 
         await db.exec(sql);
       }),
     transaction: <T>(fn: (q: Queryable) => Promise<T>) =>
-      serial(() =>
-        db.transaction(async (tx) =>
-          fn({
-            query: async <R>(sql: string, params?: unknown[]) => ({ rows: (await tx.query<R>(sql, params)).rows }),
-            exec: async (sql: string) => {
-              await tx.exec(sql);
-            },
-          }),
-        ),
-      ),
+      serial(async () => {
+        const started = performance.now();
+        let body = 0;
+        const out = await db.transaction(async (tx) => {
+          const bodyStarted = performance.now();
+          try {
+            return await fn({
+              query: async <R>(sql: string, params?: unknown[]) => ({ rows: (await tx.query<R>(sql, params)).rows }),
+              exec: async (sql: string) => {
+                await tx.exec(sql);
+              },
+            });
+          } finally {
+            body = performance.now() - bodyStarted;
+          }
+        });
+        const total = performance.now() - started;
+        timer?.('dbTxBody', body);
+        timer?.('dbTxCommit', total - body);
+        return out;
+      }),
     close: () => db.close(),
   };
 }
