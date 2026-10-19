@@ -72,7 +72,11 @@ export class IngestPipeline {
 
   process(raw: unknown[], receivedAt = Date.now()): Promise<IngestResult> {
     this.queueDepth += raw.length;
-    const run = () => this.processInner(raw, receivedAt).finally(() => (this.queueDepth -= raw.length));
+    const queued = performance.now();
+    const run = () => {
+      this.metrics.observePhase('queue', performance.now() - queued);
+      return this.processInner(raw, receivedAt).finally(() => (this.queueDepth -= raw.length));
+    };
     const next = this.chain.then(run, run);
     this.chain = next.catch(() => undefined);
     return next;
@@ -80,7 +84,11 @@ export class IngestPipeline {
 
   /** Serialised advance of derived state (used by the live clock). */
   tick(clock: number): Promise<void> {
-    const run = () => this.advance(clock, [], true);
+    const queued = performance.now();
+    const run = () => {
+      this.metrics.observePhase('tickQueue', performance.now() - queued);
+      return this.advance(clock, [], true);
+    };
     const next = this.chain.then(run, run);
     this.chain = next.catch(() => undefined);
     return next;
@@ -100,6 +108,12 @@ export class IngestPipeline {
 
   private async processInner(raw: unknown[], receivedAt: number): Promise<IngestResult> {
     const t0 = performance.now();
+    let mark = t0;
+    const lap = (name: string) => {
+      const now = performance.now();
+      this.metrics.observePhase(name, now - mark);
+      mark = now;
+    };
     const result: IngestResult = { accepted: 0, duplicates: 0, rejected: [], late: 0, outOfOrder: 0 };
     const valid: { env: IngestEnvelope; index: number }[] = [];
     const seenInBatch = new Set<string>();
@@ -143,6 +157,7 @@ export class IngestPipeline {
       seenInBatch.add(env.messageId);
       valid.push({ env, index: i });
     }
+    lap('validate');
     // Duplicates not in memory (e.g. after restart): check the message index.
     if (valid.length) {
       const ids = valid.map((v) => v.env.messageId);
@@ -154,6 +169,7 @@ export class IngestPipeline {
       for (let k = valid.length - 1; k >= 0; k--) if (dup.has(valid[k]!.env.messageId)) valid.splice(k, 1);
     }
 
+    lap('dedupe');
     const normalized: { env: IngestEnvelope; n: Normalized }[] = [];
     const watermark = this.fusion.dataWatermark;
     for (const { env } of valid) {
@@ -173,11 +189,15 @@ export class IngestPipeline {
       normalized.push({ env, n: normalizeEnvelope(env, this.frame, receivedAt, ++this.ingestSeq, quality, env.observedAt) });
     }
 
+    lap('normalize');
     // Persist in a single transaction.
     if (normalized.length) {
       await this.db.transaction(async (q) => {
         const msgRows = normalized.map(({ env }) => [env.messageId, env.sensorId, receivedAt]);
+        const tMsg = performance.now();
         for (const c of chunkedValues(msgRows)) await q.query(`INSERT INTO ingest_messages (message_id, sensor_id, received_at) VALUES ${c.sql} ON CONFLICT DO NOTHING`, c.params);
+        this.metrics.observePhase('txMessages', performance.now() - tMsg);
+        const tObs = performance.now();
         const obsRows: unknown[][] = [];
         for (const { env, n } of normalized)
           for (const o of n.observations)
@@ -207,6 +227,10 @@ export class IngestPipeline {
               o.provenance.adapter,
               o.provenance.seq,
             ]);
+        this.metrics.observePhase('txBuildRows', performance.now() - tObs);
+        this.metrics.inc('observations', obsRows.length);
+        this.metrics.inc('observationBytes', obsRows.reduce((n, r) => n + String(r[20]).length + String(r[21]).length, 0));
+        const tIns = performance.now();
         const casts = Array<string>(24).fill('');
         casts[20] = 'jsonb';
         casts[21] = 'jsonb';
@@ -215,8 +239,10 @@ export class IngestPipeline {
             `INSERT INTO observations (id, message_id, sensor_id, kind, source_kind, t, received_at, ingest_seq, x, y, z, lat, lon, sx, sy, sz, vx, vy, vz, state, quality, payload, adapter, seq) VALUES ${c.sql} ON CONFLICT (id) DO NOTHING`,
             c.params,
           );
+        this.metrics.observePhase('txObsInsert', performance.now() - tIns);
       });
     }
+    lap('persist');
     for (const { env } of normalized) this.remember(env.messageId);
     result.accepted = normalized.length;
     this.metrics.inc('accepted', normalized.length);
@@ -254,8 +280,10 @@ export class IngestPipeline {
       if (env.kind === 'lidar.scan') void this.recon.onLidarScan(env.sensorId, env.observedAt, env.payload.mediaId, n.observations[0]!.id);
       if (n.frames.length) await this.world.onCameraFrames(n.frames);
     }
+    lap('effects');
     if (maxT > this.dataClock) this.dataClock = maxT;
     await this.advance(this.dataClock, transitions);
+    lap('advance');
     if (normalized.length) {
       const sample = normalized.flatMap(({ n }) => n.observations).filter((o) => o.kind !== 'health').slice(0, 400);
       this.hub.publish({ type: 'observations', observations: sample.map((o) => ({ id: o.id, sensorId: o.sensorId, kind: o.kind, t: o.t, position: o.position, state: o.state })) });
@@ -266,9 +294,17 @@ export class IngestPipeline {
 
   /** Advance derived state to `clock`: fusion watermark, silence detection, alerts, snapshots. */
   async advance(clock: number, transitions: StatusTransition[] = [], wall = false): Promise<void> {
+    let mark = performance.now();
+    const lap = (name: string) => {
+      const now = performance.now();
+      this.metrics.observePhase(name, now - mark);
+      mark = now;
+    };
     await this.fusion.flush(clock, wall);
+    lap('fusion');
     transitions.push(...this.sensors.sweep(clock));
     await this.sensors.persist(transitions);
+    lap('sensors');
     for (const tr of transitions) {
       if (tr.to === 'silent' || tr.to === 'offline') {
         const def = findSensor(tr.sensorId);
@@ -280,10 +316,13 @@ export class IngestPipeline {
         await this.world.recordChange({ t: tr.t, kind: 'sensor_restored', subjectId: tr.sensorId, title: `${tr.sensorId} resumed reporting`, position: pos, extentM: 15, magnitude: 1, confidence: 0.99, state: 'CAPTURED', detector: 'sensor-monitor', evidence: [] });
       }
     }
+    lap('transitions');
     await this.alerts.onSensorTransitions(transitions);
+    lap('alerts');
     if (clock - this.lastSnapshotAt >= 5 * 60_000) {
       this.lastSnapshotAt = clock;
       await this.writeSnapshot(clock);
+      lap('snapshot');
     }
   }
 
