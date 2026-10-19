@@ -77,3 +77,15 @@
   color: rgba(255, 255, 255, 0.62);
 }
 @media (pointer: coarse) { .wall-hint { display: none; } }
+/* Touch: no drag, so a camera is moved by tapping it and then the place it should go. */
+.wall-touch, .wall-touch-hint { display: none; }
+@media (pointer: coarse) {
+  .wall-touch { display: inline-flex; }
+  .wall-touch-hint { display: inline-flex; font-size: var(--fs-caption); color: var(--text-1); }
+}
+.wtile.moving { box-shadow: 0 0 0 2px var(--accent); border-color: var(--accent); }
+/* Phones: the wall takes the height its tiles need and the page scrolls, rather than squeezing the tiles to nothing. */
+@media (max-width: 760px) {
+  .wall { flex: none; grid-template-rows: none !important; }
+  .wall .wtile { aspect-ratio: 4 / 3; }
+}

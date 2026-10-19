@@ -139,6 +139,9 @@ export function Cameras() {
   };
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropId, setDropId] = useState<string | null>(null);
+  // Touch screens cannot drag: here a camera is picked up with one tap and set down with another.
+  const [arranging, setArranging] = useState(false);
+  const [moveId, setMoveId] = useState<string | null>(null);
   const [pins, setPinsState] = useState<string[]>(() => {
     try {
       return JSON.parse(
@@ -256,6 +259,14 @@ export function Cameras() {
     ids.splice(b, 0, from);
     setOrder(ids);
   };
+  const arrangeTap = (id: string) => {
+    if (!moveId) setMoveId(id);
+    else if (moveId === id) setMoveId(null);
+    else {
+      moveTile(moveId, id);
+      setMoveId(null);
+    }
+  };
   const cols = Math.sqrt(layout);
   const focused = cams.find((c) => c.id === focus) ?? null;
   return (
@@ -359,6 +370,14 @@ export function Cameras() {
           <Pin size={14} /> Pins
         </Button>
         <span className="wall-hint">Drag a camera onto another to move it</span>
+        <Button variant="ghost" size="sm" className="wall-touch" aria-pressed={arranging} onClick={() => (setArranging((a) => !a), setMoveId(null))}>
+          {arranging ? "Done moving" : "Move cameras"}
+        </Button>
+        {arranging && (
+          <span className="wall-touch-hint" role="status">
+            {moveId ? `Tap where ${moveId} should go` : "Tap a camera to pick it up"}
+          </span>
+        )}
         {order.length > 0 && (
           <Button variant="ghost" size="sm" onClick={() => setOrder([])}>
             Reset order
@@ -425,6 +444,9 @@ export function Cameras() {
                 selected={focus === c.id}
                 onSelect={() => setFocus(focus === c.id ? null : c.id)}
                 dragging={dragId === c.id}
+                arranging={arranging}
+                moving={moveId === c.id}
+                onArrangeTap={() => arrangeTap(c.id)}
                 dropTarget={dropId === c.id && dragId !== null && dragId !== c.id}
                 onDragStart={() => setDragId(c.id)}
                 onDragEnter={() => setDropId(c.id)}
@@ -506,6 +528,9 @@ function WallTile({
   selected,
   onSelect,
   dragging,
+  arranging,
+  moving,
+  onArrangeTap,
   dropTarget,
   onDragStart,
   onDragEnter,
@@ -518,6 +543,9 @@ function WallTile({
   selected: boolean;
   onSelect: () => void;
   dragging: boolean;
+  arranging: boolean;
+  moving: boolean;
+  onArrangeTap: () => void;
   dropTarget: boolean;
   onDragStart: () => void;
   onDragEnter: () => void;
@@ -528,8 +556,8 @@ function WallTile({
   const live = c.kind === "site" || st?.state === "live";
   return (
     <div
-      className={`wtile ${alert ? `alerting p-${alert.priority}` : ""} ${selected ? "sel" : ""} ${dragging ? "dragging" : ""} ${dropTarget ? "drop-target" : ""}`}
-      onClick={onSelect}
+      className={`wtile ${alert ? `alerting p-${alert.priority}` : ""} ${selected ? "sel" : ""} ${dragging ? "dragging" : ""} ${dropTarget ? "drop-target" : ""} ${moving ? "moving" : ""}`}
+      onClick={arranging ? onArrangeTap : onSelect}
       role="button"
       tabIndex={0}
       aria-label={`${c.id} ${c.name}`}
