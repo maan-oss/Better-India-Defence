@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { get } from '../api/client';
 import { useAsync } from '../components/common';
-import { dateTime } from '../lib/format';
 import { ErrorNote, Loading } from '../components/common';
 import { bytes, hms } from '../lib/format';
 import { AnimatedCounter } from '../components/arc/animated-counter/animated-counter';
@@ -69,7 +68,6 @@ export function SystemHealth() {
           Refreshed every 3 s · up {Math.floor(m.uptimeS / 3600)} h {Math.round((m.uptimeS % 3600) / 60)} min
         </span>
       </div>
-      <IntegrationsPanel />
       <div className="cards cards-4">
         <Stat v={m.ingestPerSecond} unit="/s" l="Ingest rate" spark={hist.ingest} />
         <Stat v={m.batchProcessMs.p95} unit=" ms" l="Batch processing p95" spark={hist.batch} />
@@ -77,8 +75,8 @@ export function SystemHealth() {
         <Stat v={m.ingestLatencyMs.p95} unit=" ms" l="Ingest latency p95 (sent → received)" />
       </div>
       <div className="health-gauges">
-        <Gauge label="API memory" value={Math.min(100, (m.memoryMb / 4096) * 100)} detail={`${m.memoryMb} MB of 4 GB`} thresholds={[{ from: 0, tone: 'accent', label: 'Normal' }, { from: 50, tone: 'warning', label: 'High' }, { from: 85, tone: 'danger', label: 'Critical' }]} />
-        <Gauge label="Sensors reporting" value={h.sensors.length ? (h.sensors.filter((x) => x.status === 'ok' || x.status === 'degraded').length / h.sensors.length) * 100 : 0} detail={h.sensors.length ? `${h.sensors.filter((x) => x.status === 'ok' || x.status === 'degraded').length} of ${h.sensors.length}` : 'none configured'} thresholds={[{ from: 0, tone: 'danger', label: 'Blind' }, { from: 50, tone: 'warning', label: 'Partial' }, { from: 90, tone: 'accent', label: 'Covered' }]} />
+        <div className="health-gauge-cell"><Gauge label="API memory" value={Math.min(100, (m.memoryMb / 4096) * 100)} detail={`${m.memoryMb} MB of 4 GB`} thresholds={[{ from: 0, tone: 'accent', label: 'Normal' }, { from: 50, tone: 'warning', label: 'High' }, { from: 85, tone: 'danger', label: 'Critical' }]} /></div>
+        <div className="health-gauge-cell"><Gauge label="Sensors reporting" value={h.sensors.length ? (h.sensors.filter((x) => x.status === 'ok' || x.status === 'degraded').length / h.sensors.length) * 100 : 0} detail={h.sensors.length ? `${h.sensors.filter((x) => x.status === 'ok' || x.status === 'degraded').length} of ${h.sensors.length}` : 'none configured'} thresholds={[{ from: 0, tone: 'danger', label: 'Blind' }, { from: 50, tone: 'warning', label: 'Partial' }, { from: 90, tone: 'accent', label: 'Covered' }]} /></div>
         <div className="health-mini">
           <Stat v={m.eventLoopLagMs.p99} unit=" ms" l="Event-loop lag p99" spark={hist.lag} warn={m.eventLoopLagMs.p99 > 200} />
           <Stat v={m.rejectsPerSecond} unit="/s" l="Rejected messages" warn={m.rejectsPerSecond > 0} />
@@ -86,6 +84,7 @@ export function SystemHealth() {
       </div>
       <div className="page-body split">
         <div className="scroll">
+          <IntegrationsPanel />
           <div className="section">
             <h4>Services</h4>
             <table className="table">
@@ -242,21 +241,21 @@ interface Monitor {
  */
 function IntegrationsPanel() {
   const monitor = useAsync((s) => get<Monitor>('/api/interop/monitor?hours=24', s), []);
-  if (monitor.error) return <p className="muted">Integration activity is unavailable to this account.</p>;
+  if (monitor.error) return <p className="as-empty">Integration activity is unavailable to this account.</p>;
   if (!monitor.data) return <Loading what="integrations" />;
   const m = monitor.data;
   return (
-    <section className="cards" aria-label="Integrations" style={{ gridTemplateColumns: '1fr 1fr', alignItems: 'start' }}>
-      <div>
-        <h2>Integrations, last {m.windowHours} h</h2>
-        <p className="muted">
+    <section className="lp-grid" aria-label="Integrations">
+      <div className="lp-panel">
+        <h3 className="lp-title">Integrations, last {m.windowHours} h</h3>
+        <p className="lp-meta">
           {m.totals.messages.toLocaleString()} messages accepted · {m.totals.deadLetters.toLocaleString()} refused
         </p>
         <table className="table" aria-label="Activity by sensor">
           <thead>
             <tr>
               <th>Sensor</th>
-              <th>Messages</th>
+              <th className="num">Messages</th>
               <th>Last seen</th>
             </tr>
           </thead>
@@ -264,8 +263,8 @@ function IntegrationsPanel() {
             {m.sensors.map((s) => (
               <tr key={s.sensorId}>
                 <td className="mono">{s.sensorId}</td>
-                <td>{s.messages.toLocaleString()}</td>
-                <td>{dateTime(s.lastSeen)}</td>
+                <td className="num">{s.messages.toLocaleString()}</td>
+                <td className="mono">{hms(s.lastSeen)}Z</td>
               </tr>
             ))}
             {m.sensors.length === 0 && (
@@ -278,13 +277,13 @@ function IntegrationsPanel() {
           </tbody>
         </table>
       </div>
-      <div>
-        <h2>Refused, by reason</h2>
+      <div className="lp-panel">
+        <h3 className="lp-title">Refused, by reason</h3>
         <table className="table" aria-label="Refused messages by reason">
           <thead>
             <tr>
               <th>Reason</th>
-              <th>Count</th>
+              <th className="num">Count</th>
               <th>Last seen</th>
             </tr>
           </thead>
@@ -292,8 +291,8 @@ function IntegrationsPanel() {
             {m.deadLettersByReason.map((r) => (
               <tr key={r.reason}>
                 <td>{r.reason}</td>
-                <td>{r.count.toLocaleString()}</td>
-                <td>{dateTime(r.lastSeen)}</td>
+                <td className="num">{r.count.toLocaleString()}</td>
+                <td className="mono">{hms(r.lastSeen)}Z</td>
               </tr>
             ))}
             {m.deadLettersByReason.length === 0 && (
@@ -305,15 +304,28 @@ function IntegrationsPanel() {
             )}
           </tbody>
         </table>
-        <h2 style={{ marginTop: 16 }}>Refused, by sensor</h2>
+        <h3 className="lp-title lp-title-sub">Refused, by sensor</h3>
         <table className="table" aria-label="Refused messages by sensor">
+          <thead>
+            <tr>
+              <th>Sensor</th>
+              <th className="num">Count</th>
+            </tr>
+          </thead>
           <tbody>
             {m.deadLettersBySensor.map((s) => (
               <tr key={s.sensorId}>
                 <td className="mono">{s.sensorId}</td>
-                <td>{s.count.toLocaleString()}</td>
+                <td className="num">{s.count.toLocaleString()}</td>
               </tr>
             ))}
+            {m.deadLettersBySensor.length === 0 && (
+              <tr>
+                <td colSpan={2} className="muted">
+                  Nothing refused in this window.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

@@ -29,6 +29,53 @@ interface SensorDetail {
 }
 
 /** SENSORS — fleet health, configuration, coverage and diagnostics. */
+/** The estate by state: one bar and a legend. Hovering a segment or a legend row lights the other to match, and each row gives its share. */
+function SensorStates({ counts }: { counts: { ok: number; degraded: number; down: number; unreported: number } }) {
+  const [hover, setHover] = useState<string | null>(null);
+  const parts = [
+    { key: 'ok', label: 'Reporting', value: counts.ok, cls: 'ok' },
+    { key: 'degraded', label: 'Degraded', value: counts.degraded, cls: 'degraded' },
+    { key: 'down', label: 'Silent', value: counts.down, cls: 'down' },
+    { key: 'unreported', label: 'Never reported', value: counts.unreported, cls: 'unreported' },
+  ];
+  const total = parts.reduce((sum, p) => sum + p.value, 0) || 1;
+  return (
+    <div className="sn-states" role="group" aria-label={`Sensor estate by state, ${total} sensors`}>
+      <div className="sn-bar" onPointerLeave={() => setHover(null)}>
+        {parts
+          .filter((p) => p.value > 0)
+          .map((p) => (
+            <span
+              key={p.key}
+              className={`sn-seg ${p.cls}${hover && hover !== p.key ? ' dim' : ''}`}
+              style={{ flexGrow: p.value }}
+              title={`${p.label}: ${p.value} of ${total}`}
+              tabIndex={0}
+              onPointerEnter={() => setHover(p.key)}
+              onFocus={() => setHover(p.key)}
+              onBlur={() => setHover(null)}
+            />
+          ))}
+      </div>
+      <ul className="sn-legend">
+        {parts.map((p) => (
+          <li
+            key={p.key}
+            className={`sn-row${hover === p.key ? ' on' : ''}`}
+            onPointerEnter={() => setHover(p.key)}
+            onPointerLeave={() => setHover(null)}
+          >
+            <span className={`sn-key ${p.cls}`} aria-hidden="true" />
+            <span className="sn-label">{p.label}</span>
+            <span className="sn-count mono">{p.value}</span>
+            <span className="sn-pct mono">{Math.round((p.value / total) * 100)}%</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function Sensors() {
   const { id } = useParams();
   const nav = useNavigate();
@@ -71,34 +118,7 @@ export function Sensors() {
           <MetricCard label="Registered" value={total} context="sensors in the site configuration" />
           <MetricCard label="Degraded" value={counts.degraded} context="late, sparse or self-reported fault" />
           <MetricCard label="Silent" value={counts.down} context={counts.unreported ? `plus ${counts.unreported} never reported` : 'no traffic past the silence limit'} />
-          <div className="sn-states" role="img" aria-label={`Sensor estate: ${counts.ok} reporting, ${counts.degraded} degraded, ${counts.down} silent, ${counts.unreported} never reported`}>
-            <div className="sn-bar">
-              {[
-                { key: 'ok', label: 'Reporting', value: counts.ok, cls: 'ok' },
-                { key: 'degraded', label: 'Degraded', value: counts.degraded, cls: 'degraded' },
-                { key: 'down', label: 'Silent', value: counts.down, cls: 'down' },
-                { key: 'unreported', label: 'Never reported', value: counts.unreported, cls: 'unreported' },
-              ]
-                .filter((c) => c.value > 0)
-                .map((c) => (
-                  <span key={c.key} className={`sn-seg ${c.cls}`} style={{ flexGrow: c.value }} />
-                ))}
-            </div>
-            <ul className="sn-legend">
-              {[
-                { key: 'ok', label: 'Reporting', value: counts.ok, cls: 'ok' },
-                { key: 'degraded', label: 'Degraded', value: counts.degraded, cls: 'degraded' },
-                { key: 'down', label: 'Silent', value: counts.down, cls: 'down' },
-                { key: 'unreported', label: 'Never reported', value: counts.unreported, cls: 'unreported' },
-              ].map((c) => (
-                <li key={c.key}>
-                  <span className={`sn-key ${c.cls}`} aria-hidden="true" />
-                  <span className="sn-label">{c.label}</span>
-                  <span className="sn-count mono">{c.value}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <SensorStates counts={counts} />
         </div>
       )}
       <div className="page-body split">
@@ -141,8 +161,8 @@ export function Sensors() {
                       </span>
                     ),
                   },
-                  { key: 'lastSeen', label: 'Last traffic', sortable: true, width: 100, render: (v) => <span className="mono muted" style={{ whiteSpace: 'nowrap' }}>{v ? `${hms(Number(v))}Z` : '—'}</span> },
-                  { key: 'obs', label: 'Obs / 10 min', sortable: true, numeric: true, width: 84 },
+                  { key: 'lastSeen', label: 'Last traffic', sortable: true, width: 104, render: (v) => <span className="mono muted" style={{ whiteSpace: 'nowrap' }}>{v ? `${hms(Number(v))}Z` : '—'}</span> },
+                  { key: 'obs', label: 'Obs / 10 min', sortable: true, numeric: true, width: 124 },
                 ]}
               />
             </div>
@@ -303,7 +323,7 @@ function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: stri
             const d = r.definition as SensorListItem['definition'] & { position: { x: number; y: number }; rangeM?: number; headingDeg?: number; hfovDeg?: number };
             const st = r.status?.status;
             const sel = hover === d.id;
-            const s = H / 70;
+            const s = H / 56;
             return (
               <g key={d.id} transform={`translate(${d.position.x} ${d.position.y})`} onMouseEnter={() => setHover(d.id)} onMouseLeave={() => setHover(null)} onClick={() => onPick(d.id)} style={{ cursor: 'pointer' }}>
                 {d.kind === 'camera' && d.headingDeg !== undefined && d.hfovDeg !== undefined && (
@@ -312,7 +332,7 @@ function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: stri
                 {(d.kind === 'radar' || d.kind === 'rf') && d.rangeM && <circle r={Math.min(d.rangeM, H * 2)} fill="none" stroke={color(st)} strokeOpacity={sel ? 0.5 : 0.12} strokeWidth={H / 500} strokeDasharray={`${H / 80} ${H / 80}`} />}
                 <circle r={s * 1.25} fill="var(--bg-1)" stroke={color(st)} strokeWidth={s / 4} />
                 <path d={KIND_GLYPH[d.kind] ?? 'M-3 0h6'} transform={`scale(${s / 7}, ${-s / 7})`} fill="none" stroke={color(st)} strokeWidth={1.4} />
-                {(sel || st !== 'ok') && (
+                {sel && (
                   <text transform={`scale(1,-1)`} x={s * 1.8} y={s * 0.5} fontSize={s * 1.6} fill="var(--text-0)" fontFamily="var(--font-mono)">
                     {d.id}
                   </text>
