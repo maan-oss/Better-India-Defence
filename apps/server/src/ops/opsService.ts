@@ -172,7 +172,8 @@ export class OpsService {
       // Assets derived from zones that no longer exist (e.g. the demo site) and demo teams do not belong to a real site.
       const zoneIds = FACILITY.zones.map((z) => z.id);
       await this.db.query(`DELETE FROM vital_assets WHERE zone_id IS NOT NULL AND NOT (zone_id = ANY($1::text[]))`, [zoneIds]);
-      await this.db.query(`DELETE FROM teams WHERE leader LIKE '%(demo)%' AND id NOT IN (SELECT team_id FROM tasks)`);
+      // Seeded teams carry a `tm-demo-` id; the leader match also clears teams from earlier demo databases.
+      await this.db.query(`DELETE FROM teams WHERE (id LIKE 'tm-demo-%' OR leader LIKE '%(demo)%') AND id NOT IN (SELECT team_id FROM tasks)`);
     }
     const n = (await this.db.query<{ n: number }>('SELECT count(*)::int AS n FROM vital_assets')).rows[0]!.n;
     if (n === 0) for (const va of defaultVitalAssets(FACILITY)) await this.saveVa({ ...va, x: va.centre.x, y: va.centre.y, notes: 'derived from restricted zone — survey and confirm' });
@@ -182,14 +183,14 @@ export class OpsService {
     const teams = (await this.db.query<{ n: number }>('SELECT count(*)::int AS n FROM teams')).rows[0]!.n;
     if (teams === 0 && this.demoSite) {
       const demo: TeamInput[] = [
-        { callsign: 'QRT-1', kind: 'QRT', strength: 8, leader: 'Sub (demo)', channel: 'NET 1', entityId: 'veh-01', mode: 'vehicle', status: 'AVAILABLE' },
-        { callsign: 'QRT-2', kind: 'QRT', strength: 8, leader: 'Nb Sub (demo)', channel: 'NET 1', entityId: 'veh-02', mode: 'vehicle', status: 'AVAILABLE' },
-        { callsign: 'PATROL-A', kind: 'PATROL', strength: 2, leader: 'Hav (demo)', channel: 'NET 2', entityId: 'per-01', mode: 'foot', status: 'AVAILABLE' },
-        { callsign: 'PATROL-B', kind: 'PATROL', strength: 2, leader: 'Nk (demo)', channel: 'NET 2', entityId: 'per-02', mode: 'foot', status: 'AVAILABLE' },
-        { callsign: 'PATROL-C', kind: 'PATROL', strength: 2, leader: 'L/Nk (demo)', channel: 'NET 2', entityId: 'per-03', mode: 'foot', status: 'AVAILABLE' },
-        { callsign: 'MED-1', kind: 'MEDICAL', strength: 2, leader: 'NA (demo)', channel: 'NET 3', entityId: 'per-12', mode: 'foot', status: 'AVAILABLE' },
+        { callsign: 'QRT-1', kind: 'QRT', strength: 8, leader: 'Sub', channel: 'NET 1', entityId: 'veh-01', mode: 'vehicle', status: 'AVAILABLE' },
+        { callsign: 'QRT-2', kind: 'QRT', strength: 8, leader: 'Nb Sub', channel: 'NET 1', entityId: 'veh-02', mode: 'vehicle', status: 'AVAILABLE' },
+        { callsign: 'PATROL-A', kind: 'PATROL', strength: 2, leader: 'Hav', channel: 'NET 2', entityId: 'per-01', mode: 'foot', status: 'AVAILABLE' },
+        { callsign: 'PATROL-B', kind: 'PATROL', strength: 2, leader: 'Nk', channel: 'NET 2', entityId: 'per-02', mode: 'foot', status: 'AVAILABLE' },
+        { callsign: 'PATROL-C', kind: 'PATROL', strength: 2, leader: 'L/Nk', channel: 'NET 2', entityId: 'per-03', mode: 'foot', status: 'AVAILABLE' },
+        { callsign: 'MED-1', kind: 'MEDICAL', strength: 2, leader: 'NA', channel: 'NET 3', entityId: 'per-12', mode: 'foot', status: 'AVAILABLE' },
       ];
-      for (const t of demo) await this.saveTeam(t);
+      for (const t of demo) await this.saveTeam(t, `tm-demo-${t.callsign.toLowerCase()}`);
     }
   }
 

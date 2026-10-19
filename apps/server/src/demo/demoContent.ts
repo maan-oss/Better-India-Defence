@@ -41,21 +41,21 @@ export async function seedDemoContent(p: Platform, importDir: string): Promise<v
     await enrol('subject-a.jpg', {
       list: 'AUTHORISED',
       category: 'Personnel',
-      name: 'Sgt A. Verma (demo, synthetic face)',
-      serviceNo: 'DEMO-0417',
+      name: 'Sgt A. Verma (synthetic face)',
+      serviceNo: 'SYN-0417',
       rank: 'Sergeant',
       unit: 'Station Security Flight',
       accessZones: ['zn-ops'],
-      notes: 'Demonstration entry. The photograph is a synthetic face of a person who does not exist.',
+      notes: 'Synthetic record. The photograph is a synthetic face of a person who does not exist.',
     });
     await enrol('subject-b.jpg', {
       list: 'WATCHLIST',
       category: 'Person of interest',
-      name: 'Subject KILO-7 (demo, synthetic face)',
+      name: 'Subject KILO-7 (synthetic face)',
       accessZones: [],
       threatLevel: 'MEDIUM',
-      basis: 'Demonstration entry only — synthetic face of a person who does not exist. Shows the watch-list workflow.',
-      notes: 'Deny entry and escort to the guard room; inform the duty officer (demonstration instruction).',
+      basis: 'Synthetic record only: the face belongs to a person who does not exist.',
+      notes: 'Deny entry and escort to the guard room; inform the duty officer (training instruction).',
     });
   } catch (e) {
     p.log.warn({ err: e instanceof Error ? e.message : String(e) }, 'demo identities not created (vision models missing?)');
@@ -63,7 +63,7 @@ export async function seedDemoContent(p: Platform, importDir: string): Promise<v
 
   // 2. Evidence library samples.
   for (const [file, title, notes] of [
-    ['scene.jpg', 'Sample — aerial survey frame (VisDrone2019, CC BY-SA)', 'Public-dataset frame used to demonstrate detection of people and vehicles at range.'],
+    ['scene.jpg', 'Sample — aerial survey frame (VisDrone2019, CC BY-SA)', 'Public-dataset frame showing detection of people and vehicles at range.'],
     ['subject-a-cctv.jpg', 'Sample — CCTV still with a face (synthetic composite)', 'Composite of a synthetic face onto a public-dataset frame, degraded to CCTV quality.'],
   ] as const) {
     try {
@@ -83,7 +83,7 @@ export async function seedDemoContent(p: Platform, importDir: string): Promise<v
       await p.cameras.upsert(
         {
           id: 'OPS-DOOR',
-          name: 'Operations Centre door — face capture (demo recording)',
+          name: 'Operations Centre door — face capture (recorded clip)',
           binding: 'new',
           url: 'demo-ops-door.mp4',
           enabled: true,

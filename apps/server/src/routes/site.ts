@@ -23,7 +23,7 @@ export function registerSite(app: FastifyInstance, p: Platform): void {
   app.put('/api/site', { preHandler: requirePerm('admin.config') }, async (req, reply) => {
     const b = parse(SiteConfigSchema, req.body, reply);
     if (!b) return;
-    if (b.id === 'site-kestrel') return reply.code(400).send({ error: 'choose an id for your site (site-kestrel is the demo)' });
+    if (b.id === 'site-kestrel') return reply.code(400).send({ error: 'choose an id for your site (site-kestrel is the synthetic site)' });
     const ids = new Set<string>();
     for (const z of b.zones) {
       if (ids.has(z.id)) return reply.code(400).send({ error: `duplicate zone id ${z.id}` });

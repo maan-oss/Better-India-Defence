@@ -57,10 +57,10 @@ export class AuthService {
     if (n > 0) return;
     if (demo) {
       const users: [string, string, Role][] = [
-        ['viewer', 'Demo Viewer', 'viewer'],
-        ['operator', 'Demo Operator', 'operator'],
-        ['analyst', 'Demo Analyst', 'analyst'],
-        ['admin', 'Demo Administrator', 'administrator'],
+        ['viewer', 'Viewer', 'viewer'],
+        ['operator', 'Operator', 'operator'],
+        ['analyst', 'Analyst', 'analyst'],
+        ['admin', 'Administrator', 'administrator'],
       ];
       for (const [u, d, r] of users) await this.create(u, d, r, demoPassword);
     } else if (adminPassword) {

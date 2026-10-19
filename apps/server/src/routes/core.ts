@@ -72,7 +72,7 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
   });
 
   app.get('/api/auth/me', async (req, reply) => {
-    if (!req.user) return reply.code(401).send({ error: 'not signed in', demo: cfg.STRATA_DEMO_USERS === 'true' ? { users: ['viewer', 'operator', 'analyst', 'admin'], password: cfg.NODE_ENV === 'production' ? null : cfg.STRATA_DEMO_PASSWORD } : null });
+    if (!req.user) return reply.code(401).send({ error: 'not signed in' });
     const secondFactor = await p.auth.secondFactorState(req.user.id);
     return { user: req.user, permissions: permissionsFor(req.user.role), secondFactor: { ...secondFactor, required: p.cfg.STRATA_MFA_REQUIRED === 'true', available: Boolean(p.keys.storage) } };
   });
@@ -86,8 +86,6 @@ export function registerCore(app: FastifyInstance, p: Platform): void {
     notice:
       'This is a government information system for authorised use only. Activity on this system is monitored and recorded, and may be used as evidence. Unauthorised access or use may result in disciplinary and criminal proceedings.',
   }));
-
-  app.get('/api/auth/demo', async () => (cfg.STRATA_DEMO_USERS === 'true' && cfg.NODE_ENV !== 'production' ? { users: ['viewer', 'operator', 'analyst', 'admin'], password: cfg.STRATA_DEMO_PASSWORD } : { users: [], password: null }));
 
   // ------------------------------------------------------------------ ingestion (service-to-service)
   app.post('/api/ingest/batch', { bodyLimit: 64 * 1024 * 1024, config: { rateLimit: false } }, async (req, reply) => {

@@ -38,7 +38,7 @@ export interface DemoPlan {
   lastDoneDaysAgo: number | null;
 }
 
-const MAKER = 'Demonstration (synthetic)';
+const MAKER = 'Synthetic';
 
 export const DEMO_REGISTER: { assets: DemoAsset[]; dependencies: DemoDependency[]; plans: DemoPlan[] } = {
   assets: [
