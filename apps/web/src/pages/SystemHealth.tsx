@@ -72,7 +72,7 @@ export function SystemHealth() {
         <Stat v={m.ingestPerSecond} unit="/s" l="Ingest rate" spark={hist.ingest} />
         <Stat v={m.batchProcessMs.p95} unit=" ms" l="Batch processing p95" spark={hist.batch} />
         <Stat v={m.fusionMs.p95} decimals={1} unit=" ms" l="Fusion step p95" spark={hist.fusion} />
-        <Stat v={m.ingestLatencyMs.p95} unit=" ms" l="Ingest latency p95 (sent → received)" />
+        <Stat v={m.ingestLatencyMs.p95} unit=" ms" l="Live ingest latency p95 (sent → received)" />
       </div>
       <div className="health-gauges">
         <div className="health-gauge-cell"><Gauge label="API memory" value={Math.min(100, (m.memoryMb / 4096) * 100)} detail={`${m.memoryMb} MB of 4 GB`} thresholds={[{ from: 0, tone: 'accent', label: 'Normal' }, { from: 50, tone: 'warning', label: 'High' }, { from: 85, tone: 'danger', label: 'Critical' }]} /></div>

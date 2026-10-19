@@ -99,7 +99,9 @@ async function live(): Promise<void> {
   const engine = new SimulatorEngine(state.schedule);
   const client = new IngestClient(SERVER, TOKEN, 250_000, log);
   const failures = new FailureInjector();
-  let liveEdge = Math.max(state.recordingEnd ?? 0, Math.floor(Date.now() / 1000) * 1000 - 300_000);
+  // Start at the present. Backfilling the last five minutes here would stamp synthetic data with old times and
+  // report it as late delivery; the five-minute catch-up below is only for a real pause.
+  let liveEdge = Math.max(state.recordingEnd ?? 0, Math.floor(Date.now() / 1000) * 1000 - 1000);
   startService(PORT, { engine, failures, client, state, token: TOKEN, persist: () => saveState(STATE, state), liveEdge: () => liveEdge, log });
   await waitForServer().catch((e: unknown) => log(String(e)));
   log(`live simulation started; ${state.schedule.length} scheduled scenario(s) loaded`);

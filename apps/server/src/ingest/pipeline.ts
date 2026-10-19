@@ -13,6 +13,9 @@ import type { ReconstructionService } from '../reconstruction/service.ts';
 
 const MAX_FUTURE_SKEW_MS = 30_000;
 const MAX_AGE_MS = 7 * 24 * 3600_000;
+// Latency is measured for live delivery only: a live message arrives within seconds of its step. Anything older is
+// replayed history or a catch-up after a pause, which is counted apart so it cannot read as slow delivery.
+const LIVE_LAG_MS = 15_000;
 
 interface IngestResult {
   accepted: number;
@@ -224,7 +227,9 @@ export class IngestPipeline {
     const transitions: StatusTransition[] = [];
     let maxT = this.dataClock;
     for (const { env, n } of normalized) {
-      this.metrics.ingestLatencyMs.observe(Math.max(0, receivedAt - env.sentAt));
+      const lag = receivedAt - env.sentAt;
+      if (lag <= LIVE_LAG_MS) this.metrics.ingestLatencyMs.observe(Math.max(0, lag));
+      else this.metrics.inc('backfilled');
       if (env.observedAt > maxT && env.observedAt <= receivedAt + MAX_FUTURE_SKEW_MS) maxT = env.observedAt;
       const health = env.kind === 'sensor.health' ? { status: env.payload.status, ...(env.payload.message ? { message: env.payload.message } : {}), ...(env.payload.metrics ? { metrics: env.payload.metrics } : {}) } : undefined;
       const tr = this.sensors.seen(env.sensorId, env.observedAt, env.seq, health);
