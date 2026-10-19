@@ -56,7 +56,7 @@ export function Reconstructions() {
         </Button>
       </div>
       <div className="page-body split">
-        <div className="scroll">
+        <div className="scroll rc-list">
           {can('reconstruction.run') && <NewJob onCreated={(nid) => (reload(), nav(`/reconstructions/${nid}`))} />}
           {error && <ErrorNote error={error} />}
           {!data && !error && <Loading />}
@@ -91,7 +91,8 @@ export function Reconstructions() {
             </div>
           )}
         </div>
-        <div className="scroll">{id ? <JobDetail id={id} /> : <Empty art="reconstructions" title="Select a job" description="Reconstructions rebuild a scene from recorded observations, with every derived surface marked as reconstructed." />}</div>
+        {/* On a phone the detail pane shows only once a job is chosen; the list has the whole screen until then. */}
+        <div className={`scroll detail-pane${id ? ' open' : ''}`}>{id ? <JobDetail id={id} /> : <Empty art="reconstructions" title="Select a job" description="Reconstructions rebuild a scene from recorded observations, with every derived surface marked as reconstructed." />}</div>
       </div>
     </div>
   );

@@ -99,7 +99,7 @@ export function Incidents() {
           ))}
         </div>
         {/* On a phone the file pane shows only when there is a file or a form to show; with no incidents, the list says it all. */}
-        <div className={`scroll inc-detail${creating || id ? ' open' : ''}`}>
+        <div className={`scroll detail-pane${creating || id ? ' open' : ''}`}>
           {creating ? <CreateIncident onDone={(nid) => (setCreating(false), nid && nav(`/incidents/${nid}`))} /> : id ? <IncidentFile id={id} /> : incidents.length > 0 ? <Empty art="incidents" title="Select an incident" description="Its file holds the window, the evidence gathered from every sensor, the tracks, alerts, chronology and pinned items." /> : null}
         </div>
       </div>

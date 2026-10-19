@@ -460,7 +460,8 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
   .split > * { border-right: 0; }
   .split > * + * { border-top: 1px solid var(--line); }
   /* A detail pane with nothing to show takes no room on a phone. */
-  .inc-detail:not(.open) { display: none; }
+  .detail-pane:not(.open) { display: none; }
+  .rc-list > .section, .rc-table { padding-inline: var(--sp-4); }
   /* A filter wider than the phone scrolls inside its own row instead of being clipped. */
   .seg, .arc-seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
   .arc-seg.md button { font-size: 12px; padding: 0 8px; }
@@ -593,7 +594,9 @@ button.list-row { all: unset; box-sizing: border-box; display: flex; width: 100%
 /* Reconstructions */
 .rc-kind { width: 260px; }
 .rc-kind label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.rc-table { padding: 0 8px; }
+/* The job list shares the page header's inset: the new-job card and the table start on the same edge as the title. */
+.rc-list > .section { padding-inline: var(--sp-5); }
+.rc-table { padding: 0 var(--sp-5); }
 button.rc-job { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 2px; width: 100%; max-width: 100%; min-width: 0; }
 button.rc-job > span:first-child { font-size: var(--fs-body); min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 button.rc-job > span:last-child { font-size: var(--fs-micro); }
