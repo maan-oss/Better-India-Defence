@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { FACILITY } from '@strata/domain/client';
-import { get, patch, post, put } from '../api/client';
+import { del, get, patch, post, put } from '../api/client';
 import { analysePhoto, useVisionLive, type FaceEvent, type FaceSettings, type Identity as IdentityT, type PhotoFaces, type Template, type VisionStatus } from '../api/vision';
 import { useSession } from '../state/session';
 import { dateTime } from '../lib/format';
@@ -14,6 +14,7 @@ import { ActionButton } from '../components/arc/action-button/action-button';
 import { Avatar } from '../components/arc/avatar/avatar';
 import { Button } from '../components/arc/button/button';
 import { Carousel } from '../components/arc/carousel/carousel';
+import { ConfirmMorph } from '../components/arc/confirm-morph/confirm-morph';
 import { CopyButton } from '../components/arc/copy-button/copy-button';
 import { DatePicker } from '../components/arc/date-picker/date-picker';
 import { Input } from '../components/arc/input/input';
@@ -575,9 +576,15 @@ function IdentityDetail({ id, onChanged }: { id: string; onChanged: () => void }
               <span className={`qline ${t.quality.grade}`}>{t.quality.grade}</span>
               <span className="dim">{t.source.split(':')[0]}</span>
               {mayEdit && (
-                <button className="btn small ghost" onClick={() => void fetch(`/api/identities/templates/${t.id}`, { method: 'DELETE', credentials: 'same-origin' }).then(() => (d.reload(), onChanged()))}>
-                  Remove
-                </button>
+                <ConfirmMorph
+                  label="Remove"
+                  prompt="Remove this face template?"
+                  confirmLabel="Remove"
+                  pendingLabel="Removing"
+                  doneLabel="Removed"
+                  tone="danger"
+                  onConfirm={() => del(`/api/identities/templates/${t.id}`).then(() => (d.reload(), onChanged()))}
+                />
               )}
             </figure>
           ))}

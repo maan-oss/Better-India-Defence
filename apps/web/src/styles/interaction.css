@@ -20,6 +20,19 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: non
 }
 .btn.primary:active:not(:disabled) { filter: brightness(0.94); }
 
+/* A busy control keeps its width and shows a loader in place of its icon, so the label never jumps. */
+.btn[aria-busy='true'] { cursor: progress; pointer-events: none; }
+.btn[aria-busy='true']::before {
+  content: '';
+  flex: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.7s linear infinite;
+}
+
 /* Rows press by colour, not by scale: a full-width row that shrank would look broken. */
 button.list-row, .list-row, .table tr.click, .more-list a, .cmd-item, .inbox-row { transition: background-color 120ms var(--ease), color 120ms var(--ease); }
 button.list-row:active, .list-row:active, .table tr.click:active, .more-list a:active, .cmd-item:active, .inbox-row:active { background: var(--bg-4); }
@@ -42,4 +55,9 @@ button.list-row:active, .list-row:active, .table tr.click:active, .more-list a:a
 
 @media (prefers-reduced-motion: reduce) {
   .btn, .chip, .tab, .seg > button, .rail-item, .tb-bell, .tb-night button, .user-btn, .cmd-trigger { transition-duration: 1ms; }
+  .tally-in { animation-duration: 1ms; }
 }
+
+/* A figure that changes with its data rises into place, so a new value reads as news. */
+.tally-in { animation: tally-in 360ms var(--ease-out) both; }
+@keyframes tally-in { from { opacity: 0; transform: translateY(0.25em); filter: blur(2px); } }

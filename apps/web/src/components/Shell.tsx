@@ -15,6 +15,9 @@ import { NAV, pageTitle } from '../lib/nav';
 import { Icon } from './Icons';
 import { Dialog, Tip } from './ui';
 import { Breadcrumb } from './arc/breadcrumb/breadcrumb';
+import { Tally } from './Tally';
+import { motion } from 'motion/react';
+import { motionTokens } from './arc/motion-tokens';
 import { PopoverContent } from './arc/popover/popover';
 import { Drawer, DrawerContent } from './arc/drawer/drawer';
 import { ShortcutKeys, ShortcutList, type ShortcutListGroup } from './arc/shortcut-recorder/shortcut-recorder';
@@ -124,11 +127,16 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
                     onPointerEnter={() => prefetchRoute(n.to)}
                     onFocus={() => prefetchRoute(n.to)}
                   >
-                    <I />
-                    <span className="rail-label">{n.short ?? n.label}</span>
-                    <span className="rail-name">{n.label}</span>
-                    {n.keys && <span className="rail-keys">{n.keys.split(' ').map((k) => <kbd key={k}>{k}</kbd>)}</span>}
-                    {badge > 0 && <span className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`}>{badge > 99 ? '99+' : badge}</span>}
+                    {({ isActive }) => (
+                      <>
+                        {isActive && <motion.span layoutId="rail-pill" className="rail-pill" transition={motionTokens.spring.smooth} aria-hidden="true" />}
+                        <I />
+                        <span className="rail-label">{n.short ?? n.label}</span>
+                        <span className="rail-name">{n.label}</span>
+                        {n.keys && <span className="rail-keys">{n.keys.split(' ').map((k) => <kbd key={k}>{k}</kbd>)}</span>}
+                        {badge > 0 && <Tally className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`} value={badge} cap={99} />}
+                      </>
+                    )}
                   </NavLink>
                 );
               })}
@@ -161,7 +169,7 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
                         <NavLink to={n.to} onClick={() => setMore(false)}>
                           <I />
                           <span>{n.label}</span>
-                          {badge > 0 && <span className="more-count">{badge > 99 ? '99+' : badge}</span>}
+                          {badge > 0 && <Tally className="more-count" value={badge} cap={99} />}
                         </NavLink>
                       </li>
                     );
@@ -213,9 +221,9 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
           </PopoverContent>
         </P.Root>
         {runMode === 'demo' && (
-          <span className="tb-demo" title="Demonstration site: sensors, tracks, people and faces are simulated. Nothing shown here is a real observation. Operational use starts the server with STRATA_MODE=operational.">
-            <span className="tb-demo-long">Demo</span>
-            <span className="tb-demo-short">Sim</span>
+          <span className="tb-synthetic" title="Synthetic data: sensors, tracks, people and faces are simulated. Nothing shown here is a real observation. Operational use starts the server with STRATA_MODE=operational.">
+            <span className="tb-synthetic-long">Synthetic data</span>
+            <span className="tb-synthetic-short">Synthetic</span>
           </span>
         )}
       </div>
@@ -272,8 +280,8 @@ function SiteCard({ onClose, canEdit }: { onClose: () => void; canEdit: boolean 
         {sub && <span className="muted">{sub}</span>}
       </div>
       <dl className="kv">
-        <dt>Mode</dt>
-        <dd>{runMode === 'demo' ? 'Demonstration (simulated data)' : 'Operational'}</dd>
+        <dt>Data</dt>
+        <dd>{runMode === 'demo' ? 'Synthetic' : 'Live sensors'}</dd>
         <dt>Site origin</dt>
         <dd className="mono">{grid || '—'}</dd>
         <dt>Latitude, longitude</dt>

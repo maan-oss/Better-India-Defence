@@ -15,6 +15,7 @@ import { useSession } from '../../state/session';
 import { useWorld } from '../../state/world';
 import { PopoverContent } from '../arc/popover/popover';
 import { Drawer, DrawerContent } from '../arc/drawer/drawer';
+import { Tally } from '../Tally';
 
 const RANK = { critical: 0, high: 1, medium: 2, low: 3 } as const;
 const SENSOR_TEXT: Record<string, string> = { silent: 'Silent', offline: 'Offline', fault: 'Fault', degraded: 'Degraded' };
@@ -47,7 +48,7 @@ export function Inbox() {
   const label = count ? `Inbox, ${count} need action` : 'Inbox, nothing needs action';
   const cls = `tb-bell${crit ? ' crit' : ''}`;
   const icon = <Bell size={16} strokeWidth={1.75} />;
-  const badge = count > 0 && <span className="tb-bell-n">{count > 99 ? '99+' : count}</span>;
+  const badge = count > 0 && <Tally className="tb-bell-n" value={count} cap={99} />;
   const body = <InboxBody alerts={openAlerts} troubled={troubled} names={names} pending={pending} count={count} onDone={() => setOpen(false)} />;
 
   if (narrow) {

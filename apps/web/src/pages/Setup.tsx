@@ -406,7 +406,7 @@ export function Setup({ status }: { status: SetupStatus }) {
             </motion.section>
           </AnimatePresence>
         </div>
-        <footer className="setup-foot">Operational mode · no demonstration data · every step is recorded in the audit log</footer>
+        <footer className="setup-foot">No synthetic data · every step is recorded in the audit log</footer>
       </main>
     </div>
   );

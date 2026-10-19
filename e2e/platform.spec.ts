@@ -157,7 +157,7 @@ test('media forensics: upload a photograph, it is hashed and analysed for people
 test('site setup: an administrator can start a site from the demo layout and see its data feeds', async ({ page }) => {
   const errors = await signIn(page, 'admin');
   await page.getByRole('link', { name: 'Site setup' }).click();
-  await page.getByRole('button', { name: 'Start from the demo layout' }).click();
+  await page.getByRole('button', { name: 'Start from the synthetic layout' }).click();
   await expect(page.getByText('Data feeds')).toBeVisible();
   await expect(page.locator('.feed-row')).toHaveCount(2);
   await page.getByRole('button', { name: 'Add feed' }).click();

@@ -237,7 +237,7 @@ function MediaList() {
 function Handoff() {
   const { data: subjects } = useAsync((s) => get<{ id: string; label: string; consentRef: string; synthetic: boolean; enrolledAt: number }[]>('/api/handoff/subjects', s), []);
   const [subject, setSubject] = useState('');
-  const [purpose, setPurpose] = useState('Hand-off demonstration — synthetic test identity');
+  const [purpose, setPurpose] = useState('Hand-off test — synthetic test identity');
   const [res, setRes] = useState<HandoffResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -281,7 +281,7 @@ function Handoff() {
     <div style={{ maxWidth: 1100 }}>
       <div className="section col">
         <div className="note warn">
-          Restricted demonstration. Only enrolled <b>synthetic or consenting</b> test identities can be searched. Every search is audited with its stated purpose. Appearance similarity comes from a synthetic re-identification descriptor; the platform performs no facial recognition. Results are candidates for human review, never identifications.
+          Restricted use. Only enrolled <b>synthetic or consenting</b> test identities can be searched. Every search is audited with its stated purpose. Appearance similarity comes from a synthetic re-identification descriptor; the platform performs no facial recognition. Results are candidates for human review, never identifications.
         </div>
         <div className="row" style={{ flexWrap: 'wrap' }}>
           <select className="input" value={subject} onChange={(e) => setSubject(e.target.value)} aria-label="Test subject">

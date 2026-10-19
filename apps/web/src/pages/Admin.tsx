@@ -42,6 +42,7 @@ export function Admin() {
   const onlineNames = new Set(online.map((o) => o.username));
   const { toast } = useToastStack();
   const [resetFor, setResetFor] = useState<UserRecord | null>(null);
+  const [mfaFor, setMfaFor] = useState<UserRecord | null>(null);
   const update = async (u: UserRecord, body: { role?: Role; disabled?: boolean; password?: string }, done: string) => {
     try {
       await patch(`/api/admin/users/${u.id}`, body);
@@ -120,16 +121,8 @@ export function Admin() {
                           {
                             label: u.secondFactor ? 'Remove second factor…' : 'No second factor enrolled',
                             disabled: !u.secondFactor,
-                            onSelect: () => {
-                              // The account signs out and enrols a new factor at its next sign-in, so confirm first.
-                              if (!window.confirm(`Remove the second factor for ${u.displayName}? They will be signed out and must enrol a new one.`)) return;
-                              void del(`/api/admin/users/${encodeURIComponent(u.username)}/mfa`)
-                                .then(() => {
-                                  toast({ type: 'success', title: `Second factor removed for ${u.displayName}`, description: 'Recorded in the audit log' });
-                                  users.reload();
-                                })
-                                .catch((e: unknown) => toast({ type: 'error', title: 'Not removed', description: e instanceof Error ? e.message : String(e) }));
-                            },
+                            // The account signs out and enrols a new factor at its next sign-in, so it is confirmed first.
+                            onSelect: () => setMfaFor(u),
                           },
                           { label: 'Copy username', icon: <Copy size={14} />, onSelect: () => void navigator.clipboard.writeText(u.username).then(() => toast({ type: 'success', title: 'Username copied', description: u.username })) },
                           ...(u.disabled ? [{ label: 'Enable account', icon: <UserCheck size={14} />, separatorBefore: true, onSelect: () => void update(u, { disabled: false }, `${u.displayName} can sign in again`) }] : []),
@@ -246,6 +239,19 @@ export function Admin() {
         </div>
       </div>
       {resetFor && <ResetPassword user={resetFor} onClose={() => setResetFor(null)} onSave={(pw) => update(resetFor, { password: pw }, `Password reset for ${resetFor.displayName}`).then(() => setResetFor(null))} />}
+      {mfaFor && (
+        <RemoveSecondFactor
+          user={mfaFor}
+          onClose={() => setMfaFor(null)}
+          onRemove={() =>
+            del(`/api/admin/users/${encodeURIComponent(mfaFor.username)}/mfa`).then(() => {
+              toast({ type: 'success', title: `Second factor removed for ${mfaFor.displayName}`, description: 'Recorded in the audit log' });
+              users.reload();
+              setMfaFor(null);
+            })
+          }
+        />
+      )}
     </div>
   );
 }
@@ -268,6 +274,33 @@ curl -sS -X POST ${origin}/api/ingest/batch \\
     "payload": { "status": "ok", "uptimeS": 86400, "message": "self-test passed" }
   } ] }'
 # 202 accepted · 207 some rejected (reasons listed) · 401 wrong token`;
+}
+
+function RemoveSecondFactor({ user, onClose, onRemove }: { user: UserRecord; onClose: () => void; onRemove: () => Promise<void> }) {
+  return (
+    <Modal title={`Remove second factor · ${user.username}`} onClose={onClose}>
+      <div className="col" style={{ gap: 14 }}>
+        <p className="muted" style={{ margin: 0, fontSize: 'var(--fs-body)' }}>
+          {user.displayName} will be signed out and must enrol a new second factor at their next sign-in.
+        </p>
+        <div className="row">
+          <span className="spacer" />
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <ConfirmMorph
+            label="Remove second factor"
+            prompt={`Remove the second factor for ${user.username}?`}
+            confirmLabel="Remove"
+            pendingLabel="Removing"
+            doneLabel="Removed"
+            tone="danger"
+            onConfirm={onRemove}
+          />
+        </div>
+      </div>
+    </Modal>
+  );
 }
 
 function ResetPassword({ user, onClose, onSave }: { user: UserRecord; onClose: () => void; onSave: (pw: string) => Promise<void> }) {

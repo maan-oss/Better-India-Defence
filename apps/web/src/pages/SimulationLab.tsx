@@ -27,7 +27,7 @@ export function SimulationLab() {
         <Empty
           art="offline"
           title="No simulator on an operational site"
-          description="The simulation lab drives the synthetic demonstration site. This installation runs on real sensors only. To explore scenarios, start a separate demo instance with npm run demo."
+          description="The simulation lab drives the synthetic site. This installation runs on real sensors only. To explore scenarios, start a separate evaluation instance with npm run demo."
         />
       </div>
     );
@@ -66,7 +66,7 @@ function SimulationLabLive() {
     <div className="page">
       <div className="page-h">
         <h1>Simulation Lab</h1>
-        <span className="sub">Synthetic sources emit through the same ingestion API real adapters use. The rest of the platform cannot tell the difference.</span>
+        <span className="sub">Simulated sources emit through the same ingestion API real adapters use. The rest of the platform cannot tell the difference.</span>
         <div className="spacer" />
         {msg && <span className="note">{msg}</span>}
       </div>

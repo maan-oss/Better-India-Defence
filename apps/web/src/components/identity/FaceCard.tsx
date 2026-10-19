@@ -13,8 +13,8 @@ const DECISION_TEXT: Record<FaceEvent['decision'], string> = {
   NOT_COMPARABLE: 'Not comparable',
 };
 
-/** An enrolled name without the synthetic-data suffix; the demo marker is shown once, in the top bar. */
-export const displayName = (name: string | undefined): string => (name ?? '—').replace(/\s*\(demo, synthetic face\)/, '');
+/** An enrolled name without the synthetic-data suffix; the synthetic marker is shown once, in the top bar. */
+export const displayName = (name: string | undefined): string => (name ?? '—').replace(/\s*\(synthetic face\)/, '');
 
 export function DecisionChip({ ev }: { ev: Pick<FaceEvent, 'decision' | 'candidates' | 'reviewStatus'> }) {
   const wl = ev.candidates[0]?.list === 'WATCHLIST' && (ev.decision === 'STRONG' || ev.decision === 'POSSIBLE');

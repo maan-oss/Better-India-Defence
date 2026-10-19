@@ -268,26 +268,41 @@
     color: var(--text-0);
     background: var(--glass-hover);
   }
+  /* The active item is a pill that glides to the chosen item, rather than a background that appears in place. */
+  .rail-item { isolation: isolate; }
   .rail-item.active {
     color: var(--text-0);
+    background: transparent;
+  }
+  .rail-pill {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
     background: var(--glass-fill-strong);
   }
   .rail-label {
     display: none;
   }
+  /* The name opens to the width the expanding rail gives it, and fades in with it. */
   .rail-name {
-    display: none;
     flex: 1;
     min-width: 0;
+    max-width: 0;
+    opacity: 0;
     overflow: hidden;
+    white-space: nowrap;
     text-overflow: ellipsis;
     text-align: left;
     font-size: var(--fs-body);
     font-weight: 500;
+    transition: max-width 200ms var(--ease), opacity 160ms var(--ease);
   }
   .rail:hover .rail-name,
   .rail:focus-within .rail-name {
-    display: block;
+    max-width: 160px;
+    opacity: 1;
   }
   .rail-keys {
     display: none;

@@ -4,6 +4,7 @@ import { api, get, post } from '../api/client';
 import { useWorld } from '../state/world';
 import { ErrorNote, Loading } from '../components/common';
 import { Segmented } from '../components/ui';
+import { ConfirmMorph } from '../components/arc/confirm-morph/confirm-morph';
 import '../styles/site.css';
 
 /**
@@ -60,22 +61,22 @@ export function SiteSetup() {
       <div className="page">
         <div className="page-h">
           <h1>Site setup</h1>
-          <span className="sub">Currently running: {resp.active.name}{resp.active.simulated ? ' (demo, simulated sensors)' : ''}.</span>
+          <span className="sub">Currently running: {resp.active.name}{resp.active.simulated ? ' (synthetic data, simulated sensors)' : ''}.</span>
         </div>
         <div className="scroll" style={{ padding: 24 }}>
           <div className="col" style={{ maxWidth: 760, gap: 14 }}>
             <div className="note">
-              Define your installation to replace the demo facility. You will need: a surveyed anchor point (WGS84), and ideally a recent orthophoto of the area (from your survey cell,
+              Define your installation to replace the synthetic site. You will need: a surveyed anchor point (WGS84), and ideally a recent orthophoto of the area (from your survey cell,
               a drone mosaic, or licensed satellite imagery) to trace zones and buildings on. The 3-D ground is flat for configured sites — importing a surveyed terrain model is not yet
               supported.
             </div>
-            <div className="note warn">Use a fresh database for a real site: data recorded against the demo facility should not be mixed with real records.</div>
+            <div className="note warn">Use a fresh database for a real site: data recorded against the synthetic site should not be mixed with real records.</div>
             <div className="row">
               <button className="btn primary" onClick={() => setCfg(blank())}>
                 Start a blank site
               </button>
-              <button className="btn" onClick={() => setCfg({ ...resp.template, id: 'my-site', name: 'New site (from demo geometry)' })}>
-                Start from the demo layout
+              <button className="btn" onClick={() => setCfg({ ...resp.template, id: 'my-site', name: 'New site (from the synthetic layout)' })}>
+                Start from the synthetic layout
               </button>
             </div>
           </div>
@@ -104,9 +105,15 @@ export function SiteSetup() {
         </span>
         <div className="spacer" />
         {resp.stored && runMode === 'demo' && (
-          <button className="btn small ghost" onClick={() => void api('/api/site', { method: 'DELETE' }).then(() => setMsg('Site definition removed; the demo site will run after restart.'))}>
-            Revert to demo after restart
-          </button>
+          <ConfirmMorph
+            label="Revert to the synthetic site"
+            prompt="Remove the saved site definition? The synthetic site runs after restart."
+            confirmLabel="Revert"
+            pendingLabel="Reverting"
+            doneLabel="Reverted"
+            tone="neutral"
+            onConfirm={() => api('/api/site', { method: 'DELETE' }).then(() => setMsg('Site definition removed; the synthetic site will run after restart.'))}
+          />
         )}
         {resp.restartRequired && (
           <button className="btn small" disabled={restarting} onClick={() => void restart()}>

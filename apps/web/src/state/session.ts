@@ -10,7 +10,6 @@ interface SessionState {
   status: 'unknown' | 'anonymous' | 'authenticated';
   user: UserRecord | null;
   permissions: Set<string>;
-  demo: { users: string[]; password: string | null } | null;
   /** Set between the password and the code: the sign-in is waiting for the authenticator's code. */
   challenge: string | null;
   /** A privileged account that has not yet set up its second factor: the console shows only the set-up. */
@@ -28,7 +27,6 @@ export const useSession = create<SessionState>((set, getState) => ({
   status: 'unknown',
   user: null,
   permissions: new Set(),
-  demo: null,
   challenge: null,
   mustEnrol: false,
   async refresh() {
@@ -36,8 +34,7 @@ export const useSession = create<SessionState>((set, getState) => ({
       const me = await get<Me>('/api/auth/me');
       set({ status: 'authenticated', user: me.user, permissions: new Set(me.permissions), mustEnrol: Boolean(me.user.mfaPending), challenge: null });
     } catch {
-      const demo = await get<{ users: string[]; password: string | null }>('/api/auth/demo').catch(() => null);
-      set({ status: 'anonymous', user: null, permissions: new Set(), demo, challenge: null, mustEnrol: false });
+      set({ status: 'anonymous', user: null, permissions: new Set(), challenge: null, mustEnrol: false });
     }
   },
   async login(username, password) {

@@ -3,7 +3,7 @@
  * collision-aware positioning and ARIA come from the library; the look comes from styles/app.css.
  * Use these instead of hand-rolled menus, dialogs, tabs and button groups.
  */
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Dialog as D, Tabs as T, ToggleGroup as TG, Tooltip as TT } from 'radix-ui';
 import { Icon } from './Icons';
 import ArcSegmented from './arc/segmented-control/segmented-control';
@@ -111,10 +111,20 @@ export function Tip({ content, children, side = 'top', disabled }: { content: Re
   );
 }
 
-/** Modal dialog: focus trap, Escape and outside click close, focus returns to the opener. */
+/** How long a dialog takes to leave (the exit keyframes in app.css). The parent unmounts it after this, so the exit plays. */
+const DIALOG_EXIT_MS = 160;
+
+/** Modal dialog: focus trap, Escape and outside click close, focus returns to the opener. Closing plays the exit first,
+ *  and onClose runs when it has finished, so a parent that unmounts the dialog on close does not cut the exit short. */
 export function Dialog({ title, description, children, onClose, wide, footer }: { title: string; description?: ReactNode; children: ReactNode; onClose: () => void; wide?: boolean; footer?: ReactNode }) {
+  const [open, setOpen] = useState(true);
+  useEffect(() => {
+    if (open) return;
+    const timer = window.setTimeout(onClose, DIALOG_EXIT_MS);
+    return () => window.clearTimeout(timer);
+  }, [open, onClose]);
   return (
-    <D.Root open onOpenChange={(o) => !o && onClose()}>
+    <D.Root open={open} onOpenChange={(o) => !o && setOpen(false)}>
       <D.Portal>
         <D.Overlay className="modal-back" />
         <D.Content className={`modal ${wide ? 'wide' : ''}`} {...(description ? {} : { 'aria-describedby': undefined })}>

@@ -124,7 +124,7 @@
 .cmp-faces img { width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--bg-0); border-radius: var(--radius); }
 .cmp-faces figcaption { font-size: var(--fs-caption); }
 .score-bar { height: 4px; background: var(--bg-4); border-radius: 2px; position: relative; }
-.score-bar > i { position: absolute; inset: 0 auto 0 0; background: var(--text-1); }
+.score-bar > i { position: absolute; inset: 0 auto 0 0; background: var(--text-1); transition: width var(--t-slow) var(--ease-out); }
 .score-bar > b { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--text-1); }
 .reg { display: grid; grid-template-columns: 380px 1fr; min-height: 0; height: 100%; }
 .reg-list { border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }

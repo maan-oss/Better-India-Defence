@@ -140,7 +140,7 @@ function Kpis({ version }: { version: number }) {
     <div className="cards kpis">
       {k.map((x, i) => (
         <button key={x.l} className={`stat ${x.cls}`} style={{ animationDelay: `${i * 40}ms` }} onClick={() => nav(x.go)}>
-          <div className="v">{x.v}</div>
+          <div key={String(x.v)} className="v tally-in">{x.v}</div>
           <div className="l">{x.l}</div>
           <div className="kpi-sub">{x.sub}</div>
           {x.spark && x.spark.filter((v) => v > 0).length >= 3 && <Spark values={x.spark} stretch color={crit ? 'var(--st-critical)' : 'var(--data)'} />}

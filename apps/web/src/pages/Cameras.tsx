@@ -806,8 +806,8 @@ function FocusPanel({
         <CameraFaces id={c.id} />
       ) : (
         <div className="section muted" style={{ fontSize: 'var(--fs-caption)' }}>
-          Face recognition runs on analysed live streams. Site cameras in the
-          demo report analytics only.
+          Face recognition runs on analysed live streams. Site cameras report
+          analytics only.
         </div>
       )}
     </aside>

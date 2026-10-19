@@ -29,7 +29,6 @@ export function Login() {
   const verifyCode = useSession((s) => s.verifyCode);
   const cancelChallenge = useSession((s) => s.cancelChallenge);
   const challenge = useSession((s) => s.challenge);
-  const demo = useSession((s) => s.demo);
   const [code, setCode] = useState('');
   const [banner, setBanner] = useState<Banner | null>(null);
   const [username, setUsername] = useState('');
@@ -43,9 +42,6 @@ export function Login() {
       .then(setBanner)
       .catch(() => setBanner(null));
   }, []);
-  useEffect(() => {
-    if (demo?.password && !username) setUsername('operator');
-  }, [demo, username]);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -129,13 +125,8 @@ export function Login() {
               <b>Authorised use only</b>
               {banner?.notice ?? 'This system is for authorised use only. Activity is monitored and recorded.'} By signing in you acknowledge this notice.
             </div>
-            {demo?.password && (
-              <div className="note" style={{ marginTop: 14, fontSize: 'var(--fs-caption)' }}>
-                Demonstration build — accounts <span className="mono">{demo.users.join(' · ')}</span>, password <span className="mono">{demo.password}</span>.
-              </div>
-            )}
             <div className="login-foot">
-              <span>{banner?.simulated ? 'Demonstration site — synthetic data' : 'Live installation'}</span>
+              <span>{banner?.simulated ? 'Synthetic data' : 'Live installation'}</span>
             </div>
           </form>
         </section>
