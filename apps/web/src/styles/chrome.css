@@ -1,6 +1,6 @@
 /* The top bar and the rail: the desktop geometry, above 760px. Loaded last, so it wins over app.css and glass.css,
    which keep the base rules and the phone layout. On a phone (760px and under) app.css turns the rail into the bottom
-   tab bar and nothing in this file applies. */
+   tab bar; the bell and account capsule below applies at every width. */
 
 /* The names and key hints of the rail show only when the rail is open (desktop); the phone bar shows short labels. */
 .rail-name,
@@ -8,8 +8,70 @@
   display: none;
 }
 
+/* Bell, display switch and account: one capsule of three circles, each on the capsule's centre line. */
+.tb-cluster {
+  box-sizing: border-box;
+  height: var(--tb-ctl);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+}
+.tb-cluster .tb-bell,
+.tb-cluster .tb-night button,
+.tb-cluster .user-btn {
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+.tb-cluster .tb-bell {
+  width: auto;
+  min-width: 30px;
+  padding: 0 7px;
+  gap: 4px;
+}
+.tb-cluster .tb-night {
+  display: inline-flex;
+  align-items: center;
+}
+.tb-cluster .tb-bell:hover,
+.tb-cluster .tb-night button:hover,
+.tb-cluster .user-btn:hover {
+  background: var(--glass-fill-strong);
+}
+/* The count sits inside the bell's own capsule, never over its edge. */
+.tb-bell-n {
+  position: static;
+  top: auto;
+  right: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--st-critical);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  box-shadow: none;
+}
+
 @media (min-width: 761px) {
   /* ---------------------------------------------------------------- top bar */
+  /* The bar's text starts on the page header's 20px inset, 8px in from the bar's own edge. */
   .topbar {
     grid-column: 2;
     grid-row: 1;
@@ -18,7 +80,7 @@
     grid-template-columns: minmax(0, auto) minmax(200px, 1fr) minmax(0, auto);
     align-items: center;
     gap: var(--sp-4);
-    padding: 0 var(--sp-3) 0 var(--sp-4);
+    padding: 0 var(--sp-2);
     position: relative;
     z-index: 20;
     min-width: 0;
@@ -127,67 +189,6 @@
     bottom: 0;
     right: 0;
     height: auto;
-  }
-
-  /* Bell, display switch and account: one capsule of three circles, each on the capsule's centre line. */
-  .tb-cluster {
-    box-sizing: border-box;
-    height: var(--tb-ctl);
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    padding: 3px;
-    border-radius: 999px;
-  }
-  .tb-cluster .tb-bell,
-  .tb-cluster .tb-night button,
-  .tb-cluster .user-btn {
-    box-sizing: border-box;
-    width: 30px;
-    height: 30px;
-    min-width: 0;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-  }
-  .tb-cluster .tb-bell {
-    width: auto;
-    min-width: 30px;
-    padding: 0 7px;
-    gap: 4px;
-  }
-  .tb-cluster .tb-night {
-    display: inline-flex;
-    align-items: center;
-  }
-  .tb-cluster .tb-bell:hover,
-  .tb-cluster .tb-night button:hover,
-  .tb-cluster .user-btn:hover {
-    background: var(--glass-fill-strong);
-  }
-  /* The count sits inside the bell's own capsule, never over its edge. */
-  .tb-bell-n {
-    position: static;
-    top: auto;
-    right: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    border-radius: 9px;
-    background: var(--st-critical);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    box-shadow: none;
   }
 
   /* ---------------------------------------------------------------- rail */

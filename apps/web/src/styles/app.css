@@ -425,12 +425,14 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 @media (max-width: 760px) {
   html, body { overflow-x: hidden; }
   .shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: var(--top-h) minmax(0, 1fr); }
-  .topbar { grid-column: 1; grid-row: 1; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--sp-2); padding: 0 var(--sp-2) 0 var(--sp-3); }
-  .tb-crumbs li:not(:last-child) { display: none; }
+  .topbar { grid-column: 1; grid-row: 1; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--sp-2); padding: 0 var(--sp-2); }
+  /* The phone bar shows the demo or operational badge and the controls only; the site name lives on the page header. */
+  .tb-crumbs { display: none; }
   .island .isl-alerts, .island .isl-sensors, .island .isl-mode, .island .isl-live { display: none; }
   .main { grid-column: 1; grid-row: 2; }
   /* Tab bar: a floating frosted bar over the foot of the page, at most five destinations (four areas and More). */
-  .rail { position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 40; grid-row: auto; grid-column: auto; height: 66px; flex-direction: row; border: 1px solid var(--line-2); border-radius: 33px; background: color-mix(in srgb, var(--bg-2) 80%, transparent); -webkit-backdrop-filter: blur(22px) saturate(160%); backdrop-filter: blur(22px) saturate(160%); padding: 0 6px; }
+  /* Two classes, not one: glass.css sets .rail to relative after this file, and this must still float. */
+  .shell > .rail { position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 40; grid-row: auto; grid-column: auto; height: 66px; flex-direction: row; border: 1px solid var(--line-2); border-radius: 33px; background: color-mix(in srgb, var(--bg-2) 80%, transparent); -webkit-backdrop-filter: blur(22px) saturate(160%); backdrop-filter: blur(22px) saturate(160%); padding: 0 6px; }
   .page, .ops { padding-bottom: 84px; }
   .rail-logo, .rail-foot, .rail-sep, .rail-secondary { display: none !important; }
   .rail-items { flex-direction: row; overflow: visible; padding: 0; gap: 0; height: 100%; width: 100%; align-items: stretch; }
@@ -454,6 +456,11 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
   .toasts { left: 10px; right: 10px; width: auto; }
   /* minmax(0, …): a plain 1fr grows to fit its widest child and pushes the page past the phone edge. */
   .split, .page-body { grid-template-columns: minmax(0, 1fr) !important; }
+  /* Stacked panes are separated by a hairline across the page, not a rule down its edge. */
+  .split > * { border-right: 0; }
+  .split > * + * { border-top: 1px solid var(--line); }
+  /* A detail pane with nothing to show takes no room on a phone. */
+  .inc-detail:not(.open) { display: none; }
   /* A filter wider than the phone scrolls inside its own row instead of being clipped. */
   .seg, .arc-seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
   .arc-seg.md button { font-size: 12px; padding: 0 8px; }
