@@ -192,21 +192,8 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
 
   const siteName = facility?.name.split(' — ')[0] ?? 'Site';
   const title = pageTitle(loc.pathname);
-  const area = NAV.flatMap((g) => g.items).find((i) => loc.pathname.startsWith(i.to));
-  const rest = area ? loc.pathname.slice(area.to.length).split('/').filter(Boolean) : [];
-  const incidents = useData((s) => s.incidents);
-  // Show an incident by its code (INC-2026-001), not its internal id.
-  const restLabel = rest
-    .map((x) => {
-      const v = decodeURIComponent(x);
-      return area?.to === '/incidents' ? (incidents.find((i) => i.id === v)?.code ?? v) : v;
-    })
-    .join(' · ');
-  // The page header names the page, so the bar only places it: an area's own page shows the site alone.
-  const crumbs = [
-    { label: siteName, onClick: () => setSiteOpen((o) => !o) },
-    ...(rest.length && area ? [{ label: title, href: area.to }, { label: restLabel }] : []),
-  ];
+  // The page header names the page and the record, so the bar carries the site alone: no internal ids, no repeated titles.
+  const crumbs = [{ label: siteName, onClick: () => setSiteOpen((o) => !o) }];
   const role = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '';
   useEffect(() => {
     document.title = `${title} · ${siteName} · Strata`;

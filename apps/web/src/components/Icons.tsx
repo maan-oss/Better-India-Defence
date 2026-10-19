@@ -24,8 +24,8 @@ export const Icon = {
   ),
   Docs: () => (
     <svg {...p}>
-      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-      <path d="M14 3v5h5M9 13h6M9 17h6" />
+      <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2.5h6.5A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z" />
+      <path d="M3 10h18" />
     </svg>
   ),
   Assets: () => (
@@ -42,14 +42,14 @@ export const Icon = {
   ),
   Recon: () => (
     <svg {...p}>
-      <path d="M4 20V9l8-5 8 5v11" />
-      <path d="M4 14h16M9 20v-6M15 20v-6" />
+      <path d="M12 4 21 8.5 12 13 3 8.5z" />
+      <path d="M3 13l9 4.5 9-4.5M3 17.5l9 4.5 9-4.5" />
     </svg>
   ),
   Evidence: () => (
     <svg {...p}>
-      <path d="M6 3h9l4 4v14H6z" />
-      <path d="M14 3v5h5M9 13h7M9 17h5" />
+      <path d="M3.5 4.5h7.2l9.8 9.8a1.6 1.6 0 0 1 0 2.3l-4.9 4.9a1.6 1.6 0 0 1-2.3 0L3.5 11.7z" />
+      <circle cx="8" cy="9" r="1.4" />
     </svg>
   ),
   Sim: () => (

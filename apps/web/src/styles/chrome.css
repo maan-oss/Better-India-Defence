@@ -77,7 +77,8 @@
     grid-row: 1;
     height: var(--top-h);
     display: grid;
-    grid-template-columns: minmax(0, auto) minmax(200px, 1fr) minmax(0, auto);
+    /* The search sits on the bar's centre whatever the site name and the controls take, so it never moves. */
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 440px) minmax(0, 1fr);
     align-items: center;
     gap: var(--sp-4);
     padding: 0 var(--sp-2);
