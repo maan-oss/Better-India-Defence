@@ -138,128 +138,136 @@ export function Field() {
   const brg = team?.position && task?.target ? bearing(team.position, task.target) : null;
 
   return (
-    <div className="field">
-      <div className="field-top">
-        <div className="field-team">
-          <ArcSelect label="My team" placeholder="Select your team" value={teamId || undefined} onValueChange={pick} options={(teams.data ?? []).map((t) => ({ value: t.id, label: `${t.callsign} · ${t.kind}` }))} />
-        </div>
-        {team && <span className={`fstat s-${team.status.replace(' ', '-')}`}>{team.status}</span>}
+    <div className="page">
+      <div className="page-h">
+        <h1>Field</h1>
+        <span className="sub">One team: its task, position, nearby alerts and reports.</span>
       </div>
-      {team && (
-        <div className="field-pos mono">
-          <span>{team.mgrs ?? 'no position fix'}</span>
-          <span className="dim">{team.positionAgeS !== null ? `fix ${Math.round(team.positionAgeS)} s ago` : ''}</span>
-        </div>
-      )}
-      {team && can('ops.log') && <ShareLocation teamId={team.id} onFix={() => teams.reload()} />}
-      {!team && (
-        <Empty art="tasks" title="Choose your team" description="The field view follows one team: its current task, position, nearby alerts and reports. Your choice is remembered on this device." />
-      )}
-
-      {team && (
-        <>
-          {task ? (
-            <section className={`ftask p-${task.priority}`}>
-              <div className="ftask-h">
-                <span className="mono">TASK {String(task.number).padStart(3, '0')}</span>
-                <span className={`chip ${task.priority === 'critical' ? 'red' : task.priority === 'high' ? 'amber' : ''}`}>{task.priority}</span>
-                <span className="spacer" />
-                <span className="mono dim">{task.status}</span>
-              </div>
-              <div className="ftask-orders">{task.orders}</div>
-              <div className="ftask-loc">
-                <div>
-                  <span className="upper dim">Grid</span>
-                  <b className="mono">{task.mgrs ?? task.locationText ?? '—'}</b>
-                </div>
-                <div>
-                  <span className="upper dim">Distance</span>
-                  <b className="mono">{dist === null ? '—' : dist >= 1000 ? `${(dist / 1000).toFixed(2)} km` : `${Math.round(dist)} m`}</b>
-                </div>
-                <div>
-                  <span className="upper dim">Bearing</span>
-                  <b className="mono">{brg === null ? '—' : `${String(Math.round(brg)).padStart(3, '0')}° ${CARD[Math.round(brg / 45) % 8]}`}</b>
-                </div>
-                <div>
-                  <span className="upper dim">ETA</span>
-                  <b className="mono">{task.etaS !== null ? `${Math.max(1, Math.round(task.etaS / 60))} min` : '—'}</b>
-                </div>
-              </div>
-              {task.locationText && task.mgrs && <div className="muted" style={{ fontSize: 'var(--fs-body)', marginTop: 6 }}>{task.locationText}</div>}
-              {can('ops.dispatch') && NEXT[task.status] && (
-                <>
-                  {NEXT[task.status]!.status === 'COMPLETE' && (
-                    <div style={{ marginTop: 12 }}>
-                      <Textarea label="Outcome" rows={2} placeholder="What you found, actions taken" value={outcome} onChange={(e) => setOutcome(e.target.value)} />
-                    </div>
-                  )}
-                  <div className="field-slide" ref={slideBox}>
-                    <SlideToConfirm key={`${task.status}-${slideW}`} width={slideW} label={`Slide: ${NEXT[task.status]!.label.toLowerCase()}`} confirmedLabel="Sent to control room" resetDelay={60_000} onConfirm={() => void advance(NEXT[task.status]!.status)} />
-                  </div>
-                </>
-              )}
-              <div className="field-steps">
-                <Stepper label="Task progress" details="current" current={Math.max(0, STEPS.indexOf(task.status)) + 1} steps={STEPS.map((st) => ({ id: st, label: st.charAt(0) + st.slice(1).toLowerCase() }))} />
-              </div>
-              {(task.status === 'ON SCENE' || task.status === 'EN ROUTE') && <ArrivalDrills taskId={task.id} />}
-            </section>
-          ) : (
-            <section className="ftask idle">
-              <div className="ftask-h">
-                <span>No active task</span>
-              </div>
-              <div className="muted">Standing by. New tasks from the control room appear here and sound the alarm.</div>
-            </section>
+      <div className="page-body">
+        <div className="field">
+          <div className="field-top">
+            <div className="field-team">
+              <ArcSelect label="My team" placeholder="Select your team" value={teamId || undefined} onValueChange={pick} options={(teams.data ?? []).map((t) => ({ value: t.id, label: `${t.callsign} · ${t.kind}` }))} />
+            </div>
+            {team && <span className={`fstat s-${team.status.replace(' ', '-')}`}>{team.status}</span>}
+          </div>
+          {team && (
+            <div className="field-pos mono">
+              <span>{team.mgrs ?? 'no position fix'}</span>
+              <span className="dim">{team.positionAgeS !== null ? `fix ${Math.round(team.positionAgeS)} s ago` : ''}</span>
+            </div>
           )}
-          {err && <ErrorNote error={err} />}
+          {team && can('ops.log') && <ShareLocation teamId={team.id} onFix={() => teams.reload()} />}
+          {!team && (
+            <Empty art="tasks" title="Choose your team" description="The field view follows one team: its current task, position, nearby alerts and reports. Your choice is remembered on this device." />
+          )}
 
-          <div id="field-picture">
-            <LocalPicture centre={team.position} target={task?.target ?? null} />
-          </div>
-
-          <section className="fsec" id="field-alerts">
-            <h4>Alerts near you</h4>
-            {near.length === 0 && <div className="muted">None.</div>}
-            {near.length > 0 && (
-              <SwipeActions label="Alerts near you" className="field-swipe">
-                {near.map((a) => (
-                  <SwipeActionsRow
-                    key={a.id}
-                    label={a.title}
-                    leading={can('ops.log') ? [{ label: 'Report', icon: <Radio size={18} />, tone: 'accent', keepRow: true, onSelect: () => setReport(a.position ? grid(a.position) : true) }] : undefined}
-                    trailing={can('alerts.acknowledge') && a.status === 'open' ? [{ label: 'Acknowledge', icon: <Bell size={18} />, tone: 'neutral', keepRow: true, onSelect: () => void ack(a) }] : undefined}
-                  >
-                    <NearAlert a={a} from={team.position} />
-                    <div className="fal-actions">
-                      {can('ops.log') && (
-                        <Button size="sm" variant="secondary" onClick={() => setReport(a.position ? grid(a.position) : true)}>
-                          Report
-                        </Button>
-                      )}
-                      {can('alerts.acknowledge') && a.status === 'open' && (
-                        <Button size="sm" variant="secondary" onClick={() => void ack(a)}>
-                          Acknowledge
-                        </Button>
-                      )}
+          {team && (
+            <>
+              {task ? (
+                <section className={`ftask p-${task.priority}`}>
+                  <div className="ftask-h">
+                    <span className="mono">TASK {String(task.number).padStart(3, '0')}</span>
+                    <span className={`chip ${task.priority === 'critical' ? 'red' : task.priority === 'high' ? 'amber' : ''}`}>{task.priority}</span>
+                    <span className="spacer" />
+                    <span className="mono dim">{task.status}</span>
+                  </div>
+                  <div className="ftask-orders">{task.orders}</div>
+                  <div className="ftask-loc">
+                    <div>
+                      <span className="upper dim">Grid</span>
+                      <b className="mono">{task.mgrs ?? task.locationText ?? '—'}</b>
                     </div>
-                  </SwipeActionsRow>
-                ))}
-              </SwipeActions>
-            )}
-            {near.length > 0 && <div className="dim" style={{ fontSize: 'var(--fs-caption)', marginTop: 6 }}>Or swipe right to report on an alert, left to acknowledge it.</div>}
-          </section>
+                    <div>
+                      <span className="upper dim">Distance</span>
+                      <b className="mono">{dist === null ? '—' : dist >= 1000 ? `${(dist / 1000).toFixed(2)} km` : `${Math.round(dist)} m`}</b>
+                    </div>
+                    <div>
+                      <span className="upper dim">Bearing</span>
+                      <b className="mono">{brg === null ? '—' : `${String(Math.round(brg)).padStart(3, '0')}° ${CARD[Math.round(brg / 45) % 8]}`}</b>
+                    </div>
+                    <div>
+                      <span className="upper dim">ETA</span>
+                      <b className="mono">{task.etaS !== null ? `${Math.max(1, Math.round(task.etaS / 60))} min` : '—'}</b>
+                    </div>
+                  </div>
+                  {task.locationText && task.mgrs && <div className="muted" style={{ fontSize: 'var(--fs-body)', marginTop: 6 }}>{task.locationText}</div>}
+                  {can('ops.dispatch') && NEXT[task.status] && (
+                    <>
+                      {NEXT[task.status]!.status === 'COMPLETE' && (
+                        <div style={{ marginTop: 12 }}>
+                          <Textarea label="Outcome" rows={2} placeholder="What you found, actions taken" value={outcome} onChange={(e) => setOutcome(e.target.value)} />
+                        </div>
+                      )}
+                      <div className="field-slide" ref={slideBox}>
+                        <SlideToConfirm key={`${task.status}-${slideW}`} width={slideW} label={`Slide: ${NEXT[task.status]!.label.toLowerCase()}`} confirmedLabel="Sent to control room" resetDelay={60_000} onConfirm={() => void advance(NEXT[task.status]!.status)} />
+                      </div>
+                    </>
+                  )}
+                  <div className="field-steps">
+                    <Stepper label="Task progress" details="current" current={Math.max(0, STEPS.indexOf(task.status)) + 1} steps={STEPS.map((st) => ({ id: st, label: st.charAt(0) + st.slice(1).toLowerCase() }))} />
+                  </div>
+                  {(task.status === 'ON SCENE' || task.status === 'EN ROUTE') && <ArrivalDrills taskId={task.id} />}
+                </section>
+              ) : (
+                <section className="ftask idle">
+                  <div className="ftask-h">
+                    <span>No active task</span>
+                  </div>
+                  <div className="muted">Standing by. New tasks from the control room appear here and sound the alarm.</div>
+                </section>
+              )}
+              {err && <ErrorNote error={err} />}
 
-          <div className="factions" id="field-report">
-            {can('ops.log') && (
-              <Button variant="secondary" size="lg" className="field-big" onClick={() => setReport(true)}>
-                Contact report (SALUTE)
-              </Button>
-            )}
-            {can('ops.log') && <AssistButton teamId={team.id} />}
-          </div>
-        </>
-      )}
-      {report && <SaluteForm teamId={teamId || null} position={team?.position ?? null} location={typeof report === 'string' ? report : null} onClose={() => setReport(false)} />}
+              <div id="field-picture">
+                <LocalPicture centre={team.position} target={task?.target ?? null} />
+              </div>
+
+              <section className="fsec" id="field-alerts">
+                <h4>Alerts near you</h4>
+                {near.length === 0 && <div className="muted">None.</div>}
+                {near.length > 0 && (
+                  <SwipeActions label="Alerts near you" className="field-swipe">
+                    {near.map((a) => (
+                      <SwipeActionsRow
+                        key={a.id}
+                        label={a.title}
+                        leading={can('ops.log') ? [{ label: 'Report', icon: <Radio size={18} />, tone: 'accent', keepRow: true, onSelect: () => setReport(a.position ? grid(a.position) : true) }] : undefined}
+                        trailing={can('alerts.acknowledge') && a.status === 'open' ? [{ label: 'Acknowledge', icon: <Bell size={18} />, tone: 'neutral', keepRow: true, onSelect: () => void ack(a) }] : undefined}
+                      >
+                        <NearAlert a={a} from={team.position} />
+                        <div className="fal-actions">
+                          {can('ops.log') && (
+                            <Button size="sm" variant="secondary" onClick={() => setReport(a.position ? grid(a.position) : true)}>
+                              Report
+                            </Button>
+                          )}
+                          {can('alerts.acknowledge') && a.status === 'open' && (
+                            <Button size="sm" variant="secondary" onClick={() => void ack(a)}>
+                              Acknowledge
+                            </Button>
+                          )}
+                        </div>
+                      </SwipeActionsRow>
+                    ))}
+                  </SwipeActions>
+                )}
+                {near.length > 0 && <div className="dim" style={{ fontSize: 'var(--fs-caption)', marginTop: 6 }}>Or swipe right to report on an alert, left to acknowledge it.</div>}
+              </section>
+
+              <div className="factions" id="field-report">
+                {can('ops.log') && (
+                  <Button variant="secondary" size="lg" className="field-big" onClick={() => setReport(true)}>
+                    Contact report (SALUTE)
+                  </Button>
+                )}
+                {can('ops.log') && <AssistButton teamId={team.id} />}
+              </div>
+            </>
+          )}
+          {report && <SaluteForm teamId={teamId || null} position={team?.position ?? null} location={typeof report === 'string' ? report : null} onClose={() => setReport(false)} />}
+        </div>
+      </div>
     </div>
   );
 }
