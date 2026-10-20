@@ -2,7 +2,10 @@
    position: relative, which would drop these into the flow and push the compass under the mode row, so they keep the
    absolute placement their offsets were written for. */
 .ops .map-modes, .ops .map-dock, .ops .compass, .ops .scalebar { position: absolute; }
-.glass-2 { border: 1px solid var(--line-2); }
+/* One surface per control. The mode row's own tray is its only material, so the glass container behind it goes; the
+   dock's group paints nothing of its own, so the dock's glass is the only surface behind its buttons. */
+.ops .map-modes { background: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; padding: 0; }
+.ops .map-dock [data-variant] { background: transparent; border-color: transparent; box-shadow: none; }
 
 .map-modes { position: absolute; top: var(--ops-top); left: 12px; z-index: 7; padding: 3px; border-radius: 12px; max-width: calc(100% - 140px); overflow-x: auto; scrollbar-width: none; }
 .map-modes > * { --control-height-md: 30px; }
@@ -44,7 +47,9 @@
 .gs-progress { width: 100%; }
 @media (max-width: 760px) { .get-started { width: calc(100% - 24px); top: auto; bottom: 12px; translate: -50% 0; } }
 
-/* Phones: map and timeline only; the inspector is a bottom sheet. */
+/* Phones: map and timeline only; the inspector is a bottom sheet. Every control on the map keeps the same 12px gutter:
+   the mode row across the top, the tool dock and the compass beneath it, the scale and the "ask" control above the
+   timeline. The timeline is a fixed band that sits on top of the tab bar. */
 .ops.narrow { flex-direction: column; }
 .ops-col { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .ops.narrow .map-modes { right: 12px; max-width: none; }
@@ -54,4 +59,11 @@
 /* The mode row takes the full width on a phone, so the compass moves to the row beneath it, opposite the layers dock. */
 .ops.narrow .compass { top: calc(var(--ops-top) + 48px); }
 .ops.narrow .cursor-ref { display: none; }
-.ops.narrow .scalebar { left: 12px; bottom: 64px; }
+.ops.narrow .scalebar { left: 12px; bottom: 12px; }
+.ops.narrow .ops-bottom:not(:has(.timeline.compact)) { height: 168px; }
+.ops.narrow .timeline { grid-template-columns: minmax(0, 1fr); grid-template-rows: 44px minmax(0, 1fr) auto; }
+.ops.narrow .tl-controls { gap: 6px; padding: 0 10px; }
+.ops.narrow .tl-controls [aria-label="Step back"], .ops.narrow .tl-controls [aria-label="Step forward"] { display: none; }
+.ops.narrow .tl-controls > .row { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ops.narrow .tl-controls > .spacer { flex: 1 1 0; min-width: 0; }
+.ops.narrow .tl-legend { gap: 4px 14px; padding: 6px 10px 8px; }

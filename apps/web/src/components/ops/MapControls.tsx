@@ -37,7 +37,7 @@ export function ModeControl() {
     if (m === 'HISTORY' && time.mode === 'live') time.seek(time.currentLiveEdge() - 15 * 60_000);
   };
   return (
-    <div className="map-modes glass-2" data-map-chrome title={MODE_HELP[mode]}>
+    <div className="map-modes" data-map-chrome title={MODE_HELP[mode]}>
       <SegmentedControl label="Picture mode" value={mode} onValueChange={pick} options={MODES.map((m) => ({ value: m, label: MODE_LABEL[m] }))} />
     </div>
   );

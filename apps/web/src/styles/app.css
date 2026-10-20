@@ -447,11 +447,11 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
   .rail-group { display: contents; }
   .rail-item, .rail-more { flex: 1 1 0; min-width: 0; width: auto; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3px; padding: 4px 2px; border-radius: 50%; color: var(--text-2); background: transparent; }
   .rail-item:hover, .rail-more:hover { background: transparent; color: var(--text-0); }
-  /* Each icon sits in a 40 px circle; the selected one is filled. */
-  .rail-item svg, .rail-more svg { width: 22px; height: 22px; padding: 8px; box-sizing: content-box; border-radius: 50%; }
+  /* Each glyph is 26 px inside a 38 px circle; the selected one is filled. */
+  .rail-item svg, .rail-more svg { width: 26px; height: 26px; padding: 6px; box-sizing: content-box; border-radius: 50%; }
   .rail-item.active { background: transparent; color: var(--text-0); }
   .rail-item.active svg { background: var(--bg-4); }
-  .rail-label { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 13px; font-weight: 500; letter-spacing: 0; text-align: center; }
+  .rail-label { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 14px; font-weight: 500; letter-spacing: 0; text-align: center; }
   /* The count sits inside the icon's circle: its right edge on the circle's edge, never past it. */
   .rail-badge { top: 6px; right: calc(50% - 20px); min-width: 16px; height: 16px; padding: 0 4px; font-size: 10px; line-height: 16px; border-radius: 8px; }
   .tb-synthetic-long { display: none; }

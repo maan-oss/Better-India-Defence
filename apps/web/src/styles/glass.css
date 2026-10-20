@@ -162,7 +162,7 @@ input.input, select.input { border-radius: 999px; padding: 0 14px; }
 @media (max-width: 760px) {
   .shell { padding: 0; row-gap: 0; grid-template-rows: minmax(0, 1fr); background: var(--bg-1); }
   .main { grid-row: 1; grid-column: 1; border: 0; border-radius: 0; }
-  .topbar { grid-row: 1; grid-column: 1; align-self: start; z-index: 30; height: var(--top-h); margin: 8px 8px 0; }
+  .topbar { grid-row: 1; grid-column: 1; align-self: start; z-index: 30; height: var(--top-h); margin: 8px 12px 0; }
   .rail { border-radius: 33px; }
   .rail-item:hover, .rail-more:hover { background: transparent; }
   .rail-item.active { background: transparent; box-shadow: none; }
