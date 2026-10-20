@@ -78,10 +78,10 @@
   .table th { display: block; flex: none; height: auto; border: 0; padding: 0; background: transparent; }
   /* Select all stays pinned while the sort controls scroll beneath it. */
   .table th.selectCell { position: sticky; left: calc(-1 * var(--space-2)); z-index: 1; width: 40px; margin-left: calc(-1 * var(--space-2)); padding: 0 0 0 var(--space-3); background: var(--surface); }
-  .table th.selectCell .selectHit { height: 32px; }
+  .table th.selectCell .selectHit { height: 36px; }
   /* Once the strip scrolls, a fade off the pinned cell hides the word sliding under it. */
   .table th.selectCell::after { position: absolute; top: 0; bottom: 0; left: 100%; width: 36px; background: linear-gradient(to right, var(--surface) 45%, transparent); content: ""; opacity: 0; pointer-events: none; animation: stripFade linear both; animation-timeline: scroll(nearest inline); animation-range: 0 24px; }
-  .table th .sortButton, .table[data-selectable] th[data-primary] .sortButton { width: auto; height: 32px; border-radius: var(--radius-control); padding: 0 10px; transition: background-color var(--duration-standard) var(--ease-standard), color var(--duration-standard) var(--ease-standard); }
+  .table th .sortButton, .table[data-selectable] th[data-primary] .sortButton { width: auto; height: 36px; border-radius: var(--radius-control); padding: 0 10px; transition: background-color var(--duration-standard) var(--ease-standard), color var(--duration-standard) var(--ease-standard); }
   .table th[data-sorted] .sortButton { background: var(--surface-muted); }
   .table th[data-numeric] .sortInner { flex-direction: row; }
   .sortButton:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }

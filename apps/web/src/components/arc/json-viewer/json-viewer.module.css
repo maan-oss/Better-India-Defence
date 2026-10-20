@@ -81,6 +81,14 @@
   .action[data-state="done"]:hover { color: var(--success); }
 }
 
+/* Phones: rows, copy and search controls reach the 36px touch minimum. The row height here matches rowHeight() in
+   json-viewer.tsx, which positions the rows and scrolls to them. */
+@media (max-width: 760px) {
+  .line { height: 36px; }
+  .action, .pathCopy, .tool, .search .tool { width: 36px; height: 36px; }
+  .search, .input { min-height: 36px; }
+  .input { height: 36px; }
+}
 @media (max-width: 420px) {
   .tree { --indent: 12px; }
   .key { max-width: 40%; }

@@ -50,6 +50,9 @@
 
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
+@media (max-width: 760px) {
+  .toggle { min-height: 36px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .toggle, .swatch, .layer, .crosshair, .label, .tooltip, .tipRow, .axisLabel { transition: none; }
 }

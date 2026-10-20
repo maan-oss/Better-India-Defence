@@ -70,3 +70,9 @@
 .ops.narrow .tl-controls > .row { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ops.narrow .tl-controls > .spacer { flex: 1 1 0; min-width: 0; }
 .ops.narrow .tl-legend { gap: 4px 14px; padding: 6px 10px 8px; }
+/* The layer switches and the site list in the layers sheet are tap targets; on a phone each row reaches 36px. */
+@media (max-width: 760px) {
+  .ms-row { min-height: 36px; }
+  .ms-thing { height: 36px; }
+  .ops.narrow .map-modes button { min-width: 36px; }
+}

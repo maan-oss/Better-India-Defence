@@ -637,6 +637,8 @@ button.rc-job[aria-current] > span:first-child { text-decoration: underline; tex
   .dispatch-pos { display: none; }
   .dispatch-table th:first-child, .dispatch-table td:first-child { width: 36px; padding-inline: 4px; }
 }
+/* The "Ask the record" entry point sits over the map, above the timeline. */
+.btn.ask-open { position: absolute; right: 12px; bottom: 12px; z-index: 11; height: 32px; }
 /* Touch targets. On a phone every control has a hit area a thumb can reach: 40px for the top bar, 36px for buttons,
    tabs and segments. The glyphs keep their size; only the area around them grows. */
 @media (max-width: 760px) {
@@ -647,12 +649,17 @@ button.rc-job[aria-current] > span:first-child { text-decoration: underline; tex
   .shell .topbar .tb-synthetic { font-size: 10px; }
   .shell .topbar > .tb-right { gap: 4px; }
   .shell .topbar .tb-bell, .shell .topbar .tb-night button, .shell .topbar .user-btn { min-width: 40px; min-height: 40px; }
-  .arc-seg.sm { --control-height-sm: 32px; }
+  /* Segmented controls: the desktop sizes (24px sm, md) give way to the phone's 36px segment. */
+  .arc-seg.sm, .arc-seg.md { --control-height-sm: 36px; }
   .btn.small { min-height: 36px; }
   .btn.icon.small { width: 36px; height: 36px; }
   .tab { min-height: 36px; }
-  .seg > button, .arc-seg > button { min-height: 32px; }
-  /* Text links that open a record keep their look; their tap area reaches a finger's width into the rows above and
-     below. The negative margin cancels the padding, so no row changes height. */
-  button.obs-link, button.link-btn { padding-block: 9px; margin-block: -9px; }
+  .seg > button, .arc-seg button { min-width: 36px; min-height: 36px; }
+  .btn.ask-open { height: 36px; }
+  .inc-title button { min-height: 36px; }
+  .touch-range { height: 36px; }
+  /* Text links that open a record keep their look. Their tap area is 36px tall and at least 36px wide, reaching
+     into the rows above and below. The negative margins cancel the padding, so no row or column changes place. */
+  button.obs-link, button.link-btn { display: inline-block; box-sizing: border-box; min-width: 36px; line-height: 18px; padding: 9px 8px; margin: -9px -8px; text-align: start; }
+  .sn-table button.obs-link[aria-current] { padding: 9px 8px; }
 }

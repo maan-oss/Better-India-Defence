@@ -110,7 +110,7 @@ export function Copilot() {
 
   if (!open)
     return (
-      <button className="btn glass" style={{ position: 'absolute', right: 12, bottom: 12, zIndex: 11, height: 32 }} onClick={() => (setOpen(true), setTimeout(() => inputRef.current?.focus(), 30))}>
+      <button className="btn glass ask-open" onClick={() => (setOpen(true), setTimeout(() => inputRef.current?.focus(), 30))}>
         <Icon.Ask /> Ask the record <span className="kbd">/</span>
       </button>
     );

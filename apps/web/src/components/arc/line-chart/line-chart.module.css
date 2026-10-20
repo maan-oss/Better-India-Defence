@@ -54,6 +54,9 @@
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 @keyframes breathe { from { opacity: .22; } to { opacity: .45; } }
+@media (max-width: 760px) {
+  .toggle { min-height: 36px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .toggle, .swatch::before, .line, .tooltip, .crosshair, .dot, .series { transition: none; }
   .chart[data-loading] .series, .skeleton { animation: none; }

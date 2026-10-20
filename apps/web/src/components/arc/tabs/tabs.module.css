@@ -13,6 +13,7 @@
 .scrollRight { right: 0; border-radius: 0 var(--radius-control) var(--radius-control) 0; }
 .scrollButton:disabled { opacity: 0; pointer-events: none; }
 .scrollButton:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -3px; }
+@media (max-width: 760px) { .scrollButton { width: 36px; } }
 .trigger { position: relative; -webkit-tap-highlight-color: transparent; display: inline-grid; min-width: 5.5rem; place-items: center; flex: 0 0 auto; min-height: var(--control-height-sm); border: 0; border-radius: calc(var(--radius-control) - 3px); padding: 0 var(--space-3); background: transparent; color: var(--text-muted); font: inherit; font-size: var(--text-sm); font-weight: 500; white-space: nowrap; cursor: pointer; transition: color var(--duration-fast) var(--ease-standard); }
 @media (hover: hover) and (pointer: fine) { .trigger:hover { color: var(--foreground); } }
 .trigger:active { color: var(--foreground); }.trigger[data-state="active"] { color: var(--accent-strong); }

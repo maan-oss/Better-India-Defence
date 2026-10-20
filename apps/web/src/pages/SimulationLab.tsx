@@ -211,7 +211,7 @@ function Slider({ label, value, disabled, onChange }: { label: string; value: nu
       <span className="muted" style={{ width: 160 }}>
         {label}
       </span>
-      <input type="range" min={0} max={0.5} step={0.01} value={v} disabled={disabled} onChange={(e) => setV(Number(e.target.value))} onMouseUp={() => onChange(v)} onKeyUp={() => onChange(v)} className="grow" aria-label={label} />
+      <input type="range" min={0} max={0.5} step={0.01} value={v} disabled={disabled} onChange={(e) => setV(Number(e.target.value))} onMouseUp={() => onChange(v)} onKeyUp={() => onChange(v)} className="grow touch-range" aria-label={label} />
       <span className="mono" style={{ width: 44, textAlign: 'right' }}>
         {Math.round(v * 100)}%
       </span>

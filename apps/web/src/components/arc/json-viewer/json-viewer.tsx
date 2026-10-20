@@ -69,7 +69,9 @@ type Row = {
   hidden?: number;
 };
 
-const ROW = 30;
+/** Rows are one fixed height, so scrolling can aim at where a row will settle. A phone takes the 36px touch minimum. */
+const phone = typeof matchMedia === "function" ? matchMedia("(max-width: 760px)") : null;
+const rowHeight = () => (phone?.matches ? 36 : 30);
 const IDENT = /^[A-Za-z_$][\w$]*$/;
 
 function typeOf(value: unknown): JsonValueType {
@@ -296,9 +298,9 @@ export const JsonViewer = forwardRef<HTMLDivElement, JsonViewerProps>(function J
   const reveal = useCallback((index: number, center: boolean) => {
     const tree = treeRef.current;
     if (!tree) return;
-    const top = index * ROW, bottom = top + ROW, view = tree.clientHeight, now = tree.scrollTop;
+    const row = rowHeight(), top = index * row, bottom = top + row, view = tree.clientHeight, now = tree.scrollTop;
     let target = now;
-    if (center) target = top - view / 2 + ROW / 2;
+    if (center) target = top - view / 2 + row / 2;
     else if (top < now + 4) target = top - 4;
     else if (bottom > now + view - 4) target = bottom - view + 4;
     target = Math.max(0, target);
@@ -441,6 +443,7 @@ export const JsonViewer = forwardRef<HTMLDivElement, JsonViewerProps>(function J
   const heightStyle = { "--json-max-height": typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight } as CSSProperties;
   const bulk = rows.length > 400;
   const rowTransition: Transition = reduced || bulk ? { duration: 0 } : { height: motionTokens.spring.smooth, opacity: { duration: motionTokens.duration.fast, ease: [...motionTokens.ease.standard] } };
+  const rowPx = rowHeight();
 
   const describe = (row: Row) => {
     const name = row.name === null ? rootName : String(row.name);
@@ -480,7 +483,7 @@ export const JsonViewer = forwardRef<HTMLDivElement, JsonViewerProps>(function J
               role="treeitem" tabIndex={isActive ? 0 : -1} aria-level={row.level} aria-posinset={row.posinset} aria-setsize={row.setsize}
               aria-expanded={row.kind === "node" && branch ? row.open : undefined} aria-selected={isActive} aria-label={describe(row)}
               className={styles.row} data-kind={row.kind} data-active={isActive || undefined} style={{ "--level": row.level - 1 } as CSSProperties}
-              initial={{ height: 0, opacity: 0, overflow: "hidden" }} animate={{ height: ROW, opacity: 1, transitionEnd: { overflow: "visible" } }} exit={{ height: 0, opacity: 0, overflow: "hidden" }} transition={rowTransition}
+              initial={{ height: 0, opacity: 0, overflow: "hidden" }} animate={{ height: rowPx, opacity: 1, transitionEnd: { overflow: "visible" } }} exit={{ height: 0, opacity: 0, overflow: "hidden" }} transition={rowTransition}
               onFocus={event => { if (event.target === event.currentTarget && row.id !== active) setActiveRaw(row.id); }}
               onClick={() => {
                 if (row.kind === "more") { showMore(row.parent!); moveTo(row.id); return; }
