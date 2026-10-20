@@ -60,6 +60,9 @@
 .ops.narrow .compass { top: calc(var(--ops-top) + 48px); }
 .ops.narrow .cursor-ref { display: none; }
 .ops.narrow .scalebar { left: 12px; bottom: 12px; }
+/* The tool dock's buttons are 44px on a phone, the touch minimum, not the 36px of the desktop tray. */
+.ops.narrow .map-dock [data-variant] { --fbg-h: 44px; }
+.ops.narrow .map-modes > * { --control-height-md: 36px; --control-height-sm: 36px; }
 .ops.narrow .ops-bottom:not(:has(.timeline.compact)) { height: 168px; }
 .ops.narrow .timeline { grid-template-columns: minmax(0, 1fr); grid-template-rows: 44px minmax(0, 1fr) auto; }
 .ops.narrow .tl-controls { gap: 6px; padding: 0 10px; }

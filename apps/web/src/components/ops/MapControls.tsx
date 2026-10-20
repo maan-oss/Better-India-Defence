@@ -77,11 +77,11 @@ export function ToolDock({ panelOpen, onTogglePanel, onFit }: { panelOpen: boole
             iconOnly
             tooltipSide="right"
             items={[
-              { id: 'layers', label: 'Layers', icon: <Layers size={17} strokeWidth={1.75} />, pressed: sheet === 'layers', onSelect: () => toggle('layers') },
-              { id: 'nav', label: `Navigation: ${nav}`, icon: <NavIcon size={17} strokeWidth={1.75} />, pressed: sheet === 'nav', onSelect: () => toggle('nav') },
+              { id: 'layers', label: 'Layers', icon: <Layers size={19} strokeWidth={1.75} />, pressed: sheet === 'layers', onSelect: () => toggle('layers') },
+              { id: 'nav', label: `Navigation: ${nav}`, icon: <NavIcon size={19} strokeWidth={1.75} />, pressed: sheet === 'nav', onSelect: () => toggle('nav') },
               { type: 'separator' },
-              { id: 'fit', label: 'Fit the site', icon: <Maximize size={17} strokeWidth={1.75} />, onSelect: onFit },
-              { id: 'panel', label: panelOpen ? 'Hide inspector' : 'Show inspector', icon: panelOpen ? <PanelRightClose size={17} strokeWidth={1.75} /> : <PanelRight size={17} strokeWidth={1.75} />, pressed: panelOpen, onSelect: onTogglePanel },
+              { id: 'fit', label: 'Fit the site', icon: <Maximize size={19} strokeWidth={1.75} />, onSelect: onFit },
+              { id: 'panel', label: panelOpen ? 'Hide inspector' : 'Show inspector', icon: panelOpen ? <PanelRightClose size={19} strokeWidth={1.75} /> : <PanelRight size={19} strokeWidth={1.75} />, pressed: panelOpen, onSelect: onTogglePanel },
             ]}
           />
         </div>

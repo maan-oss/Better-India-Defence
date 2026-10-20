@@ -194,7 +194,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .seg { display: inline-flex; align-items: center; border: 1px solid var(--line-2); border-radius: 999px; background: var(--bg-0); flex: none; padding: 2px; gap: 2px; }
 .seg.fill { display: flex; }
 .seg.fill > * { flex: 1; }
-.seg > button { height: 22px; padding: 0 10px; background: transparent; border: 0; border-radius: 999px; color: var(--text-2); cursor: pointer; font-size: var(--fs-caption); font-weight: 500; white-space: nowrap; transition: color var(--t-fast), background var(--t-fast); }
+.seg > button { height: 24px; padding: 0 10px; background: transparent; border: 0; border-radius: 999px; color: var(--text-2); cursor: pointer; font-size: var(--fs-caption); font-weight: 500; white-space: nowrap; transition: color var(--t-fast), background var(--t-fast); }
 .seg.sm > button { height: 20px; padding: 0 8px; }
 .seg > button:hover:not(:disabled) { color: var(--text-0); }
 .seg > button[data-state='on'], .seg > button.on { color: var(--text-0); background: var(--bg-4); box-shadow: 0 0 0 1px var(--line-2); }
@@ -433,7 +433,9 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
   :root { --gutter: var(--sp-4); }
   html, body { overflow-x: hidden; }
   .shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: var(--top-h) minmax(0, 1fr); }
-  .topbar { grid-column: 1; grid-row: 1; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--sp-2); padding: 0 var(--sp-2); }
+  /* Site badge and search take the width they need; the status cluster takes the rest and sits at the right edge. */
+  .topbar { grid-column: 1; grid-row: 1; grid-template-columns: auto auto minmax(0, 1fr); gap: var(--sp-2); padding: 0 var(--sp-2); }
+  .topbar > .tb-right { justify-self: end; }
   /* The phone bar shows the synthetic or operational badge and the controls only; the site name lives on the page header. */
   .tb-crumbs { display: none; }
   .island .isl-alerts, .island .isl-sensors, .island .isl-mode, .island .isl-live { display: none; }
@@ -491,7 +493,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 
 /* Arc segmented control at console density (see components/ui.tsx). */
 .arc-seg { flex: none; }
-.arc-seg.sm { --control-height-sm: 22px; font-size: var(--fs-caption); }
+.arc-seg.sm { --control-height-sm: 24px; font-size: var(--fs-caption); }
 .arc-seg.sm button { padding: 0 9px; font-size: var(--fs-caption); }
 .arc-seg.md { --control-height-sm: 24px; }
 .arc-seg.md button { font-size: var(--fs-body); }
@@ -627,3 +629,17 @@ button.rc-job[aria-current] > span:first-child { text-decoration: underline; tex
 /* Sensors: the three counts share a row on a tablet and a phone; the states bar takes the full width below them. */
 @media (max-width: 1100px) { .sn-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .sn-summary > .sn-states, .sn-states { grid-column: 1 / -1; } }
 @media (max-width: 760px) { .sn-summary { gap: 8px; padding: 12px var(--gutter); } .sn-summary > article { padding: 12px; } }
+/* Touch targets. On a phone every control has a hit area a thumb can reach: 40px for the top bar, 36px for buttons,
+   tabs and segments. The glyphs keep their size; only the area around them grows. */
+@media (max-width: 760px) {
+  /* The site badge, search and status cluster need about 350px on a 390px phone; the gaps and the badge type make room. */
+  .shell .topbar { --tb-ctl: 40px; gap: 6px; }
+  .shell .topbar .tb-synthetic { font-size: 10px; }
+  .shell .topbar > .tb-right { gap: 4px; }
+  .shell .topbar .tb-bell, .shell .topbar .tb-night button, .shell .topbar .user-btn { min-width: 40px; min-height: 40px; }
+  .arc-seg.sm { --control-height-sm: 32px; }
+  .btn.small { min-height: 36px; }
+  .btn.icon.small { width: 36px; height: 36px; }
+  .tab { min-height: 36px; }
+  .seg > button, .arc-seg > button { min-height: 32px; }
+}
