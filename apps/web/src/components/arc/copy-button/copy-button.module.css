@@ -17,5 +17,7 @@
 .glyph { display: inline-block; }
 .iconOnly { width: var(--control-height-sm); padding: 0; }
 .plain { border-color: transparent; background: transparent; color: var(--text-secondary); }
+/* Phones: an icon-only copy control takes the 36px touch minimum on both sides. */
+@media (max-width: 760px) { .iconOnly { flex: none; width: 36px; height: 36px; } }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .button { transition: none; } .button:active:not(:disabled) { transform: none; } }

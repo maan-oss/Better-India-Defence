@@ -15,5 +15,5 @@
 .shell button { display: grid; width: 24px; height: 24px; flex: 0 0 auto; place-items: center; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--text-muted); transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
 @media (hover: hover) and (pointer: fine) { .shell button:hover { background: var(--surface-muted); color: var(--foreground); } }
 /* Phones: the text field fills the whole pill, so the pill's full height takes taps. */
-@media (max-width: 760px) { .shell { align-items: stretch; } .input { align-self: stretch; } }
+@media (max-width: 760px) { .shell { align-items: stretch; } .input { height: 36px; margin-block: -1px; } }
 @media (prefers-reduced-motion: reduce) { .shell, .shell > svg, .shell button { transition: none; } }

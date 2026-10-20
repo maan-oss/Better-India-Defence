@@ -75,4 +75,6 @@
   .ms-row { min-height: 36px; }
   .ms-thing { height: 36px; }
   .ops.narrow .map-modes button { min-width: 36px; }
+  /* A layer switch at full size, inside a 36px hit area of its own. */
+  .ms-switch { zoom: 1; min-height: 36px !important; }
 }

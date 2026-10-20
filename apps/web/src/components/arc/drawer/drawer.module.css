@@ -70,6 +70,8 @@
 .close { display: grid; flex: 0 0 auto; width: var(--space-8); height: var(--space-8); margin-top: calc((var(--text-lg) * var(--leading-body) - var(--space-8)) / 2); place-items: center; border: 1px solid var(--border); border-radius: var(--radius-control); background: color-mix(in oklab, var(--surface-muted) 65%, transparent); color: var(--text-secondary); cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), transform var(--duration-spring) var(--ease-spring); }
 @media (hover: hover) and (pointer: fine) { .close:hover { background: var(--surface-muted); color: var(--foreground); } }
 .close:active { transform: scale(.96); transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), transform var(--duration-instant) var(--ease-standard); }
+/* Phones: the close control takes the 36px touch minimum and stays centred on the title line. */
+@media (max-width: 760px) { .close { width: 36px; height: 36px; margin-top: calc((var(--text-lg) * var(--leading-body) - 36px) / 2); } }
 .body { min-height: 0; overflow: auto; padding: var(--space-6); font-size: var(--text-sm); line-height: var(--leading-body); overscroll-behavior: contain; scrollbar-width: thin; }
 
 @media (max-width: 40rem) {
