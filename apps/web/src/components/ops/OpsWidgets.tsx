@@ -103,13 +103,13 @@ export function DispatchDialog({ alert, place, onClose }: { alert: AlertRecord |
   return (
     <Modal title={alert ? `Dispatch — ${alert.title}` : place ? `Dispatch team to ${gridRef(place)}` : 'Dispatch team'} onClose={onClose}>
       <div className="col" style={{ gap: 10 }}>
-        <table className="table">
+        <table className="table dispatch-table">
           <thead>
             <tr>
               <th />
               <th>Team</th>
               <th>Status</th>
-              <th>Position</th>
+              <th className="dispatch-pos">Position</th>
               <th>Distance / ETA</th>
             </tr>
           </thead>
@@ -123,10 +123,11 @@ export function DispatchDialog({ alert, place, onClose }: { alert: AlertRecord |
                     <input type="radio" checked={teamId === t.id} disabled={Boolean(t.taskId)} onChange={() => setTeamId(t.id)} aria-label={t.callsign} />
                   </td>
                   <td>
-                    <b className="mono">{t.callsign}</b> <span className="dim">{t.kind} · {t.strength}</span>
+                    <b className="mono">{t.callsign}</b>
+                    <span className="dim dispatch-kind">{t.kind} · {t.strength}</span>
                   </td>
                   <td>{t.taskId ? 'tasked' : t.status}</td>
-                  <td className="mono" style={{ fontSize: 'var(--fs-micro)' }}>
+                  <td className="mono dispatch-pos" style={{ fontSize: 'var(--fs-micro)' }}>
                     {t.mgrs ?? 'no GPS'}
                     {t.positionAgeS !== null && t.positionAgeS > 60 ? <span className="err-inline"> ({t.positionAgeS}s old)</span> : null}
                   </td>

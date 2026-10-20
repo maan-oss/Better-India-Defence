@@ -629,10 +629,20 @@ button.rc-job[aria-current] > span:first-child { text-decoration: underline; tex
 /* Sensors: the three counts share a row on a tablet and a phone; the states bar takes the full width below them. */
 @media (max-width: 1100px) { .sn-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .sn-summary > .sn-states, .sn-states { grid-column: 1 / -1; } }
 @media (max-width: 760px) { .sn-summary { gap: 8px; padding: 12px var(--gutter); } .sn-summary > article { padding: 12px; } }
+/* Dispatch: the team's kind and strength sit under its callsign rather than wrapping beside it. On a phone the position
+   column goes; the distance and ETA column answers the dispatch question and keeps its width. */
+.dispatch-kind { display: block; font-size: var(--fs-caption); white-space: nowrap; }
+.dispatch-table td b, .dispatch-table td:nth-child(3) { white-space: nowrap; }
+@media (max-width: 760px) {
+  .dispatch-pos { display: none; }
+  .dispatch-table th:first-child, .dispatch-table td:first-child { width: 36px; padding-inline: 4px; }
+}
 /* Touch targets. On a phone every control has a hit area a thumb can reach: 40px for the top bar, 36px for buttons,
    tabs and segments. The glyphs keep their size; only the area around them grows. */
 @media (max-width: 760px) {
   /* The site badge, search and status cluster need about 350px on a 390px phone; the gaps and the badge type make room. */
+  /* Small Arc controls (menu triggers, confirm buttons, pagination) take the phone's 36px button height. */
+  :root { --control-height-sm: 36px; }
   .shell .topbar { --tb-ctl: 40px; gap: 6px; }
   .shell .topbar .tb-synthetic { font-size: 10px; }
   .shell .topbar > .tb-right { gap: 4px; }
@@ -642,4 +652,7 @@ button.rc-job[aria-current] > span:first-child { text-decoration: underline; tex
   .btn.icon.small { width: 36px; height: 36px; }
   .tab { min-height: 36px; }
   .seg > button, .arc-seg > button { min-height: 32px; }
+  /* Text links that open a record keep their look; their tap area reaches a finger's width into the rows above and
+     below. The negative margin cancels the padding, so no row changes height. */
+  button.obs-link, button.link-btn { padding-block: 9px; margin-block: -9px; }
 }
