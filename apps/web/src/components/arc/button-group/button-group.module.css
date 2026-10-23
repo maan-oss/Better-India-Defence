@@ -85,3 +85,7 @@
   .segment:active .content, .iconOnly:active .content { transform: none; }
   .menu, .menu[data-state="closed"] { transform: none; transition: opacity var(--duration-instant) linear; }
 }
+/* Phones: each segment takes the full 36px height, overhanging the group's 1px border by a pixel above and below. */
+@media (max-width: 760px) {
+  .segment { height: var(--bg-h); min-width: var(--bg-h); margin-block: -1px; }
+}

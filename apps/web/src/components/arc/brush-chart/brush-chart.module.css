@@ -61,6 +61,8 @@
 .grip { width: 6px; height: 22px; border-radius: 3px; background: var(--surface-raised); box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 26%, transparent), var(--shadow-resting); transition: transform var(--duration-instant) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard); }
 .handle:active .grip { transform: scaleY(1.12); }
 @media (hover: hover) and (pointer: fine) { .handle:hover .grip { transform: scaleY(1.12); } }
+/* Phones: each window handle is a 36px-wide grab area, still centred on its edge. */
+@media (max-width: 760px) { .handle { width: 36px; margin-left: -18px; } }
 
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 

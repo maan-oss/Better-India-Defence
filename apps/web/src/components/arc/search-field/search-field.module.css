@@ -4,6 +4,9 @@
 .shell { display: flex; min-height: var(--control-height-md); align-items: center; gap: var(--space-2); border: 1px solid var(--border-strong); border-radius: 999px; padding: 0 var(--space-3); background: var(--surface); transition: border-color var(--duration-fast) var(--ease-standard); }
 @media (hover: hover) and (pointer: fine) { .shell:hover:not(:focus-within) { border-color: var(--foreground); } }
 .shell:focus-within { border-color: var(--foreground); }
+/* The text field fills the pill's full height, so every part of the pill takes taps. */
+.shell { align-items: stretch; }
+.input { align-self: stretch; }
 /* The glass wakes up with the field: muted at rest, full contrast while searching. */
 .shell > svg { flex: 0 0 auto; color: var(--text-muted); transition: color var(--duration-fast) var(--ease-standard); }
 .shell:focus-within > svg, .shell[data-filled="true"] > svg { color: var(--foreground); }
@@ -14,6 +17,6 @@
 .clearSlot { display: grid; width: 24px; height: 24px; flex: 0 0 auto; place-items: center; }
 .shell button { display: grid; width: 24px; height: 24px; flex: 0 0 auto; place-items: center; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--text-muted); transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
 @media (hover: hover) and (pointer: fine) { .shell button:hover { background: var(--surface-muted); color: var(--foreground); } }
-/* Phones: the text field fills the whole pill, so the pill's full height takes taps. */
-@media (max-width: 760px) { .shell { align-items: stretch; } .input { height: 36px; margin-block: -1px; } }
+/* Phones: the field is 36px, drawn over the pill's own border, so the whole pill is one 36px target. */
+@media (max-width: 760px) { .input { height: 36px; margin-block: -1px; } }
 @media (prefers-reduced-motion: reduce) { .shell, .shell > svg, .shell button { transition: none; } }
