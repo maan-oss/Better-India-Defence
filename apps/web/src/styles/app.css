@@ -426,6 +426,9 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .formgrid { display: grid; grid-template-columns: 148px 1fr; gap: var(--sp-3) var(--sp-4); align-items: center; }
 .formgrid label { color: var(--text-1); font-size: var(--fs-body); font-weight: 500; }
 .formgrid .input { width: 100%; box-sizing: border-box; min-width: 0; }
+/* The identity search keeps its probe beside the form on a wide screen; a phone stacks them, so the form has the full width. */
+.probe-col { width: 170px; }
+@media (max-width: 760px) { .probe-row { flex-direction: column; } .probe-col { width: 100%; } }
 .formgrid > * { min-width: 0; }
 
 /* ================================================================ phones and small tablets */

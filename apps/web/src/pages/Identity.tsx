@@ -727,8 +727,8 @@ function Search({ faceId, identityId }: { faceId: string | null; identityId: str
           Searches every stored face sighting (cameras and evidence) for faces resembling the probe. Each search is recorded with its purpose. Results above the strong threshold are
           strong candidates; below it, resemblance only.
         </div>
-        <div className="row" style={{ alignItems: 'flex-start', gap: 16 }}>
-          <div className="col" style={{ width: 170 }}>
+        <div className="row probe-row" style={{ alignItems: 'flex-start', gap: 16 }}>
+          <div className="col probe-col">
             <b className="upper muted">Probe</b>
             {probe?.kind === 'face' && <img src={`/api/faces/${probe.id}/image`} alt="Probe face" style={{ width: 160, height: 160, objectFit: 'cover' }} />}
             {probe?.kind === 'identity' && (

@@ -108,6 +108,8 @@
 .sig-thumb { height: 28px; width: auto; border-radius: 4px; background: #f0eee6; padding: 2px 6px; }
 .link-btn { background: none; border: 0; padding: 0; color: var(--text-0); font-weight: 600; cursor: pointer; text-decoration: underline dotted var(--line-3); text-underline-offset: 3px; }
 .link-btn:hover { text-decoration-color: var(--text-1); }
+/* A team callsign link keeps its look; its tap area is 24px tall, and the negative margins cancel the padding. */
+.link-btn { display: inline-block; line-height: 16px; padding: 4px 6px; margin: -4px -6px; }
 .handover-form { display: grid; grid-template-columns: minmax(260px, 0.9fr) 1.4fr; gap: 24px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); align-items: start; }
 @media (max-width: 900px) { .handover-form { grid-template-columns: 1fr; } }
 
