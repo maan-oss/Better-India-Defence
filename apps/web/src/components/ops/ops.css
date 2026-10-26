@@ -30,7 +30,7 @@
 /* First steps card. */
 .get-started { position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 8; width: min(440px, calc(100% - 140px)); border-radius: var(--radius-xl); padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-4); }
 .get-started header { display: flex; align-items: flex-start; gap: var(--sp-3); justify-content: space-between; }
-.get-started h3 { margin: 0; font-size: var(--fs-lead); font-weight: 600; letter-spacing: -0.01em; color: var(--text-0); }
+.get-started h2 { margin: 0; font-size: var(--fs-lead); font-weight: 600; letter-spacing: -0.01em; color: var(--text-0); }
 .get-started header p { margin: 4px 0 0; color: var(--text-2); font-size: var(--fs-body); }
 .get-started ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
 .gs-step { width: 100%; display: flex; align-items: center; gap: var(--sp-3); padding: 8px 10px; margin: 0 -10px; width: calc(100% + 20px); border: 0; border-radius: var(--radius); background: none; text-align: left; cursor: pointer; color: var(--text-1); transition: background var(--t-fast); }

@@ -171,7 +171,7 @@ function SitePanel({ cfg, set, sel, setSel }: { cfg: SiteConfig; set: (p: Partia
   return (
     <div className="site-panel scroll">
       <div className="section">
-        <h4>Site</h4>
+        <h2 className="section-h">Site</h2>
         <div className="formgrid">
           <label>Id</label>
           <input className="input" value={cfg.id} onChange={(e) => set({ id: e.target.value.toLowerCase() })} />
@@ -201,7 +201,7 @@ function SitePanel({ cfg, set, sel, setSel }: { cfg: SiteConfig; set: (p: Partia
         </div>
       </div>
       <div className="section">
-        <h4>Orthophoto</h4>
+        <h2 className="section-h">Orthophoto</h2>
         <label className="btn small">
           {busy ? 'Uploading…' : cfg.orthophoto ? 'Replace image…' : 'Upload image…'}
           <input
@@ -243,7 +243,7 @@ function SitePanel({ cfg, set, sel, setSel }: { cfg: SiteConfig; set: (p: Partia
         </div>
       </div>
       <div className="section">
-        <h4>Selected</h4>
+        <h2 className="section-h">Selected</h2>
         {!sel && <span className="muted">Select an item on the plan, or use a drawing tool.</span>}
         {sel?.kind === 'perimeter' && (
           <div className="col">
@@ -314,7 +314,7 @@ function SitePanel({ cfg, set, sel, setSel }: { cfg: SiteConfig; set: (p: Partia
       </div>
       <FeedsSection cfg={cfg} set={set} />
       <div className="section">
-        <h4>Contents</h4>
+        <h2 className="section-h">Contents</h2>
         <div className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
           {cfg.zones.length} zones ({cfg.zones.filter((x) => x.restricted).length} restricted) · {cfg.buildings.length} buildings · perimeter {cfg.perimeter.length} vertices · {cfg.gates.length} gates · {(cfg.feeds ?? []).length} feeds
         </div>
@@ -330,7 +330,7 @@ function FeedsSection({ cfg, set }: { cfg: SiteConfig; set: (p: Partial<SiteConf
   const upd = (i: number, patch: Partial<SiteConfig['feeds'][number]>) => set({ feeds: feeds.map((f, j) => (j === i ? { ...f, ...patch } : f)) });
   return (
     <div className="section">
-      <h4>Data feeds</h4>
+      <h2 className="section-h">Data feeds</h2>
       <div className="dim" style={{ fontSize: 'var(--fs-micro)', marginBottom: 6 }}>
         Each feed is a sensor id that an adapter posts as (see <span className="mono">packages/adapters</span>: <span className="mono">strata-adapter</span> with NMEA, MAVLink or CoT listeners).
         Cameras are added on the Cameras page.

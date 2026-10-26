@@ -218,7 +218,7 @@ function SensorDetailView({ id }: { id: string }) {
       </div>
       {(d.kind === 'camera' || d.kind === 'drone') && <CameraFeed sensorId={d.id} t={t} live={useTime.getState().mode === 'live'} />}
       <div className="section">
-        <h4>Traffic, last 60 minutes</h4>
+        <h2 className="section-h">Traffic, last 60 minutes</h2>
         <div className="muted" style={{ fontSize: 'var(--fs-caption)', marginBottom: 8 }}>
           {gaps === 0 ? 'Messages arrived in every minute.' : gaps === 60 ? 'No messages in the last hour.' : `${gaps} of 60 minutes without a message.`} Drag the strip below to look closer.
         </div>
@@ -226,12 +226,12 @@ function SensorDetailView({ id }: { id: string }) {
       </div>
       {data.coveragePatches !== null && (
         <div className="section">
-          <h4>Coverage</h4>
+          <h2 className="section-h">Coverage</h2>
           Calibrated view covers <b>{data.coveragePatches}</b> surface patches (walls, roofs, ground cells) against baseline geometry.
         </div>
       )}
       <div className="section">
-        <h4>Status history</h4>
+        <h2 className="section-h">Status history</h2>
         {data.events.length === 0 ? (
           <div className="muted">No transitions recorded.</div>
         ) : (
@@ -244,7 +244,7 @@ function SensorDetailView({ id }: { id: string }) {
         )}
       </div>
       <div className="section">
-        <h4>Recent observations</h4>
+        <h2 className="section-h">Recent observations</h2>
         {data.recent.length === 0 && <div className="muted">None in the retention window.</div>}
         {data.recent.slice(0, 30).map((o) => (
           <div key={o.id} className="row" style={{ fontSize: 'var(--fs-caption)', padding: '3px 0' }}>
@@ -263,7 +263,7 @@ function SensorDetailView({ id }: { id: string }) {
         ))}
       </div>
       <div className="section">
-        <h4>Configuration</h4>
+        <h2 className="section-h">Configuration</h2>
         <JsonViewer data={d} rootName={d.id} defaultExpandDepth={1} maxHeight={300} label={`Configuration of ${d.id}`} />
       </div>
       {can('system.view') && <DeadLetters sensorId={d.id} />}
@@ -277,7 +277,7 @@ function DeadLetters({ sensorId }: { sensorId: string }) {
   const rows = (data ?? []).filter((r) => r.sensor_id === sensorId);
   return (
     <div className="section">
-      <h4>Rejected messages for this sensor ({rows.length})</h4>
+      <h2 className="section-h">Rejected messages for this sensor ({rows.length})</h2>
       {rows.slice(0, 20).map((r) => (
         <div key={r.id} className="col" style={{ padding: '4px 0', borderTop: '1px solid var(--line)' }}>
           <span className="mono muted">
@@ -339,7 +339,7 @@ function SensorMap({ rows, onPick }: { rows: SensorListItem[]; onPick: (id: stri
   return (
     <div className="sensor-map reveal">
       <div className="section">
-        <h4>Sensor estate</h4>
+        <h2 className="section-h">Sensor estate</h2>
         <div className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
           {placed.length} positioned sensors. Select one for diagnostics; feeds without a fixed position (GPS gateways, interop, satellite) are listed on the left.
         </div>

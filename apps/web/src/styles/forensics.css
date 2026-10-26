@@ -142,7 +142,7 @@
 
 /* custody report & print */
 .custody h2 { font-size: var(--fs-lead); font-weight: 600; margin: var(--sp-4) 0 var(--sp-3); }
-.custody h3 { font-size: var(--fs-body); color: var(--text-0); font-weight: 600; margin: var(--sp-6) 0 var(--sp-2); }
+.custody .sub-h { font-size: var(--fs-body); color: var(--text-0); font-weight: 600; margin: var(--sp-6) 0 var(--sp-2); }
 .print-banner { display: none; }
 @media print {
   body { overflow: visible; background: #fff; color: #000; }

@@ -475,7 +475,7 @@ export function ShortcutList({ groups, label = "Keyboard shortcuts", searchable 
       <AnimatePresence initial={false}>
         {filtered.map(group => <motion.section key={group.label} className={styles.group} aria-label={group.label}
           initial={reduced ? { opacity: 0 } : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={reduced ? { opacity: 0 } : { opacity: 0, height: 0 }} transition={rowTransition}>
-          <h4 className={styles.groupLabel}>{group.label}</h4>
+          <h2 className="section-h" className={styles.groupLabel}>{group.label}</h2>
           <ul className={styles.rows}>
             <AnimatePresence initial={false}>
               {group.items.map(item => {

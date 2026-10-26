@@ -117,7 +117,7 @@ export function Copilot() {
   return (
     <section className="copilot glass" aria-label="Copilot">
       <div className="panel-h">
-        <h3>Copilot</h3>
+        <h2 className="sub-h">Copilot</h2>
         <span className="dim" style={{ fontSize: 'var(--fs-micro)' }}>
           {status ? (status.configured ? `routing: ${status.model} · facts: database` : 'deterministic · no LLM configured') : ''}
         </span>

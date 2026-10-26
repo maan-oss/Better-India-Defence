@@ -54,7 +54,7 @@ export function ContextPanel() {
   return (
     <aside className="ops-right" aria-label="Context">
       <div className="panel-h">
-        <h3>{sel ? 'Inspector' : mode === 'NOW' || mode === 'HISTORY' ? 'Operational picture' : mode.toLowerCase()}</h3>
+        <h2 className="sub-h">{sel ? 'Inspector' : mode === 'NOW' || mode === 'HISTORY' ? 'Operational picture' : mode.toLowerCase()}</h2>
         <div className="spacer" />
         {sel && (
           <button className="btn small ghost" onClick={() => select(null)} aria-label="Close inspector">

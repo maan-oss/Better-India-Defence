@@ -522,7 +522,7 @@ function Custody({ id, item, onSaved }: { id: string; item: EvidenceItem; onSave
         <dt>Notes</dt>
         <dd>{r.item.notes ?? '—'}</dd>
       </dl>
-      <h3>Derived products ({r.products.length})</h3>
+      <h2 className="sub-h">Derived products ({r.products.length})</h2>
       <table className="table">
         <thead>
           <tr>
@@ -560,7 +560,7 @@ function Custody({ id, item, onSaved }: { id: string; item: EvidenceItem; onSave
           ))}
         </tbody>
       </table>
-      <h3>Custody and access trail ({r.custody.length})</h3>
+      <h2 className="sub-h">Custody and access trail ({r.custody.length})</h2>
       <table className="table">
         <thead>
           <tr>

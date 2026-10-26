@@ -57,7 +57,7 @@ export function GetStarted() {
         <motion.section className="get-started glass-2" aria-label="Get started" initial={{ opacity: 0, y: 12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.98 }} transition={{ type: 'spring', visualDuration: 0.35, bounce: 0.1 }}>
           <header>
             <div>
-              <h3>Bring the site online</h3>
+              <h2 className="sub-h">Bring the site online</h2>
               <p>The picture fills in as sources connect. Nothing here is simulated.</p>
             </div>
             <button className="btn ghost small icon" onClick={hide} aria-label="Hide for this site">

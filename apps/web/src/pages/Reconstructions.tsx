@@ -192,7 +192,7 @@ function JobDetail({ id }: { id: string }) {
       {data.kind === 'multi_frame' && data.status === 'completed' && <MultiFrame result={r} />}
       {data.status === 'completed' && data.kind !== 'multi_frame' && (
         <div className="section">
-          <h4>Result</h4>
+          <h2 className="section-h">Result</h2>
           <dl className="kv">
             {Object.entries(r)
               .filter(([, v]) => typeof v !== 'object' || v === null)
@@ -208,7 +208,7 @@ function JobDetail({ id }: { id: string }) {
         </div>
       )}
       <div className="section">
-        <h4>Inputs ({data.inputs.length})</h4>
+        <h2 className="section-h">Inputs ({data.inputs.length})</h2>
         {data.inputs.slice(0, 60).map((e, i) => (
           <div key={i} className="row" style={{ fontSize: 'var(--fs-caption)', padding: '2px 0' }}>
             <StateChip state={e.state} /> <span className="mono">{e.kind}</span> <span className="mono muted ellipsis">{e.id}</span> <span className="muted">{e.t ? hms(e.t) : ''}</span>
@@ -216,7 +216,7 @@ function JobDetail({ id }: { id: string }) {
         ))}
       </div>
       <div className="section">
-        <h4>Parameters</h4>
+        <h2 className="section-h">Parameters</h2>
         <JsonViewer data={data.params} rootName="params" defaultExpandDepth={2} maxHeight={280} label="Job parameters" />
       </div>
     </div>
@@ -230,7 +230,7 @@ function MultiFrame({ result }: { result: Record<string, unknown> }) {
   return (
     <>
       <div className="section">
-        <h4>Outputs — four distinct products</h4>
+        <h2 className="section-h">Outputs — four distinct products</h2>
         <div className="rc-outputs">
           {outputs.map((o) => (
             <Card
@@ -249,7 +249,7 @@ function MultiFrame({ result }: { result: Record<string, unknown> }) {
         </div>
       </div>
       <div className="section">
-        <h4>Registration (sub-pixel alignment per frame)</h4>
+        <h2 className="section-h">Registration (sub-pixel alignment per frame)</h2>
         <SortableDataTable
           caption="Frame registration"
           rowKey="t"

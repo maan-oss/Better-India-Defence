@@ -50,9 +50,9 @@ export function Checklist({ alertId }: { alertId: string }) {
   const done = c.data.items.filter((i) => i.doneBy).length;
   return (
     <div className="section">
-      <h4>
+      <h2 className="section-h">
         Standing orders · {done}/{c.data.items.length}
-      </h4>
+      </h2>
       <ol className="sop">
         {c.data.items.map((i) => (
           <li key={i.index} className={i.doneBy ? 'done' : ''}>

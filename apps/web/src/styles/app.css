@@ -20,7 +20,10 @@ a { color: var(--text-0); text-underline-offset: 2px; text-decoration-color: var
 a:hover { text-decoration-color: var(--text-1); }
 h1, h2, h3, h4, h5 { text-wrap: balance; }
 /* One style for every section heading: sentence case, the body size, semibold, primary text. Classes below may refine it. */
-h4 { font-size: var(--fs-body); font-weight: 600; color: var(--text-1); }
+/* Headings below the page title are h2s; these classes keep the look they had as h3 and h4. */
+.section-h { margin: 1.33em 0; font-size: var(--fs-body); font-weight: 600; color: var(--text-1); }
+.sub-h { margin: 1em 0; font-size: 1.17em; font-weight: 700; }
+.minor-h { margin: 1.67em 0; font-size: 0.83em; font-weight: 700; }
 ::selection { background: rgba(240, 238, 230, 0.2); color: var(--text-0); }
 :focus { outline: none; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
@@ -141,7 +144,7 @@ h4 { font-size: var(--fs-body); font-weight: 600; color: var(--text-1); }
 
 /* ---------------------------------------------------------------- shortcuts dialog */
 .keys-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--sp-6); align-items: start; }
-.keys-goto h4 { margin: 4px 0 var(--sp-2); font-size: var(--fs-caption); font-weight: 600; color: var(--text-1); }
+.keys-goto .section-h { margin: 4px 0 var(--sp-2); font-size: var(--fs-caption); font-weight: 600; color: var(--text-1); }
 .keys-row { display: flex; align-items: center; gap: var(--sp-3); height: 30px; border-bottom: 1px solid var(--line); font-size: var(--fs-body); }
 .keys-k { display: inline-flex; align-items: center; gap: 6px; min-width: 120px; font-size: var(--fs-caption); }
 .keys-k .kbd { min-width: 20px; text-align: center; }
@@ -226,10 +229,10 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
    separated by spacing and by the inset hairlines inside tables. */
 .panel { --panel: var(--bg-2); background: var(--panel); border-radius: var(--radius-xl); }
 .panel-h { display: flex; align-items: center; gap: var(--sp-2); min-height: 48px; padding: 0 var(--sp-4); }
-.panel-h h3 { margin: 0; font-size: var(--fs-lead); font-weight: 600; letter-spacing: -0.01em; color: var(--text-0); }
+.panel-h h2 { margin: 0; font-size: var(--fs-lead); font-weight: 600; letter-spacing: -0.01em; color: var(--text-0); }
 .section { padding: var(--sp-4) var(--gutter); border-bottom: 1px solid var(--line); }
 .section:last-child { border-bottom: 0; }
-.section h4 { margin: 0 0 var(--sp-3); }
+.section .section-h { margin: 0 0 var(--sp-3); }
 .kv { display: grid; grid-template-columns: minmax(132px, max-content) 1fr; gap: 6px var(--sp-6); font-size: var(--fs-body); }
 .kv dt { color: var(--text-2); }
 .kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
@@ -239,7 +242,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; line-height:
 .empty { padding: var(--sp-8) var(--sp-4); color: var(--text-2); text-align: center; font-size: var(--fs-body); }
 .empty-state { display: grid; place-items: center; align-content: center; text-align: center; gap: var(--sp-2); padding: 56px var(--sp-6); color: var(--text-2); }
 .empty-state svg { color: var(--text-3); width: 32px; height: 32px; margin-bottom: var(--sp-2); }
-.empty-state h3 { margin: 0; color: var(--text-0); font-weight: 600; font-size: var(--fs-body-lg); }
+.empty-state h2 { margin: 0; color: var(--text-0); font-weight: 600; font-size: var(--fs-body-lg); }
 .empty-state p { margin: 0; max-width: 400px; font-size: var(--fs-body); }
 .err { padding: var(--sp-3); color: var(--st-critical-text); border: 1px solid var(--st-critical-line); background: var(--st-critical-tint); border-radius: var(--radius); margin: var(--sp-3); font-size: var(--fs-body); }
 .note { padding: 10px var(--sp-3); border: 1px solid var(--line-2); color: var(--text-1); background: var(--bg-2); font-size: var(--fs-body); border-radius: var(--radius); }
@@ -573,7 +576,7 @@ button.obs-link { display: inline-block; box-sizing: border-box; min-width: 24px
 .sn-count { margin-left: auto; color: var(--text-0); font-weight: 600; }
 .sn-table { padding: 0 var(--gutter); }
 .sn-table button.obs-link[aria-current] { text-decoration: none; background: var(--bg-3); padding: 4px 6px; border-radius: 4px; }
-.sn-detail .section h4 { margin-bottom: 8px; }
+.sn-detail .section .section-h { margin-bottom: 8px; }
 @media (max-width: 1100px) { .sn-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sn-states { grid-column: 1 / -1; } .sn-search { width: 100%; } }
 
 /* Incidents */
@@ -586,7 +589,7 @@ button.list-row { all: unset; box-sizing: border-box; display: flex; width: 100%
 .inc-tabs { padding: 0 20px; }
 .inc-tabs [role='tabpanel'] .section { padding-left: 0; padding-right: 0; }
 .inc-create { display: flex; flex-direction: column; gap: 18px; max-width: 640px; }
-.inc-create h3 { margin: 0 0 4px; font-size: var(--fs-title); font-weight: 600; letter-spacing: -0.01em; }
+.inc-create h2 { margin: 0 0 4px; font-size: var(--fs-title); font-weight: 600; letter-spacing: -0.01em; }
 .inc-create p { margin: 0; font-size: var(--fs-body); line-height: 20px; }
 .inc-create-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
 .site-tree { height: 100%; padding: 10px 8px; }

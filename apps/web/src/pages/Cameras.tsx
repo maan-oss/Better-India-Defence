@@ -660,9 +660,9 @@ function FocusPanel({
   return (
     <aside className="focus-panel scroll reveal">
       <div className="panel-h">
-        <h3>
+        <h2 className="sub-h">
           {c.id} · {c.kind === "live" ? "live stream" : "site camera"}
-        </h3>
+        </h2>
         <span className="spacer" />
         <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close">
           <Icon.Close />
@@ -757,7 +757,7 @@ function FocusPanel({
       </div>
       {s && (
         <div className="section">
-          <h4>Stream</h4>
+          <h2 className="section-h">Stream</h2>
           <dl className="kv">
             <dt>Source</dt>
             <dd className="mono ellipsis" title={s.urlMasked}>
@@ -786,7 +786,7 @@ function FocusPanel({
       )}
       {def && def.kind === "camera" && (
         <div className="section">
-          <h4>Calibrated pose</h4>
+          <h2 className="section-h">Calibrated pose</h2>
           <dl className="kv">
             <dt>Grid</dt>
             <dd className="mono">{grid(def.position)}</dd>
@@ -825,7 +825,7 @@ function CameraFaces({ id }: { id: string }) {
   );
   return (
     <div className="section">
-      <h4>Faces seen by {id}</h4>
+      <h2 className="section-h">Faces seen by {id}</h2>
       {!can("identity.view") && (
         <div className="muted">Your role cannot view recognition results.</div>
       )}
@@ -982,7 +982,7 @@ function CameraForm({
       <div className="camform">
         {!initial && (
           <section>
-            <h4>Source</h4>
+            <h2 className="section-h">Source</h2>
             <RadioCards
               aria-label="Camera source"
               layout="grid"
@@ -1031,7 +1031,7 @@ function CameraForm({
           </section>
         )}
         <section>
-          <h4>Identity</h4>
+          <h2 className="section-h">Identity</h2>
           <div className="camform-two">
             {f.binding === "site" ? (
               <ArcSelect
@@ -1071,7 +1071,7 @@ function CameraForm({
           </div>
         </section>
         <section>
-          <h4>Stream</h4>
+          <h2 className="section-h">Stream</h2>
           {device ? (
             <p className="muted camform-note">
               After saving, this browser opens the camera and sends frames to
@@ -1135,7 +1135,7 @@ function CameraForm({
         </section>
         {f.binding === "new" && (
           <section>
-            <h4>Position and pose</h4>
+            <h2 className="section-h">Position and pose</h2>
             <div className="camform-grid">
               <NumberField
                 label="Latitude"
@@ -1214,7 +1214,7 @@ function CameraForm({
           </section>
         )}
         <section>
-          <h4>Analysis</h4>
+          <h2 className="section-h">Analysis</h2>
           <div className="camform-two">
             <ArcSelect
               label="Watches zone"

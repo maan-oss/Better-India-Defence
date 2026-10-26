@@ -247,7 +247,7 @@ function DocumentPane({ id, onChanged, version }: { id: string; onChanged: () =>
       </pre>
       {can('documents.review') && me !== d.uploadedBy && (
         <form className="as-form" onSubmit={assess} aria-label="Assess the content">
-          <h3>Assess the content</h3>
+          <h2 className="sub-h">Assess the content</h2>
           <label className="as-field">
             <span>Confidence</span>
             <select className="input" value={level} onChange={(e) => setLevel(e.target.value as Confidence)}>

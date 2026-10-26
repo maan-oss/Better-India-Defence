@@ -133,7 +133,7 @@
 }
 
 /* Forms inside a pane: the add and assess forms of the documents library and the asset forms. */
-.as-section h3, .as-form h3 { margin: var(--sp-2) 0 0; font-size: var(--fs-body); font-weight: 600; color: var(--text-0); }
+.as-section .sub-h, .as-form .sub-h { margin: var(--sp-2) 0 0; font-size: var(--fs-body); font-weight: 600; color: var(--text-0); }
 .as-form { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg-1); }
 .as-field { display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-caption); color: var(--text-2); }
 .as-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); justify-content: flex-end; }

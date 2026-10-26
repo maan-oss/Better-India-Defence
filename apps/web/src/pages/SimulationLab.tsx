@@ -95,7 +95,7 @@ function SimulationLabLive() {
       <div className="page-body split">
         <div className="scroll" tabIndex={0}>
           <div className="section">
-            <h4>Scenarios</h4>
+            <h2 className="section-h">Scenarios</h2>
             <div className="muted" style={{ marginBottom: 8 }}>
               Recorded period {dateTime(state.recordingStart)} → {hms(state.recordingEnd)}Z. Triggered scenarios start 5 s after the request.
             </div>
@@ -128,7 +128,7 @@ function SimulationLabLive() {
         </div>
         <div className="scroll" tabIndex={0}>
           <div className="section">
-            <h4>Failure injection {admin ? '' : '(administrator only)'}</h4>
+            <h2 className="section-h">Failure injection {admin ? '' : '(administrator only)'}</h2>
             <div className="muted" style={{ marginBottom: 10 }}>
               Applied to live traffic. Watch System Health and the Sensors page: the platform must survive and label every degraded input.
             </div>
@@ -166,7 +166,7 @@ function SimulationLabLive() {
             {f.disconnectedUntil > Date.now() && <div className="note warn" style={{ marginTop: 10 }}>Connection dropped until {hms(f.disconnectedUntil)}Z — data is buffered, then delivered late.</div>}
           </div>
           <div className="section">
-            <h4>Injected so far</h4>
+            <h2 className="section-h">Injected so far</h2>
             <dl className="kv">
               {Object.entries(state.failureCounters).map(([k, v]) => (
                 <div key={k} style={{ display: 'contents' }}>
@@ -177,7 +177,7 @@ function SimulationLabLive() {
             </dl>
           </div>
           <div className="section">
-            <h4>Schedule</h4>
+            <h2 className="section-h">Schedule</h2>
             <table className="table">
               <tbody>
                 {state.schedule
@@ -194,7 +194,7 @@ function SimulationLabLive() {
             </table>
           </div>
           <div className="section">
-            <h4>Server restart test</h4>
+            <h2 className="section-h">Server restart test</h2>
             <div className="muted">Stop the API process while the simulator runs, then restart it. The simulator buffers and retries; the platform restores active tracks, sensor state and open alerts from PostgreSQL, rejects nothing twice (message de-duplication) and marks the gap honestly.</div>
           </div>
         </div>

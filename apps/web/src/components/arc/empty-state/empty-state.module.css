@@ -3,7 +3,7 @@
 .glyph { display: grid; place-items: center; }
 .frame { width: 100%; max-width: 100%; }
 .copy { display: flow-root; }
-.root h3 { position: relative; margin: var(--space-5) 0 0; color: var(--foreground); font-size: var(--text-base); font-weight: 500; line-height: var(--leading-body); }
+.root h2 { position: relative; margin: var(--space-5) 0 0; color: var(--foreground); font-size: var(--text-base); font-weight: 500; line-height: var(--leading-body); }
 .root p { position: relative; max-width: 18rem; margin: var(--space-2) auto 0; color: var(--text-secondary); font-size: var(--text-sm); line-height: var(--leading-body); }
 /* Centered copy wraps into even lines, so a new description never leaves a single word hanging. */
 .line { display: block; text-wrap: balance; }

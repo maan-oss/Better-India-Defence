@@ -193,7 +193,7 @@ function IncidentFile({ id }: { id: string }) {
         </TabsList>
         <TabsContent value="file">
           <div className="section">
-            <h4>Summary</h4>
+            <h2 className="section-h">Summary</h2>
             {edit ? (
               <InlineEdit multiline variant="body" as="p" label="Incident summary" placeholder="What is known, what is not, and what is being done." value={inc.summary ?? ''} validate={(v) => (v.length > 4000 ? 'At most 4000 characters' : null)} onSave={(v) => save({ summary: v }, 'Summary')} />
             ) : (
@@ -205,7 +205,7 @@ function IncidentFile({ id }: { id: string }) {
         <TabsContent value="evidence">
           {data.stoppedBefore.length > 0 && (
             <div className="section">
-              <h4>Sensors not reporting at incident start</h4>
+              <h2 className="section-h">Sensors not reporting at incident start</h2>
               <SortableDataTable
                 caption="Sensors not reporting"
                 rowKey="key"
@@ -221,7 +221,7 @@ function IncidentFile({ id }: { id: string }) {
             </div>
           )}
           <div className="section">
-            <h4>Gathered from the window</h4>
+            <h2 className="section-h">Gathered from the window</h2>
             <SortableDataTable
               caption="Evidence by sensor"
               rowKey="sensor"
@@ -239,7 +239,7 @@ function IncidentFile({ id }: { id: string }) {
             />
           </div>
           <div className="section">
-            <h4>Pinned evidence ({inc.evidence.length})</h4>
+            <h2 className="section-h">Pinned evidence ({inc.evidence.length})</h2>
             {inc.evidence.length === 0 && <div className="muted">Nothing pinned yet. Use the camera inspector in the reconstruction environment to preserve frames.</div>}
             {inc.evidence.map((e, i) => (
               <div key={i} className="row" style={{ padding: '3px 0' }}>
@@ -250,7 +250,7 @@ function IncidentFile({ id }: { id: string }) {
         </TabsContent>
         <TabsContent value="tracks">
           <div className="section">
-            <h4>Alerts</h4>
+            <h2 className="section-h">Alerts</h2>
             {data.alerts.length === 0 && <div className="muted">No alerts in the window.</div>}
             {data.alerts.map((a) => (
               <div key={a.id} className="row" style={{ padding: '4px 0' }}>
@@ -259,7 +259,7 @@ function IncidentFile({ id }: { id: string }) {
             ))}
           </div>
           <div className="section">
-            <h4>Tracks</h4>
+            <h2 className="section-h">Tracks</h2>
             <SortableDataTable
               caption="Tracks in the window"
               rowKey="id"
@@ -368,7 +368,7 @@ function CreateIncident({ onDone }: { onDone: (id: string | null) => void }) {
   return (
     <div className="section inc-create reveal">
       <div>
-        <h3>New incident</h3>
+        <h2 className="sub-h">New incident</h2>
         <p className="muted">An incident is a place and a time window. Everything every sensor recorded inside it is gathered into the file and preserved.</p>
       </div>
       <Input label="Title" placeholder="e.g. Fence alarm, east segment" value={title} onChange={(e) => setTitle(e.target.value)} error={title && title.trim().length < 3 ? 'At least 3 characters' : undefined} />
@@ -413,7 +413,7 @@ function Chronology({ data }: { data: IncidentPackage }) {
   const shown = ev.slice(0, 40);
   return (
     <div className="section">
-      <h4>Chronology</h4>
+      <h2 className="section-h">Chronology</h2>
       <SuiTimeline value={shown.length} className="inc-chrono">
         {shown.map((e, i) => (
           <TimelineItem key={i} step={i + 1} className={`chr-${e.tone}`}>

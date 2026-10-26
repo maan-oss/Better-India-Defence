@@ -322,7 +322,7 @@ function Handoff() {
             </div>
           </div>
           <div className="section">
-            <h4>Observed sequence ({res.candidates} person observations searched)</h4>
+            <h2 className="section-h">Observed sequence ({res.candidates} person observations searched)</h2>
             {segmentsWithGaps.map((x, i) =>
               x.type === 'seg' ? (
                 <div key={i} className="row" style={{ padding: '10px 0', borderTop: '1px solid var(--line)', alignItems: 'flex-start' }}>
@@ -363,7 +363,7 @@ function Handoff() {
             )}
           </div>
           <div className="section">
-            <h4>Rationale</h4>
+            <h2 className="section-h">Rationale</h2>
             {res.result.rationale.map((r, i) => (
               <div key={i} className="muted">
                 · {r}

@@ -159,7 +159,7 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
           <div className="more-groups">
             {visible.map((g) => (
               <section key={g.group} className="more-group" aria-label={g.group}>
-                <h3 className="more-title">{g.group}</h3>
+                <h2 className="more-title">{g.group}</h2>
                 <ul className="more-list">
                   {g.items.map((n) => {
                     const I = Icon[n.icon] as () => ReactNode;
@@ -354,7 +354,7 @@ function ShortcutsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
       <div className="keys-layout">
         <ShortcutList groups={SHORTCUTS} label="Keyboard shortcuts" searchPlaceholder="Find a shortcut" />
         <section className="keys-goto" aria-label="Go to an area">
-          <h4>Go to an area: press G, then</h4>
+          <h2 className="section-h">Go to an area: press G, then</h2>
           {GOTO.map(([k, d]) => (
             <div key={k} className="keys-row">
               <span className="keys-k">

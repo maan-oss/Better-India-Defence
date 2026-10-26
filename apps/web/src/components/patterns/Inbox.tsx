@@ -111,7 +111,7 @@ function InboxBody({ alerts, troubled, names, pending, count, onDone }: { alerts
     <div className="inbox">
       {alerts.length > 0 && (
         <section className="inbox-sec" aria-label="Open alerts">
-          <h3>Alerts</h3>
+          <h2 className="sub-h">Alerts</h2>
           <ul>
             {alerts.slice(0, 12).map((a) => (
               <li key={a.id} className="inbox-row">
@@ -141,7 +141,7 @@ function InboxBody({ alerts, troubled, names, pending, count, onDone }: { alerts
       )}
       {troubled.length > 0 && (
         <section className="inbox-sec" aria-label="Sensors">
-          <h3>Sensors</h3>
+          <h2 className="sub-h">Sensors</h2>
           <ul>
             {troubled.map((s) => (
               <li key={s.sensorId} className="inbox-row">
@@ -162,7 +162,7 @@ function InboxBody({ alerts, troubled, names, pending, count, onDone }: { alerts
       )}
       {pending > 0 && (
         <section className="inbox-sec" aria-label="Identity">
-          <h3>Identity</h3>
+          <h2 className="sub-h">Identity</h2>
           <ul>
             <li className="inbox-row">
               <button type="button" className="inbox-main" onClick={() => go('/identity')}>

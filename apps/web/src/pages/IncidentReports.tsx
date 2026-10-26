@@ -230,7 +230,7 @@ function ReportDetail({ id, onChanged, version }: { id: string; onChanged: () =>
         {r.resolvedBy ? ` · resolved by ${r.resolvedBy}` : ''}
         {r.reviewedBy ? ` · reviewed by ${r.reviewedBy}` : ''}
       </p>
-      <h3>Equipment</h3>
+      <h2 className="sub-h">Equipment</h2>
       {r.assets.length === 0 && <p className="note">None linked. Watch level applies.</p>}
       <ul>
         {r.assets.map((a) => (
@@ -257,7 +257,7 @@ function ReportDetail({ id, onChanged, version }: { id: string; onChanged: () =>
           </Button>
         </div>
       )}
-      <h3>Next steps</h3>
+      <h2 className="sub-h">Next steps</h2>
       {steps.length === 0 && !canReview && <p className="note">Nothing you can do on this report now{me && r.reportedBy === me ? ' — you reported it, so someone else must verify it' : ''}.</p>}
       {steps.length > 0 && (
         <div className="as-form">
@@ -283,7 +283,7 @@ function ReportDetail({ id, onChanged, version }: { id: string; onChanged: () =>
             });
           }}
         >
-          <h3>Post-incident review</h3>
+          <h2 className="sub-h">Post-incident review</h2>
           <Textarea label="Summary" value={summary} maxLength={4000} onChange={(e) => setSummary(e.target.value)} />
           <Textarea label="Lessons" value={lessons} maxLength={4000} onChange={(e) => setLessons(e.target.value)} />
           <div className="as-actions">
@@ -304,7 +304,7 @@ function ReportDetail({ id, onChanged, version }: { id: string; onChanged: () =>
           {err}
         </p>
       )}
-      <h3>History</h3>
+      <h2 className="sub-h">History</h2>
       <ol aria-label="History">
         {events.map((e) => (
           <li key={e.id}>

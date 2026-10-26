@@ -563,7 +563,7 @@ export const CommentThread = forwardRef<HTMLElement, CommentThreadProps>(functio
           : <motion.div key="thread" className={styles.thread} {...face}>
             <header className={styles.header}>
               <div className={styles.heading}>
-                {title && <h3 className={styles.title}>{title}</h3>}
+                {title && <h2 className={styles.title}>{title}</h2>}
                 <span className={styles.subtitle}>{t.commentCount(total)}</span>
               </div>
               {!appendOnly && <button type="button" className={styles.resolve} data-resolve disabled={!total} onClick={() => setResolved(true)}><Check size={15} strokeWidth={1.75} aria-hidden="true" />{t.resolve}</button>}

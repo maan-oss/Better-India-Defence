@@ -54,7 +54,7 @@ export function EvidenceInspector({ patchId }: { patchId: string }) {
       <Header kind={patch.kind === 'interior' ? 'Interior space' : patch.kind === 'ground' ? 'Ground surface' : 'Surface'} title={title} chips={[...states].map((s) => <StateChip key={s} state={s} />)} />
       {data.superseded && <div className="note warn" style={{ margin: 12 }}>This surface no longer exists according to the latest LiDAR reconstruction of the structure. The prior design geometry is shown as a ghost only.</div>}
       <div className="ledger">
-        <h5>Geometry</h5>
+        <h2 className="minor-h">Geometry</h2>
         {geometry.length ? (
           geometry.map((c) => <ContributionRow key={c.sensorId} c={c} onObs={setObs} />)
         ) : (
@@ -69,7 +69,7 @@ export function EvidenceInspector({ patchId }: { patchId: string }) {
         </div>
       </div>
       <div className="ledger">
-        <h5>Appearance</h5>
+        <h2 className="minor-h">Appearance</h2>
         {primaryApp ? (
           <>
             <div className="big">
@@ -93,7 +93,7 @@ export function EvidenceInspector({ patchId }: { patchId: string }) {
       </div>
       {appearance.length > 1 && (
         <div className="ledger">
-          <h5>Secondary observations</h5>
+          <h2 className="minor-h">Secondary observations</h2>
           {appearance.slice(1).map((c) => (
             <ContributionRow key={c.sensorId} c={c} onObs={setObs} />
           ))}
@@ -125,7 +125,7 @@ export function EvidenceInspector({ patchId }: { patchId: string }) {
         </div>
       </div>
       <div className="ledger">
-        <h5>Original evidence ({data.evidence.length})</h5>
+        <h2 className="minor-h">Original evidence ({data.evidence.length})</h2>
         {data.evidence.length === 0 && <div className="muted">No observation records.</div>}
         {data.evidence.map((e) => (
           <div key={`${e.kind}:${e.id}`} className="ev-row">
@@ -187,7 +187,7 @@ export function TrackInspector({ id }: { id: string }) {
       />
       {lost && data.lastConfirmed && (
         <div className="ledger">
-          <h5>Object permanence</h5>
+          <h2 className="minor-h">Object permanence</h2>
           <div className="big">
             LAST OBSERVED <span className="mono">{hms(data.lastConfirmed.t)}Z</span>
           </div>
@@ -236,7 +236,7 @@ export function TrackInspector({ id }: { id: string }) {
         )}
       </div>
       <div className="ledger">
-        <h5>Contributing sensors ({tr.contributors.length})</h5>
+        <h2 className="minor-h">Contributing sensors ({tr.contributors.length})</h2>
         {tr.contributors
           .slice()
           .sort((a, b) => b.count - a.count)
@@ -256,7 +256,7 @@ export function TrackInspector({ id }: { id: string }) {
           ))}
       </div>
       <div className="ledger">
-        <h5>Recent evidence</h5>
+        <h2 className="minor-h">Recent evidence</h2>
         {data.observations.length === 0 && <div className="muted">No recent observation records.</div>}
         {data.observations.slice(0, 14).map((o) => (
           <div key={o.id} className="ev-row">
@@ -432,7 +432,7 @@ export function ChangeInspector({ id }: { id: string }) {
         </div>
       </div>
       <div className="ledger">
-        <h5>Supporting evidence ({data.evidence.length})</h5>
+        <h2 className="minor-h">Supporting evidence ({data.evidence.length})</h2>
         {data.evidence.map((e: EvidenceRef, i: number) => (
           <div key={`${e.id}-${i}`} className="ev-row">
             <EvidenceLink ev={e} onObservation={setObs} />
@@ -547,7 +547,7 @@ export function AlertInspector({ id }: { id: string }) {
       <Checklist alertId={alert.id} />
       {dispatch && <DispatchDialog alert={alert} onClose={() => setDispatch(false)} />}
       <div className="ledger">
-        <h5>Evidence</h5>
+        <h2 className="minor-h">Evidence</h2>
         {alert.evidence.map((e, i) => (
           <div key={`${e.id}-${i}`} className="ev-row">
             <EvidenceLink ev={e} onObservation={setObs} />
@@ -557,7 +557,7 @@ export function AlertInspector({ id }: { id: string }) {
         ))}
       </div>
       <div className="ledger">
-        <h5>Notes</h5>
+        <h2 className="minor-h">Notes</h2>
         {alert.notes.map((n, i) => (
           <div key={i} className="ev-row">
             <span>{n.text}</span>
@@ -608,7 +608,7 @@ export function BuildingInspector({ id }: { id: string }) {
         </dl>
       </div>
       <div className="ledger">
-        <h5>Surfaces ({own.length}) — select for evidence</h5>
+        <h2 className="minor-h">Surfaces ({own.length}) — select for evidence</h2>
         {own.map((p) => (
           <div key={p.id} className="ev-row" style={{ cursor: 'pointer' }} onClick={() => select({ kind: 'patch', id: p.id, buildingId: id })}>
             <span>{p.label.split('—')[1]?.trim() ?? p.label}</span>
@@ -641,7 +641,7 @@ export function ObjectInspector({ id }: { id: string }) {
         </dl>
       </div>
       <div className="ledger">
-        <h5>Evidence</h5>
+        <h2 className="minor-h">Evidence</h2>
         {o.evidence.length === 0 && <div className="muted">None — expected from design data only.</div>}
         {o.evidence.map((e, i) => (
           <div key={i} className="ev-row">

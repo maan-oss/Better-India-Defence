@@ -77,7 +77,7 @@ export function EmptyState({ title, description, action, icon, className, label 
   return <section className={[styles.root, className].filter(Boolean).join(" ")} aria-label={label}>
     <div className={styles.icon} aria-hidden="true"><AnimatePresence mode="popLayout" initial={false}><Swap key={iconKey(glyph)} className={styles.glyph} initial={reduce ? { opacity: 0 } : iconIn} animate={shown} exit={reduce ? fadeOut : { ...iconIn, transition: exitFast }} transition={reduce ? enter : motionTokens.spring.snappy}>{glyph}</Swap></AnimatePresence></div>
     <HeightFrame reduce={reduce} morphKey={`${title}\n${description}`}>
-      <h3><AnimatePresence mode="popLayout" initial={false}><Swap key={title} className={styles.line} {...swap}>{title}</Swap></AnimatePresence></h3>
+      <h2 className="sub-h"><AnimatePresence mode="popLayout" initial={false}><Swap key={title} className={styles.line} {...swap}>{title}</Swap></AnimatePresence></h2>
       <p><AnimatePresence mode="popLayout" initial={false}><Swap key={description} className={styles.line} {...swap}>{description}</Swap></AnimatePresence></p>
     </HeightFrame>
     {action && <div className={styles.action}>{action}</div>}

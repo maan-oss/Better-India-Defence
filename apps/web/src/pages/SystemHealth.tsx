@@ -86,7 +86,7 @@ export function SystemHealth() {
         <div className="scroll" tabIndex={0}>
           <IntegrationsPanel />
           <div className="section">
-            <h4>Services</h4>
+            <h2 className="section-h">Services</h2>
             <table className="table">
               <tbody>
                 {h.services.map((s) => (
@@ -104,7 +104,7 @@ export function SystemHealth() {
             </table>
           </div>
           <div className="section">
-            <h4>Ingest (messages/s, last 3 min)</h4>
+            <h2 className="section-h">Ingest (messages/s, last 3 min)</h2>
             {hist.ingest.length > 1 ? (
               <LineChart
                 label="Ingest rate"
@@ -123,7 +123,7 @@ export function SystemHealth() {
             )}
           </div>
           <div className="section">
-            <h4>Pipeline counters</h4>
+            <h2 className="section-h">Pipeline counters</h2>
             <dl className="kv">
               {Object.entries(m.counters).map(([k, v]) => (
                 <div key={k} style={{ display: 'contents' }}>
@@ -136,7 +136,7 @@ export function SystemHealth() {
         </div>
         <div className="scroll" tabIndex={0}>
           <div className="section">
-            <h4>Storage · {h.storage.engine === 'pglite' ? 'embedded PostgreSQL (PGlite)' : 'PostgreSQL'}</h4>
+            <h2 className="section-h">Storage · {h.storage.engine === 'pglite' ? 'embedded PostgreSQL (PGlite)' : 'PostgreSQL'}</h2>
             {h.storage.disk && h.storage.disk.totalBytes > 0 && (
               <div className="health-disk">
                 <UsageMeter
@@ -180,7 +180,7 @@ export function SystemHealth() {
             </dl>
           </div>
           <div className="section">
-            <h4>Reconstruction jobs</h4>
+            <h2 className="section-h">Reconstruction jobs</h2>
             {h.jobs.length === 0 ? (
               <div className="muted">No jobs yet.</div>
             ) : (
@@ -197,7 +197,7 @@ export function SystemHealth() {
             )}
           </div>
           <div className="section">
-            <h4>Clocks</h4>
+            <h2 className="section-h">Clocks</h2>
             <dl className="kv">
               <dt>Server</dt>
               <dd className="mono">{hms(h.clock.serverTime)}Z</dd>
@@ -212,7 +212,7 @@ export function SystemHealth() {
             </dl>
           </div>
           <div className="section">
-            <h4>Sensor ingestion state</h4>
+            <h2 className="section-h">Sensor ingestion state</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(92px, 1fr))', gap: 4 }}>
               {h.sensors.map((s) => (
                 <div key={s.sensorId} className="row mono" style={{ fontSize: 'var(--fs-caption)' }} title={`${s.status} · ${s.lastSeen ? hms(s.lastSeen) : 'never'}`}>
@@ -247,7 +247,7 @@ function IntegrationsPanel() {
   return (
     <section className="lp-grid" aria-label="Integrations">
       <div className="lp-panel">
-        <h3 className="lp-title">Integrations, last {m.windowHours} h</h3>
+        <h2 className="lp-title">Integrations, last {m.windowHours} h</h2>
         <p className="lp-meta">
           {m.totals.messages.toLocaleString()} messages accepted · {m.totals.deadLetters.toLocaleString()} refused
         </p>
@@ -278,7 +278,7 @@ function IntegrationsPanel() {
         </table>
       </div>
       <div className="lp-panel">
-        <h3 className="lp-title">Refused, by reason</h3>
+        <h2 className="lp-title">Refused, by reason</h2>
         <table className="table" aria-label="Refused messages by reason">
           <thead>
             <tr>
@@ -304,7 +304,7 @@ function IntegrationsPanel() {
             )}
           </tbody>
         </table>
-        <h3 className="lp-title lp-title-sub">Refused, by sensor</h3>
+        <h2 className="lp-title lp-title-sub">Refused, by sensor</h2>
         <table className="table" aria-label="Refused messages by sensor">
           <thead>
             <tr>

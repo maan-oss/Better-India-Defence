@@ -88,7 +88,7 @@ function Review({ faceId }: { faceId: string | null }) {
     <div className="rv">
       <div className="rv-list">
         <div className="panel-h">
-          <h3>Awaiting verification</h3>
+          <h2 className="sub-h">Awaiting verification</h2>
           <div className="spacer" />
           <span className="muted">{list.data?.length ?? '…'}</span>
         </div>
@@ -435,7 +435,7 @@ function IdentityForm({ list, initial, onSaved }: { list: 'AUTHORISED' | 'WATCHL
   const cats = list === 'WATCHLIST' ? ['Person of interest', 'Banned from site', 'Missing person', 'Absconder'] : ['Personnel', 'Contractor', 'Visitor', 'Family', 'Vendor', 'Other'];
   return (
     <div className="col idform" style={{ maxWidth: 720, gap: 16 }}>
-      <h3 style={{ margin: 0 }}>{initial ? 'Edit entry' : list === 'WATCHLIST' ? 'New watchlist entry' : 'New authorised person'}</h3>
+      <h2 className="sub-h" style={{ margin: 0 }}>{initial ? 'Edit entry' : list === 'WATCHLIST' ? 'New watchlist entry' : 'New authorised person'}</h2>
       <div className="idform-grid">
         <ArcSelect label="Category" value={f.category} onValueChange={(v) => setF({ ...f, category: v })} options={cats.map((c) => ({ value: c, label: c }))} />
         <Input label="Full name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
@@ -510,10 +510,10 @@ function IdentityDetail({ id, onChanged }: { id: string; onChanged: () => void }
     <div className="col" style={{ gap: 14, maxWidth: 1000 }}>
       <div className="row">
         <span className={`lchip ${i.list}`}>{i.list}</span>
-        <h3 style={{ margin: 0 }}>
+        <h2 className="sub-h" style={{ margin: 0 }}>
           {i.rank ? `${i.rank} ` : ''}
           {i.name}
-        </h3>
+        </h2>
         <span className="chip">{i.status}</span>
         <div className="spacer" />
         {mayEdit && (
@@ -567,7 +567,7 @@ function IdentityDetail({ id, onChanged }: { id: string; onChanged: () => void }
         </dd>
       </dl>
       <div>
-        <h4 className="upper muted">Enrolled photos ({i.templates.length})</h4>
+        <h2 className="section-h upper muted">Enrolled photos ({i.templates.length})</h2>
         {i.templates.length > 0 && (
         <Carousel label={`Enrolled photos of ${i.name}`} slideSize="160px">
           {i.templates.map((t) => (
@@ -602,7 +602,7 @@ function IdentityDetail({ id, onChanged }: { id: string; onChanged: () => void }
         />
       )}
       <div>
-        <h4 className="upper muted">Recent sightings</h4>
+        <h2 className="section-h upper muted">Recent sightings</h2>
         {sightings.data?.length === 0 && <span className="muted">None recorded.</span>}
         <div className="fgrid">
           {sightings.data?.map((ev) => (
@@ -659,9 +659,9 @@ function EnrolPhoto({ identityId, onDone }: { identityId: string; onDone: () => 
   };
   return (
     <div className="panel" style={{ padding: 12 }}>
-      <h4 className="upper muted" style={{ margin: '0 0 8px' }}>
+      <h2 className="section-h upper muted" style={{ margin: '0 0 8px' }}>
         Enrol photo
-      </h4>
+      </h2>
       <div className="muted" style={{ fontSize: 'var(--fs-caption)', marginBottom: 8 }}>
         Use a recent, frontal, well-lit photo (ID-card or gate-pass quality). Several photos (different days, with/without spectacles) improve recognition. Faces below FAIR quality are
         refused.
@@ -820,7 +820,7 @@ function Settings() {
         </div>
         <div className="panel id-settings">
           <div className="panel-h">
-            <h3>Decision thresholds</h3>
+            <h2 className="sub-h">Decision thresholds</h2>
             <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
               cosine similarity
             </span>
@@ -863,7 +863,7 @@ function Settings() {
         </div>
         <div className="panel">
           <div className="panel-h">
-            <h3>Models</h3>
+            <h2 className="sub-h">Models</h2>
           </div>
           <table className="table">
             <thead>

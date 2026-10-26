@@ -178,7 +178,7 @@ function ImportAssets({ onDone }: { onDone: () => void }) {
   const clean = result !== null && result.problems.length === 0 && result.rows > 0;
   return (
     <section className="as-form" aria-label="Import assets from CSV" style={{ margin: '0 12px 12px' }}>
-      <h3>Import assets</h3>
+      <h2 className="sub-h">Import assets</h2>
       <p className="muted">
         One asset per row. Columns: tag, name, category, criticality, and optionally zone_id, manufacturer, model, serial, commissioned_at, warranty_until,
         notes, classification, owner, shared_with (separated by semicolons), stock_quantity, reorder_level, stock_unit.
@@ -380,7 +380,7 @@ function StockPanel({ id, stock, live, onDone }: { id: string; stock: NonNullabl
   const tone = stock.outOfStock ? 'red' : stock.lowStock ? 'amber' : 'ok';
   return (
     <section className="as-form" aria-label="Stock">
-      <h3>Stock</h3>
+      <h2 className="sub-h">Stock</h2>
       <p>
         <span className={`as-badge ${tone}`}>{state}</span> {stock.quantity} {stock.unit} on hand · reorder at {stock.reorderLevel} {stock.unit}
       </p>
@@ -424,7 +424,7 @@ function StockPanel({ id, stock, live, onDone }: { id: string; stock: NonNullabl
           }}
           aria-label="Request a reorder"
         >
-          <h3>Request a reorder</h3>
+          <h2 className="sub-h">Request a reorder</h2>
           <Input label={`Quantity (${stock.unit})`} inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
           <Input label="Reason" value={orderReason} maxLength={300} onChange={(e) => setOrderReason(e.target.value)} />
           <div className="as-actions">
@@ -487,7 +487,7 @@ function StatusForm({ id, current, onDone }: { id: string; current: AssetStatus;
   };
   return (
     <form className="as-form" onSubmit={submit} aria-label="Record a status change">
-      <h3>Record a status change</h3>
+      <h2 className="sub-h">Record a status change</h2>
       <label className="as-field">
         <span>New status</span>
         <select className="input" value={status} onChange={(e) => setStatus(e.target.value as SettableStatus)}>
@@ -574,7 +574,7 @@ function RetireForm({ id, onDone }: { id: string; onDone: () => void }) {
     );
   return (
     <div className="as-form" aria-label="Retire asset">
-      <h3>Retire asset</h3>
+      <h2 className="sub-h">Retire asset</h2>
       <p className="note">Retirement is final. It is refused while another asset still depends on this one.</p>
       <Input label="Reason" value={reason} maxLength={300} onChange={(e) => setReason(e.target.value)} />
       <div className="as-actions">
@@ -625,7 +625,7 @@ function DependenciesTab({ d, rows, changed }: { d: AssetDetail; rows: AssetView
 
   return (
     <div className="as-section">
-      <h3>Needs to operate</h3>
+      <h2 className="sub-h">Needs to operate</h2>
       {d.upstream.length === 0 && <p className="muted">Nothing. It does not depend on another asset.</p>}
       {d.upstream.length > 0 && (
         <ul className="as-list-plain">
@@ -639,7 +639,7 @@ function DependenciesTab({ d, rows, changed }: { d: AssetDetail; rows: AssetView
           ))}
         </ul>
       )}
-      <h3>Needed by</h3>
+      <h2 className="sub-h">Needed by</h2>
       {d.dependents.length === 0 && <p className="muted">No other asset depends on it.</p>}
       {d.dependents.length > 0 && (
         <ul className="as-list-plain">
@@ -812,7 +812,7 @@ function MaintenanceTab({ d, changed }: { d: AssetDetail; changed: () => void })
             void run(() => post(`/api/assets/${a.id}/plans`, { title: title.trim(), intervalDays: days })).then(() => setTitle(''));
           }}
         >
-          <h3>Add a maintenance plan</h3>
+          <h2 className="sub-h">Add a maintenance plan</h2>
           <Input label="Task" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} />
           <Input label="Every (days)" type="number" min={1} max={3650} value={interval} onChange={(e) => setInterval(e.target.value)} />
           <div className="as-actions">

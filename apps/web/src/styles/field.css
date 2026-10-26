@@ -27,7 +27,7 @@
 .fsteps { display: flex; gap: 3px; margin-top: 12px; }
 .fsteps span { flex: 1; text-align: center; font-size: var(--fs-micro); font-weight: 500; padding: 6px 0 0; border-top: 3px solid var(--line-2); color: var(--text-3); }
 .fsteps span.done { border-top-color: var(--st-standby); color: var(--text-1); }
-.fsec h4 { margin: 0 0 var(--sp-2); font-size: var(--fs-body); font-weight: 600; color: var(--text-1); }
+.fsec .section-h { margin: 0 0 var(--sp-2); font-size: var(--fs-body); font-weight: 600; color: var(--text-1); }
 .flocal { width: 100%; height: 300px; border-radius: var(--radius-lg); border: 1px solid var(--line-2); display: block; }
 .fal { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-1); margin-bottom: 6px; }
 .fal.p-critical { border-color: rgba(229, 72, 77, 0.5); box-shadow: inset 2px 0 0 var(--st-critical); }

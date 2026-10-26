@@ -248,7 +248,7 @@ export function TacticalScope() {
   return (
     <section className="panel cmd-scope">
       <div className="panel-h">
-        <h3>Tactical scope</h3>
+        <h2 className="sub-h">Tactical scope</h2>
         <span className="spacer" />
         <Segmented
           size="sm"

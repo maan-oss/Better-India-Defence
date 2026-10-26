@@ -74,7 +74,7 @@ export function Admin() {
         <div className="scroll" tabIndex={0}>
           <div className="section">
             <div className="row admin-users-h">
-              <h4 style={{ margin: 0 }}>Users</h4>
+              <h2 className="section-h" style={{ margin: 0 }}>Users</h2>
               <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
                 {(users.data ?? []).filter((u) => !u.disabled).length} active · {online.length} signed in now
               </span>
@@ -146,7 +146,7 @@ export function Admin() {
             </div>
           </div>
           <div className="section col admin-create" style={{ maxWidth: 620, gap: 14 }}>
-            <h4>Create user</h4>
+            <h2 className="section-h">Create user</h2>
             <div className="admin-two">
               <Input label="Username" placeholder="e.g. jkumar" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, '') })} />
               <Input label="Full name and rank" placeholder="e.g. Capt J. Kumar" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} />
@@ -176,7 +176,7 @@ export function Admin() {
             </div>
           </div>
           <div className="section">
-            <h4>Role capabilities</h4>
+            <h2 className="section-h">Role capabilities</h2>
             <table className="table">
               <thead>
                 <tr>
@@ -203,7 +203,7 @@ export function Admin() {
         </div>
         <div className="scroll" tabIndex={0}>
           <div className="section">
-            <h4>Effective configuration</h4>
+            <h2 className="section-h">Effective configuration</h2>
             {config.error && <ErrorNote error={config.error} />}
             {config.data && <JsonViewer data={config.data.effective} rootName="config" defaultExpandDepth={1} maxHeight={420} label="Effective configuration" />}
             <div className="muted" style={{ marginTop: 8, fontSize: 'var(--fs-caption)' }}>
@@ -211,7 +211,7 @@ export function Admin() {
             </div>
           </div>
           <div className="section">
-            <h4>Integrations</h4>
+            <h2 className="section-h">Integrations</h2>
             <SortableDataTable
               caption="Integrations"
               rowKey="name"
@@ -226,14 +226,14 @@ export function Admin() {
             />
           </div>
           <div className="section">
-            <h4>Connect equipment</h4>
+            <h2 className="section-h">Connect equipment</h2>
             <p className="muted" style={{ fontSize: 'var(--fs-body)', margin: '0 0 10px' }}>
               Anything that can send HTTPS can be a sensor: register it in Site configuration, then post <span className="mono">strata.ingest/v1</span> envelopes with the service token. Re-sent message ids are de-duplicated, so retries are safe. Formats and adapters: docs/INTEROP.md.
             </p>
             <CodeBlock filename="health-report.sh" language="bash" code={ingestExample(window.location.origin, FACILITY.sensors[0]?.id ?? 'C01')} />
           </div>
           <div className="section">
-            <h4>Accreditation status</h4>
+            <h2 className="section-h">Accreditation status</h2>
             <div className="note warn">This build is a development prototype. It holds no government or defence certification or accreditation. See docs/SECURITY.md for what would be required.</div>
           </div>
         </div>

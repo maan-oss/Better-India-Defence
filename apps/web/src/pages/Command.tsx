@@ -171,7 +171,7 @@ function ReadinessPanel() {
   return (
     <section className="panel cmd-ready">
       <div className="panel-h">
-        <h3>Readiness</h3>
+        <h2 className="sub-h">Readiness</h2>
         <div className="spacer" />
       </div>
       <div className="ready-row">
@@ -276,7 +276,7 @@ function WatchActivity() {
   return (
     <section className="panel cmd-activity">
       <div className="panel-h">
-        <h3>Watch activity</h3>
+        <h2 className="sub-h">Watch activity</h2>
         <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
           {hist.data.length} alerts in 26 weeks
         </span>
@@ -313,7 +313,7 @@ function ThreatBoard() {
   return (
     <section className="panel cmd-threats">
       <div className="panel-h">
-        <h3>Threat evaluation</h3>
+        <h2 className="sub-h">Threat evaluation</h2>
         <div className="spacer" />
         <span className="muted" style={{ fontSize: 'var(--fs-micro)' }}>
           ranked by proximity, imminence and approach to vital assets — decision support only
@@ -373,7 +373,7 @@ function TeamsPanel({ version }: { version: number }) {
   return (
     <section className="panel">
       <div className="panel-h">
-        <h3>Response teams</h3>
+        <h2 className="sub-h">Response teams</h2>
         <div className="spacer" />
         {can('ops.dispatch') && (
           <button className="btn small" onClick={() => setDispatch(true)}>
@@ -441,7 +441,7 @@ function TasksPanel({ version }: { version: number }) {
   return (
     <section className="panel tasks-panel">
       <div className="panel-h">
-        <h3>Tasks</h3>
+        <h2 className="sub-h">Tasks</h2>
         <span className="muted" style={{ fontSize: 'var(--fs-caption)' }}>
           {can('ops.dispatch') ? 'Drag a card to record its progress' : 'Read only'}
         </span>
@@ -614,9 +614,9 @@ function Handover() {
     <div className="scroll" tabIndex={0} style={{ padding: 16 }}>
       <div className="col" style={{ maxWidth: 1100, gap: 16 }}>
         <section className="panel" style={{ padding: 14 }}>
-          <h4 className="upper muted" style={{ margin: '0 0 8px' }}>
+          <h2 className="section-h upper muted" style={{ margin: '0 0 8px' }}>
             Current state (captured into the handover)
-          </h4>
+          </h2>
           {state.data ? <HandoverView s={state.data} /> : <Loading />}
           <div className="handover-form">
             <div className="col" style={{ gap: 6 }}>

@@ -226,7 +226,7 @@ export function Field() {
               </div>
 
               <section className="fsec" id="field-alerts">
-                <h4>Alerts near you</h4>
+                <h2 className="section-h">Alerts near you</h2>
                 {near.length === 0 && <div className="muted">None.</div>}
                 {near.length > 0 && (
                   <SwipeActions label="Alerts near you" className="field-swipe">
@@ -460,7 +460,7 @@ function LocalPicture({ centre, target }: { centre: Vec3 | null; target: { x: nu
   }, [centre, target, vas]);
   return (
     <section className="fsec">
-      <h4>Local picture · 600 m</h4>
+      <h2 className="section-h">Local picture · 600 m</h2>
       <canvas ref={ref} className="flocal" aria-label="Local picture around your team" />
     </section>
   );

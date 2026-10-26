@@ -116,7 +116,7 @@ export function IncidentPanel({ id }: { id: string }) {
       </div>
       {data.stoppedBefore.length > 0 && (
         <div className="ledger">
-          <h5>Sensors not reporting at incident start</h5>
+          <h2 className="minor-h">Sensors not reporting at incident start</h2>
           {data.stoppedBefore.map((s) => (
             <div key={`${s.sensorId}${s.t}`} className="ev-row">
               <span className="ev-link" onClick={() => select({ kind: 'sensor', id: s.sensorId })}>
@@ -131,7 +131,7 @@ export function IncidentPanel({ id }: { id: string }) {
         </div>
       )}
       <div className="ledger">
-        <h5>Nearby sensors ({data.sensors.length})</h5>
+        <h2 className="minor-h">Nearby sensors ({data.sensors.length})</h2>
         {data.sensors.map((s) => (
           <div key={s.sensorId} className="ev-row" style={{ cursor: 'pointer' }} onClick={() => select({ kind: 'sensor', id: s.sensorId })}>
             <span>
@@ -143,7 +143,7 @@ export function IncidentPanel({ id }: { id: string }) {
         ))}
       </div>
       <div className="ledger">
-        <h5>Tracks in area ({data.tracks.length})</h5>
+        <h2 className="minor-h">Tracks in area ({data.tracks.length})</h2>
         {data.tracks.map((t) => (
           <div key={t.id} className="ev-row" style={{ cursor: 'pointer' }} onClick={() => (select({ kind: 'track', id: t.id }), useTime.getState().seek(t.firstT))}>
             <span>
@@ -157,7 +157,7 @@ export function IncidentPanel({ id }: { id: string }) {
         ))}
       </div>
       <div className="ledger">
-        <h5>Alerts ({data.alerts.length})</h5>
+        <h2 className="minor-h">Alerts ({data.alerts.length})</h2>
         {data.alerts.map((a) => (
           <div key={a.id} className="ev-row" style={{ cursor: 'pointer' }} onClick={() => select({ kind: 'alert', id: a.id })}>
             <span className="row">
@@ -169,7 +169,7 @@ export function IncidentPanel({ id }: { id: string }) {
       </div>
       {data.changes.length > 0 && (
         <div className="ledger">
-          <h5>World changes</h5>
+          <h2 className="minor-h">World changes</h2>
           {data.changes.map((c) => (
             <div key={c.id} className="ev-row" style={{ cursor: 'pointer' }} onClick={() => select({ kind: 'change', id: c.id })}>
               <span>{c.title}</span>
@@ -232,7 +232,7 @@ export function DiffPanel() {
       {data && (
         <>
           <div className="ledger">
-            <h5>Detected change events ({data.detectedChanges.length})</h5>
+            <h2 className="minor-h">Detected change events ({data.detectedChanges.length})</h2>
             {data.detectedChanges.length === 0 && <div className="muted">No change events detected between A and B.</div>}
             {[...data.detectedChanges].sort((x, y) => rank(x.kind) - rank(y.kind) || x.t - y.t).map((c) => (
               <div key={c.id} className="ev-row" style={{ cursor: 'pointer' }} onClick={() => (select({ kind: 'change', id: c.id }), flyTo(c.position, Math.max(140, c.extentM * 6)))}>
@@ -245,7 +245,7 @@ export function DiffPanel() {
             ))}
           </div>
           <div className="ledger">
-            <h5>State differences A → B ({data.entries.length})</h5>
+            <h2 className="minor-h">State differences A → B ({data.entries.length})</h2>
             {data.entries.map((e, i) => (
               <div key={i} className="ev-row" style={{ cursor: e.position ? 'pointer' : 'default' }} onClick={() => e.position && flyTo(e.position, 220)}>
                 <span>{e.title}</span>
@@ -259,7 +259,7 @@ export function DiffPanel() {
             ))}
           </div>
           <div className="ledger">
-            <h5>Overhead imagery</h5>
+            <h2 className="minor-h">Overhead imagery</h2>
             {data.imagery.before && data.imagery.after && data.imagery.before.id !== data.imagery.after.id ? (
               <ImageryCompare before={data.imagery.before} after={data.imagery.after} />
             ) : (
@@ -364,7 +364,7 @@ export function CoveragePanel() {
         )}
       </div>
       <div className="ledger">
-        <h5>Lowest support surfaces</h5>
+        <h2 className="minor-h">Lowest support surfaces</h2>
         {!coverage && <Loading />}
         {rows.map(({ r, p }) => (
           <div key={r[0]} className="ev-row" style={{ cursor: 'pointer' }} onClick={() => (select({ kind: 'patch', id: r[0], buildingId: p!.ownerId }), flyTo(p!.center, 120))}>
