@@ -129,6 +129,11 @@
 .reg { display: grid; grid-template-columns: 380px 1fr; min-height: 0; height: 100%; }
 .reg-list { border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
 .reg-detail { overflow: auto; padding: var(--sp-5) var(--sp-6); min-height: 0; }
+/* Phones: the list sits above the detail instead of leaving the detail a sliver at the screen edge. */
+@media (max-width: 760px) {
+  .rv, .reg { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 45%) minmax(0, 1fr); }
+  .rv-list, .reg-list { border-right: 0; border-bottom: 1px solid var(--line); }
+}
 .chooser { display: flex; flex-wrap: wrap; gap: 10px; }
 .chooser button { background: var(--bg-2); border: 1px solid var(--line-2); border-radius: var(--radius-lg); padding: var(--sp-2); cursor: pointer; display: flex; flex-direction: column; gap: 4px; color: inherit; width: 140px; text-align: left; }
 .chooser button:disabled { opacity: 0.45; cursor: not-allowed; }

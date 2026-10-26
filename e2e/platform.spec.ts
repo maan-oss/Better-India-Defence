@@ -271,7 +271,8 @@ test('phone shell: tab bar, search and the All areas sheet work at 390 px withou
 
 test('status island opens to show readiness, alerts and sensor state', async ({ page }) => {
   await signIn(page, 'analyst');
-  await page.getByRole('button', { name: 'Console status' }).click();
+  // The pill is named by its visible readiness text, so it is found by its class rather than a label.
+  await page.locator('button.island').click();
   const panel = page.getByRole('dialog', { name: 'Console status' });
   await expect(panel).toBeVisible();
   await expect(panel.getByText('Readiness')).toBeVisible();
