@@ -278,7 +278,7 @@ export function Cameras() {
           {sources.filter((s) => s.status.state === "live").length} live
           analysed streams ·{" "}
           {alertingCount ? (
-            <b style={{ color: "var(--red)" }}>{alertingCount} alerting</b>
+            <b style={{ color: "var(--st-critical-text)" }}>{alertingCount} alerting</b>
           ) : (
             "none alerting"
           )}
@@ -560,7 +560,6 @@ function WallTile({
       onClick={arranging ? onArrangeTap : onSelect}
       role="button"
       tabIndex={0}
-      aria-label={`${c.id} ${c.name}`}
       onKeyDown={(e) => e.key === "Enter" && onSelect()}
       draggable
       onDragStart={(e) => {

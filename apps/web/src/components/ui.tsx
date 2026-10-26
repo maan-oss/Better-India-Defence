@@ -79,7 +79,7 @@ export function Tabs<V extends string>({ value, onChange, options, label, classN
     <T.Root value={value} onValueChange={(v) => onChange(v as V)} activationMode="manual" className={`tabs ${className}`}>
       <T.List aria-label={label} className="tabs-list">
         {list.map((i) => (
-          <T.Trigger key={i.value} value={i.value} disabled={i.disabled} title={i.title} className="tab">
+          <T.Trigger key={i.value} value={i.value} disabled={i.disabled} title={i.title} aria-controls={undefined} className="tab">
             {i.label}
           </T.Trigger>
         ))}

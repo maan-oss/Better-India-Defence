@@ -7,7 +7,7 @@
 .toggle { display: inline-flex; min-height: 32px; align-items: center; gap: 8px; padding: 0 10px 0 8px; border: 0; border-radius: var(--radius-pill); background: transparent; color: var(--text-secondary); cursor: pointer; font: inherit; font-size: var(--text-sm); line-height: var(--leading-body); -webkit-tap-highlight-color: transparent; transition: color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), opacity var(--duration-fast) var(--ease-standard), transform var(--duration-instant) var(--ease-standard); }
 .toggle:active { transform: scale(.97); }
 .toggle[data-active] { color: var(--foreground); background: color-mix(in oklab, var(--foreground) 5%, transparent); }
-.toggle[data-dim] { opacity: .56; }
+.toggle[data-dim] { opacity: .72; }
 .toggle[aria-pressed="false"] { color: var(--text-muted); }
 .toggleLabel { white-space: nowrap; }
 .toggle[aria-pressed="false"] .toggleLabel { opacity: .72; text-decoration: line-through; text-decoration-color: color-mix(in oklab, currentColor 55%, transparent); }

@@ -92,7 +92,7 @@ function Review({ faceId }: { faceId: string | null }) {
           <div className="spacer" />
           <span className="muted">{list.data?.length ?? '…'}</span>
         </div>
-        <div className="scroll">
+        <div className="scroll" tabIndex={0}>
           {list.data?.length === 0 && <Empty compact art="identity" title="Nothing to review" description="Recognition candidates appear here for human verification." />}
           {/* One row per person: repeat sightings of the same match fold under the newest, and open on request. */}
           {groupSightings(list.data ?? []).map((g) => {
@@ -119,7 +119,7 @@ function Review({ faceId }: { faceId: string | null }) {
           })}
         </div>
       </div>
-      <div className="rv-detail">
+      <div className="rv-detail" tabIndex={0}>
         {sel ? (
           <ReviewDetail
             id={sel}
@@ -264,7 +264,7 @@ function Sightings() {
   const [decision, setDecision] = useState<string>('');
   const list = useAsync((s) => get<FaceEvent[]>(`/api/faces?limit=300${decision ? `&decision=${decision}` : ''}`, s), [fv, decision]);
   return (
-    <div className="scroll" style={{ padding: 16 }}>
+    <div className="scroll" tabIndex={0} style={{ padding: 16 }}>
       <div className="row" style={{ marginBottom: 12, flexWrap: 'wrap' }}>
         <span className="muted">Filter</span>
         <Segmented
@@ -353,7 +353,7 @@ function Register({ selected, onSelect }: { selected: string | null; onSelect: (
         <div style={{ padding: 10, borderBottom: '1px solid var(--line)' }}>
           <SearchField label="Search the register" placeholder="Name, service number, unit" value={q} onValueChange={setQ} />
         </div>
-        <div className="scroll">
+        <div className="scroll" tabIndex={0}>
           {ids.data?.length === 0 && <Empty compact art="identity" title={q ? 'No matches' : 'No entries yet'} description={q ? 'Try a shorter name or a service number.' : list === 'WATCHLIST' ? 'Watchlist entries need a documented basis.' : 'Add the people who may be on site, with their zone access.'} />}
           {ids.data?.map((i) => (
             <div key={i.id} className={`list-row ${selected === i.id ? 'sel' : ''}`} onClick={() => (setCreating(false), onSelect(i.id))}>
@@ -721,7 +721,7 @@ function Search({ faceId, identityId }: { faceId: string | null; identityId: str
     }
   };
   return (
-    <div className="scroll" style={{ padding: 16 }}>
+    <div className="scroll" tabIndex={0} style={{ padding: 16 }}>
       <div className="col" style={{ maxWidth: 900, gap: 12 }}>
         <div className="note">
           Searches every stored face sighting (cameras and evidence) for faces resembling the probe. Each search is recorded with its purpose. Results above the strong threshold are
@@ -811,7 +811,7 @@ function Settings() {
       .then(() => setMsg('Saved (audited).'))
       .catch((e: unknown) => setMsg(e instanceof Error ? e.message : String(e)));
   return (
-    <div className="scroll" style={{ padding: 16 }}>
+    <div className="scroll" tabIndex={0} style={{ padding: 16 }}>
       <div className="col" style={{ maxWidth: 900, gap: 16 }}>
         <div className="id-metrics">
           <MetricCard label="Authorised entries" value={st.data.gallery.authorised} context="people who may be on site" />

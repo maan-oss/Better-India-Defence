@@ -154,7 +154,7 @@ export function ContextMenu({ children, items, label = "Context menu", trigger =
   }
 
   return <>
-    <div ref={targetRef} className={styles.target} tabIndex={0} onPointerDown={event => { pressedWhileOpen.current = open && event.button === 0; if (event.button === 2) rightDown.current = { x: event.clientX, y: event.clientY }; }}
+    <div ref={targetRef} className={styles.target} role="button" tabIndex={0} onPointerDown={event => { pressedWhileOpen.current = open && event.button === 0; if (event.button === 2) rightDown.current = { x: event.clientX, y: event.clientY }; }}
       onPointerUp={event => { if (trigger !== "still-right-click" || event.button !== 2 || !rightDown.current) return; const d = Math.hypot(event.clientX - rightDown.current.x, event.clientY - rightDown.current.y); rightDown.current = null; if (d < 5) showMenu(event.clientX, event.clientY); }}
       onClick={onTargetClick} onContextMenu={event => { event.preventDefault(); if (trigger === "default") showMenu(event.clientX, event.clientY); }} onKeyDown={onTargetKeyDown} aria-label={label} aria-haspopup="menu" aria-expanded={open}>
       {children}

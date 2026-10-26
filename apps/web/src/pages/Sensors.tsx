@@ -122,7 +122,7 @@ export function Sensors() {
         </div>
       )}
       <div className="page-body split sn-split">
-        <div className="scroll">
+        <div className="scroll" tabIndex={0}>
           {error && <ErrorNote error={error} />}
           {!data && !error && <Loading />}
           {data && total === 0 && <Empty art="sensors" title="No sensors registered" description="Add sensors in Site configuration. Each one appears here once its first message arrives." />}
@@ -168,7 +168,7 @@ export function Sensors() {
             </div>
           )}
         </div>
-        <div className="scroll">{id ? <SensorDetailView id={id} /> : <SensorMap rows={data ?? []} onPick={(sid) => nav(`/sensors/${sid}`)} />}</div>
+        <div className="scroll" tabIndex={0}>{id ? <SensorDetailView id={id} /> : <SensorMap rows={data ?? []} onPick={(sid) => nav(`/sensors/${sid}`)} />}</div>
       </div>
     </div>
   );

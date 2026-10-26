@@ -12,6 +12,8 @@ export class GlobeIntro {
   private start = 0;
   readonly duration = 2600;
   private target: THREE.Vector3;
+  /** The site marker fades out before the camera reaches it, so its ring never fills the view. */
+  private marker: THREE.Mesh;
 
   constructor(lat: number, lon: number) {
     const globe = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.MeshBasicMaterial({ color: P.bg1 }));
@@ -32,10 +34,11 @@ export class GlobeIntro {
     const rim = new THREE.Mesh(new THREE.SphereGeometry(1.012, 64, 48), new THREE.MeshBasicMaterial({ color: P.accent, transparent: true, opacity: 0.12, side: THREE.BackSide }));
     this.scene.add(rim);
     this.target = this.toXyz(lat, lon, 1);
-    const marker = new THREE.Mesh(new THREE.RingGeometry(0.006, 0.009, 32), new THREE.MeshBasicMaterial({ color: P.accent2, side: THREE.DoubleSide }));
+    const marker = new THREE.Mesh(new THREE.RingGeometry(0.006, 0.009, 32), new THREE.MeshBasicMaterial({ color: P.accent2, side: THREE.DoubleSide, transparent: true }));
     marker.position.copy(this.target.clone().multiplyScalar(1.002));
     marker.lookAt(this.target.clone().multiplyScalar(2));
     this.scene.add(marker);
+    this.marker = marker;
     this.scene.background = new THREE.Color(P.bg0);
   }
 
@@ -53,6 +56,7 @@ export class GlobeIntro {
   frame(renderer: THREE.WebGLRenderer, aspect: number): number {
     const k = Math.min(1, (performance.now() - this.start) / this.duration);
     const e = 1 - Math.pow(1 - k, 3);
+    (this.marker.material as THREE.MeshBasicMaterial).opacity = 1 - Math.min(1, Math.max(0, (k - 0.45) / 0.25));
     const dir = this.target.clone().normalize();
     const side = new THREE.Vector3(0, 1, 0).cross(dir).normalize();
     const startPos = dir.clone().multiplyScalar(4.2).addScaledVector(side, 1.6).add(new THREE.Vector3(0, 1.2, 0));

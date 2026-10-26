@@ -61,7 +61,7 @@ export function Login() {
 
   return (
     <div className="login">
-      <div className="login-main">
+      <main className="login-main">
         <section className="login-hero" aria-hidden="true">
           <StrataField className="hero-strata" width={1400} height={1000} lines={38} seed={7} relief={0.7} animate observations={3} />
           <div className="hero-clock">
@@ -130,7 +130,7 @@ export function Login() {
             </div>
           </form>
         </section>
-      </div>
+      </main>
     </div>
   );
 }

@@ -29,7 +29,7 @@
   --text-0: #1d1d1f;
   --text-1: #3a3a3c;
   --text-2: #5a5a5f;
-  --text-3: #6e6e73;   /* tertiary: >=4.5:1 on --bg-1 and --bg-2 */
+  --text-3: #636368;   /* tertiary: >=4.5:1 on --bg-1, --bg-2 and the card surfaces above them */
 
   /* Interaction — cream. The one primary action is a cream fill (Claude ivory); selection is a lighter grey. */
   --accent: #1d1d1f;
@@ -70,7 +70,7 @@
 
   /* Epistemic state — paired with pattern everywhere (solid / half / dashed). Radix teal 11, violet 11. */
   --captured: #1d1d1f;
-  --reconstructed: #00806f;
+  --reconstructed: #00695c;
   --inferred: #6e46c8;
   --prior: #6e6e73;
   --unknown: #aeaeb2;

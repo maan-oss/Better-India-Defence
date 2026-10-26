@@ -481,7 +481,7 @@ export const JsonViewer = forwardRef<HTMLDivElement, JsonViewerProps>(function J
             const mark = matched ? needle : "";
             return <motion.div key={row.id} ref={(node: HTMLDivElement | null) => { if (node) rowRefs.current.set(row.id, node); else rowRefs.current.delete(row.id); }}
               role="treeitem" tabIndex={isActive ? 0 : -1} aria-level={row.level} aria-posinset={row.posinset} aria-setsize={row.setsize}
-              aria-expanded={row.kind === "node" && branch ? row.open : undefined} aria-selected={isActive} aria-label={describe(row)}
+              aria-expanded={row.kind === "node" && branch ? row.open : undefined} aria-selected={isActive} aria-description={describe(row)}
               className={styles.row} data-kind={row.kind} data-active={isActive || undefined} style={{ "--level": row.level - 1 } as CSSProperties}
               initial={{ height: 0, opacity: 0, overflow: "hidden" }} animate={{ height: rowPx, opacity: 1, transitionEnd: { overflow: "visible" } }} exit={{ height: 0, opacity: 0, overflow: "hidden" }} transition={rowTransition}
               onFocus={event => { if (event.target === event.currentTarget && row.id !== active) setActiveRaw(row.id); }}

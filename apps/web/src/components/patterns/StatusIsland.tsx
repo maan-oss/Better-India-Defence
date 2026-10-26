@@ -152,7 +152,7 @@ export function StatusIsland() {
       </div>
       <AnimatePresence initial={false}>
         {!open ? (
-          <motion.button key="pill" layoutId="island" className={`island ${crit ? 'has-crit' : ''}`} onClick={() => setOpen(true)} aria-expanded={false} aria-label="Console status" transition={spring} style={{ borderRadius: 999 }}>
+          <motion.button key="pill" layoutId="island" className={`island ${crit ? 'has-crit' : ''}`} onClick={() => setOpen(true)} aria-expanded={false} transition={spring} style={{ borderRadius: 999 }}>
             <motion.span className="island-row" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
               {pill}
             </motion.span>

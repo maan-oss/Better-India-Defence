@@ -24,7 +24,8 @@
 .tileLabel { font-weight: 500; }
 .tileValue { opacity: 0; font-variant-numeric: tabular-nums; }
 .tile[data-room="name"] .tileLabel, .tile[data-room="full"] .tileLabel, .tile[data-room="full"] .tileValue { opacity: 1; }
-.tile[data-room="full"] .tileValue { opacity: .72; }
+/* Full opacity keeps the value above 4.5:1 on the darkest fill; the hierarchy comes from the weight and size. */
+.tile[data-room="full"] .tileValue { opacity: 1; font-weight: 600; }
 /* A branch on the top level prints its name and total on one header line. */
 .tile[data-branch][data-level="1"] { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 8px; }
 .tile[data-branch][data-level="1"] .tileValue { flex: none; opacity: .6; }

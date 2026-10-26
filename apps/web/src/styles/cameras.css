@@ -22,7 +22,7 @@
 .wt-state.error { color: var(--st-critical); }
 .wtile-bot { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.72)); color: rgba(255, 255, 255, 0.85); font-size: var(--fs-micro); }
 .wtile-bot > span:first-child { font-variant-numeric: tabular-nums; }
-.wtile-alert { position: absolute; left: 10px; right: 10px; bottom: 34px; display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--st-critical); color: #fff; font-size: var(--fs-caption); font-weight: 600; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); }
+.wtile-alert { position: absolute; left: 10px; right: 10px; bottom: 34px; display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: color-mix(in oklab, var(--st-critical) 78%, #000); color: #fff; font-size: var(--fs-caption); font-weight: 600; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); }
 .wtile-alert svg { flex: none; }
 .wtile-alert .ellipsis { min-width: 0; }
 .wtile.alerting.p-high .wtile-alert, .wtile.alerting.p-medium .wtile-alert { background: var(--st-serious); }

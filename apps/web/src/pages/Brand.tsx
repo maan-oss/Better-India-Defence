@@ -18,7 +18,7 @@ const SWATCHES = [
 
 export function Brand() {
   return (
-    <div className="page brandbook scroll">
+    <div className="page brandbook scroll" tabIndex={0}>
       <header className="bb-hero">
         <StrataField className="bb-hero-art" width={1600} height={620} lines={30} seed={11} animate observations={2} />
         <div className="bb-hero-copy">

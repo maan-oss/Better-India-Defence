@@ -93,7 +93,7 @@ function SimulationLabLive() {
         </div>
       </div>
       <div className="page-body split">
-        <div className="scroll">
+        <div className="scroll" tabIndex={0}>
           <div className="section">
             <h4>Scenarios</h4>
             <div className="muted" style={{ marginBottom: 8 }}>
@@ -126,7 +126,7 @@ function SimulationLabLive() {
             </div>
           ))}
         </div>
-        <div className="scroll">
+        <div className="scroll" tabIndex={0}>
           <div className="section">
             <h4>Failure injection {admin ? '' : '(administrator only)'}</h4>
             <div className="muted" style={{ marginBottom: 10 }}>

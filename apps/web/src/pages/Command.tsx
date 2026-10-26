@@ -85,7 +85,7 @@ export function Command() {
 function Overview() {
   const version = useOps((s) => s.version);
   return (
-    <div className="scroll" style={{ minHeight: 0 }}>
+    <div className="scroll" tabIndex={0} style={{ minHeight: 0 }}>
       <Kpis version={version} />
       <div className="cmd-grid">
         <ReadinessPanel />
@@ -319,7 +319,7 @@ function ThreatBoard() {
           ranked by proximity, imminence and approach to vital assets — decision support only
         </span>
       </div>
-      <div className="scroll" style={{ maxHeight: 360 }}>
+      <div className="scroll" tabIndex={0} style={{ maxHeight: 360 }}>
         <table className="table threat-table">
           <thead>
             <tr>
@@ -479,7 +479,7 @@ function DutyLog() {
   };
   const rows = (log.data ?? []).filter((l) => !kinds.length || kinds.includes(l.kind));
   return (
-    <div className="scroll" style={{ padding: 20 }}>
+    <div className="scroll" tabIndex={0} style={{ padding: 20 }}>
       <div className="col" style={{ maxWidth: 1000, gap: 16 }}>
         {can('ops.log') && (
           <section className="panel duty-new">
@@ -611,7 +611,7 @@ function Handover() {
   const [err, setErr] = useState<string | null>(null);
   if (!can('ops.log')) return <div className="empty">Watch handover requires operator rights.</div>;
   return (
-    <div className="scroll" style={{ padding: 16 }}>
+    <div className="scroll" tabIndex={0} style={{ padding: 16 }}>
       <div className="col" style={{ maxWidth: 1100, gap: 16 }}>
         <section className="panel" style={{ padding: 14 }}>
           <h4 className="upper muted" style={{ margin: '0 0 8px' }}>
@@ -764,7 +764,7 @@ function Sitreps() {
       .catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)));
   return (
     <div className="sitrep-layout">
-      <div className="scroll" style={{ borderRight: '1px solid var(--line)' }}>
+      <div className="scroll" tabIndex={0} style={{ borderRight: '1px solid var(--line)' }}>
         {can('incidents.edit') && (
           <div className="section col no-print">
             <b className="upper muted">New SITREP</b>
@@ -807,7 +807,7 @@ function Sitreps() {
           </div>
         ))}
       </div>
-      <div className="scroll">{sel ? <SitrepEditor key={sel.id} s={sel} site={facility?.name ?? ''} onChanged={(x) => (setSel(x), list.reload())} /> : <Empty art="audit" title="Select or draft a SITREP" description="Draft from the record fills the DTG, grid references, alerts, incidents, teams and top threats. Edit, then issue; amendments are kept as versions." />}</div>
+      <div className="scroll" tabIndex={0}>{sel ? <SitrepEditor key={sel.id} s={sel} site={facility?.name ?? ''} onChanged={(x) => (setSel(x), list.reload())} /> : <Empty art="audit" title="Select or draft a SITREP" description="Draft from the record fills the DTG, grid references, alerts, incidents, teams and top threats. Edit, then issue; amendments are kept as versions." />}</div>
     </div>
   );
 }
@@ -909,7 +909,7 @@ function Assets() {
   const vas = useAsync((s) => get<{ id: string; name: string; kind: string; priority: number; centre: { x: number; y: number }; radiusM: number; zoneId: string | null }[]>('/api/ops/vital-assets', s), []);
   const [edit, setEdit] = useState<{ id: string; name: string; kind: string; priority: number; x: number; y: number; radiusM: number } | null>(null);
   return (
-    <div className="scroll" style={{ padding: 16 }}>
+    <div className="scroll" tabIndex={0} style={{ padding: 16 }}>
       <div className="col" style={{ maxWidth: 1000, gap: 12 }}>
         <div className="note">Vital assets anchor the threat evaluation. Defaults were derived from restricted zones; survey each asset’s centre and protection radius.</div>
         {vas.data && vas.data.length === 0 ? (

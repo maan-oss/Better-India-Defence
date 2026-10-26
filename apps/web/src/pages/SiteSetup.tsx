@@ -63,7 +63,7 @@ export function SiteSetup() {
           <h1>Site setup</h1>
           <span className="sub">Currently running: {resp.active.name}{resp.active.simulated ? ' (synthetic data, simulated sensors)' : ''}.</span>
         </div>
-        <div className="scroll" style={{ padding: 24 }}>
+        <div className="scroll" tabIndex={0} style={{ padding: 24 }}>
           <div className="col" style={{ maxWidth: 760, gap: 14 }}>
             <div className="note">
               Define your installation to replace the synthetic site. You will need: a surveyed anchor point (WGS84), and ideally a recent orthophoto of the area (from your survey cell,

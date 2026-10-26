@@ -14,7 +14,7 @@ export function VirtualList<T>({ items, rowHeight, render, empty, overscan = 6 }
         ref.current = el;
         if (el && el.clientHeight !== height) setHeight(el.clientHeight || 600);
       }}
-      className="scroll"
+      className="scroll" tabIndex={0}
       style={{ height: '100%', position: 'relative' }}
       onScroll={(e) => setScroll((e.target as HTMLDivElement).scrollTop)}
     >

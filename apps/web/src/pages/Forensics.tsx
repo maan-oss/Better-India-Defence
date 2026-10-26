@@ -67,7 +67,7 @@ export function Forensics() {
           <div className="fx-search">
             <input className="input" placeholder="Search title, file name, notes, SHA-256…" value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
-          <div className="scroll">
+          <div className="scroll" tabIndex={0}>
             {items.loading && !items.data && <Loading />}
             {items.error && <ErrorNote error={items.error} />}
             {items.data?.length === 0 && <Empty compact art="evidence" title="No evidence yet" description="Add images or video to begin." />}
@@ -362,7 +362,7 @@ function ItemFaces({ id }: { id: string }) {
   const order = { STRONG: 0, POSSIBLE: 1, NO_MATCH: 2, NOT_COMPARABLE: 3 };
   const sorted = [...faces.data].sort((a, b) => order[a.decision] - order[b.decision] || (a.tMedia ?? 0) - (b.tMedia ?? 0));
   return (
-    <div className="scroll" style={{ padding: 14 }}>
+    <div className="scroll" tabIndex={0} style={{ padding: 14 }}>
       <div className="note" style={{ marginBottom: 12 }}>
         Faces are compared with the authorised register and the watchlist. A match is a candidate for human verification, not an identification. Faces too small, blurred or turned
         away are recorded as not comparable rather than guessed.
@@ -382,7 +382,7 @@ function Products({ item, version }: { item: EvidenceItem; version: number }) {
   const [open, setOpen] = useState<EvidenceProduct | null>(null);
   if (!prods.data) return <Loading />;
   return (
-    <div className="scroll" style={{ padding: 14 }}>
+    <div className="scroll" tabIndex={0} style={{ padding: 14 }}>
       {!prods.data.length && <Empty compact art="reconstructions" title="No products yet" description="Capture a frame, run multi-frame fusion, or enhance a region. Each product keeps its own hash and processing record." />}
       <div className="pgrid">
         {prods.data.map((p) => (

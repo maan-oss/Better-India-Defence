@@ -71,7 +71,7 @@ export function Admin() {
         <span className="sub">Local identity, role-based access control, configuration. All changes are audited.</span>
       </div>
       <div className="page-body split">
-        <div className="scroll">
+        <div className="scroll" tabIndex={0}>
           <div className="section">
             <div className="row admin-users-h">
               <h4 style={{ margin: 0 }}>Users</h4>
@@ -201,7 +201,7 @@ export function Admin() {
             </table>
           </div>
         </div>
-        <div className="scroll">
+        <div className="scroll" tabIndex={0}>
           <div className="section">
             <h4>Effective configuration</h4>
             {config.error && <ErrorNote error={config.error} />}

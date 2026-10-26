@@ -83,7 +83,7 @@ export function SystemHealth() {
         </div>
       </div>
       <div className="page-body split">
-        <div className="scroll">
+        <div className="scroll" tabIndex={0}>
           <IntegrationsPanel />
           <div className="section">
             <h4>Services</h4>
@@ -134,7 +134,7 @@ export function SystemHealth() {
             </dl>
           </div>
         </div>
-        <div className="scroll">
+        <div className="scroll" tabIndex={0}>
           <div className="section">
             <h4>Storage · {h.storage.engine === 'pglite' ? 'embedded PostgreSQL (PGlite)' : 'PostgreSQL'}</h4>
             {h.storage.disk && h.storage.disk.totalBytes > 0 && (

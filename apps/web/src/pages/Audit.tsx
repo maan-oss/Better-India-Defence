@@ -113,7 +113,7 @@ export function Audit() {
           {loading ? 'Loading…' : `${rows.length}${rows.length === 500 ? '+' : ''} record${rows.length === 1 ? '' : 's'}`}
         </span>
       </div>
-      <div className="scroll" style={{ flex: 1, minHeight: 0 }}>
+      <div className="scroll" tabIndex={0} style={{ flex: 1, minHeight: 0 }}>
         {error && <ErrorNote error={error} />}
         {!data && loading && <Loading />}
         <div className="audit-table">

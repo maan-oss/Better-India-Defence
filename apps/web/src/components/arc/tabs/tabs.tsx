@@ -86,7 +86,9 @@ export function TabsTrigger({ className, children, value, ...props }: ComponentP
   const { active } = useContext(TabsContext);
   const reduced = useReducedMotion();
   // The LayoutGroup in Tabs scopes the highlight to this instance, so it glides between triggers but never flies in from another tab set.
-  return <TabsPrimitive.Trigger {...props} value={value} data-value={value} className={[styles.trigger, className].filter(Boolean).join(" ")}>
+  // Only the open panel is in the DOM, so an inactive tab names no panel; the open tab keeps Radix's link to it.
+  const controls = active === value ? {} : { "aria-controls": undefined };
+  return <TabsPrimitive.Trigger {...props} {...controls} value={value} data-value={value} className={[styles.trigger, className].filter(Boolean).join(" ")}>
     {active === value && <motion.span className={styles.selection} layoutId="selection" layoutDependency={active} transition={reduced ? { duration: 0 } : motionTokens.spring.morph} aria-hidden="true"/>}
     <span className={styles.triggerLabel}>{children}</span>
   </TabsPrimitive.Trigger>;

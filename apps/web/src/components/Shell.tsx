@@ -122,7 +122,7 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
                     key={n.to}
                     to={n.to}
                     className={`rail-item${PHONE_PRIMARY.includes(n.to) ? '' : ' rail-secondary'}`}
-                    aria-label={n.label}
+                    aria-label={n.short ? `${n.short}${badge > 0 ? badge : ''} · ${n.label}${badge > 0 ? ', ' + badge + ' need attention' : ''}` : `${n.label}${badge > 0 ? ', ' + badge + ' need attention' : ''}`}
                     title={n.label}
                     onPointerEnter={() => prefetchRoute(n.to)}
                     onFocus={() => prefetchRoute(n.to)}
@@ -134,7 +134,7 @@ function Rail({ onShortcuts }: { onShortcuts: () => void }) {
                         <span className="rail-label">{n.short ?? n.label}</span>
                         <span className="rail-name">{n.label}</span>
                         {n.keys && <span className="rail-keys">{n.keys.split(' ').map((k) => <kbd key={k}>{k}</kbd>)}</span>}
-                        {badge > 0 && <Tally className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`} value={badge} cap={99} />}
+                        {badge > 0 && <span aria-hidden="true"><Tally className={`rail-badge ${n.to === '/operations' ? 'red' : ''}`} value={badge} cap={99} /></span>}
                       </>
                     )}
                   </NavLink>
@@ -227,7 +227,7 @@ function TopBar({ onCommand, onShortcuts }: { onCommand: () => void; onShortcuts
           </span>
         )}
       </div>
-      <button className="cmd-trigger" onClick={onCommand} aria-label="Open command bar">
+      <button className="cmd-trigger" onClick={onCommand} aria-label="Search or run a command">
         <Search size={15} strokeWidth={2} />
         <span className="cmd-trigger-text">Search or run a command</span>
       </button>

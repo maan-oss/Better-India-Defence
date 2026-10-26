@@ -122,7 +122,7 @@ function EnrolFromSighting({ ev, onClose, onDone }: { ev: FaceEvent; onClose: ()
         <img src={`/api/faces/${ev.id}/image?which=aligned`} alt="Aligned face" style={{ width: 112, height: 112, border: '1px solid var(--line-2)' }} />
         <div className="col grow">
           <input className="input" placeholder="Search name, service number or unit…" value={q} onChange={(e) => setQ(e.target.value)} autoFocus />
-          <div className="scroll" style={{ maxHeight: 300 }}>
+          <div className="scroll" tabIndex={0} style={{ maxHeight: 300 }}>
             {(data ?? []).map((i) => (
               <div key={i.id} className="list-row" onClick={() => void enrol(i.id)}>
                 <span className={`lchip ${i.list}`}>{i.list === 'WATCHLIST' ? 'WL' : 'AUTH'}</span>
