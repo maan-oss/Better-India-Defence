@@ -48,7 +48,8 @@ export function Inbox() {
   const label = count ? `Inbox, ${count} need action` : 'Inbox, nothing needs action';
   const cls = `tb-bell${crit ? ' crit' : ''}`;
   const icon = <Bell size={16} strokeWidth={1.75} />;
-  const badge = count > 0 && <Tally className="tb-bell-n" value={count} cap={99} />;
+  // The count is in the label; the rolling digits are decoration, so they stay out of the name.
+  const badge = count > 0 && <span aria-hidden="true"><Tally className="tb-bell-n" value={count} cap={99} /></span>;
   const body = <InboxBody alerts={openAlerts} troubled={troubled} names={names} pending={pending} count={count} onDone={() => setOpen(false)} />;
 
   if (narrow) {

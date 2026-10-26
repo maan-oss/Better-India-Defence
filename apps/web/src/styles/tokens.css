@@ -164,14 +164,6 @@
   --friend-tint: #e6f1fc;
   --friend-line: #a9cdf3;
 
-  /* Chip tints for epistemic and affiliation tags. */
-  --reconstructed-tint: #0d2d2a;
-  --reconstructed-line: #145750;
-  --inferred-tint: #1b1525;
-  --inferred-line: #473876;
-  --friend-tint: #0d2847;
-  --friend-line: #205d9e;
-
   /* Split-flap clock. */
   --flap-top: #ffffff;
   --flap-bottom: #ececf0;
@@ -260,6 +252,13 @@
   --inferred: #baa7ff;
   --prior: #9b988f;
   --unknown: #4a4a4a;
+  /* Chip tints on dark surfaces. */
+  --reconstructed-tint: #0d2d2a;
+  --reconstructed-line: #145750;
+  --inferred-tint: #1b1525;
+  --inferred-line: #473876;
+  --friend-tint: #0d2847;
+  --friend-line: #205d9e;
 
   /* Classification markings. */
   --cls-unclassified: #007a33;
@@ -396,6 +395,13 @@
   --inferred: #b8402f;
   --prior: #a33224;
   --unknown: #5a1a12;
+  /* Chip tints on dark surfaces. */
+  --reconstructed-tint: #0d2d2a;
+  --reconstructed-line: #145750;
+  --inferred-tint: #1b1525;
+  --inferred-line: #473876;
+  --friend-tint: #0d2847;
+  --friend-line: #205d9e;
   --shadow-2: 0 0 0 1px rgba(255, 60, 40, 0.14), 0 18px 48px rgba(0, 0, 0, 0.8);
   --glass-tint: rgba(28, 4, 3, 0.52);
   --glass-tint-strong: rgba(48, 8, 6, 0.7);

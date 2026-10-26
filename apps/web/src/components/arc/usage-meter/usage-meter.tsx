@@ -317,19 +317,21 @@ export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, fr
     <div ref={legend} className={styles.legend} role="group" aria-label={`${label} by category`} onKeyDown={onLegendKey}>
       {items.map((item, index) => {
         const warning = item.id === "free" && status === "over";
-        return <button key={item.id} type="button" className={styles.item} data-highlight={active ? active === item.id ? "on" : "off" : undefined} aria-pressed={pinned === item.id} aria-label={`${item.label}, ${format(item.value)}`} tabIndex={index === roving ? 0 : -1}
+        return <button key={item.id} type="button" className={styles.item} data-highlight={active ? active === item.id ? "on" : "off" : undefined} aria-pressed={pinned === item.id} tabIndex={index === roving ? 0 : -1}
           onClick={() => { setRoving(index); setPinned(current => current === item.id ? null : item.id); }}
           onFocus={() => { setRoving(index); setFocused(item.id); }} onBlur={() => setFocused(null)}
           onPointerEnter={event => { if (event.pointerType === "mouse") setHovered(item.id); }} onPointerLeave={event => { if (event.pointerType === "mouse") setHovered(null); }}>
+          {/* The name is spoken text; the visible label and rolling digits are hidden from assistive tech, so each value is read once. */}
+          <span className={styles.srOnly}>{`${item.label}, ${format(item.value)}`}</span>
           <span className={styles.itemHead}>
             <span className={styles.key} aria-hidden="true"><AnimatePresence mode="popLayout" initial={false}>
               {warning
                 ? <motion.span key="alert" className={styles.keyIcon} variants={reduced ? fade : pop} initial="hidden" animate="shown" exit="gone"><TriangleAlert size={12} strokeWidth={2} /></motion.span>
                 : <motion.span key="swatch" className={styles.swatch} data-index={item.id === "free" ? "free" : index} variants={reduced ? fade : pop} initial="hidden" animate="shown" exit="gone" />}
             </AnimatePresence></span>
-            <span className={styles.itemLabel}><Swap text={item.label} reduced={reduced} /></span>
+            <span className={styles.itemLabel} aria-hidden="true"><Swap text={item.label} reduced={reduced} /></span>
           </span>
-          <span className={styles.itemValue}><Ticker value={item.value} decimals={decimals} reduced={reduced} />{unit && <span className={styles.itemUnit}>{unit}</span>}</span>
+          <span className={styles.itemValue} aria-hidden="true"><Ticker value={item.value} decimals={decimals} reduced={reduced} />{unit && <span className={styles.itemUnit}>{unit}</span>}</span>
         </button>;
       })}
     </div>

@@ -1,6 +1,6 @@
 // @ts-nocheck — vendored Arc source (MIT, see LICENSE); typechecked upstream under different compiler options.
 
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Fragment, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, CSSProperties, FocusEvent as ReactFocusEvent, ReactNode } from "react";
 import { AnimatePresence, animate, motion, useIsPresent, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import type { Transition, Variants } from "motion/react";
@@ -137,11 +137,15 @@ const slide: Variants = {
 function Rolling({ text, direction, reduced }: { text: string; direction: number; reduced: boolean }) {
   const words = text.split(/\s+/).filter(Boolean);
   return <span className={styles.rolling} aria-hidden="true">
-    {words.map((word, index) => <span key={index} className={styles.word}>
-      <AnimatePresence initial={false} mode="popLayout" custom={direction}>
-        <motion.span key={word} className={styles.wordInner} custom={direction} variants={reduced ? fade : roll} initial="enter" animate="center" exit="exit">{word}</motion.span>
-      </AnimatePresence>
-    </span>)}
+    {/* The space between words is real text, so the visible value reads as the words do. */}
+    {words.map((word, index) => <Fragment key={index}>
+      {index > 0 && " "}
+      <span className={styles.word}>
+        <AnimatePresence initial={false} mode="popLayout" custom={direction}>
+          <motion.span key={word} className={styles.wordInner} custom={direction} variants={reduced ? fade : roll} initial="enter" animate="center" exit="exit">{word}</motion.span>
+        </AnimatePresence>
+      </span>
+    </Fragment>)}
   </span>;
 }
 
