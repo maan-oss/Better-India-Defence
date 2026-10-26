@@ -186,172 +186,10 @@
   --series-2: #0071e3;
   --series-3: #8944ab;
   --series-4: #248a3d;
+  --series-5: color-mix(in oklab, var(--foreground) 30%, var(--surface));
+  --series-6: color-mix(in oklab, var(--foreground) 18%, var(--surface));
 }
 
-:root[data-theme='night'] {
-  color-scheme: dark;
-
-  /* Neutral ladder — ChatGPT-style true greys (no blue tint). */
-  --bg-chrome: #171717; /* rail, top bar, side panels (ChatGPT sidebar) */
-  --bg-0: #171717;   /* map frame, wells, inputs' surround */
-  --bg-1: #212121;   /* app surface: pages, panels (ChatGPT main) */
-  --bg-2: #2a2a2a;   /* raised: cards, inputs, headers */
-  --bg-3: #2f2f2f;   /* hover / pressed (ChatGPT composer) */
-  --bg-4: #383838;   /* selected, menus */
-  --bg-hover: #262626;
-  --line: rgba(255, 255, 255, 0.06);    /* hairline */
-  --line-2: rgba(255, 255, 255, 0.1);   /* default border */
-  --line-3: rgba(255, 255, 255, 0.18);  /* strong border, hover */
-
-  /* Text — Claude's warm cream instead of cold white. Contrast on --bg-1: 14.9, 9.3, 5.4, 3.1. */
-  --text-0: #f3f1ea;
-  --text-1: #c9c6bd;
-  --text-2: #9b988f;
-  --text-3: #96938b;   /* tertiary: >=4.5:1 on --bg-1 and --bg-2 */
-
-  /* Interaction — cream. The one primary action is a cream fill (Claude ivory); selection is a lighter grey. */
-  --accent: #f0eee6;
-  --accent-2: #faf9f5;
-  --accent-ink: #1f1e1d;
-  --accent-dim: rgba(240, 238, 230, 0.08);
-  --accent-line: rgba(240, 238, 230, 0.42);
-  --focus: rgba(240, 238, 230, 0.7);
-
-  /* Status — Radix scales: solid (9), text (11), tint (3), border (6). */
-  --st-critical: #e5484d;  --st-critical-text: #ff9592; --st-critical-tint: #3b1219; --st-critical-line: #72232d;
-  --st-serious: #f76b15;   --st-serious-text: #ffa057;  --st-serious-tint: #331e0b;  --st-serious-line: #66350c;
-  --st-caution: #ffc53d;   --st-caution-text: #ffca16;  --st-caution-tint: #302008;  --st-caution-line: #5c3d05;
-  --st-normal: #46a758;    --st-normal-text: #71d083;   --st-normal-tint: #1b2a1e;   --st-normal-line: #2d5736;
-  --st-standby: #00a2c7;   --st-standby-text: #4ccce6;  --st-standby-tint: #082c36;  --st-standby-line: #045468;
-  --st-off: #7a7770;
-  /* Legacy names mapped onto the scale. */
-  --red: var(--st-critical);
-  --red-dim: var(--st-critical-tint);
-  --amber: var(--st-serious);
-  --amber-dim: var(--st-serious-tint);
-  --caution: var(--st-caution);
-  --caution-dim: var(--st-caution-tint);
-  --ok: var(--st-normal);
-  --ok-dim: var(--st-normal-tint);
-  --info: var(--st-standby);
-  --info-dim: var(--st-standby-tint);
-
-  /* Data (charts, sparklines): neutral so measures never read as status. */
-  --data: #a8a59d;
-
-  /* Affiliation (APP-6 / MIL-STD-2525) — map symbology only. Radix blue/red/orange/grass/yellow 11. */
-  --friend: #70b8ff;
-  --hostile: #ff6369;
-  --suspect: #ffa057;
-  --neutral: #71d083;
-  --unknown-aff: #f5e147;
-
-  /* Epistemic state — paired with pattern everywhere (solid / half / dashed). Radix teal 11, violet 11. */
-  --captured: #f3f1ea;
-  --reconstructed: #0bd8b6;
-  --inferred: #baa7ff;
-  --prior: #9b988f;
-  --unknown: #4a4a4a;
-  /* Chip tints on dark surfaces. */
-  --reconstructed-tint: #0d2d2a;
-  --reconstructed-line: #145750;
-  --inferred-tint: #1b1525;
-  --inferred-line: #473876;
-  --friend-tint: #0d2847;
-  --friend-line: #205d9e;
-
-  /* Classification markings. */
-  --cls-unclassified: #007a33;
-  --cls-restricted: #502b85;
-  --cls-confidential: #0033a0;
-  --cls-secret: #c8102e;
-  --cls-topsecret: #ff8c00;
-
-  /* Type scale: six sizes, one line height each. Every font-size in the app is one of these. */
-  --fs-micro: 11px;    --lh-micro: 16px;   /* labels, chips, banners, dense mono timestamps (minimum for operators) */
-  --fs-caption: 12px;  --lh-caption: 16px; /* secondary text, table meta */
-  --fs-body: 13px;     --lh-body: 20px;    /* default UI, tables, controls */
-  --fs-body-lg: 14px;  --lh-body-lg: 22px; /* forms, reading text */
-  --fs-lead: 16px;     --lh-lead: 24px;    /* section and card titles */
-  --fs-title: 20px;    --lh-title: 28px;   /* page titles */
-  --fs-display: 28px;  --lh-display: 32px; /* metric values */
-  --fs-hero: 40px;     --lh-hero: 44px;    /* sign-in and brand pages only */
-
-  --font-sans: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-
-  /* Spacing — 4 px base. Use these, not ad-hoc values. */
-  --sp-1: 4px;
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-5: 20px;
-  --sp-6: 24px;
-  --sp-8: 32px;
-  --sp-10: 40px;
-  --gutter: var(--sp-5);
-
-  /* Radius — controls 6, containers 8, overlays 10. */
-  --radius-sm: 6px;
-  --radius: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-
-  --ease: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --t-fast: 120ms;
-  --t-med: 200ms;
-  --t-slow: 420ms;
-
-  /* Dark UI separates with hairlines; shadow only for things that float. */
-  --shadow-1: none;
-  --shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 16px 40px -8px rgba(0, 0, 0, 0.55), 0 4px 12px -4px rgba(0, 0, 0, 0.35);
-  --glow-accent: 0 0 0 1px var(--bg-1), 0 0 0 3px var(--focus);
-
-  /*
-   * Liquid Glass. Apple's material bends the light behind it with a lensing shader; CSS can approximate that with a
-   * blurred, saturated backdrop, a sheen that falls off down the surface and a lit edge (glass.css draws the edge).
-   * Glass needs colour behind it to read as glass, so the backdrop carries a few soft light sources.
-   */
-  --glass-tint: rgba(30, 30, 38, 0.42);
-  --glass-tint-strong: rgba(70, 70, 84, 0.56);
-  --glass-tint-clear: rgba(18, 18, 26, 0.14);
-  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.17) 0%, rgba(255, 255, 255, 0.05) 46%, rgba(255, 255, 255, 0.02) 60%, rgba(255, 255, 255, 0.08) 100%);
-  --glass-sheen-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.1) 46%, rgba(255, 255, 255, 0.04) 60%, rgba(255, 255, 255, 0.13) 100%);
-  --glass-fill: var(--glass-sheen), var(--glass-tint);
-  --glass-fill-strong: var(--glass-sheen-strong), var(--glass-tint-strong);
-  --glass-fill-clear: var(--glass-sheen), var(--glass-tint-clear);
-  --glass-danger: linear-gradient(180deg, rgba(255, 120, 120, 0.24), rgba(255, 120, 120, 0.06)), rgba(70, 12, 18, 0.55);
-  --glass-prominent: linear-gradient(180deg, #ffffff 0%, var(--accent) 52%, #e2dfd3 100%);
-  --glass-prominent-hover: linear-gradient(180deg, #ffffff 0%, var(--accent-2) 100%);
-  --glass-prominent-rim: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(0, 0, 0, 0.14);
-  --glass-edge: rgba(255, 255, 255, 0.12);
-  /* The lit edge: brightest where light would strike the top-left, a faint line along the bottom-right. */
-  --glass-specular: linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.14) 30%, rgba(255, 255, 255, 0.03) 56%, rgba(255, 255, 255, 0.3) 100%);
-  --glass-rim: inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -14px 24px -18px rgba(255, 255, 255, 0.12);
-  --glass-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.55), 0 14px 34px -12px rgba(0, 0, 0, 0.62), 0 2px 8px rgba(0, 0, 0, 0.22);
-  --glass-blur: blur(28px) saturate(190%);
-  --glass-hover: rgba(255, 255, 255, 0.08);
-  --wallpaper: radial-gradient(70% 60% at 0% 0%, rgba(74, 104, 190, 0.45), transparent 62%), radial-gradient(60% 55% at 100% 0%, rgba(134, 86, 190, 0.32), transparent 60%), radial-gradient(70% 60% at 100% 100%, rgba(40, 150, 150, 0.3), transparent 62%), radial-gradient(50% 50% at 0% 100%, rgba(230, 140, 90, 0.18), transparent 60%), #0b0c10;
-
-  --rail-w: 56px;
-  --rail-w-open: 272px;
-  --left-w: 272px;
-  --right-w: 384px;
-  --top-h: 48px;
-  --tb-ctl: 36px;   /* one height for every control in the top bar; icon-only controls are circles of this size */
-  --timeline-h: 128px;
-  /* Arc layer: each theme sets these. */
-  --thumb: #f3f1ea;
-  --track-hover: #444444;
-  --neutral-5: #4a4a4a;
-  --neutral-6: #6e6c66;
-  --neutral-9: #dcd9d0;
-  --series-1: #d6d3ca;
-  --series-2: #7aa2c8;
-  --series-3: #b39ddb;
-  --series-4: #8fbf9f;
-}
 
 /*
  * Night (red-light) display for darkened operations rooms: monochrome red preserves dark adaptation.
@@ -417,6 +255,25 @@
   --glass-specular: linear-gradient(135deg, rgba(255, 110, 90, 0.7) 0%, rgba(255, 90, 70, 0.12) 30%, rgba(255, 90, 70, 0.02) 56%, rgba(255, 90, 70, 0.28) 100%);
   --glass-hover: rgba(255, 90, 70, 0.1);
   --wallpaper: radial-gradient(60% 50% at 8% -5%, rgba(255, 60, 40, 0.1), transparent 70%), #000;
+  /* Night display: monochrome red. Series, classification and neutral tones stay on the red ramp. */
+  --glass-blur: blur(28px) saturate(190%);
+  --glass-danger: linear-gradient(180deg, rgba(255, 120, 120, 0.24), rgba(255, 120, 120, 0.06)), rgba(70, 12, 18, 0.55);
+  --thumb: #ff7a66;
+  --track-hover: #3a0f0a;
+  --neutral-5: #4a1410;
+  --neutral-6: #7a2a20;
+  --neutral-9: #ff8a7a;
+  --series-1: #ffb3a6;
+  --series-2: #ff6a56;
+  --series-3: #e0503c;
+  --series-4: #c83a2a;
+  --series-5: #ff8a7a;
+  --series-6: #b8402f;
+  --cls-unclassified: #ff8a7a;
+  --cls-restricted: #e0503c;
+  --cls-confidential: #c83a2a;
+  --cls-secret: #ff2a1a;
+  --cls-topsecret: #ffb3a6;
 }
 :root[data-theme='night'] canvas,
 :root[data-theme='night'] img,
