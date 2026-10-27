@@ -211,10 +211,13 @@ export function Timeline() {
       const steps = [60_000, 300_000, 600_000, 900_000, 1800_000, 3600_000, 7200_000, 10800_000, 21600_000, 43200_000, 86400_000];
       const need = g.measureText('00:00').width + 18;
       const step = steps.find((s) => (s / span) * W > need) ?? steps[steps.length - 1]!;
+      // On a phone the strip is a pill: a tick label inside the curved ends would be cut off, so it is left out.
+      const pillEdge = W < 600 ? H / 2 : 0;
       for (let tt = Math.ceil(v.from / step) * step; tt < v.to; tt += step) {
         const x = xOf(tt, W, v);
         g.fillRect(x, H - 16, 1, 4);
-        g.fillText(hm(tt), x + 3, H - 5);
+        const label = hm(tt);
+        if (x >= pillEdge && x + 3 + g.measureText(label).width <= W - pillEdge) g.fillText(label, x + 3, H - 5);
       }
       // DIFF handles
       const d = useWorld.getState().diff;
@@ -237,10 +240,13 @@ export function Timeline() {
       g.fillStyle = alpha(P.normal, 0.85);
       g.fillRect(xe - 0.5, 0, 1, H - 16);
       g.font = '600 9.5px "Geist Variable"';
-      // At the right edge the label turns to the left of the line, so it is never cut off.
-      const nowW = g.measureText('NOW').width;
-      if (xe + 3 + nowW <= W) g.fillText('NOW', xe + 3, 10);
-      else g.fillText('NOW', xe - 3 - nowW, 10);
+      // At the right edge the label turns to the left of the line, so it is never cut off. The live edge label is for
+      // the wide strip only: on a phone the Live button already says so, and the label would sit on the band label.
+      if (W >= 600) {
+        const nowW = g.measureText('NOW').width;
+        if (xe + 3 + nowW <= W) g.fillText('NOW', xe + 3, 10);
+        else g.fillText('NOW', xe - 3 - nowW, 10);
+      }
       const xp = xOf(time.mode === 'live' ? edge : time.t, W, v);
       g.fillStyle = P.text0;
       g.fillRect(xp - 1, 0, 2, H - 16);

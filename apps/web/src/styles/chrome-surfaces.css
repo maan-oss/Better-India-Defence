@@ -1,0 +1,130 @@
+/*
+ * One surface per control. A control carries its own glass, and a container around controls carries none, so no
+ * background ever sits behind another background. Shapes are one family: circles for icon-only controls, pills for
+ * everything else (chips, labels, badges, the mode row, the timeline strip, the tab bar). The only rectangles left
+ * are the sheets that rise over the map: a full-width sheet cannot be a pill.
+ *
+ * Loaded last, so it overrides the earlier surface rules of the bar, map and timeline stylesheets.
+ */
+
+/* ---------------------------------------------------------------- top bar: bell, display and account */
+/* Three circles on the bar, not a capsule around them. The count sits on the bell's top-right corner. */
+.shell .tb-cluster {
+  background: none;
+  background-image: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+  gap: 8px;
+}
+.shell .tb-cluster::after { display: none; }
+.shell .tb-cluster .tb-bell,
+.shell .tb-cluster .tb-night button,
+.shell .tb-cluster .user-btn {
+  width: var(--tb-ctl);
+  height: var(--tb-ctl);
+  min-width: var(--tb-ctl);
+  border-radius: 50%;
+  background: var(--glass-fill-clear);
+  box-shadow: 0 0 0 1px var(--line-2);
+}
+.shell .tb-cluster .tb-bell:hover,
+.shell .tb-cluster .tb-night button:hover,
+.shell .tb-cluster .user-btn:hover {
+  background: var(--glass-fill-clear);
+  box-shadow: 0 0 0 1px var(--line-3);
+}
+.shell .tb-cluster .tb-bell { position: relative; padding: 0; gap: 0; }
+.shell .tb-cluster .tb-bell .tb-bell-n {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--bg-1);
+}
+
+/* ---------------------------------------------------------------- picture modes: a row of labels, one pill picked */
+.shell .map-modes { background: none; background-image: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.shell .map-modes::after { display: none; }
+.shell .map-modes [role="group"],
+.shell .map-modes [role="group"] > div {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ---------------------------------------------------------------- map tools: one circle per tool */
+.shell .map-dock { background: none; background-image: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.shell .map-dock::after { display: none; }
+.shell .map-dock > * { background: none; background-image: none; border: 0; box-shadow: none; padding: 0; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.shell .map-dock [role="separator"] { display: none; }
+.shell .map-dock button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--glass-fill-clear);
+  box-shadow: 0 0 0 1px var(--line-2);
+}
+.shell .map-dock button[aria-pressed="true"] { background: var(--glass-fill-strong); box-shadow: 0 0 0 1px var(--line-3); }
+.shell .map-dock button span { background: none; }
+
+/* ---------------------------------------------------------------- map furniture: pills and circles */
+.shell .compass {
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.shell .compass svg { width: 52px; height: 52px; }
+.shell .scalebar { border-radius: 999px; padding: 4px 12px; }
+.shell .cursor-ref.glass,
+.shell .mode-banner.glass,
+.shell .world-hud.glass { border-radius: 999px; }
+
+/* ---------------------------------------------------------------- phone: what the screen cannot drive */
+/* No pointer means no compass to drive, no keyboard means no "/" hint, and the timeline keeps its scrubber and
+   live button. Each of these is still on the desktop. */
+.shell .ops.narrow .compass,
+.shell .ops.narrow .scalebar,
+.shell .ops.narrow .ask-open,
+.shell .ops.narrow .tl-legend,
+.shell .ops.narrow .tl-toggle,
+.shell .ops.narrow .tl-controls .speed,
+.shell .ops.narrow .tl-controls [aria-label="Step back"],
+.shell .ops.narrow .tl-controls [aria-label="Step forward"],
+.shell .ops.narrow .tl-controls [aria-label="Play reverse"] { display: none; }
+
+/* The timeline sits on the map with no band behind it. The scrubber is one pill; its controls are plain labels. */
+.shell .ops.narrow .ops-bottom {
+  background: none;
+  border-top: 0;
+}
+.shell .ops.narrow .ops-bottom:not(:has(.timeline.compact)) { height: 124px; }
+.shell .ops.narrow .tl-controls {
+  background: none;
+  border: 0;
+  padding: 0 12px;
+  gap: 8px;
+}
+.shell .ops.narrow .tl-controls .seg,
+.shell .ops.narrow .tl-controls .seg > button { background: none; border: 0; box-shadow: none; }
+.shell .ops.narrow .tl-canvas {
+  margin: 0 12px 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--glass-fill-clear);
+  box-shadow: 0 0 0 1px var(--line-2);
+}

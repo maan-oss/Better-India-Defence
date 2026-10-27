@@ -17,8 +17,8 @@ const SYMBOL_HALF = 12;
 const GAP = 4;
 /** One text line (11 px type on a 15 px line) and the chip's padding around a label. */
 const LINE = 15;
-const PAD_X = 5;
-const PAD_Y = 1;
+const PAD_X = 8;
+const PAD_Y = 2;
 /** Labels at or above this priority are placed even when every position is taken. */
 const PINNED = 90;
 /** Labels stay this far inside the map. */

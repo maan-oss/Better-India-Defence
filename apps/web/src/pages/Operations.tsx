@@ -453,6 +453,7 @@ export function Operations() {
       panelOpen={narrow ? sheetOpen : panelOpen}
       onTogglePanel={narrow ? () => setSheetOpen((o) => !o) : togglePanel}
       onFit={fit}
+      compact={narrow}
         />
         {banner && <div className="mode-banner glass">{banner}</div>}
         {viewThrough && (

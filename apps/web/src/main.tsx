@@ -20,6 +20,7 @@ import { TooltipProvider } from './components/ui';
 import './styles/glass.css';
 import './styles/interaction.css';
 import './styles/chrome.css';
+import './styles/chrome-surfaces.css';
 
 enableLensing();
 trackGlassLight();

@@ -3,7 +3,7 @@
  * a vertical tool dock (left), and the layers sheet the dock opens. Built from Arc's segmented control, floating
  * button group, popover, switch and accordion; the dock's grouping follows Skecher UI's morphing-dock pattern.
  */
-import { useState } from 'react';
+import { useState, type ComponentProps } from 'react';
 import { Popover as P } from 'radix-ui';
 import { Layers, Move3d, Maximize, PanelRight, PanelRightClose, Orbit, Plane, Footprints } from 'lucide-react';
 import { useWorld, MODES, LAYERS, type GlobalMode, type LayerKey } from '../../state/world';
@@ -61,11 +61,25 @@ const NAV_HELP = {
   walk: 'Ground level at 1.7 m eye height · W A S D · drag to look',
 };
 
-export function ToolDock({ panelOpen, onTogglePanel, onFit }: { panelOpen: boolean; onTogglePanel: () => void; onFit: () => void }) {
+/**
+ * On a phone the dock keeps only what the screen needs: the layers and the picture sheet. Navigation mode and
+ * fit-to-site are desktop tools; the phone has no pointer to drive them.
+ */
+const COMPACT_DOCK = ['layers', 'panel'];
+
+export function ToolDock({ panelOpen, onTogglePanel, onFit, compact = false }: { panelOpen: boolean; onTogglePanel: () => void; onFit: () => void; compact?: boolean }) {
   const [sheet, setSheet] = useState<'layers' | 'nav' | null>(null);
   const nav = useWorld((s) => s.nav);
   const toggle = (s: 'layers' | 'nav') => setSheet((cur) => (cur === s ? null : s));
   const NavIcon = nav === 'fly' ? Plane : nav === 'walk' ? Footprints : Orbit;
+  type DockItem = ComponentProps<typeof FloatingButtonGroup>['items'][number];
+  const dockItems: DockItem[] = [
+    { id: 'layers', label: 'Layers', icon: <Layers size={19} strokeWidth={1.75} />, pressed: sheet === 'layers', onSelect: () => toggle('layers') },
+    { id: 'nav', label: `Navigation: ${nav}`, icon: <NavIcon size={19} strokeWidth={1.75} />, pressed: sheet === 'nav', onSelect: () => toggle('nav') },
+    { type: 'separator' },
+    { id: 'fit', label: 'Fit the site', icon: <Maximize size={19} strokeWidth={1.75} />, onSelect: onFit },
+    { id: 'panel', label: panelOpen ? 'Hide inspector' : 'Show inspector', icon: panelOpen ? <PanelRightClose size={19} strokeWidth={1.75} /> : <PanelRight size={19} strokeWidth={1.75} />, pressed: panelOpen, onSelect: onTogglePanel },
+  ];
   return (
     <P.Root open={sheet !== null} onOpenChange={(o) => !o && setSheet(null)}>
       <P.Anchor asChild>
@@ -76,13 +90,7 @@ export function ToolDock({ panelOpen, onTogglePanel, onFit }: { panelOpen: boole
             variant="floating"
             iconOnly
             tooltipSide="right"
-            items={[
-              { id: 'layers', label: 'Layers', icon: <Layers size={19} strokeWidth={1.75} />, pressed: sheet === 'layers', onSelect: () => toggle('layers') },
-              { id: 'nav', label: `Navigation: ${nav}`, icon: <NavIcon size={19} strokeWidth={1.75} />, pressed: sheet === 'nav', onSelect: () => toggle('nav') },
-              { type: 'separator' },
-              { id: 'fit', label: 'Fit the site', icon: <Maximize size={19} strokeWidth={1.75} />, onSelect: onFit },
-              { id: 'panel', label: panelOpen ? 'Hide inspector' : 'Show inspector', icon: panelOpen ? <PanelRightClose size={19} strokeWidth={1.75} /> : <PanelRight size={19} strokeWidth={1.75} />, pressed: panelOpen, onSelect: onTogglePanel },
-            ]}
+            items={compact ? dockItems.filter((item) => 'id' in item && item.id !== undefined && COMPACT_DOCK.includes(item.id)) : dockItems}
           />
         </div>
       </P.Anchor>
