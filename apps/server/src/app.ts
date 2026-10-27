@@ -21,6 +21,7 @@ import { registerBackup } from './routes/backup.ts';
 import { registerOidc } from './routes/oidc.ts';
 import { registerIncidentReports } from './routes/incidentReports.ts';
 import { registerDocuments } from './routes/documents.ts';
+import { registerRecords } from './routes/records.ts';
 
 export async function buildApp(p: Platform): Promise<FastifyInstance> {
   const cfg = p.cfg;
@@ -77,6 +78,7 @@ export async function buildApp(p: Platform): Promise<FastifyInstance> {
   registerOidc(app, p);
   registerIncidentReports(app, p);
   registerDocuments(app, p);
+  registerRecords(app, p);
 
   app.get('/ws', { websocket: true }, (socket, req) => {
     if (!req.user) {

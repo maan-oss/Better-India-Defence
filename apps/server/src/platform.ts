@@ -29,6 +29,8 @@ import { CopilotService } from './copilot/copilot.ts';
 import { AuthService } from './auth/authService.ts';
 import { oidcFromConfig, type OidcClient } from './auth/oidc.ts';
 import { IncidentReportService } from './incidentReports/reportService.ts';
+import { RecordCommentService } from './records/recordComments.ts';
+import { LinkGraphService } from './records/linkGraph.ts';
 import { DocumentService } from './documents/documentService.ts';
 import { HandoffService } from './handoff/handoffService.ts';
 import { VisionService } from './vision/visionService.ts';
@@ -66,6 +68,10 @@ export class Platform {
   oidc: OidcClient | null = null;
   /** Incident reports: the lifecycle, linked equipment and the history of each step. */
   reports!: IncidentReportService;
+  /** Discussion on a record, append-only and visible to whoever can see the record. */
+  recordComments!: RecordCommentService;
+  /** Link analysis: the records around one record, through the links the system holds. */
+  links!: LinkGraphService;
   /** Documents: ingestion, full-text search and assessments. */
   documents!: DocumentService;
   handoff!: HandoffService;
@@ -139,6 +145,8 @@ export class Platform {
     if (!anchored.ok) this.log.error({ problems: anchored.problems.slice(0, 5) }, 'audit chain anchors do not verify');
     this.oidc = oidcFromConfig(cfg);
     this.reports = new IncidentReportService(this.db);
+    this.recordComments = new RecordCommentService(this.db);
+    this.links = new LinkGraphService(this.db);
     this.documents = new DocumentService(this.db);
     this.auth = new AuthService(this.db, cfg.SESSION_TTL_HOURS, {
       mfa: { key: this.keys.storage?.bytes ?? null, required: cfg.STRATA_MFA_REQUIRED === 'true', issuer: cfg.STRATA_MFA_ISSUER },

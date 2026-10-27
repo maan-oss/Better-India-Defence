@@ -11,6 +11,8 @@ export const PERMISSIONS = {
   'incidents.view': 'viewer',
   'incidents.create': 'operator',
   'incidents.edit': 'operator',
+  // Comments on a record a person can see: the discussion that goes with the record, kept in its history.
+  'records.comment': 'operator',
   // Verifying a report and reviewing a resolved incident are analyst acts: someone other than the person who reported or resolved it.
   'reports.verify': 'analyst',
   'reports.review': 'analyst',

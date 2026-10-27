@@ -1,0 +1,19 @@
+/* Record discussion and link analysis: the comment thread and its form, and the drawing of the links around a record. */
+.rdisc { display: grid; gap: 12px; justify-self: stretch; }
+.rdisc-thread { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rdisc-thread li { padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; }
+.rdisc-thread p { margin: 4px 0 0; white-space: pre-wrap; }
+.rdisc-meta { font-size: var(--fs-micro); color: var(--text-2); }
+.rdisc-form { display: grid; gap: 8px; }
+
+.linkg { display: grid; gap: 12px; justify-self: stretch; }
+.linkg-svg { display: block; width: 100%; max-width: 640px; height: auto; }
+.linkg-edge { stroke: var(--line-3); stroke-width: 1.2; }
+.linkg-edge-label { font-size: 10px; fill: var(--text-2); text-anchor: middle; paint-order: stroke; stroke: var(--bg-1); stroke-width: 3px; }
+.linkg-node circle { fill: var(--bg-3); stroke: var(--line-3); stroke-width: 1.2; }
+.linkg-node text { font-size: 11px; fill: var(--text-1); font-family: var(--font-mono); }
+.linkg-asset circle { stroke: var(--text-2); }
+.linkg-incident_report circle { stroke: var(--st-caution); }
+.linkg-centre circle { fill: var(--bg-4); stroke: var(--text-1); stroke-width: 1.6; }
+.linkg-list, .linkg-relations { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.linkg-relations { color: var(--text-2); font-size: var(--fs-small); }

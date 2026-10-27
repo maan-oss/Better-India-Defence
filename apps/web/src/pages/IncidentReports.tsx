@@ -4,6 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { get, post } from '../api/client';
 import type { AssetView } from '@strata/domain/client';
 import { ErrorNote, Loading, useAsync } from '../components/common';
+import { LinkGraph } from '../components/LinkGraph';
+import { RecordComments } from '../components/RecordComments';
 import { Button } from '../components/arc/button/button';
 import { Input } from '../components/arc/input/input';
 import { Textarea } from '../components/arc/textarea/textarea';
@@ -304,6 +306,10 @@ function ReportDetail({ id, onChanged, version }: { id: string; onChanged: () =>
           {err}
         </p>
       )}
+      <h2 className="sub-h">Connections</h2>
+      <LinkGraph kind="incident_report" id={r.id} />
+      <h2 className="sub-h">Discussion</h2>
+      <RecordComments kind="incident_report" id={r.id} />
       <h2 className="sub-h">History</h2>
       <ol aria-label="History">
         {events.map((e) => (

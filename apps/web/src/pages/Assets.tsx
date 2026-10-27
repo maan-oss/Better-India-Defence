@@ -24,6 +24,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/arc/tabs
 import { Textarea } from '../components/arc/textarea/textarea';
 import { dateTime, titleCase } from '../lib/format';
 import { useSession } from '../state/session';
+import { LinkGraph } from '../components/LinkGraph';
+import { RecordComments } from '../components/RecordComments';
 import '../styles/assets.css';
 
 const STATUS_LABEL: Record<AssetStatus, string> = { in_service: 'In service', degraded: 'Degraded', out_of_service: 'Out of service', retired: 'Retired' };
@@ -257,6 +259,8 @@ function AssetPane({ id, rows, version, changed }: { id: string; rows: AssetView
           <TabsTrigger value="dependencies">Dependencies</TabsTrigger>
           <TabsTrigger value="impact">Impact</TabsTrigger>
           <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+          <TabsTrigger value="connections">Connections</TabsTrigger>
+          <TabsTrigger value="discussion">Discussion</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
@@ -270,6 +274,12 @@ function AssetPane({ id, rows, version, changed }: { id: string; rows: AssetView
         </TabsContent>
         <TabsContent value="maintenance">
           <MaintenanceTab d={d} changed={changed} />
+        </TabsContent>
+        <TabsContent value="connections">
+          <LinkGraph kind="asset" id={id} />
+        </TabsContent>
+        <TabsContent value="discussion">
+          <RecordComments kind="asset" id={id} />
         </TabsContent>
         <TabsContent value="history">
           <HistoryTab events={d.events} rows={rows} />
