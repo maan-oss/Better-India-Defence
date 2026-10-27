@@ -113,14 +113,14 @@ export function Operations() {
         /* storage unavailable */
       }
       setIntroFade(0);
-      engine.flyTo({ x: 0, y: -150, z: 0 }, 3200, 20, -42);
+      engine.flyTo({ x: 0, y: -150, z: 0 }, 3200, 0, -42);
     };
     if (withIntro) {
       host.addEventListener("intro-done", afterIntro, { once: true });
       setIntroFade(0);
     } else {
       setIntroFade(0);
-      engine.flyTo({ x: 0, y: -150, z: 0 }, 3200, 20, -42);
+      engine.flyTo({ x: 0, y: -150, z: 0 }, 3200, 0, -42);
     }
     engine.getTime = now;
     engine.getTracks = (t) => {

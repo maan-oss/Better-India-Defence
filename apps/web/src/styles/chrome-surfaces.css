@@ -1,14 +1,26 @@
 /*
- * One surface per control. A control carries its own glass, and a container around controls carries none, so no
- * background ever sits behind another background. Shapes are one family: circles for icon-only controls, pills for
- * everything else (chips, labels, badges, the mode row, the timeline strip, the tab bar). The only rectangles left
- * are the sheets that rise over the map: a full-width sheet cannot be a pill.
+ * Chrome on the console: what sits over the picture, what sits beside it, and where each control lives.
  *
- * Loaded last, so it overrides the earlier surface rules of the bar, map and timeline stylesheets.
+ * Rules
+ * 1. Over the map only what must be read or touched while the picture moves: the status, search and notifications
+ *    (top), the picture mode (top, under the status), the map tools (right, low), and the track labels. Everything
+ *    else is off the map or behind a sheet.
+ * 2. A surface is glass only where it sits over the live picture, so text on it stays legible. Chrome beside the
+ *    picture (the timeline and the tab bar) is solid and carries no glass.
+ * 3. One surface per control. A container around controls carries no surface of its own, except the picture-mode
+ *    track, which is the single surface the mode labels sit on; its selected segment is the one thing inside it.
+ * 4. Shapes are one family: circles for icon-only controls, pills for everything else. The sheets that rise over the
+ *    map are the only rectangles, because a full-width sheet cannot be a pill.
+ * 5. Placement follows the hand and the screen edges. Controls sit 16 px in from each side, which keeps them clear of
+ *    the system's edge gestures; controls that are used often (live, the map tools) sit low on the right, in thumb
+ *    reach; the status sits at the top, where the eye goes first.
+ *
+ * Selectors are scoped under .shell (and .shell .ops for the map) so they win over the component stylesheets, which
+ * load after this one when a route is loaded lazily.
  */
 
-/* ---------------------------------------------------------------- top bar: bell, display and account */
-/* Three circles on the bar, not a capsule around them. The count sits on the bell's top-right corner. */
+/* ---------------------------------------------------------------- top bar: status, search, notifications, account */
+/* The bar is one row of separate controls. The bell's count sits on the bell's top-right corner. */
 .shell .tb-cluster {
   background: none;
   background-image: none;
@@ -49,11 +61,20 @@
   box-shadow: 0 0 0 2px var(--bg-1);
 }
 
-/* ---------------------------------------------------------------- picture modes: a row of labels, one pill picked */
-.shell .map-modes { background: none; background-image: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
-.shell .map-modes::after { display: none; }
-.shell .map-modes [role="group"],
-.shell .map-modes [role="group"] > div {
+/* ---------------------------------------------------------------- picture modes: one track, the selected mode is the thumb */
+/* The track is the one surface the labels sit on over the picture. Its inner group and rail carry nothing. */
+.shell .ops .map-modes {
+  background: var(--glass-fill-clear);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  box-shadow: none;
+  padding: 3px;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+.shell .ops .map-modes::after { display: none; }
+.shell .ops .map-modes [role="group"],
+.shell .ops .map-modes [role="group"] > div {
   background: none;
   border: 0;
   box-shadow: none;
@@ -61,23 +82,26 @@
   -webkit-backdrop-filter: none;
 }
 
-/* ---------------------------------------------------------------- map tools: one circle per tool */
-.shell .map-dock { background: none; background-image: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
-.shell .map-dock::after { display: none; }
-.shell .map-dock > * { background: none; background-image: none; border: 0; box-shadow: none; padding: 0; backdrop-filter: none; -webkit-backdrop-filter: none; }
-.shell .map-dock [role="separator"] { display: none; }
-.shell .map-dock button {
+/* ---------------------------------------------------------------- map tools: one circle per tool, no shared surface */
+.shell .ops .map-dock { background: none; background-image: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.shell .ops .map-dock::after { display: none; }
+.shell .ops .map-dock > * { background: none; background-image: none; border: 0; box-shadow: none; padding: 0; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.shell .ops .map-dock [role="separator"] { display: none; }
+.shell .ops .map-dock button {
   width: 44px;
   height: 44px;
   border-radius: 50%;
   background: var(--glass-fill-clear);
   box-shadow: 0 0 0 1px var(--line-2);
 }
-.shell .map-dock button[aria-pressed="true"] { background: var(--glass-fill-strong); box-shadow: 0 0 0 1px var(--line-3); }
-.shell .map-dock button span { background: none; }
+.shell .ops .map-dock button:hover { background: var(--glass-fill-strong); box-shadow: 0 0 0 1px var(--line-3); }
+.shell .ops .map-dock button[aria-pressed="true"] { background: var(--glass-fill-strong); box-shadow: 0 0 0 1px var(--line-3); }
+.shell .ops .map-dock button span { background: none; }
+/* The group's sliding highlight would sit behind each circle as a second surface; the circle's own state shows hover. */
+.shell .ops .map-dock > * > span[aria-hidden="true"]:empty { display: none; }
 
-/* ---------------------------------------------------------------- map furniture: pills and circles */
-.shell .compass {
+/* ---------------------------------------------------------------- map furniture: compass as a circle, scale and hints as pills */
+.shell .ops .compass {
   width: 80px;
   height: 80px;
   padding: 0;
@@ -88,16 +112,59 @@
   justify-content: center;
   gap: 0;
 }
-.shell .compass svg { width: 52px; height: 52px; }
-.shell .scalebar { border-radius: 999px; padding: 4px 12px; }
-.shell .cursor-ref.glass,
-.shell .mode-banner.glass,
-.shell .world-hud.glass { border-radius: 999px; }
+.shell .ops .compass svg { width: 52px; height: 52px; }
+.shell .ops .scalebar { border-radius: 999px; padding: 4px 12px; }
+.shell .ops .cursor-ref.glass,
+.shell .ops .mode-banner.glass,
+.shell .ops .world-hud.glass { border-radius: 999px; }
 
-/* ---------------------------------------------------------------- phone: what the screen cannot drive */
-/* No pointer means no compass to drive, no keyboard means no "/" hint, and the timeline keeps its scrubber and
-   live button. Each of these is still on the desktop. */
-.shell .ops.narrow .compass,
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 760px) {
+  /* Status row: state on the left (synthetic data, system status); actions on the right (search, bell, account).
+     The status cluster's wrapper is flattened so its parts sit in the row beside the search. The display toggle is in
+     the account menu already, so it leaves the bar. */
+  .shell .topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-inline: 0;
+    padding: 12px 16px 0;
+  }
+  .shell .topbar .tb-left { order: 1; min-width: 0; }
+  .shell .topbar .tb-right { display: contents; }
+  .shell .topbar .island-wrap { order: 2; }
+  .shell .topbar .cmd-trigger { order: 3; margin-left: auto; }
+  .shell .topbar .tb-cluster { order: 4; }
+  .shell .tb-night { display: none; }
+}
+
+.shell .ops.narrow .map-modes {
+  top: 60px;
+  left: 16px;
+  right: 16px;
+  max-width: none;
+  justify-content: flex-start;
+}
+.shell .ops.narrow .map-modes button { padding: 0 6px; }
+
+/* Map tools: right edge, low, where a thumb rests; Layers and the picture sheet only. The compass rises above them
+   once the map is turned away from north. */
+.shell .ops.narrow .map-dock {
+  left: auto;
+  top: auto;
+  right: 16px;
+  bottom: 12px;
+}
+.shell .ops.narrow .compass {
+  left: auto;
+  top: auto;
+  right: 16px;
+  bottom: 116px;
+}
+.shell .ops.narrow .compass[data-north="true"] { display: none; }
+
+/* Hidden on the phone: scale and the keyboard hint need a pointer or a keyboard; the legend is a desktop aid; the
+   copilot opens from search ("Ask the copilot"). The timeline keeps its pause, Live and range controls. */
 .shell .ops.narrow .scalebar,
 .shell .ops.narrow .ask-open,
 .shell .ops.narrow .tl-legend,
@@ -107,7 +174,8 @@
 .shell .ops.narrow .tl-controls [aria-label="Step forward"],
 .shell .ops.narrow .tl-controls [aria-label="Play reverse"] { display: none; }
 
-/* The timeline sits on the map with no band behind it. The scrubber is one pill; its controls are plain labels. */
+/* Timeline: solid chrome beside the picture, so it carries no surface of its own. Its controls are plain labels and
+   the strip is one pill. Both sit 16 px in, like the rest of the bar. */
 .shell .ops.narrow .ops-bottom {
   background: none;
   border-top: 0;
@@ -116,15 +184,23 @@
 .shell .ops.narrow .tl-controls {
   background: none;
   border: 0;
-  padding: 0 12px;
+  padding: 0 16px;
   gap: 8px;
 }
 .shell .ops.narrow .tl-controls .seg,
 .shell .ops.narrow .tl-controls .seg > button { background: none; border: 0; box-shadow: none; }
 .shell .ops.narrow .tl-canvas {
-  margin: 0 12px 8px;
+  margin: 0 16px 8px;
   border-radius: 999px;
   overflow: hidden;
   background: var(--glass-fill-clear);
   box-shadow: 0 0 0 1px var(--line-2);
+}
+
+/* The tab bar and the toasts sit on the same 16 px gutter as the top bar and the map controls. */
+@media (max-width: 760px) {
+  .shell > .rail { left: 16px; right: 16px; bottom: calc(12px + env(safe-area-inset-bottom)); }
+  .toasts { left: 16px; right: 16px; }
+  /* The layers sheet opens to the left of the dock: the gutter, the 44 px dock, the 15 px offset and the gutter again. */
+  body .map-sheet { max-width: calc(100vw - 91px) !important; }
 }

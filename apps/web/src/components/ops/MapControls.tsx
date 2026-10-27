@@ -94,7 +94,7 @@ export function ToolDock({ panelOpen, onTogglePanel, onFit, compact = false }: {
           />
         </div>
       </P.Anchor>
-      <PopoverContent side="right" align="start" sideOffset={10} className="map-sheet" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <PopoverContent side="right" align="start" sideOffset={10} collisionPadding={16} className="map-sheet" onOpenAutoFocus={(e) => e.preventDefault()}>
         {sheet === 'layers' ? <LayersSheet /> : <NavSheet />}
       </PopoverContent>
     </P.Root>

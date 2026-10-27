@@ -55,7 +55,8 @@ export function MapHud({ engineRef, hostRef, facility }: { engineRef: RefObject<
 
   return (
     <>
-      <button className="compass glass" data-map-chrome onClick={() => engineRef.current?.northUp()} title="Click for north-up">
+      {/* Flagged when the map points north, so the phone can hide the compass until it is useful to reset it. */}
+      <button className="compass glass" data-map-chrome data-north={Math.abs(((view.headingDeg % 360) + 540) % 360 - 180) < 0.5 ? 'true' : undefined} onClick={() => engineRef.current?.northUp()} title="Click for north-up">
         <svg aria-hidden="true" viewBox="-50 -50 100 100" width="64" height="64" style={{ transform: `rotate(${-view.headingDeg}deg)` }}>
           {Array.from({ length: 36 }, (_, i) => (
             <line key={i} x1="0" y1={-44} x2="0" y2={i % 9 === 0 ? -36 : -40} stroke={i % 9 === 0 ? 'var(--text-1)' : 'var(--text-3)'} strokeWidth={i % 9 === 0 ? 1.6 : 1} transform={`rotate(${i * 10})`} />
